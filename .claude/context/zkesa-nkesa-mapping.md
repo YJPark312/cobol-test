@@ -11,23 +11,70 @@
 
 | zKESA (COBOL) | nKESA (Java) | 설명 |
 |---|---|---|
-| AS (Application Service) | **ProcessUnit (PU)** - PM 메소드 | 거래 진입점, 입력검증/업무호출/출력조립 |
+| AS (Application Service) | **ProcessUnit (PU)** - PM 메소드 | 거래 진입점, 입력검증/업무호출/출력조립. `extends com.kbstar.sqc.base.ProcessUnit` |
 | PC (Process Component) | **ProcessUnit (PU)** - PM 또는 FM 메소드 | 프로세스 제어 |
-| DC (Data Component) | **DataUnit (DU)** - DM 메소드 | 데이터 접근, DB 처리 로직 |
+| DC (Data Component) | **FunctionUnit (FU)** - FM 메소드 | 비즈니스 로직 (검증/분기/DB호출 조합). `extends com.kbstar.sqc.base.FunctionUnit` |
 | IC (Interface Component) | **FunctionUnit (FU)** - FM 공유메소드 | 공통 인터페이스 로직 |
 | FC (Function Component) | **FunctionUnit (FU)** - FM 메소드 | 기능 단위 로직 |
 | BC (Batch Component) | **FunctionUnit (FU)** - FM 메소드 (배치) | 배치 로직 |
-| DBIO / SQLIO | **DataUnit (DU)** - DM 메소드 | DB 접근 (MyBatis SQL 실행) |
+| DBIO / SQLIO | **DataUnit (DU)** - DM 메소드 | DB 접근 (MyBatis SQL 실행). `extends com.kbstar.sqc.base.DataUnit` |
+
+> **⚠ DC→FU 매핑 근거**: DC(Data Component)는 단순 DB CRUD가 아니라, 입력 검증(S2000), 처리구분 분기(EVALUATE), 다중 DBIO/SQLIO 호출 조합, 기존재 체크 등 **비즈니스 로직**을 포함한다. 이는 DU(DataUnit)의 역할(단순 DB CRUD)이 아닌 FU(FunctionUnit)의 역할에 해당한다. 실제 DB CRUD 호출(#DYDBIO, #DYSQLA)은 FU가 바인딩한 DU를 통해 수행한다.
+
+### 1.1.1 기본 클래스 상속 구조
+
+```
+com.kbstar.sqc.base.ProcessUnit   ← PU가 상속 (@BizUnit type="PU")
+com.kbstar.sqc.base.FunctionUnit  ← FU가 상속 (@BizUnit type="FU")
+com.kbstar.sqc.base.DataUnit      ← DU가 상속 (@BizUnit type="DU")
+```
+
+- **ProcessUnit** 제공 메서드: `getCommonArea(onlineCtx)`, `getLog(onlineCtx)`
+- **FunctionUnit** 제공 메서드: `getCommonArea(onlineCtx)`, `getLog(onlineCtx)`, `callSharedMethodByDirect()`
+- **DataUnit** 제공 메서드: `dbSelect(sqlId, requestData, onlineCtx)`, `dbInsert(sqlId, requestData, onlineCtx)`, `dbUpdate(sqlId, requestData, onlineCtx)`, `dbDelete(sqlId, requestData, onlineCtx)`
+
+### 1.1.2 PU 다중 PM 통합 규칙
+
+하나의 PU 클래스에 **관련 AS 모듈 여러 개의 PM 메소드를 통합**할 수 있다.
+
+```
+예: AIPBA30(기업집단신용평가이력관리) + AIP4A40(기업집단신용등급모니터링) + AIP4A34(기업집단신용평가이력조회)
+    → PUCorpGrpCrdtEvalHistMgmt.java 에 3개 PM 메소드로 통합
+      - pmKIP11A30E0() ← AIPBA30
+      - pmKIP04A4040() ← AIP4A40
+      - pmKIP04A3440() ← AIP4A34
+```
+
+통합 기준: 동일 업무 도메인(기업집단신용평가)에 속하고, 동일 DC(DIPA301)를 호출하는 AS 모듈
 
 ### 1.2 프로그램 구조 매핑 (PARAGRAPH → 메소드)
+
+#### AS(PU) 레벨 PARAGRAPH 매핑
 
 | zKESA PARAGRAPH | nKESA 메소드 영역 | 변환 패턴 |
 |---|---|---|
 | `S0000-MAIN-RTN` | PM 메소드 본체 | `public IDataSet pmXxx(IDataSet requestData, IOnlineContext onlineCtx)` |
 | `S1000-INITIALIZE-RTN` | PM 메소드 상단 초기화 | `IDataSet responseData = new DataSet();` / `CommonArea ca = getCommonArea(onlineCtx);` |
-| `S2000-VALIDATION-RTN` | try 블록 내 입력값 검증 | `if (requestData.getString("field") == null || "".equals(...))` → `throw new BusinessException(...)` |
-| `S3000-PROCESS-RTN` | try 블록 내 업무 로직 | FM/DM 호출, callSharedMethod 등 |
-| `S9000-FINAL-RTN` | `return responseData;` | 정상 종료 시 responseData 반환 |
+| `S2000-VALIDATION-RTN` | try 블록 전 입력값 검증 | `if (field == null \|\| field.trim().isEmpty())` → `throw new BusinessException(...)` |
+| `S3000-PROCESS-RTN` | try 블록 내 FU 호출 | `responseData = fuXxx.fmMethod(requestData, onlineCtx);` |
+| `S9000-FINAL-RTN` | `return responseData;` | 정상 종료. `responseData.put("statusCode", "00");` |
+
+#### DC(FU) 레벨 PARAGRAPH 매핑
+
+| zKESA PARAGRAPH | nKESA 메소드 영역 | 변환 패턴 |
+|---|---|---|
+| `S0000-MAIN-RTN` | @BizMethod FM 메소드 본체 | `public IDataSet processXxx(IDataSet requestData, IOnlineContext onlineCtx)` |
+| `S1000-INITIALIZE-RTN` | FM 메소드 상단 초기화 | `CommonArea ca = getCommonArea(onlineCtx);` + groupCoCd 설정 |
+| `S2000-VALIDATION-RTN` | FM 내 입력값 검증 | DC 고유 에러코드(UKIP0001~) 사용. AS 에러코드(UKIF0072)와 다름 |
+| `S3000-PROCESS-RTN` | FM 내 로직 또는 `private _createXxx()` | 복잡한 로직은 private 헬퍼로 분리 |
+| `S4000-PROCESS-RTN` | FM 내 로직 또는 `private _deleteXxx()` | 삭제/취소 분기 처리 |
+| `S3100~S3nnn-xxx-RTN` | `private _helperMethod()` | DC 내부 서브 PARAGRAPH → `_` 접두어 private 메서드 |
+| `S5000-xxx-CALL-RTN` | `private _helperMethod()` | SQLIO 호출 서브 → private 헬퍼 |
+| `S9000-FINAL-RTN` | `return responseData;` | `#OKEXIT` → return |
+
+> **DC(FU) private 헬퍼 명명 규칙**: COBOL 내부 PARAGRAPH는 Java에서 `_` 접두어 private 메서드로 변환한다.
+> 예: `S3200-THKIPB110-INS-RTN` → `private IDataSet _createNewCorpGrpCrdtEval()`
+> 예: `S4200-PSHIST-DEL-RTN` → `private IDataSet _deleteCorpGrpCrdtEval()`
 
 ### 1.3 데이터 인터페이스 매핑
 
@@ -36,13 +83,34 @@
 | `YCCOMMON-CA` (COPY YCCOMMON) | `IOnlineContext onlineCtx` / `CommonArea ca` | 공통 영역. `getCommonArea(onlineCtx)`로 접근 |
 | `YNxxxxxx-CA` (AS 입력 카피북) | `IDataSet requestData` | PM의 입력 파라미터 |
 | `YPxxxxxx-CA` (AS 출력 카피북) | `IDataSet responseData` | PM의 출력 반환값 |
-| `XDxxxxxx-CA` (DC 인터페이스) | `IDataSet` (DM 호출용 requestData/responseData) | DC→DU 데이터 전달 |
+| `XDxxxxxx-CA` (DC 인터페이스) | `IDataSet` (FM 호출용 requestData/responseData) | PU→FU 데이터 전달 (DC는 FU로 매핑) |
 | `XPxxxxxx-CA` (PC 인터페이스) | `IDataSet` (FM 호출용 requestData/responseData) | PC→FU 데이터 전달 |
-| `XQxxxxxx-CA` (SQLIO 인터페이스) | MyBatis 파라미터 `Map` / DTO | SQL 실행 파라미터 |
-| `TRxxxxxx-REC` (테이블 레코드) | MyBatis 결과 DTO / `IDataSet` | 테이블 조회 결과 |
-| `TKxxxxxx-PK` (테이블 키) | MyBatis 파라미터 DTO / `Map` | 테이블 키 조건 |
+| `XQxxxxxx-CA` (SQLIO 인터페이스) | `IDataSet` (DM 호출용 파라미터) | FU에서 DU 메소드 호출 시 파라미터 |
+| `TRxxxxxx-REC` (테이블 레코드) | `IDataSet` / `IRecordSet` / `IRecord` | 테이블 조회 결과 |
+| `TKxxxxxx-PK` (테이블 키) | `IDataSet` (DM 파라미터) | 테이블 키 조건 → DU 메소드 requestData에 포함 |
 | `WK-AREA` (Working Area) | 로컬 변수 | 메소드 내 임시 변수 |
 | `CO-AREA` (상수 영역) | `static final` 상수 또는 Enum | 프로그램 상수 정의 |
+
+### 1.4 CommonArea 필드 접근 매핑
+
+| zKESA (BICOM 필드) | nKESA (Java) | 설명 |
+|---|---|---|
+| `BICOM-GROUP-CO-CD` | `ca.getBiCom().getGroupCoCd()` | 그룹회사코드 |
+| `BICOM-USER-EMPID` | `ca.getBiCom().getUserEmpid()` | 사용자 직원번호 |
+| `BICOM-BRNCD` | `ca.getBiCom().getBrncd()` | 거래부점코드 |
+| `BICOM-SCREN-NO` | `ca.getBiCom().getScrenNo()` | 화면번호 |
+
+> `CommonArea ca = getCommonArea(onlineCtx);` 로 먼저 획득 후 사용
+
+### 1.5 에러코드 계층 규칙
+
+| 계층 | COBOL 위치 | 에러코드 특징 | 예시 |
+|---|---|---|---|
+| **AS (PU)** | AIPBA30 S2000 | 통합 에러코드 사용 | `#ERROR CO-B3800004 CO-UKIF0072` (모든 필수항목에 동일 코드) |
+| **DC (FU)** | DIPA301 S2000 | 세분화 에러코드 사용 | `UKIP0001`(그룹코드), `UKIP0002`(등록코드), `UKIP0003`(평가일), `UKIP0007`(처리구분), `UKIP0008`(기준일) |
+| **DBIO/SQLIO (DU)** | DU 메소드 | DB 오류 전용 에러코드 | `B3900009`(검색불가), `B4200219`(삭제불가), `B4200023`(중복등록) |
+
+> **변환 시 에러코드 결정**: PU에서 검증하면 AS 에러코드, FU에서 검증하면 DC 에러코드를 사용한다. 정답지에서는 DC 에러코드를 PU로 올려 세분화하는 패턴도 사용됨.
 
 ---
 
@@ -55,10 +123,10 @@
 | **`#ERROR errCd treatCd stat`** | `throw new BusinessException(errCd, treatCd, customMsg, cause)` | `#ERROR CO-B3800004 CO-UKIF0072 CO-STAT-ERROR` → `throw new BusinessException("B3800004", "UKIF0072", "맞춤메시지", e)` |
 | **`#MULERR`** (멀티에러) | `addBusinessException(errCd, treatCd, onlineCtx)` | PM에서만 사용. 최대 10건 |
 | **`#OKEXIT stat`** | `return responseData;` | 정상 종료. 별도 상태코드 세팅 불필요 |
-| **`#DYCALL pgm YCCOMMON-CA interface-CA`** | 동일 컴포넌트: 직접 메소드 호출 / 타 컴포넌트: `callSharedMethodByDirect(compId, "유닛.method", reqDs, onlineCtx)` | AS→PC/FC: `callSharedMethodByDirect(..., "FUxxx.fmMethod", ...)` / AS→DC: `callSharedMethodByDirect(..., "DUxxx.dmMethod", ...)` |
+| **`#DYCALL pgm YCCOMMON-CA interface-CA`** | 동일 컴포넌트: `@BizUnitBind` + 직접 메소드 호출 / 타 컴포넌트: `callSharedMethodByDirect(compId, "유닛.method", reqDs, onlineCtx)` | AS→DC: `@BizUnitBind FU` 직접 호출 / AS→IC: `callSharedMethodByDirect(...)` |
 | **`#STCALL pgm ...`** | 직접 메소드 호출 (static) | 동일 컴포넌트 내 호출 |
-| **`#DYDBIO cmd key rec`** | DM 메소드 호출 (MyBatis) | `#DYDBIO SELECT-CMD-Y TKFACO13-PK TRFACO13-REC` → `IDataSet result = duXxx.dmSelectXxx(paramDs, onlineCtx)` |
-| **`#DYSQLA sqlioId interface-CA`** | DM 메소드 호출 (MyBatis 복합 SQL) | `#DYSQLA QFA0308 XQFA0308-CA` → `IDataSet result = duXxx.dmXxx(paramDs, onlineCtx)` |
+| **`#DYDBIO cmd key rec`** | FU에서 `@BizUnitBind DU` 직접 호출 | `#DYDBIO INSERT-CMD-Y TKIPB110-PK TRIPB110-REC` → `duTSKIPB110.insert(paramDs, onlineCtx)` |
+| **`#DYSQLA sqlioId interface-CA`** | FU에서 `@BizUnitBind DU` 직접 호출 | `#DYSQLA QIPA301 SELECT XQIPA301-CA` → `duTSKIPA111.select(paramDs, onlineCtx)` |
 | **`#GETOUT YPxxxxxx-CA`** | `IDataSet responseData = new DataSet();` | 출력영역 할당. Java에서는 DataSet 생성으로 대체 |
 | **`#BOFMID formId`** | 화면 폼 ID 설정 (프레임워크 자동 처리) | 대부분 변환 불필요. 필요시 `responseData.put("formId", value)` |
 | **`#SCRENO screenNo`** | 화면번호 지정 (프레임워크 자동 처리) | 변환 불필요 |
@@ -85,66 +153,98 @@
 | `'98'` | `COND-xxx-ABNORMAL` | 프레임워크 자동 처리 (시스템 예외) |
 | `'99'` | `COND-xxx-SYSERROR` | 프레임워크 자동 처리 (시스템 예외) |
 
-### 2.3 호출 결과 체크 패턴 변환
+### 2.3 AS→DC 호출 결과 체크 패턴 변환
 
-**zKESA (COBOL):**
+**zKESA (COBOL) - AS에서 DC 호출:**
 ```cobol
-#DYCALL DFA9202 YCCOMMON-CA XDFA9202-CA
+*@  AS(AIPBA30) → DC(DIPA301) 호출
+#DYCALL DIPA301 YCCOMMON-CA XDIPA301-CA
 
-IF XDFA9202-R-STAT NOT = CO-STAT-OK
-   #ERROR CO-B1050011 CO-UKFA5022 CO-STAT-ERROR
+*@  DC 결과 체크
+IF NOT COND-XDIPA301-OK AND NOT COND-XDIPA301-NOTFOUND
+   #ERROR XDIPA301-R-ERRCD XDIPA301-R-TREAT-CD XDIPA301-R-STAT
 END-IF
 ```
 
-**nKESA (Java):**
+**nKESA (Java) - PU에서 FU 호출:**
 ```java
-IDataSet reqDs = new DataSet();
-reqDs.put("inputField", requestData.getString("inputField"));
+// PU 클래스 내 FU 바인딩 (AS→DC = PU→FU)
+@BizUnitBind private FUCorpGrpCrdtEvalHistProc fuCorpGrpCrdtEvalHistProc;
 
-// FM/DM 호출 (타 컴포넌트 공유메소드)
-// PC/FC 호출 시: FU.fmMethod / DC 호출 시: DU.dmMethod
-IDataSet resDs = callSharedMethodByDirect(
-    "com.kbstar.xxx.yyy",
-    "DUXxx.dmMethodName",    // DC 호출의 경우 DU.dmXxx
-    reqDs, onlineCtx);
-
-// 에러 처리는 내부에서 BusinessException throw → 자동 전파
-// NOTFOUND 등 업무 판단이 필요한 경우만 결과값 체크
+// PM 메소드 내
+try {
+    // DC 호출 → FU 메소드 직접 호출 (@BizUnitBind)
+    responseData = fuCorpGrpCrdtEvalHistProc.processCorpGrpCrdtEvalHist(requestData, onlineCtx);
+    responseData.put("statusCode", "00");
+} catch (BusinessException e) {
+    throw e; // FU에서 발생한 BusinessException 자동 전파
+} catch (Exception e) {
+    throw new BusinessException("B3900042", "UKII0182", "전산부 업무담당자에게 연락하여 주시기 바랍니다.", e);
+}
 ```
 
-### 2.4 DBIO 호출 패턴 변환
+> **핵심**: nKESA에서는 DC 결과 상태코드 체크 대신 **BusinessException 예외 전파**로 에러를 처리한다.
 
-**zKESA (COBOL):**
+### 2.4 DC 내 DBIO/SQLIO 호출 패턴 변환
+
+**zKESA (COBOL) - DC에서 DBIO:**
 ```cobol
-INITIALIZE TKFACO13-PK
-MOVE value TO TKFACO13-ACNO
-#DYDBIO SELECT-CMD-Y TKFACO13-PK TRFACO13-REC
+*@ DIPA301 S3100: SQLIO로 기존재 확인
+#DYSQLA QIPA301 SELECT XQIPA301-CA
 
 EVALUATE TRUE
-   WHEN COND-DBIO-OK
-      CONTINUE
-   WHEN COND-DBIO-MRNF
-      업무로직
+   WHEN COND-DBSQL-OK       *@ 이미 존재 → 오류
+        #ERROR CO-B4200023 CO-UKII0182 CO-STAT-ERROR
+   WHEN COND-DBSQL-MRNF     *@ 미존재 → INSERT 진행
+        MOVE 'N' TO WK-DATA-YN
    WHEN OTHER
-      #ERROR CO-B0100099 CO-UKLA0099 CO-STATUS-ERROR
+        #ERROR CO-B3900009 CO-UKII0182 CO-STAT-ERROR
 END-EVALUATE
 ```
 
-**nKESA (Java) - DU/DM:**
+**nKESA (Java) - FU에서 DU 호출:**
 ```java
-// DataUnit (DU) 내 DM 메소드
-@BizMethod("테이블조회")
-public IDataSet dmSelectXxx(IDataSet requestData, IOnlineContext onlineCtx) {
+// FU 클래스 내 DU 바인딩 (DC→SQLIO = FU→DU)
+@BizUnitBind private DUTSKIPA111 duTSKIPA111;
+
+// FM 메소드 내
+boolean dataExists = false;
+try {
+    IDataSet duplicateResult = duTSKIPA111.select(duplicateCheckData, onlineCtx);
+    if (duplicateResult != null && duplicateResult.getString("corpClctGroupCd") != null) {
+        dataExists = true; // COND-DBSQL-OK → 이미 존재
+    }
+} catch (BusinessException e) {
+    dataExists = false; // COND-DBSQL-MRNF → 미존재
+}
+
+if (dataExists) {
+    throw new BusinessException("B4200023", "UKII0182", "이미 등록되어있는 정보입니다.");
+}
+```
+
+### 2.5 DU 내부 DBIO 구현 패턴
+
+**nKESA (Java) - DU 기본 메서드 사용:**
+```java
+// DataUnit (DU) 내 @BizMethod
+// sqlMap 직접 호출이 아닌 기본 클래스 제공 메서드 사용
+@BizMethod("기업집단평가기본 테이블 SELECT")
+public IDataSet select(IDataSet requestData, IOnlineContext onlineCtx) {
     IDataSet responseData = new DataSet();
-    Map<String, Object> param = requestData.toMap();
-    // MyBatis 호출
-    Map<String, Object> result = sqlMap.queryForObject("namespace.selectXxx", param);
-    if (result != null) {
-        responseData.putAll(result);
+    try {
+        IRecordSet recordset = dbSelect("select", requestData, onlineCtx); // 기본 메서드
+        responseData.put("RECORD", recordset);
+    } catch (BusinessException e) {
+        throw e;
+    } catch (Exception e) {
+        throw new BusinessException("B3900009", "UKII0182", "데이터를 검색할 수 없습니다.", e);
     }
     return responseData;
 }
 ```
+
+> **DU에서 sqlMap 직접 호출 금지**. DataUnit 기본 클래스의 `dbSelect()`, `dbInsert()`, `dbUpdate()`, `dbDelete()` 사용.
 
 ---
 
@@ -350,18 +450,43 @@ public IDataSet dmSelectXxx(IDataSet requestData, IOnlineContext onlineCtx) {
 
 ## 4. 호출 패턴 변환 규칙
 
-### 4.1 동일 컴포넌트 내 호출
+### 4.1 AS→DC 호출 (PU→FU 바인딩)
 
-**zKESA:** `#DYCALL` 로 동일 어플리케이션 내 프로그램 호출
-**nKESA:** `@BizUnitBind` 어노테이션으로 FU/DU 주입 후 직접 메소드 호출
+**zKESA:** `#DYCALL DIPA301 YCCOMMON-CA XDIPA301-CA`
+**nKESA:** `@BizUnitBind`로 FU를 PU에 주입 후 **직접 메소드 호출**
 
 ```java
-@BizUnitBind
-private FUXxxLogic fuXxxLogic;
+// PU 클래스 내 FU 바인딩 (AS→DC 패턴)
+@BizUnitBind private FUCorpGrpCrdtEvalHistProc fuCorpGrpCrdtEvalHistProc;
 
-// FM 직접 호출
-IDataSet result = fuXxxLogic.fmMethodName(reqDs, onlineCtx);
+// PM 메소드 내에서 FM 직접 호출
+responseData = fuCorpGrpCrdtEvalHistProc.processCorpGrpCrdtEvalHist(requestData, onlineCtx);
 ```
+
+> **중요**: 동일 컴포넌트 내 AS→DC 호출은 `callSharedMethodByDirect`가 아닌 **@BizUnitBind 직접 호출**을 사용한다.
+
+### 4.1.1 DC→DBIO/SQLIO 호출 (FU→DU 바인딩)
+
+**zKESA:** `#DYDBIO SELECT-CMD-Y TKIPB110-PK TRIPB110-REC` / `#DYSQLA QIPA301 SELECT XQIPA301-CA`
+**nKESA:** `@BizUnitBind`로 DU를 FU에 주입 후 **직접 메소드 호출**
+
+```java
+// FU 클래스 내 DU 바인딩 (DC→DBIO/SQLIO 패턴)
+@BizUnitBind private DUTSKIPB110 duTSKIPB110; // 기업집단평가기본 테이블DU
+@BizUnitBind private DUTSKIPB111 duTSKIPB111; // 기업집단연혁명세 테이블DU
+@BizUnitBind private DUTSKIPA111 duTSKIPA111; // 기업관계연결정보 테이블DU (SQLIO QIPA307)
+
+// FM 메소드 내에서 DU DM 메소드 직접 호출
+duTSKIPB110.insert(newEvalData, onlineCtx);                     // #DYDBIO INSERT-CMD-Y
+int deleteCount = duTSKIPB110.delete(requestData, onlineCtx);   // #DYDBIO DELETE-CMD-Y
+IDataSet result = duTSKIPB110.select(requestData, onlineCtx);   // #DYDBIO SELECT-CMD-Y
+IDataSet listResult = duTSKIPB110.selectList(requestData, onlineCtx); // #DYSQLA SELECT
+```
+
+> **DU 바인딩 명명**: `@BizUnitBind private DUTSKIPB110 duTSKIPB110;`
+> - 클래스명: `DU` + 테이블명 (예: `DUTSKIPB110` = DU + TSKIPB110 → THKIPB110 테이블)
+> - 변수명: `du` + 테이블명 (예: `duTSKIPB110`)
+> - SQLIO 전용 테이블도 별도 DU로 생성 (예: QIPA307 → `DUTSKIPA111`)
 
 ### 4.2 타 컴포넌트 호출 (공유메소드)
 
@@ -379,6 +504,8 @@ IDataSet resDs = callSharedMethodByDirect(
 
 String outField = resDs.getString("outField1");
 ```
+
+> **동일 컴포넌트** 내 호출은 `@BizUnitBind` 직접 호출, **타 컴포넌트** 호출만 `callSharedMethodByDirect` 사용
 
 ### 4.3 공통 유틸리티 호출
 
@@ -416,22 +543,90 @@ IDataSet linkRes = callService("거래코드", linkReq, onlineCtx);
 
 ## 5. DB 접근 패턴 변환
 
-### 5.1 DBIO → MyBatis DM
+### 5.1 DBIO → DataUnit 기본 메서드
 
-| zKESA DBIO 명령 | MyBatis DM 패턴 |
-|---|---|
-| `#DYDBIO SELECT-CMD-Y key rec` | `sqlMap.queryForObject(namespace + ".selectXxx", param)` |
-| `#DYDBIO SELECT-CMD-N key rec` (다건) | `sqlMap.queryForList(namespace + ".selectListXxx", param)` |
-| `#DYDBIO INSERT-CMD key rec` | `sqlMap.insert(namespace + ".insertXxx", param)` |
-| `#DYDBIO UPDATE-CMD key rec` | `sqlMap.update(namespace + ".updateXxx", param)` |
-| `#DYDBIO DELETE-CMD key rec` | `sqlMap.delete(namespace + ".deleteXxx", param)` |
+DU(DataUnit)는 `com.kbstar.sqc.base.DataUnit`을 상속하며, 기본 제공 메서드를 사용한다.
+**sqlMap 직접 호출이 아닌 `dbSelect/dbInsert/dbUpdate/dbDelete` 기본 메서드를 사용.**
 
-### 5.2 SQLIO → MyBatis DM (복합 SQL)
+| zKESA DBIO 명령 | DU 기본 메서드 | 설명 |
+|---|---|---|
+| `#DYDBIO SELECT-CMD-Y key rec` | `IRecordSet rs = dbSelect("select", requestData, onlineCtx)` | 단건 조회 (LOCK) |
+| `#DYDBIO SELECT-CMD-N key rec` (다건) | `IRecordSet rs = dbSelect("selectList", requestData, onlineCtx)` | 다건 조회 |
+| `#DYDBIO INSERT-CMD-Y key rec` | `int cnt = dbInsert("insert", requestData, onlineCtx)` | 삽입 |
+| `#DYDBIO UPDATE-CMD-Y key rec` | `int cnt = dbUpdate("update", requestData, onlineCtx)` | 수정 |
+| `#DYDBIO DELETE-CMD-Y key rec` | `int cnt = dbDelete("delete", requestData, onlineCtx)` | 삭제 |
 
-| zKESA SQLIO | MyBatis DM 패턴 |
-|---|---|
-| `#DYSQLA QxxxxXX XQxxxxXX-CA` | 복합 쿼리를 MyBatis XML에 정의 후 DM 메소드에서 호출 |
-| Multi-Row Fetch | `sqlMap.queryForList(...)` + `IRecordSet` 으로 변환 |
+```java
+// DU 메소드 예시 (정답지 패턴)
+@BizMethod("기업집단평가기본 테이블 INSERT")
+public int insert(IDataSet requestData, IOnlineContext onlineCtx) {
+    try {
+        int insertCount = dbInsert("insert", requestData, onlineCtx);
+        return insertCount;
+    } catch (BusinessException e) {
+        throw e;
+    } catch (Exception e) {
+        throw new BusinessException("B3900009", "UKII0182", "데이터를 생성할 수 없습니다.", e);
+    }
+}
+```
+
+### 5.2 DBIO 커서 패턴 (OPEN/FETCH/CLOSE) → 리스트 조회
+
+**zKESA:**
+```cobol
+#DYDBIO OPEN-CMD-1  TKIPB111-PK TRIPB111-REC
+PERFORM VARYING WK-I FROM 1 BY 1 UNTIL COND-DBIO-MRNF
+    #DYDBIO FETCH-CMD-1 TKIPB111-PK TRIPB111-REC
+    IF COND-DBIO-OK THEN
+        #DYDBIO SELECT-CMD-Y  TKIPB111-PK TRIPB111-REC
+        #DYDBIO DELETE-CMD-Y  TKIPB111-PK TRIPB111-REC
+    END-IF
+END-PERFORM
+#DYDBIO CLOSE-CMD-1  TKIPB111-PK TRIPB111-REC
+```
+
+**nKESA:** OPEN/FETCH/CLOSE 루프 → DU의 `dbSelect` 리스트 조회 + 반복 삭제
+
+```java
+// 커서 기반 다건 삭제 → 단순화된 DU delete 호출
+int deleteCount = duTSKIPB111.delete(requestData, onlineCtx);
+```
+
+> DU 내부에서 `dbDelete("delete", ...)` 가 MyBatis SQL로 조건 기반 다건 삭제를 수행.
+> 커서 패턴의 레코드별 SELECT→DELETE 루프는 SQL WHERE 조건으로 대체된다.
+
+### 5.3 SQLIO → DataUnit 메서드
+
+| zKESA SQLIO | DU 메서드 패턴 | 설명 |
+|---|---|---|
+| `#DYSQLA QxxxxXX SELECT XQxxxxXX-CA` | `IRecordSet rs = dbSelect("selectListXxx", requestData, onlineCtx)` | 복합 쿼리 조회 |
+| Multi-Row 결과 | `IRecordSet` + `IRecord` 순회 | `recordSet.getRecord(i)` 반복 |
+| `DBSQL-SELECT-CNT` | `recordSet.getRecordCount()` | 조회 건수 |
+
+### 5.4 조회 건수 제한 패턴
+
+COBOL SQLIO 배열 크기 제한 → Java에서 명시적 건수 제한 구현
+
+```java
+@BizMethod("기업집단평가기본 테이블 SELECT LIST")
+public IDataSet selectList(IDataSet requestData, IOnlineContext onlineCtx) {
+    IDataSet responseData = new DataSet();
+    IRecordSet recordset = dbSelect("selectList", requestData, onlineCtx);
+
+    // 최대 1000건 제한 (COBOL SQLIO 배열 크기 반영)
+    if (recordset != null && recordset.getRecordCount() > 1000) {
+        IRecordSet limitedRecordset = new RecordSet();
+        for (int i = 0; i < 1000; i++) {
+            limitedRecordset.addRecord(recordset.getRecord(i));
+        }
+        responseData.put("LIST", limitedRecordset);
+    } else {
+        responseData.put("LIST", recordset);
+    }
+    return responseData;
+}
+```
 
 ---
 
@@ -468,12 +663,195 @@ nKESA에 대응 API가 없는 (`N/A`) 항목은 다음과 같이 처리:
 |---|---|---|
 | `YN` | AS 입력 카피북 | PM 메소드의 `IDataSet requestData` 필드 |
 | `YP` | AS 출력 카피북 | PM 메소드의 `IDataSet responseData` 필드 |
-| `XD` | DC 인터페이스 | DM 메소드의 `IDataSet` 파라미터/리턴 필드 |
+| `XD` | DC 인터페이스 | **FM 메소드**의 `IDataSet` 파라미터/리턴 필드 (DC→FU이므로 FM) |
 | `XP` | PC 인터페이스 | FM 메소드의 `IDataSet` 파라미터/리턴 필드 |
-| `XQ` | SQLIO 인터페이스 | DM 메소드의 `IDataSet` 파라미터 + MyBatis XML |
-| `TR` | 테이블 레코드 | MyBatis 결과 DTO / `Map<String, Object>` |
-| `TK` | 테이블 키 | MyBatis 파라미터 DTO / `Map<String, Object>` |
+| `XQ` | SQLIO 인터페이스 | DU DM 메소드의 `IDataSet` 파라미터 (FU→DU 호출용) |
+| `TR` | 테이블 레코드 | `IRecordSet` / `IRecord` / `IDataSet` |
+| `TK` | 테이블 키 | DU 메소드 `IDataSet requestData`에 키 필드로 포함 |
 | `YC` | 공통 유틸리티 | `IOnlineContext` / `CommonArea` |
 | `XC` | 공통유틸리티 인터페이스 | 공유메소드 호출용 `IDataSet` |
 | `CO-` | 상수 정의 | `static final String` 상수 또는 Enum |
 | `WK-` | Working Area | 메소드 로컬 변수 |
+
+---
+
+## 9. COBOL 제어문 → Java 변환 패턴
+
+### 9.1 EVALUATE → if/else if
+
+```cobol
+EVALUATE XDIPA301-I-PRCSS-DSTCD
+    WHEN '01'
+         PERFORM S3000-PROCESS-RTN THRU S3000-PROCESS-EXT
+    WHEN '02'
+    WHEN '03'
+         PERFORM S4000-PROCESS-RTN THRU S4000-PROCESS-EXT
+END-EVALUATE
+```
+
+```java
+if ("01".equals(prcssDstcd)) {
+    responseData = _createNewCorpGrpCrdtEval(requestData, onlineCtx);
+} else if ("02".equals(prcssDstcd) || "03".equals(prcssDstcd)) {
+    responseData = _deleteCorpGrpCrdtEval(requestData, onlineCtx);
+}
+```
+
+### 9.2 EVALUATE TRUE → try/catch + 조건 분기
+
+```cobol
+EVALUATE TRUE
+    WHEN COND-DBIO-OK
+         CONTINUE
+    WHEN COND-DBIO-MRNF
+         업무로직
+    WHEN OTHER
+         #ERROR CO-B3900009 CO-UKII0182 CO-STAT-ERROR
+END-EVALUATE
+```
+
+```java
+try {
+    IDataSet result = duXxx.select(requestData, onlineCtx);
+    // COND-DBIO-OK: 정상 처리
+} catch (BusinessException e) {
+    // COND-DBIO-MRNF: 데이터 미존재 → 업무 로직 분기
+    // WHEN OTHER: DB 오류 → BusinessException 전파
+    throw e;
+}
+```
+
+### 9.3 IF SPACE 체크 → null/isEmpty 체크
+
+```cobol
+IF YNIPBA30-PRCSS-DSTCD = SPACE
+   #ERROR CO-B3800004 CO-UKIF0072 CO-STAT-ERROR
+END-IF
+```
+
+```java
+String prcssDstcd = requestData.getString("prcssDstcd");
+if (prcssDstcd == null || prcssDstcd.trim().isEmpty()) {
+    throw new BusinessException("B3800004", "UKIF0072", "처리구분코드를 입력해주세요.");
+}
+```
+
+### 9.4 PERFORM VARYING → for 루프
+
+```cobol
+PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > DBSQL-SELECT-CNT
+    PERFORM S4241-THKIPB113-DEL-RTN THRU S4241-THKIPB113-DEL-EXT
+END-PERFORM
+```
+
+```java
+IRecordSet recordSet = duResult.getRecordSet("LIST");
+for (int i = 0; i < recordSet.getRecordCount(); i++) {
+    IRecord record = recordSet.getRecord(i);
+    // 레코드별 처리
+}
+```
+
+### 9.5 #BOFMID → responseData.put("formatId", ...)
+
+```cobol
+MOVE 'V1'              TO WK-FMID(1:2).
+MOVE BICOM-SCREN-NO    TO WK-FMID(3:11).
+#BOFMID WK-FMID.
+```
+
+```java
+String screenNo = ca.getBiCom().getScrenNo();
+if (screenNo == null || screenNo.trim().isEmpty()) {
+    screenNo = "0000";
+}
+String formatId = "V1" + screenNo;
+responseData.put("formatId", formatId);
+```
+
+---
+
+## 10. 전체 변환 흐름 예시 (AS+DC → PU+FU+DU)
+
+### 10.1 변환 전 COBOL 구조
+
+```
+AIPBA30.cbl (AS)
+├── S1000: #DYCALL IJICOMM (CommonArea 초기화)
+├── S2000: 입력검증 (#ERROR CO-B3800004 CO-UKIF0072)
+├── S3000: #DYCALL DIPA301 (DC 호출)
+└── S9000: #OKEXIT
+
+DIPA301.cbl (DC)
+├── S1000: 영역 초기화
+├── S2000: DC레벨 검증 (#ERROR CO-B3800004 CO-UKIP0001~0008)
+├── EVALUATE 처리구분
+│   ├── '01' → S3000 (신규평가)
+│   │   ├── S3100: #DYSQLA QIPA301 (기존재 확인)
+│   │   ├── S3200: #DYDBIO INSERT THKIPB110
+│   │   │   ├── S3210: PK SET
+│   │   │   ├── S3220: REC SET
+│   │   │   │   ├── S3221: #DYSQLA QIPA307 (주채무계열여부)
+│   │   │   │   └── S5000: #DYSQLA QIPA302 (직원정보)
+│   │   │   └── #DYDBIO INSERT-CMD-Y
+│   │   └── END
+│   └── '02'/'03' → S4000 (확정취소/삭제)
+│       └── S4200: 12개 테이블 연쇄삭제
+│           ├── S4210: THKIPB110 DELETE
+│           ├── S4220: THKIPB111 DELETE (커서)
+│           ├── S4230: THKIPB116 DELETE (커서)
+│           ├── S4240: THKIPB113 DELETE (SQLIO+DBIO)
+│           ├── ...
+│           └── S42E0: THKIPB119 DELETE (SQLIO+DBIO)
+└── S9000: #OKEXIT
+```
+
+### 10.2 변환 후 Java 구조
+
+```
+PUCorpGrpCrdtEvalHistMgmt.java (PU)  ← AIPBA30
+├── @BizUnitBind FUCorpGrpCrdtEvalHistProc
+├── @BizMethod pmKIP11A30E0()        ← AIPBA30 S0000
+│   ├── 입력검증 (B3800004/UKIF0072) ← S2000
+│   ├── fuXxx.processCorpGrpCrdtEvalHist() 호출 ← S3000 #DYCALL DIPA301
+│   └── return responseData          ← S9000
+├── @BizMethod pmKIP04A4040()        ← AIP4A40 (다른 AS 통합)
+└── @BizMethod pmKIP04A3440()        ← AIP4A34 (다른 AS 통합)
+
+FUCorpGrpCrdtEvalHistProc.java (FU)  ← DIPA301
+├── @BizUnitBind DUTSKIPB110~133, DUTSKIPA111 (13개 DU)
+├── @BizMethod processCorpGrpCrdtEvalHist() ← DIPA301 S0000
+│   ├── DC레벨 검증 (UKIP0001~0008)  ← S2000
+│   ├── if "01" → _createNewCorpGrpCrdtEval()  ← S3000
+│   └── if "02"/"03" → _deleteCorpGrpCrdtEval() ← S4000
+├── private _createNewCorpGrpCrdtEval() ← S3000~S3220, S5000
+│   ├── duTSKIPA111.select() (기존재 확인) ← S3100 QIPA301
+│   ├── duTSKIPA111.select() (주채무계열) ← S3221 QIPA307
+│   ├── TODO: 직원정보 조회               ← S5000 QIPA302
+│   └── duTSKIPB110.insert() (신규 생성) ← S3200 DBIO INSERT
+└── private _deleteCorpGrpCrdtEval()   ← S4000~S4200
+    └── 12개 DU.delete() 연쇄 호출      ← S4210~S42E0
+
+DUTSKIPB110.java (DU)  ← DIPA301 내 THKIPB110 관련 DBIO/SQLIO
+├── selectList()    ← SQLIO 다건 조회 + 1000건 제한
+├── selectListHist() ← 이력 다건 조회 + 1000건 제한
+├── select()        ← #DYDBIO SELECT-CMD-Y
+├── insert()        ← #DYDBIO INSERT-CMD-Y
+├── update()        ← #DYDBIO UPDATE-CMD-Y
+└── delete()        ← #DYDBIO DELETE-CMD-Y
+
+(DUTSKIPB111~133, DUTSKIPA111 동일 패턴으로 테이블별 DU 생성)
+```
+
+### 10.3 변환 판단 체크리스트
+
+| 단계 | 체크 항목 |
+|------|----------|
+| 1. AS 식별 | 동일 DC를 호출하는 AS 모듈 그룹 → 1개 PU로 통합 |
+| 2. DC 식별 | DC의 비즈니스 로직 → FU로 변환. DBIO/SQLIO → DU로 분리 |
+| 3. 테이블 식별 | DC가 접근하는 테이블 목록 → 테이블당 1개 DU 생성 |
+| 4. 에러코드 | AS 에러코드(UKIF0072) vs DC 에러코드(UKIP000x) 구분 적용 |
+| 5. 기존재 체크 | SQLIO OK→에러 / MRNF→진행 → try/catch + boolean 플래그 |
+| 6. 커서 루프 | OPEN/FETCH/CLOSE → DU 단일 delete 호출 (SQL에서 다건 삭제) |
+| 7. 검증 위치 | AS 검증은 PU PM 내, DC 검증은 FU FM 내 |
+| 8. CommonArea | BICOM 필드 → ca.getBiCom().getXxx() |
