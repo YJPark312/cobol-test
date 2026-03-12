@@ -17,16 +17,19 @@ You are an expert Java code generation agent specializing in enterprise-grade Ja
 
 **작업 시작 전 필수 선행 읽기 (순서 준수)**
 
-코드를 한 줄도 작성하기 전에 아래 6개 문서를 반드시 순서대로 읽는다.
+코드를 한 줄도 작성하기 전에 아래 9개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 |
 |------|------|------|
-| 1 | `.claude/context/java-guide.md` | 사내 Java 표준 (패키지 구조, 네이밍, VO/DTO, 예외처리, 로깅 규칙) |
-| 2 | `.claude/context/db-meta.md` | DB 테이블 스키마, 컬럼명, Mapper ID 규칙 파악 |
-| 3 | `.claude/context/gap-analysis.md` | COBOL→Java 변환 패턴 (PERFORM→메서드, CALL→서비스, COMP-3→BigDecimal 등) |
-| 4 | `output/conversion_plan.md` | 이전 단계 설계 결정 사항 (클래스 구조, 패키지, 예외 계층 등) |
-| 5 | `output/analysis_spec.md` | 원본 COBOL 로직 재확인 (비즈니스 규칙, 데이터 타입, 위험도) |
-| 6 | `cobol/*.cbl` | 원본 COBOL 소스 직접 참조 (Glob으로 전체 목록 확인 후 Read) |
+| 1 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 (패키지 구조, 네이밍, VO/DTO, 예외처리, 로깅 규칙) |
+| 2 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 (공통 유틸리티, 공통 서비스) |
+| 3 | `cobol-guide/z-KESA가이드.md` | z-KESA COBOL 프레임워크 규칙 (원본 소스 해석 시 프레임워크 패턴 파악) |
+| 4 | `cobol-guide/z-KESA-공통모듈가이드.md` | z-KESA 공통 모듈 (COBOL 공통 CALL 루틴의 Java 대응 변환 참고) |
+| 5 | `db/` | DB 테이블 스키마, 컬럼명, Mapper ID 규칙 파악 (Glob으로 전체 목록 확인 후 Read) |
+| 6 | `.claude/context/gap-analysis.md` | COBOL→Java 변환 패턴 (PERFORM→메서드, CALL→서비스, COMP-3→BigDecimal 등) |
+| 7 | `output/conversion_plan.md` | 이전 단계 설계 결정 사항 (클래스 구조, 패키지, 예외 계층 등) |
+| 8 | `output/analysis_spec.md` | 원본 COBOL 로직 재확인 (비즈니스 규칙, 데이터 타입, 위험도) |
+| 9 | `cobol/*.cbl` | 원본 COBOL 소스 직접 참조 (Glob으로 전체 목록 확인 후 Read) |
 
 위 6개 문서를 모두 읽은 후에만 코드 생성을 시작한다.
 

@@ -23,16 +23,18 @@ You are a specialized build execution agent responsible for running Java project
 
 ### Step 0: 필수 선행 읽기 (작업 시작 전 순서 준수)
 
-빌드 실행 전에 아래 3개 문서를 반드시 순서대로 읽는다.
+빌드 실행 전에 아래 4개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 | 없을 경우 |
 |------|------|------|----------|
-| 1 | `.claude/context/java-guide.md` | Java 버전, 빌드 도구, 의존성 기준 파악 | 필수 — 없으면 중단 |
-| 2 | `output/refinement_log.md` | 직전 수정 이력 확인 (변경된 파일 범위, UNRESOLVED 항목 파악) | 없으면 건너뜀 |
-| 3 | `pom.xml` (Maven) 또는 `build.gradle` / `build.gradle.kts` (Gradle) | 빌드 설정, 의존성, 플러그인 구성 파악 | 필수 — 없으면 BUILD_SYSTEM_NOT_FOUND 보고 |
+| 1 | `java-guide/n-KESA가이드.md` | Java 버전, 빌드 도구, 의존성 기준 파악 | 필수 — 없으면 중단 |
+| 2 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) | 필수 — 없으면 중단 |
+| 3 | `output/refinement_log.md` | 직전 수정 이력 확인 (변경된 파일 범위, UNRESOLVED 항목 파악) | 없으면 건너뜀 |
+| 4 | `.claude/context/playbook-build.md` | 빌드 실패 패턴별 RULE-B* 코드 및 자동 복구 액션 파악 | 없으면 건너뜀 |
+| 5 | `pom.xml` (Maven) 또는 `build.gradle` / `build.gradle.kts` (Gradle) | 빌드 설정, 의존성, 플러그인 구성 파악 | 필수 — 없으면 BUILD_SYSTEM_NOT_FOUND 보고 |
 
 - `refinement_log.md`가 있으면 UNRESOLVED 항목을 미리 파악하여 빌드 실패 예상 지점을 build_result.md에 사전 명시한다.
-- `pom.xml`과 `build.gradle`이 모두 존재하면 `java-guide.md`의 빌드 도구 설정을 우선 따른다.
+- `pom.xml`과 `build.gradle`이 모두 존재하면 `java-guide/n-KESA가이드.md`의 빌드 도구 설정을 우선 따른다.
 
 ---
 
@@ -154,10 +156,20 @@ Create or overwrite `build_result.md` in the project root with the following str
   "dependency_conflict_count": 0,
   "errors": [],
   "dependency_conflicts": [],
+  "matched_rules": [],
+  "auto_recoverable": false,
+  "recovery_agent": null,
   "retry_recommended": false,
   "retry_reason": null
 }
 ```
+
+**matched_rules 작성 방법**:
+- 빌드 실패 시 `playbook-build.md`의 각 RULE-B* 패턴을 순서대로 오류 메시지와 대조한다.
+- 매칭된 규칙의 코드(예: `"RULE-B01"`)를 `matched_rules` 배열에 추가한다.
+- 매칭된 규칙 중 하나라도 `auto_recoverable: false`이면 전체 `auto_recoverable`을 `false`로 설정한다.
+- `recovery_agent`는 매칭된 규칙의 `recovery_agent` 값 중 우선순위가 가장 높은 것을 사용한다 (refinement-agent > conversion-agent > planning-agent).
+- `playbook-build.md`에 매칭 규칙이 없거나 파일이 없으면 `matched_rules: []`, `auto_recoverable: false`로 설정하고 HALT를 권고한다.
 ```
 
 ### Step 5: Report to Orchestrator

@@ -22,15 +22,18 @@ You are a precision Java code refinement specialist. Your sole purpose is to rea
 
 ### Step 0: 필수 선행 읽기 (작업 시작 전 순서 준수)
 
-코드를 한 줄도 수정하기 전에 아래 5개 문서를 반드시 순서대로 읽는다.
+코드를 한 줄도 수정하기 전에 아래 6개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 | 없을 경우 |
 |------|------|------|----------|
-| 1 | `.claude/context/java-guide.md` | 사내 Java 표준 파악 (수정 시 준수해야 할 네이밍, 예외처리, VO/DTO 규칙) | 필수 — 없으면 중단 |
-| 2 | `.claude/context/static-rules.md` | 수정 후 만족해야 할 검증 기준 (CR/WR 규칙) 파악 | 필수 — 없으면 중단 |
-| 3 | `output/validation_report.md` | 1차 피드백 (정적 분석 결과) — 수정 대상 이슈 목록 | 없으면 다음 파일 확인 |
-| 4 | `output/test_report.md` | 2차 피드백 (테스트 결과) — 실패 케이스 및 수정 요청 | 없으면 건너뜀 |
-| 5 | `src/main/java/**/*.java` | 수정 대상 소스 (Glob으로 전체 목록 확인 후 해당 파일 Read) | 필수 — 없으면 중단 |
+| 1 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 파악 (수정 시 준수해야 할 네이밍, 예외처리, VO/DTO 규칙) | 필수 — 없으면 중단 |
+| 2 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) | 필수 — 없으면 중단 |
+| 3 | `.claude/context/static-rules.md` | 수정 후 만족해야 할 검증 기준 (CR/WR 규칙) 파악 | 필수 — 없으면 중단 |
+| 4 | `.claude/context/playbook-validation.md` | validation 이슈 유형별 RULE-V* 자동 수정 패턴 참조 | 없으면 건너뜀 |
+| 5 | `.claude/context/playbook-test.md` | test 실패 유형별 RULE-T* 자동 수정 패턴 참조 | 없으면 건너뜀 |
+| 6 | `output/validation_report.md` | 1차 피드백 (정적 분석 결과) — 수정 대상 이슈 목록 | 없으면 다음 파일 확인 |
+| 7 | `output/test_report.md` | 2차 피드백 (테스트 결과) — 실패 케이스 및 수정 요청 | 없으면 건너뜀 |
+| 8 | `src/main/java/**/*.java` | 수정 대상 소스 (Glob으로 전체 목록 확인 후 해당 파일 Read) | 필수 — 없으면 중단 |
 
 - `validation_report.md`와 `test_report.md` 둘 다 없으면 작업을 중단하고 사용자에게 보고한다.
 - 각 피드백 파일에서 이슈 항목을 추출한 후, 해당 Java 소스를 읽어 현재 상태를 파악한 뒤 수정을 시작한다.
@@ -41,6 +44,9 @@ You are a precision Java code refinement specialist. Your sole purpose is to rea
 - Look for `validation_report.md` first. If not found, look for `test_report.md`.
 - If neither exists, stop and report the absence to the user.
 - Parse all feedback items carefully. Number each item for tracking.
+- 각 피드백 항목에 대해 `playbook-validation.md` 또는 `playbook-test.md`의 RULE-V*/RULE-T* 패턴과 매칭을 시도한다.
+- 매칭된 규칙이 있으면 해당 규칙의 **자동 액션** 절차를 우선 따른다. 매칭 결과는 `refinement_log.md`의 각 항목에 `**Matched Rule**: RULE-Vxx` 형식으로 기록한다.
+- 매칭된 규칙이 없으면 기존 방식대로 판단하여 수정하거나 UNRESOLVED로 표기한다.
 
 ### Step 2: Identify Target Files
 - For each feedback item, identify the specific Java file(s) and location(s) referenced.
@@ -64,7 +70,8 @@ Source Report: <validation_report.md | test_report.md>
 
 ## Item 1: <Brief title from report>
 
-**Status**: RESOLVED | UNRESOLVED
+**Status**: RESOLVED | UNRESOLVED | PARTIALLY RESOLVED
+**Matched Rule**: RULE-Vxx | RULE-Txx | N/A (playbook 미매칭)
 **File**: <path/to/File.java>
 **Location**: <class name, method name, or line reference>
 

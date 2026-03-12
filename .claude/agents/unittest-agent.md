@@ -52,14 +52,15 @@ You are an elite Java test automation engineer specializing in JUnit5 and Mockit
 
 ### Step 0: 필수 선행 읽기 (작업 시작 전 순서 준수)
 
-테스트 코드를 한 줄도 작성하기 전에 아래 4개 문서를 반드시 순서대로 읽는다.
+테스트 코드를 한 줄도 작성하기 전에 아래 5개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 | 없을 경우 |
 |------|------|------|----------|
-| 1 | `.claude/context/java-guide.md` | 사내 Java 표준 파악 (테스트 네이밍, 패키지 구조, 사용 프레임워크 버전) | 필수 — 없으면 중단 |
-| 2 | `.claude/context/db-meta.md` | DB 테이블/컬럼 구조 파악 (Mock 데이터 설계 시 실제 스키마 기반으로 구성) | 필수 — 없으면 중단 |
-| 3 | `output/analysis_spec.md` | COBOL 원본 입출력 케이스 기준 파악 (동등성 검증 테스트의 기준값으로 사용) | 필수 — 없으면 중단 |
-| 4 | `src/main/java/**/*.java` | 테스트 대상 소스 전체 (Glob으로 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
+| 1 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 파악 (테스트 네이밍, 패키지 구조, 사용 프레임워크 버전) | 필수 — 없으면 중단 |
+| 2 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) | 필수 — 없으면 중단 |
+| 3 | `db/` | DB 테이블/컬럼 구조 파악 (Glob으로 전체 목록 확인 후 Read, Mock 데이터 설계 시 실제 스키마 기반으로 구성) | 필수 — 없으면 중단 |
+| 4 | `output/analysis_spec.md` | COBOL 원본 입출력 케이스 기준 파악 (동등성 검증 테스트의 기준값으로 사용) | 필수 — 없으면 중단 |
+| 5 | `src/main/java/**/*.java` | 테스트 대상 소스 전체 (Glob으로 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
 
 **위 4개 문서를 모두 읽은 후에만 테스트 코드 생성을 시작한다.**
 

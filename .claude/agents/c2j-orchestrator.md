@@ -36,18 +36,37 @@ Maintain a clear, ordered list of pipeline stages. For each stage:
 For each stage that supports retry (build, test):
   - Maintain retry_count (initialize to 0 at pipeline start or stage reset)
   - On failure:
-      retry_count += 1
-      If retry_count <= 3:
-          Log RETRYING in pipeline_status.md
-          Re-invoke the failed stage
-      If retry_count > 3:
-          Log HALTED - HUMAN INTERVENTION REQUIRED in pipeline_status.md
-          Output a clear human-readable summary of:
-            - Which stage failed
-            - What error or output was observed
-            - How many retries were attempted
-            - What action the human should take
+
+      Step 1. 에이전트 반환 payload에서 matched_rules, auto_recoverable, recovery_agent 확인
+
+      Step 2. auto_recoverable = false 이면:
+          → 즉시 HALT
+          Log HALTED - AUTO RECOVERY IMPOSSIBLE in pipeline_status.md
+          Generate output/build_error.md with:
+            - 실패 스테이지
+            - matched_rules 목록 및 각 규칙의 auto_recoverable: false 사유
+            - 권고 수동 조치 내용
           Stop all further pipeline execution
+
+      Step 3. auto_recoverable = true 이면:
+          retry_count += 1
+
+          If retry_count <= 3:
+              Log RETRYING (retry_count/3) [matched_rules: ...] in pipeline_status.md
+              recovery_agent를 matched_rules 컨텍스트와 함께 호출하여 자동 수정 수행
+              수정 완료 후 실패 스테이지 재실행
+
+          If retry_count > 3:
+              Log HALTED - MAX RETRY EXCEEDED in pipeline_status.md
+              Output a clear human-readable summary of:
+                - 실패 스테이지
+                - matched_rules 및 각 재시도에서 수행한 복구 액션 이력
+                - 재시도 횟수 (3회)
+                - 사람이 확인해야 할 사항
+              Stop all further pipeline execution
+
+      Step 4. matched_rules가 빈 배열([])이고 playbook에 해당 패턴이 없는 경우:
+          → auto_recoverable = false로 간주하여 즉시 HALT 처리
 ```
 
 ### pipeline_status.md Format
@@ -98,10 +117,16 @@ Update this file at every meaningful event: stage start, stage success, stage fa
 ### 참고 자료 (Read Only · 수정 금지)
 | 파일 경로 | 내용 | 전달할 에이전트 |
 |-----------|------|----------------|
-| .claude/context/db-meta.md | DB 테이블/컬럼/타입 메타 정보 | analysis, conversion, unittest |
-| .claude/context/java-guide.md | 사내 Java 프레임워크 규칙 | planning, conversion, validation, refinement, build, unittest |
+| db/ | DB 테이블/컬럼/타입 메타 정보 | analysis, conversion, unittest |
+| java-guide/n-KESA가이드.md | 사내 Java 프레임워크 규칙 | planning, conversion, validation, refinement, build, unittest |
+| java-guide/n-KESA-공통모듈가이드.md | 사내 Java 공통 모듈 가이드 | planning, conversion, validation, refinement, build, unittest |
+| cobol-guide/z-KESA가이드.md | COBOL z-KESA 프레임워크 규칙 | analysis, planning, conversion |
+| cobol-guide/z-KESA-공통모듈가이드.md | COBOL z-KESA 공통 모듈 가이드 | analysis, planning, conversion |
 | .claude/context/gap-analysis.md | COBOL→Java 변환 패턴 차이 | analysis, planning, conversion |
 | .claude/context/static-rules.md | 사내 정적 분석 규칙 | validation, refinement |
+| .claude/context/playbook-validation.md | validation 실패 패턴별 RULE-V* 자동 복구 규칙 | orchestrator, refinement |
+| .claude/context/playbook-build.md | 빌드 실패 패턴별 RULE-B* 자동 복구 규칙 | orchestrator, build |
+| .claude/context/playbook-test.md | 테스트 실패 패턴별 RULE-T* 자동 복구 규칙 | orchestrator, refinement |
 
 ### 산출물 파일 (파이프라인 진행 기준)
 | 파일 경로 | 생성 에이전트 | 사람 검토 | 다음 에이전트 |

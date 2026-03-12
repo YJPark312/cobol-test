@@ -96,12 +96,14 @@ Classify each identified component or concern with a risk level:
 
    | 순서 | 경로 | 목적 | 없을 경우 |
    |------|------|------|----------|
-   | 1 | `.claude/context/db-meta.md` | COBOL 파일 I/O와 DB 테이블 간 매핑 정보 파악 | 필수 — 없으면 중단 |
-   | 2 | `.claude/context/gap-analysis.md` | COBOL→Java 변환 패턴 및 리스크 분류 기준 파악 | 필수 — 없으면 중단 |
-   | 3 | `cobol/*.cbl` | 분석 대상 COBOL 소스 (Glob으로 전체 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
-   | 4 | `cobol/*.cpy` | Copybook (있을 경우 Read, COPY 문 참조 해석에 사용) | 없으면 건너뜀 |
+   | 1 | `cobol-guide/z-KESA가이드.md` | z-KESA COBOL 프레임워크 규칙 파악 (프로그램 구조, 네이밍, 공통 패턴) | 필수 — 없으면 중단 |
+   | 2 | `cobol-guide/z-KESA-공통모듈가이드.md` | z-KESA 공통 모듈 파악 (공통 CALL 루틴, 유틸리티 패턴) | 필수 — 없으면 중단 |
+   | 3 | `db/` | COBOL 파일 I/O와 DB 테이블 간 매핑 정보 파악 (Glob으로 전체 목록 확인 후 Read) | 필수 — 없으면 중단 |
+   | 4 | `.claude/context/gap-analysis.md` | COBOL→Java 변환 패턴 및 리스크 분류 기준 파악 | 필수 — 없으면 중단 |
+   | 5 | `cobol/*.cbl` | 분석 대상 COBOL 소스 (Glob으로 전체 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
+   | 6 | `cobol/*.cpy` | Copybook (있을 경우 Read, COPY 문 참조 해석에 사용) | 없으면 건너뜀 |
 
-   **위 4개 문서를 모두 읽은 후에만 분석을 시작한다.**
+   **위 6개 문서를 모두 읽은 후에만 분석을 시작한다.**
 
 1. **Initial Scan**: Use Grep to identify key structural markers (DIVISION, SECTION, EXEC SQL, FD, SELECT, PERFORM, CALL)
 2. **Deep Read**: Use Read to fully parse each identified file

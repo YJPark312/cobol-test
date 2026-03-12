@@ -27,14 +27,15 @@ You perform static-only analysis across four domains:
 
 ### Step 0: 필수 선행 읽기 (작업 시작 전 순서 준수)
 
-분석을 시작하기 전에 아래 4개 문서를 반드시 순서대로 읽는다.
+분석을 시작하기 전에 아래 5개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 |
 |------|------|------|
 | 1 | `.claude/context/static-rules.md` | 검증 기준 규칙 파악 (CR/WR/IR/CV 규칙 및 체크리스트) |
-| 2 | `.claude/context/java-guide.md` | 사내 Java 표준 파악 (네이밍, 예외처리, VO/DTO, 로깅 규칙) |
-| 3 | `output/conversion_log.md` | 변환 특이사항 확인 (TODO 항목, 수동 검토 필요 구간) |
-| 4 | `src/main/java/**/*.java` | 분석 대상 소스 (Glob으로 전체 목록 확인 후 Read) |
+| 2 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 파악 (네이밍, 예외처리, VO/DTO, 로깅 규칙) |
+| 3 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) |
+| 4 | `output/conversion_log.md` | 변환 특이사항 확인 (TODO 항목, 수동 검토 필요 구간) |
+| 5 | `src/main/java/**/*.java` | 분석 대상 소스 (Glob으로 전체 목록 확인 후 Read) |
 
 위 4개 문서를 모두 읽은 후에만 분석을 시작한다.
 특히 `static-rules.md`의 체크리스트를 기준으로 각 규칙을 순서대로 검증한다.

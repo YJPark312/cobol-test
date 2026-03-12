@@ -28,8 +28,11 @@ your-project/
 
 | 자료명 | 경로 | 참조 에이전트 |
 |--------|------|--------------|
-| DB 메타 정보 | .claude/context/db-meta.md | 분석, 변환, 테스트 |
-| 사내 Java 가이드 | .claude/context/java-guide.md | 플래닝, 변환, 검증, 리파인먼트 |
+| DB 메타 정보 | db/ | 분석, 변환, 테스트 |
+| 사내 Java 가이드 (프레임워크) | java-guide/n-KESA가이드.md | 플래닝, 변환, 검증, 리파인먼트 |
+| 사내 Java 가이드 (공통모듈) | java-guide/n-KESA-공통모듈가이드.md | 플래닝, 변환, 검증, 리파인먼트 |
+| COBOL 가이드 (프레임워크) | cobol-guide/z-KESA가이드.md | 분석, 플래닝, 변환 |
+| COBOL 가이드 (공통모듈) | cobol-guide/z-KESA-공통모듈가이드.md | 분석, 플래닝, 변환 |
 | COBOL→Java 갭 분석 | .claude/context/gap-analysis.md | 분석, 플래닝, 변환 |
 | 정적 분석 규칙 | .claude/context/static-rules.md | 검증, 리파인먼트 |
 
