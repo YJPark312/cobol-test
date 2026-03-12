@@ -36,7 +36,8 @@
 | `YCCOMMON-CA` (COPY YCCOMMON) | `IOnlineContext onlineCtx` / `CommonArea ca` | 공통 영역. `getCommonArea(onlineCtx)`로 접근 |
 | `YNxxxxxx-CA` (AS 입력 카피북) | `IDataSet requestData` | PM의 입력 파라미터 |
 | `YPxxxxxx-CA` (AS 출력 카피북) | `IDataSet responseData` | PM의 출력 반환값 |
-| `XDxxxxxx-CA` / `XPxxxxxx-CA` (모듈 인터페이스) | `IDataSet` (FM 호출용 requestData/responseData) | FM간 데이터 전달 |
+| `XDxxxxxx-CA` (DC 인터페이스) | `IDataSet` (DM 호출용 requestData/responseData) | DC→DU 데이터 전달 |
+| `XPxxxxxx-CA` (PC 인터페이스) | `IDataSet` (FM 호출용 requestData/responseData) | PC→FU 데이터 전달 |
 | `XQxxxxxx-CA` (SQLIO 인터페이스) | MyBatis 파라미터 `Map` / DTO | SQL 실행 파라미터 |
 | `TRxxxxxx-REC` (테이블 레코드) | MyBatis 결과 DTO / `IDataSet` | 테이블 조회 결과 |
 | `TKxxxxxx-PK` (테이블 키) | MyBatis 파라미터 DTO / `Map` | 테이블 키 조건 |
@@ -51,10 +52,10 @@
 
 | zKESA 매크로 | nKESA Java 패턴 | 변환 예시 |
 |---|---|---|
-| **`#ERROR errCd treatCd stat`** | `throw new BusinessException(errCd, treatCd)` | `#ERROR CO-B3800004 CO-UKIF0072 CO-STAT-ERROR` → `throw new BusinessException("B3800004", "UKIF0072")` |
+| **`#ERROR errCd treatCd stat`** | `throw new BusinessException(errCd, treatCd, customMsg, cause)` | `#ERROR CO-B3800004 CO-UKIF0072 CO-STAT-ERROR` → `throw new BusinessException("B3800004", "UKIF0072", "맞춤메시지", e)` |
 | **`#MULERR`** (멀티에러) | `addBusinessException(errCd, treatCd, onlineCtx)` | PM에서만 사용. 최대 10건 |
 | **`#OKEXIT stat`** | `return responseData;` | 정상 종료. 별도 상태코드 세팅 불필요 |
-| **`#DYCALL pgm YCCOMMON-CA interface-CA`** | 동일 컴포넌트: 직접 메소드 호출 / 타 컴포넌트: `callSharedMethodByDirect(compId, "FUxxx.method", reqDs, onlineCtx)` | `#DYCALL DIPA301 YCCOMMON-CA XDIPA301-CA` → `IDataSet res = callSharedMethodByDirect("com.kbstar.kip.xxx", "FUxxx.method", reqDs, onlineCtx)` |
+| **`#DYCALL pgm YCCOMMON-CA interface-CA`** | 동일 컴포넌트: 직접 메소드 호출 / 타 컴포넌트: `callSharedMethodByDirect(compId, "유닛.method", reqDs, onlineCtx)` | AS→PC/FC: `callSharedMethodByDirect(..., "FUxxx.fmMethod", ...)` / AS→DC: `callSharedMethodByDirect(..., "DUxxx.dmMethod", ...)` |
 | **`#STCALL pgm ...`** | 직접 메소드 호출 (static) | 동일 컴포넌트 내 호출 |
 | **`#DYDBIO cmd key rec`** | DM 메소드 호출 (MyBatis) | `#DYDBIO SELECT-CMD-Y TKFACO13-PK TRFACO13-REC` → `IDataSet result = duXxx.dmSelectXxx(paramDs, onlineCtx)` |
 | **`#DYSQLA sqlioId interface-CA`** | DM 메소드 호출 (MyBatis 복합 SQL) | `#DYSQLA QFA0308 XQFA0308-CA` → `IDataSet result = duXxx.dmXxx(paramDs, onlineCtx)` |
@@ -100,13 +101,14 @@ END-IF
 IDataSet reqDs = new DataSet();
 reqDs.put("inputField", requestData.getString("inputField"));
 
-// FM 호출 (타 컴포넌트 공유메소드)
+// FM/DM 호출 (타 컴포넌트 공유메소드)
+// PC/FC 호출 시: FU.fmMethod / DC 호출 시: DU.dmMethod
 IDataSet resDs = callSharedMethodByDirect(
     "com.kbstar.xxx.yyy",
-    "FUXxx.methodName",
+    "DUXxx.dmMethodName",    // DC 호출의 경우 DU.dmXxx
     reqDs, onlineCtx);
 
-// 에러 처리는 FM 내부에서 BusinessException throw → 자동 전파
+// 에러 처리는 내부에서 BusinessException throw → 자동 전파
 // NOTFOUND 등 업무 판단이 필요한 경우만 결과값 체크
 ```
 
@@ -146,7 +148,7 @@ public IDataSet dmSelectXxx(IDataSet requestData, IOnlineContext onlineCtx) {
 
 ---
 
-## 3. 공통 유틸리티 매핑 (133건)
+## 3. 공통 유틸리티 매핑 (135건)
 
 > zKESA COBOL 프로그램 ID → nKESA Java 클래스.메소드()
 > `N/A` 표기: nKESA에서 미구현 (별도 구현 필요)
@@ -216,7 +218,7 @@ public IDataSet dmSelectXxx(IDataSet requestData, IOnlineContext onlineCtx) {
 | 1.12 | 관할/대출실행팀 소속부점코드 조회 | `CJIBR03` | `FUBcBranch.getJrsdLnExeTeamBrnCd()` |
 | 1.13 | 부점 폐쇄에 의한 통합부점 조회 | `CJIBR04` | `FUBcBranch.getIntegrationBranch()` |
 | 1.14 | 통합부점코드에 속한 통폐합된 부점 전체조회 | `CJIBR05` | `FUBcBranch.getMrabBrnWhol()` |
-| 1.15 | 인수합병 부점의 통합부점코드 조회 | `CJIBR06` | `FUBcBranch.getIntgraGiroCd()` |
+| 1.15 | 인수합병 부점의 통합부점코드 조회 | `CJIBR06` | `FUBcBranch.getIntgraGiroCd()` (nKESA명: 통합지로코드 조회) |
 | 1.16 | 부점운영지원내역 조회 | `CJIBR07` | `FUBcBranch.getBranchOperSportHist()` |
 | 1.17 | 부점주소, 전화번호 조회 | `CJIBR08` | `FUBcBranch.getBranchAddrTelno()` |
 | 1.19 | 우편번호 3자리로 지역별 소속부점코드 조회 | `CJIBR10` | `FUBcBranch.getAreaBranchCode()` |
@@ -328,8 +330,10 @@ public IDataSet dmSelectXxx(IDataSet requestData, IOnlineContext onlineCtx) {
 | 1.18 | 업무마감통제내용 변경 | `CJIBR09` | N/A |
 | 1.27 | KB 영업일정보 조회/변경 | `CJIKB01` | `FUBcBase.prcssKBBaseInfo()` |
 | 1.72 | 거래제어 정보 조회 | `CJITR01` | `FUBcTransaction.getTranCtrlInfo()` |
-| 1.76 | ECC 암호화 | `CJIECC1` | `FUBcEcc.getEncodeStringCode1()` / `getEncodeStringCode2()` |
-| 1.77 | ECC 복호화 | `CJIECC2` | `FUBcEcc.getDecodeStringCode1()` / `getDecodeStringCode2()` |
+| 1.76 | ECC 암호화 I | `CJIECC1` | `FUBcEcc.getEncodeStringCode1()` |
+| 1.77 | ECC 암호화 II | `CJIECC1` | `FUBcEcc.getEncodeStringCode2()` |
+| 1.78 | ECC 복호화 I | `CJIECC2` | `FUBcEcc.getDecodeStringCode1()` |
+| 1.79 | ECC 복호화 II | `CJIECC2` | `FUBcEcc.getDecodeStringCode2()` |
 | 1.80 | 책임자승인사유 판단 | `CJISUP1` | `FUBcAuthorization.prcssSpvsrAthorPtrn()` |
 | 1.81 | EBCDIC 한글코드 검증 | `CJIKS01` | N/A |
 | 1.86 | KSC5601 한글코드 검증 | `CJIKS04` | N/A |
@@ -464,7 +468,8 @@ nKESA에 대응 API가 없는 (`N/A`) 항목은 다음과 같이 처리:
 |---|---|---|
 | `YN` | AS 입력 카피북 | PM 메소드의 `IDataSet requestData` 필드 |
 | `YP` | AS 출력 카피북 | PM 메소드의 `IDataSet responseData` 필드 |
-| `XD`, `XP` | DC/PC 인터페이스 | FM 메소드의 `IDataSet` 파라미터/리턴 필드 |
+| `XD` | DC 인터페이스 | DM 메소드의 `IDataSet` 파라미터/리턴 필드 |
+| `XP` | PC 인터페이스 | FM 메소드의 `IDataSet` 파라미터/리턴 필드 |
 | `XQ` | SQLIO 인터페이스 | DM 메소드의 `IDataSet` 파라미터 + MyBatis XML |
 | `TR` | 테이블 레코드 | MyBatis 결과 DTO / `Map<String, Object>` |
 | `TK` | 테이블 키 | MyBatis 파라미터 DTO / `Map<String, Object>` |
