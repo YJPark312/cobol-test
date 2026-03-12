@@ -13,7 +13,7 @@
 |---|---|---|
 | AS (Application Service) | **ProcessUnit (PU)** - PM 메소드 | 거래 진입점, 입력검증/업무호출/출력조립 |
 | PC (Process Component) | **ProcessUnit (PU)** - PM 또는 FM 메소드 | 프로세스 제어 |
-| DC (Data Component) | **FunctionUnit (FU)** - FM 메소드 | 단위 비즈니스 로직 |
+| DC (Data Component) | **DataUnit (DU)** - DM 메소드 | 데이터 접근, DB 처리 로직 |
 | IC (Interface Component) | **FunctionUnit (FU)** - FM 공유메소드 | 공통 인터페이스 로직 |
 | FC (Function Component) | **FunctionUnit (FU)** - FM 메소드 | 기능 단위 로직 |
 | BC (Batch Component) | **FunctionUnit (FU)** - FM 메소드 (배치) | 배치 로직 |
