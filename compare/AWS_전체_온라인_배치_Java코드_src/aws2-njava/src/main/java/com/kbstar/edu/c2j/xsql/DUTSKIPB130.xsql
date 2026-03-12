@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<!-- 기업집단주석 조회 -->
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업집단주석 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+			  ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+			  ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+			  ,VALUA_YMD AS "valuaYmd"
+			  ,CORP_C_COMT_DSTCD AS "corpCComtDstcd"
+			  ,SERNO AS "serno"
+			  ,COMT_CTNT AS "comtCtnt"
+		  FROM INST1.TSKIPB130
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		 ORDER BY CORP_C_COMT_DSTCD, SERNO
+		]]>
+	</select>
+
+	<!-- 기업집단주석 등록 -->
+	<insert id="insert" parameterClass="map">
+		<![CDATA[/* 기업집단주석 등록 | MultiQ4KBBank, 2025-10-01 */
+		INSERT INTO INST1.TSKIPB130 (
+			 GROUP_CO_CD
+			,CORP_CLCT_GROUP_CD
+			,CORP_CLCT_REGI_CD
+			,VALUA_YMD
+			,CORP_C_COMT_DSTCD
+			,SERNO
+			,COMT_CTNT
+		) VALUES (
+			 #groupCoCd#
+			,#corpClctGroupCd#
+			,#corpClctRegiCd#
+			,#valuaYmd#
+			,#corpCComtDstcd#
+			,#serno#
+			,#comtCtnt#
+		)
+		]]>
+	</insert>
+
+	<!-- 기업집단주석 삭제 -->
+	<delete id="delete" parameterClass="map">
+		<![CDATA[/* 기업집단주석 삭제 | MultiQ4KBBank, 2025-10-01 */
+		DELETE FROM INST1.TSKIPB130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		]]>
+	</delete>
+
+</sqlMap>

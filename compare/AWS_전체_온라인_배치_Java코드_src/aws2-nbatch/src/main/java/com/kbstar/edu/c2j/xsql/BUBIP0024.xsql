@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- 기업집단평가데이터 선정 (BR-013-001) -->
+    <select id="selectCorporateGroupEvaluation" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 기업집단평가데이터선정 | MultiQ4KBBank, 2025-01-27 */
+        SELECT DISTINCT
+               A.CORP_CLCT_GROUP_CD AS "corpClctGroupCd",
+               A.CORP_CLCT_REGI_CD AS "corpClctRegiCd", 
+               A.VALUA_YMD AS "valuaYmd",
+               A.VALUA_BASE_YMD AS "valuaBaseYmd"
+          FROM INST1.TSKIPB110 A,
+               (SELECT GROUP_CO_CD,
+                       MAX(VALUA_YMD) AS VALUA_YMD,
+                       CORP_CLCT_GROUP_CD,
+                       CORP_CLCT_REGI_CD
+                  FROM INST1.TSKIPB110
+                 WHERE GROUP_CO_CD = :groupCoCd
+                   AND VALUA_CNFRM_YMD = ''
+                 GROUP BY GROUP_CO_CD, CORP_CLCT_GROUP_CD, CORP_CLCT_REGI_CD) B
+         WHERE A.GROUP_CO_CD = B.GROUP_CO_CD
+           AND A.VALUA_YMD = B.VALUA_YMD
+           AND A.CORP_CLCT_GROUP_CD = B.CORP_CLCT_GROUP_CD
+           AND A.CORP_CLCT_REGI_CD = B.CORP_CLCT_REGI_CD
+         ORDER BY A.CORP_CLCT_GROUP_CD, A.CORP_CLCT_REGI_CD
+        ]]>
+    </select>
+
+    <!-- 기존 참조자료 삭제 (BR-013-007) -->
+    <delete id="deleteExistingReferenceData" parameterClass="map">
+        <![CDATA[
+        /* 기존참조자료삭제 | MultiQ4KBBank, 2025-01-27 */
+        DELETE FROM INST1.TSKIPB113
+         WHERE GROUP_CO_CD = :groupCoCd
+           AND CORP_CLCT_GROUP_CD = :corpClctGroupCd
+           AND CORP_CLCT_REGI_CD = :corpClctRegiCd
+           AND VALUA_YMD = :valuaYmd
+        ]]>
+    </delete>
+
+    <!-- 다년도 날짜 계산 (BR-013-002) -->
+    <select id="calculateMultiYearDates" parameterClass="map" resultClass="hmap" fetchSize="1">
+        <![CDATA[
+        /* 다년도날짜계산 | MultiQ4KBBank, 2025-01-27 */
+        SELECT :valuaBaseYmd AS "baseYearDate",
+               CHAR(DATE(SUBSTR(:valuaBaseYmd,1,4)||'-'||
+                        SUBSTR(:valuaBaseYmd,5,2)||'-'||
+                        SUBSTR(:valuaBaseYmd,7,2)) - 12 MONTHS, ISO) AS "n1YearDate",
+               CHAR(DATE(SUBSTR(:valuaBaseYmd,1,4)||'-'||
+                        SUBSTR(:valuaBaseYmd,5,2)||'-'||
+                        SUBSTR(:valuaBaseYmd,7,2)) - 24 MONTHS, ISO) AS "n2YearDate"
+          FROM SYSIBM.SYSDUMMY1
+        ]]>
+    </select>
+
+    <!-- 사업부문별 재무데이터 집계 (BR-013-003, BR-013-004) -->
+    <select id="selectBusinessSectorFinancialData" parameterClass="map" resultClass="hmap" fetchSize="100">
+        <![CDATA[
+        /* 사업부문별재무데이터집계 | MultiQ4KBBank, 2025-01-27 */
+        WITH T1 AS (
+            SELECT A.GROUP_CO_CD, A.CORP_CLCT_GROUP_CD, A.CORP_CLCT_REGI_CD,
+                   '07' || A.EXAM_CUST_IDNFR AS FNAF_MTRL_NO,
+                   VALUE(B.ALTRV_NO, A.EXAM_CUST_IDNFR) AS ALTRV_NO,
+                   A.EXAM_CUST_IDNFR AS CUST_IDNFR
+              FROM INST1.TSKIPC110 A
+              LEFT OUTER JOIN (
+                   SELECT BB.GROUP_CO_CD, BB.ALTRV_NO, CC.CUST_IDNFR
+                     FROM INST1.THKAAADET BB, INST1.THKAABPCB CC, INST1.TSKIPC110 DD
+                    WHERE BB.BDRCT_CUST_ENCPT_NO = CC.BDRCT_CUST_ENCPT_NO) B
+                ON (A.GROUP_CO_CD = B.GROUP_CO_CD AND A.EXAM_CUST_IDNFR = B.CUST_IDNFR)
+             WHERE A.GROUP_CO_CD = :groupCoCd
+               AND A.CORP_CLCT_GROUP_CD = :corpClctGroupCd
+               AND A.CORP_CLCT_REGI_CD = :corpClctRegiCd
+               AND A.FNSTMT_RFLCT_YN = '1'
+        ),
+        T2 AS (
+            SELECT T1.GROUP_CO_CD, T1.CORP_CLCT_GROUP_CD, T1.CORP_CLCT_REGI_CD,
+                   T1.FNAF_MTRL_NO, T1.ALTRV_NO, T1.CUST_IDNFR,
+                   CB01.HANSIN_INDST_CD
+              FROM T1, INST1.THKABCB01 CB01
+             WHERE CB01.GROUP_CO_CD = T1.GROUP_CO_CD
+               AND CB01.CUST_IDNFR = T1.ALTRV_NO
+        ),
+        T3 AS (
+            SELECT T2.GROUP_CO_CD, T2.CORP_CLCT_GROUP_CD, T2.CORP_CLCT_REGI_CD,
+                   T2.FNAF_MTRL_NO, T2.ALTRV_NO, T2.CUST_IDNFR, T2.HANSIN_INDST_CD,
+                   VALUE(MC11.BIZ_SECT_DSTIC, '99') AS BIZ_SECT_DSTIC
+              FROM T2
+              LEFT OUTER JOIN INST1.THKIIMC11 MC11
+                ON (MC11.GROUP_CO_CD = T2.GROUP_CO_CD
+                    AND MC11.STND_INDST_CLSF_CD = T2.HANSIN_INDST_CD)
+        ),
+        T4 AS (
+            SELECT T3.BIZ_SECT_DSTIC,
+                   VALUE(SUM(MA10.FNAF_ITEM_AMT), 0) AS BIZ_SECT_ASALE_AMT,
+                   COUNT(DISTINCT T3.CUST_IDNFR) AS ENTP_CNT
+              FROM T3, INST1.THKIIMA10 MA10
+             WHERE MA10.GROUP_CO_CD = T3.GROUP_CO_CD
+               AND MA10.FNAF_MTRL_NO = T3.FNAF_MTRL_NO
+               AND MA10.FNAF_MTRL_SRC_DSTIC = '2'
+               AND MA10.FNAF_STLACC_DSTIC = '1'
+               AND MA10.STLACC_END_YMD = :stlaccEndYmd
+               AND MA10.FNAF_RPTDOC_DSTIC = '12'
+               AND MA10.FNAF_ITEM_CD = '1000'
+             GROUP BY T3.BIZ_SECT_DSTIC
+        ),
+        T5 AS (
+            SELECT VALUE(SUM(MA10.FNAF_ITEM_AMT), 0) AS BIZ_SA_TOTAL_AMT
+              FROM T3, INST1.THKIIMA10 MA10
+             WHERE MA10.GROUP_CO_CD = T3.GROUP_CO_CD
+               AND MA10.FNAF_MTRL_NO = T3.FNAF_MTRL_NO
+               AND MA10.FNAF_MTRL_SRC_DSTIC = '2'
+               AND MA10.FNAF_STLACC_DSTIC = '1'
+               AND MA10.STLACC_END_YMD = :stlaccEndYmd
+               AND MA10.FNAF_RPTDOC_DSTIC = '12'
+               AND MA10.FNAF_ITEM_CD = '1000'
+        )
+        SELECT T4.BIZ_SECT_DSTIC AS "bizSectDstic",
+               CASE WHEN T4.BIZ_SECT_DSTIC = '00' THEN ''
+                    ELSE (SELECT INSTNC_CTNT FROM INST1.THKIIMC12 
+                          WHERE GROUP_CO_CD = :groupCoCd
+                            AND INSTNC_IDNFR = '101448000'
+                            AND INSTNC_CD = T4.BIZ_SECT_DSTIC
+                            AND DSTCD = '1')
+               END AS "bizSectDsticName",
+               T4.BIZ_SECT_ASALE_AMT AS "bizSectAsaleAmt",
+               T5.BIZ_SA_TOTAL_AMT AS "bizSaTotalAmt",
+               T4.ENTP_CNT AS "entpCnt"
+          FROM T4, T5
+         WHERE T4.BIZ_SECT_ASALE_AMT > 0
+         ORDER BY T4.BIZ_SECT_DSTIC
+        ]]>
+    </select>
+
+    <!-- 참조자료 신규 생성 -->
+    <insert id="insertReferenceData" parameterClass="map">
+        <![CDATA[
+        /* 참조자료신규생성 | MultiQ4KBBank, 2025-01-27 */
+        INSERT INTO INST1.TSKIPB113 (
+            GROUP_CO_CD,
+            CORP_CLCT_GROUP_CD,
+            CORP_CLCT_REGI_CD,
+            VALUA_YMD,
+            FNAF_A_RPTDOC_DSTCD,
+            FNAF_ITEM_CD,
+            BIZ_SECT_DSTIC,
+            BIZ_SECT_DSTIC_NAME,
+            BASE_YR_ITEM_AMT,
+            BASE_YR_RATO,
+            BASE_YR_ENTP_CNT,
+            N1_YR_BF_ITEM_AMT,
+            N1_YR_BF_RATO,
+            N1_YR_BF_ENTP_CNT,
+            N2_YR_BF_ITEM_AMT,
+            N2_YR_BF_RATO,
+            N2_YR_BF_ENTP_CNT,
+            SYS_LAST_PRCSS_YMS,
+            SYS_LAST_UNO
+        ) VALUES (
+            :groupCoCd,
+            :corpClctGroupCd,
+            :corpClctRegiCd,
+            :valuaYmd,
+            :fnafARptdocDstcd,
+            :fnafItemCd,
+            :bizSectDstic,
+            :bizSectDsticName,
+            VALUE(:baseYrItemAmt, 0),
+            VALUE(:baseYrRato, 0),
+            VALUE(:baseYrEntpCnt, 0),
+            VALUE(:n1YrBfItemAmt, 0),
+            VALUE(:n1YrBfRato, 0),
+            VALUE(:n1YrBfEntpCnt, 0),
+            VALUE(:n2YrBfItemAmt, 0),
+            VALUE(:n2YrBfRato, 0),
+            VALUE(:n2YrBfEntpCnt, 0),
+            :sysLastPrcssYms,
+            :sysLastUno
+        )
+        ]]>
+    </insert>
+
+    <!-- 참조자료 갱신 -->
+    <update id="updateReferenceData" parameterClass="map">
+        <![CDATA[
+        /* 참조자료갱신 | MultiQ4KBBank, 2025-01-27 */
+        UPDATE INST1.TSKIPB113
+           SET N1_YR_BF_ITEM_AMT = VALUE(:n1YrBfItemAmt, N1_YR_BF_ITEM_AMT),
+               N1_YR_BF_RATO = VALUE(:n1YrBfRato, N1_YR_BF_RATO),
+               N1_YR_BF_ENTP_CNT = VALUE(:n1YrBfEntpCnt, N1_YR_BF_ENTP_CNT),
+               N2_YR_BF_ITEM_AMT = VALUE(:n2YrBfItemAmt, N2_YR_BF_ITEM_AMT),
+               N2_YR_BF_RATO = VALUE(:n2YrBfRato, N2_YR_BF_RATO),
+               N2_YR_BF_ENTP_CNT = VALUE(:n2YrBfEntpCnt, N2_YR_BF_ENTP_CNT),
+               SYS_LAST_PRCSS_YMS = :sysLastPrcssYms,
+               SYS_LAST_UNO = :sysLastUno
+         WHERE GROUP_CO_CD = :groupCoCd
+           AND CORP_CLCT_GROUP_CD = :corpClctGroupCd
+           AND CORP_CLCT_REGI_CD = :corpClctRegiCd
+           AND VALUA_YMD = :valuaYmd
+           AND FNAF_A_RPTDOC_DSTCD = :fnafARptdocDstcd
+           AND FNAF_ITEM_CD = :fnafItemCd
+           AND BIZ_SECT_DSTIC = :bizSectDstic
+        ]]>
+    </update>
+
+</sqlMap>

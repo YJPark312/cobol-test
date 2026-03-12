@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+    <method fixedLength="true" id="processCorpGrpCrdtEvalSummInq">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+        </input>
+        <output>
+            <field id="fnshYn" length="1" name="완료여부" type="string"/>
+            <field id="adjsStgeNoDstcd" length="2" name="조정단계번호구분" type="string"/>
+            <field id="comtCtnt" length="4000" name="의견내용" type="string"/>
+            <field id="totalNoitm" length="7" name="총건수" type="numeric"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+            <recordSet id="evalGridData" recordCount="1000">
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+                <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+                <field id="corpCpStgeDstcd" length="1" name="기업집단처리단계구분" type="string"/>
+                <field id="adjsStgeNoDstcd" length="2" name="조정단계번호구분" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+    <method fixedLength="true" id="getEvaluationCompletionStatus">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+        </input>
+        <output>
+            <field id="fnshYn" length="1" name="완료여부" type="string"/>
+            <field id="adjsStgeNoDstcd" length="2" name="조정단계번호구분" type="string"/>
+            <field id="comtCtnt" length="4000" name="의견내용" type="string"/>
+        </output>
+    </method>
+    <method fixedLength="true" id="getCreditEvaluationSummaryData">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+        </input>
+        <output>
+            <field id="totalNoitm" length="7" name="총건수" type="numeric"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+            <recordSet id="evalGridData" recordCount="1000">
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+                <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+</method-list>

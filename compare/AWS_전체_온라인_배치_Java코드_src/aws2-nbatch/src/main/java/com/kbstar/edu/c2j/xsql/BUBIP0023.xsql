@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- F-006-002: 처리대상기업집단선택 (CUR_C001) -->
+    <!-- BR-006-001: 기업집단선택기준 적용 -->
+    <select id="selectCorpGroups" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 기업집단선택 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            A.기업집단그룹코드                                  AS "corpClctGroupCd"     /* 기업집단그룹코드 */
+           ,A.기업집단등록코드                                  AS "corpClctRegiCd"      /* 기업집단등록코드 */
+           ,SUBSTR(A.평가기준년월일, 1, 6)                      AS "baseYm"              /* 기준년월 */
+        FROM INST1.TSKIPB110 A                                                          /* 기업집단평가기본 */
+           , (SELECT DISTINCT 
+                     그룹회사코드
+                    ,기업집단그룹코드
+                    ,기업집단등록코드
+              FROM INST1.TSKIPC110                                                      /* 기업집단평가기본 */
+              WHERE 그룹회사코드 = 'KB0' 
+                AND 재무제표반영여부 = '0'
+             ) B
+        WHERE A.그룹회사코드 = B.그룹회사코드 
+          AND A.기업집단그룹코드 = B.기업집단그룹코드
+          AND A.기업집단등록코드 = B.기업집단등록코드 
+          AND A.그룹회사코드 = 'KB0'
+          AND A.기업집단처리단계구분 != '6'
+        ORDER BY A.기업집단그룹코드, A.기업집단등록코드
+        ]]>
+    </select>
+
+    <!-- F-006-003: 기존합산비율삭제 (CUR_C004) -->
+    <!-- BR-006-005: 데이터삭제및재생성로직 적용 -->
+    <delete id="deleteExistingRatios" parameterClass="map">
+        <![CDATA[
+        /* 기존합산비율삭제 | MultiQ4KBBank, 2025-10-01 */
+        DELETE FROM INST1.TSKIPC121                                                     /* 기업집단합산재무비율 */
+        WHERE 그룹회사코드 = #groupCoCd#
+          AND 기업집단그룹코드 = #corpClctGroupCd#
+          AND 기업집단등록코드 = #corpClctRegiCd#
+          AND 재무분석결산구분 = '1'
+          AND 기준년 = #baseYr#
+          AND 재무분석보고서구분 = #fnafARptdocDstcd#
+        ]]>
+    </delete>
+
+    <!-- F-006-004: 결산년처리 (CUR_C002) -->
+    <!-- BR-006-002: 결산년처리로직 적용 -->
+    <select id="selectSettlementYears" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 결산년선택 | MultiQ4KBBank, 2025-10-01 */
+        SELECT DISTINCT 
+            결산년                                              AS "stlaccYr"            /* 결산년 */
+           ,결산년합계업체수                                    AS "stlaccCnt"           /* 결산년합계업체수 */
+        FROM INST1.TSKIPC120                                                            /* 기업집단재무제표항목 */
+        WHERE 그룹회사코드 = 'KB0' 
+          AND 기업집단그룹코드 = #corpClctGroupCd#
+          AND 기업집단등록코드 = #corpClctRegiCd# 
+          AND 재무분석결산구분 = '1'
+          AND 기준년 = #baseYr#
+        ORDER BY 결산년 DESC
+        ]]>
+    </select>
+
+    <!-- F-006-005: 재무비율계산 (CUR_C003) -->
+    <!-- BR-006-003: 재무산식계산규칙 및 BR-006-006: 산식변수치환규칙 적용 -->
+    <select id="selectFinancialFormulas" parameterClass="map" resultClass="hmap" fetchSize="100">
+        <![CDATA[
+        /* 재무공식선택 | MultiQ4KBBank, 2025-10-01 */
+        WITH MB11A ("재무분석보고서구분", "재무항목코드", "인자수", "OP_NUM", "계산식내용", "계산식소스내용")
+        AS (
+            SELECT Z."재무분석보고서구분"
+                  ,Z."재무항목코드"
+                  ,(LENGTH(REPLACE(Z."계산식내용",' ','')) - LENGTH(REPLACE(REPLACE(Z."계산식내용",'&',''),' ',''))) / 2 AS "인자수"
+                  ,1 AS "OP_NUM"
+                  ,CASE 
+                    WHEN (LENGTH(REPLACE(Z."계산식내용",' ','')) - LENGTH(REPLACE(REPLACE(Z."계산식내용",'&',''),' ',''))) / 2 >= 1
+                    THEN REPLACE(Z."계산식내용", 
+                         SUBSTR(REPLACE(Z."계산식내용",' ',''), 
+                                LOCATE_IN_STRING(REPLACE(Z."계산식내용",' ',''), '&', 1) + 1, 
+                                LOCATE_IN_STRING(REPLACE(Z."계산식내용",' ',''), '&', 
+                                                LOCATE_IN_STRING(REPLACE(Z."계산식내용",' ',''), '&', 1) + 1) - 
+                                LOCATE_IN_STRING(REPLACE(Z."계산식내용",' ',''), '&', 1) - 1),
+                         CASE SUBSTR(REPLACE(Z."계산식내용",' ',''), 
+                                    LOCATE_IN_STRING(REPLACE(Z."계산식내용",' ',''), '&', 1) + 8, 1)
+                              WHEN 'C' THEN #stlaccYr#
+                              WHEN 'B' THEN #stlaccYrB#
+                              ELSE '0'
+                         END)
+                    ELSE Z."계산식내용"
+                   END AS "계산식내용"
+                  ,Z."계산식내용" AS "계산식소스내용"
+            FROM INST1.THKIIMB11 Z                                                      /* 재무분석항목기본 */
+            WHERE RTRIM(Z.계산식내용) <> '' 
+              AND Z.계산식구분 = '15'
+              AND Z.재무분석보고서구분 = '19'
+        )
+        SELECT 
+            "재무분석보고서구분"                                AS "fnafARptdocDstic"    /* 재무분석보고서구분 */
+           ,"재무항목코드"                                      AS "fnafItemCd"          /* 재무항목코드 */
+           ,"계산식내용"                                        AS "clfrCtnt"            /* 계산식내용 */
+        FROM MB11A
+        WHERE "인자수" >= 0
+        ORDER BY "재무분석보고서구분", "재무항목코드"
+        ]]>
+    </select>
+
+    <!-- F-006-006: 합산비율레코드삽입 -->
+    <insert id="insertConsolidatedRatio" parameterClass="map">
+        <![CDATA[
+        /* 합산비율삽입 | MultiQ4KBBank, 2025-10-01 */
+        INSERT INTO INST1.TSKIPC121 (                                                   /* 기업집단합산재무비율 */
+            그룹회사코드                                         /* 그룹회사코드 */
+           ,기업집단그룹코드                                     /* 기업집단그룹코드 */
+           ,기업집단등록코드                                     /* 기업집단등록코드 */
+           ,재무분석결산구분                                     /* 재무분석결산구분 */
+           ,기준년                                              /* 기준년 */
+           ,결산년                                              /* 결산년 */
+           ,재무분석보고서구분                                   /* 재무분석보고서구분 */
+           ,재무항목코드                                        /* 재무항목코드 */
+           ,재무분석자료원구분                                   /* 재무분석자료원구분 */
+           ,기업집단재무비율                                     /* 기업집단재무비율 */
+           ,분자값                                              /* 분자값 */
+           ,분모값                                              /* 분모값 */
+           ,결산년합계업체수                                     /* 결산년합계업체수 */
+           ,시스템최종처리일시                                   /* 시스템최종처리일시 */
+           ,시스템최종사용자번호                                 /* 시스템최종사용자번호 */
+        ) VALUES (
+            #groupCoCd#                                         /* 그룹회사코드 */
+           ,#corpClctGroupCd#                                   /* 기업집단그룹코드 */
+           ,#corpClctRegiCd#                                    /* 기업집단등록코드 */
+           ,#fnafAStlaccDstcd#                                  /* 재무분석결산구분 */
+           ,#baseYr#                                            /* 기준년 */
+           ,#stlaccYr#                                          /* 결산년 */
+           ,#fnafARptdocDstcd#                                  /* 재무분석보고서구분 */
+           ,#fnafItemCd#                                        /* 재무항목코드 */
+           ,#fnafAbOrglDstcd#                                   /* 재무분석자료원구분 */
+           ,#corpClctFnafRato#                                  /* 기업집단재무비율 */
+           ,#nmrtVal#                                           /* 분자값 */
+           ,#dnmnVal#                                           /* 분모값 */
+           ,#stlaccYsEntpCnt#                                   /* 결산년합계업체수 */
+           ,#sysLastPrcssYms#                                   /* 시스템최종처리일시 */
+           ,#sysLastUno#                                        /* 시스템최종사용자번호 */
+        )
+        ]]>
+    </insert>
+
+    <!-- 처리 통계 조회 (선택적) -->
+    <select id="selectProcessingStats" parameterClass="map" resultClass="hmap" fetchSize="1">
+        <![CDATA[
+        /* 처리통계조회 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            COUNT(*) AS "totalCount"                            /* 총 처리건수 */
+        FROM INST1.TSKIPC121                                                            /* 기업집단합산재무비율 */
+        WHERE 그룹회사코드 = 'KB0'
+          AND 기준년 = #baseYr#
+          AND 재무분석결산구분 = '1'
+          AND 재무분석보고서구분 = '19'
+          AND 시스템최종사용자번호 = 'BIP0023'
+        ]]>
+    </select>
+
+</sqlMap>

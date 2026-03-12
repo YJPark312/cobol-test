@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<!-- 신규평가 연혁데이터 조회 -->
+	<select id="selectNewEvalHistory" parameterClass="map" resultClass="hmap" fetchSize="500">
+		<![CDATA[/* 신규평가 연혁데이터 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.그룹회사코드 AS "groupCoCd"
+			  ,A.기업집단그룹코드 AS "corpClctGroupCd"
+			  ,A.기업집단등록코드 AS "corpClctRegiCd"
+			  ,A.평가년월일 AS "valuaYmd"
+			  ,A.일련번호 AS "serno"
+			  ,A.연혁년월일 AS "ordvlYmd"
+			  ,A.연혁내용 AS "ordvlCtnt"
+		  FROM INST1.TSKIPB111 A
+		 INNER JOIN INST1.TSKIPB110 B
+		    ON A.그룹회사코드 = B.그룹회사코드
+		   AND A.기업집단그룹코드 = B.기업집단그룹코드
+		   AND A.기업집단등록코드 = B.기업집단등록코드
+		   AND A.평가년월일 = B.평가년월일
+		 WHERE A.기업집단그룹코드 = #corpClctGroupCd#
+		   AND A.기업집단등록코드 = #corpClctRegiCd#
+		   AND A.평가년월일 = #valuaYmd#
+		   AND (B.평가확정년월일 = '' OR B.평가확정년월일 IS NULL)
+		 ORDER BY A.일련번호
+		 FETCH FIRST 500 ROWS ONLY
+		]]>
+	</select>
+
+	<!-- 기존평가 연혁데이터 조회 (최대 평가일자 기준) -->
+	<select id="selectExistingEvalHistory" parameterClass="map" resultClass="hmap" fetchSize="500">
+		<![CDATA[/* 기존평가 연혁데이터 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.그룹회사코드 AS "groupCoCd"
+			  ,A.기업집단그룹코드 AS "corpClctGroupCd"
+			  ,A.기업집단등록코드 AS "corpClctRegiCd"
+			  ,A.평가년월일 AS "valuaYmd"
+			  ,A.일련번호 AS "serno"
+			  ,A.연혁년월일 AS "ordvlYmd"
+			  ,A.연혁내용 AS "ordvlCtnt"
+			  ,COALESCE(C.장표출력여부, 'N') AS "shetOutptYn"
+		  FROM INST1.TSKIPB111 A
+		 INNER JOIN INST1.TSKIPB110 B
+		    ON A.그룹회사코드 = B.그룹회사코드
+		   AND A.기업집단그룹코드 = B.기업집단그룹코드
+		   AND A.기업집단등록코드 = B.기업집단등록코드
+		   AND A.평가년월일 = B.평가년월일
+		  LEFT JOIN (
+		       SELECT 그룹회사코드, 기업집단그룹코드, 기업집단등록코드, 일련번호, '장표출력여부' AS 장표출력여부
+		         FROM INST1.TSKIPB111
+		        WHERE 기업집단그룹코드 = #corpClctGroupCd#
+		          AND 기업집단등록코드 = #corpClctRegiCd#
+		   ) C
+		    ON A.그룹회사코드 = C.그룹회사코드
+		   AND A.기업집단그룹코드 = C.기업집단그룹코드
+		   AND A.기업집단등록코드 = C.기업집단등록코드
+		   AND A.일련번호 = C.일련번호
+		 WHERE A.기업집단그룹코드 = #corpClctGroupCd#
+		   AND A.기업집단등록코드 = #corpClctRegiCd#
+		   AND A.평가년월일 = (
+		       SELECT MAX(D.평가년월일)
+		         FROM INST1.TSKIPB110 D
+		        WHERE D.기업집단그룹코드 = #corpClctGroupCd#
+		          AND D.기업집단등록코드 = #corpClctRegiCd#
+		          AND D.평가확정년월일 IS NOT NULL
+		          AND D.평가확정년월일 != ''
+		   )
+		 ORDER BY A.일련번호
+		 FETCH FIRST 500 ROWS ONLY
+		]]>
+	</select>
+
+	<!-- 기업집단연혁명세 단건 조회 -->
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50">
+		<![CDATA[/* 기업집단연혁명세 단건 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.그룹회사코드 AS "groupCoCd"
+			  ,A.기업집단그룹코드 AS "corpClctGroupCd"
+			  ,A.기업집단등록코드 AS "corpClctRegiCd"
+			  ,A.평가년월일 AS "valuaYmd"
+			  ,A.일련번호 AS "serno"
+			  ,A.연혁년월일 AS "ordvlYmd"
+			  ,A.연혁내용 AS "ordvlCtnt"
+		  FROM INST1.TSKIPB111 A
+		 WHERE A.기업집단그룹코드 = #corpClctGroupCd#
+		   AND A.기업집단등록코드 = #corpClctRegiCd#
+		   AND A.평가년월일 = #valuaYmd#
+		   AND A.일련번호 = #serno#
+		]]>
+	</select>
+
+	<!-- 기업집단연혁명세 등록 -->
+	<insert id="insert" parameterClass="map">
+		<![CDATA[/* 기업집단연혁명세 등록 | MultiQ4KBBank, 2025-10-01 */
+		INSERT INTO INST1.TSKIPB111 (
+			 그룹회사코드
+			,기업집단그룹코드
+			,기업집단등록코드
+			,평가년월일
+			,일련번호
+			,연혁년월일
+			,연혁내용
+		) VALUES (
+			 #groupCoCd#
+			,#corpClctGroupCd#
+			,#corpClctRegiCd#
+			,#valuaYmd#
+			,#serno#
+			,#ordvlYmd#
+			,#ordvlCtnt#
+		)
+		]]>
+	</insert>
+
+	<!-- 기업집단연혁명세 수정 -->
+	<update id="update" parameterClass="map">
+		<![CDATA[/* 기업집단연혁명세 수정 | MultiQ4KBBank, 2025-10-01 */
+		UPDATE INST1.TSKIPB111 SET
+			 연혁년월일 = #ordvlYmd#
+			,연혁내용 = #ordvlCtnt#
+		 WHERE 그룹회사코드 = #groupCoCd#
+		   AND 기업집단그룹코드 = #corpClctGroupCd#
+		   AND 기업집단등록코드 = #corpClctRegiCd#
+		   AND 평가년월일 = #valuaYmd#
+		   AND 일련번호 = #serno#
+		]]>
+	<!-- 기업집단연혁명세 삭제 -->
+	<delete id="delete" parameterClass="map">
+		<![CDATA[/* 기업집단연혁명세 삭제 | MultiQ4KBBank, 2025-10-01 */
+		DELETE FROM INST1.TSKIPB111
+		 WHERE 기업집단그룹코드 = #corpClctGroupCd#
+		   AND 기업집단등록코드 = #corpClctRegiCd#
+		   AND 평가년월일 = #valuaYmd#
+		]]>
+	</delete>
+
+</sqlMap>

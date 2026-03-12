@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 기업집단승인결의록명세 조회 | MultiQ4KBBank, 2025-10-02 */
+SELECT A.VALUA_BRN_NAME AS "valuaBrnName"
+      ,A.ENRL_CMMB_CNT AS "enrlCmmbCnt"
+      ,A.ATTND_CMMB_CNT AS "attndCmmbCnt"
+      ,A.ATHOR_CMMB_CNT AS "athorCmmbCnt"
+      ,A.NOT_ATHOR_CMMB_CNT AS "notAthorCmmbCnt"
+      ,A.MTAG_DSTCD AS "mtagDstcd"
+      ,A.CMPRE_ATHOR_DSTCD AS "cmpreAthorDstcd"
+      ,A.PREV_GRD AS "prevGrd"
+      ,A.ATHOR_BRN_NAME AS "athorBrnName"
+      ,A.ATHOR_YMD AS "athorYmd"
+      ,A.OL_GM_GRD_DSTCD AS "olGmGrdDstcd"
+  FROM INST1.TSKIPB131 A
+ WHERE A.GROUP_CO_CD = #groupCoCd#
+   AND A.CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND A.CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND A.VALUA_YMD = #valuaYmd#
+]]></select>
+
+</sqlMap>

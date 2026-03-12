@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 기업집단합산재무비율 단건 조회 | MultiQ4KBBank, 2025-10-01 */
+SELECT GROUP_CO_CD AS "groupCoCd"
+      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,FNAF_A_STLACC_DSTCD AS "fnafAStlaccDstcd"
+      ,BASE_YR AS "baseYr"
+      ,STLACC_YR AS "stlaccYr"
+      ,FNAF_A_RPTDOC_DSTCD AS "fnafARptdocDstcd"
+      ,FNAF_ITEM_CD AS "fnafItemCd"
+      ,FNAF_AB_ORGL_DSTCD AS "fnafAbOrglDstcd"
+      ,CORP_CLCT_FNAF_RATO AS "corpClctFnafRato"
+      ,NMRT_VAL AS "nmrtVal"
+      ,DNMN_VAL AS "dnmnVal"
+      ,STLACC_YS_ENTP_CNT AS "stlaccYsEntpCnt"
+  FROM INST1.TSKIPC121
+ WHERE GROUP_CO_CD = #groupCoCd#
+   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+   AND BASE_YR = #baseYr#
+   AND STLACC_YR = #stlaccYr#
+   AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd#
+   AND FNAF_ITEM_CD = #fnafItemCd#
+]]></select>
+
+<select id="selectList" parameterClass="map" resultClass="hmap" fetchSize="1000"><![CDATA[/* 기업집단합산재무비율 목록 조회 | MultiQ4KBBank, 2025-10-01 */
+SELECT GROUP_CO_CD AS "groupCoCd"
+      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,FNAF_A_STLACC_DSTCD AS "fnafAStlaccDstcd"
+      ,BASE_YR AS "baseYr"
+      ,STLACC_YR AS "stlaccYr"
+      ,FNAF_A_RPTDOC_DSTCD AS "fnafARptdocDstcd"
+      ,FNAF_ITEM_CD AS "fnafItemCd"
+      ,FNAF_AB_ORGL_DSTCD AS "fnafAbOrglDstcd"
+      ,CORP_CLCT_FNAF_RATO AS "corpClctFnafRato"
+      ,NMRT_VAL AS "nmrtVal"
+      ,DNMN_VAL AS "dnmnVal"
+      ,STLACC_YS_ENTP_CNT AS "stlaccYsEntpCnt"
+  FROM INST1.TSKIPC121
+ WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+   AND BASE_YR = #baseYr#
+<isNotEmpty property="fnafARptdocDstcd">
+   AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd#
+</isNotEmpty>
+ ORDER BY FNAF_A_STLACC_DSTCD, STLACC_YR DESC, FNAF_ITEM_CD
+ FETCH FIRST 6000 ROWS ONLY
+]]></select>
+
+<insert id="insert" parameterClass="map"><![CDATA[/* 기업집단합산재무비율 등록 | MultiQ4KBBank, 2025-10-01 */
+INSERT INTO INST1.TSKIPC121 (
+	GROUP_CO_CD
+	,CORP_CLCT_GROUP_CD
+	,CORP_CLCT_REGI_CD
+	,FNAF_A_STLACC_DSTCD
+	,BASE_YR
+	,STLACC_YR
+	,FNAF_A_RPTDOC_DSTCD
+	,FNAF_ITEM_CD
+	,FNAF_AB_ORGL_DSTCD
+	,CORP_CLCT_FNAF_RATO
+	,NMRT_VAL
+	,DNMN_VAL
+	,STLACC_YS_ENTP_CNT
+) VALUES (
+	#groupCoCd#
+	,#corpClctGroupCd#
+	,#corpClctRegiCd#
+	,#fnafAStlaccDstcd#
+	,#baseYr#
+	,#stlaccYr#
+	,#fnafARptdocDstcd#
+	,#fnafItemCd#
+	,#fnafAbOrglDstcd#
+	,#corpClctFnafRato#
+	,#nmrtVal#
+	,#dnmnVal#
+	,#stlaccYsEntpCnt#
+)
+]]></insert>
+
+<update id="update" parameterClass="map"><![CDATA[/* 기업집단합산재무비율 수정 | MultiQ4KBBank, 2025-10-01 */
+UPDATE INST1.TSKIPC121
+   SET FNAF_AB_ORGL_DSTCD = #fnafAbOrglDstcd#
+      ,CORP_CLCT_FNAF_RATO = #corpClctFnafRato#
+      ,NMRT_VAL = #nmrtVal#
+      ,DNMN_VAL = #dnmnVal#
+      ,STLACC_YS_ENTP_CNT = #stlaccYsEntpCnt#
+ WHERE GROUP_CO_CD = #groupCoCd#
+   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+   AND BASE_YR = #baseYr#
+   AND STLACC_YR = #stlaccYr#
+   AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd#
+   AND FNAF_ITEM_CD = #fnafItemCd#
+]]></update>
+
+<delete id="delete" parameterClass="map"><![CDATA[/* 기업집단합산재무비율 삭제 | MultiQ4KBBank, 2025-10-01 */
+DELETE FROM INST1.TSKIPC121
+ WHERE GROUP_CO_CD = #groupCoCd#
+   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+   AND BASE_YR = #baseYr#
+   AND STLACC_YR = #stlaccYr#
+   AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd#
+   AND FNAF_ITEM_CD = #fnafItemCd#
+]]></delete>
+
+</sqlMap>

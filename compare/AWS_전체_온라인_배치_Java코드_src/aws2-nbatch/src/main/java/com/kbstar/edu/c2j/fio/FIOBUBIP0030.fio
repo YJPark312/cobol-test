@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fio>
+    <name>기업집단합산연결재무비율생성 파일</name>
+    <description>Corporate Group Consolidated Financial Ratio Generation File</description>
+    <encoding>UTF-8</encoding>
+    
+    <!-- RATIO_OUT - 합산연결재무비율 출력파일 -->
+    <file id="RATIO_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="groupCoCd" length="3" name="그룹회사코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" padChar="0x20" padType="right" type="string"/>
+            <field id="fnafAStlaccDstcd" length="1" name="재무분석결산구분" padChar="0x20" padType="right" type="string"/>
+            <field id="baseYr" length="4" name="기준년" padChar="0x20" padType="right" type="string"/>
+            <field id="stlaccYr" length="4" name="결산년" padChar="0x20" padType="right" type="string"/>
+            <field id="fnafARptdocDstcd" length="2" name="재무분석보고서구분" padChar="0x20" padType="right" type="string"/>
+            <field id="fnafItemCd" length="4" name="재무항목코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctFnafRato" length="8" name="기업집단재무비율" padChar="0x30" padType="left" type="string"/>
+            <field id="nmrtVal" length="15" name="분자값" padChar="0x30" padType="left" type="string"/>
+            <field id="dnmnVal" length="15" name="분모값" padChar="0x30" padType="left" type="string"/>
+            <field id="stlaccYsEntpCnt" length="9" name="결산년합계업체수" padChar="0x30" padType="left" type="string"/>
+            <field id="sysLastPrcssYms" length="20" name="시스템최종처리일시" padChar="0x20" padType="right" type="string"/>
+            <field id="sysLastUno" length="7" name="시스템최종사용자번호" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- STATS_OUT - 처리통계 출력파일 -->
+    <file id="STATS_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="b110FetchCnt" length="9" name="기업집단평가조회건수" padChar="0x30" padType="left" type="string"/>
+            <field id="c131DeleteCnt" length="9" name="기존비율데이터삭제건수" padChar="0x30" padType="left" type="string"/>
+            <field id="c131InsertCnt" length="9" name="비율데이터생성건수" padChar="0x30" padType="left" type="string"/>
+            <field id="statusUpdateCnt" length="9" name="상태업데이트건수" padChar="0x30" padType="left" type="string"/>
+            <field id="totalProcessCnt" length="9" name="총처리건수" padChar="0x30" padType="left" type="string"/>
+            <field id="filler" length="75" name="여백" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+</fio>

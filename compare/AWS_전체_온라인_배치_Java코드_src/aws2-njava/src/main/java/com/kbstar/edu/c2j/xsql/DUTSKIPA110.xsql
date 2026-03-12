@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="selectCorpGrpBasicInfo" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업집단기본정보조회 | MultiQ4KBBank, 2025-10-02 */
+		SELECT CORP_CLCT_NAME AS "corpClctName"
+		      ,MGT_BRN AS "mgtBrn"
+		      ,MAIN_DEBT_AFFLT_YN AS "mainDebtAffltYn"
+		      ,BELNG_CORP_CNT AS "belngCorpCnt"
+		      ,LIMT AS "limt"
+		      ,AMUS AS "amus"
+		      ,(CASE WHEN LIMT > 0 THEN LIMT - AMUS ELSE 0 END) AS "availAmt"
+		      ,(CASE WHEN LIMT > 0 THEN ROUND((AMUS / LIMT) * 100, 2) ELSE 0 END) AS "utilRt"
+		      ,RISK_GRD AS "riskGrd"
+		      ,EVAL_STAT AS "evalStat"
+		      ,LAST_UPD_DT AS "lastUpdDt"
+		      ,EVAL_USER_ID AS "evalUserId"
+		  FROM INST1.TSKIPA110
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_BASE_YMD <= #valuaBaseYmd#
+		 ORDER BY VALUA_BASE_YMD DESC
+		]]>
+	</select>
+
+</sqlMap>

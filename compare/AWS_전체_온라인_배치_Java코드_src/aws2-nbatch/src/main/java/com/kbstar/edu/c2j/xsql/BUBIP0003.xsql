@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+   <select id="selectSourceKipa110" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* TSKIPA110 조회 | MultiQ4KBBank, 2025-09-15 */
+SELECT a.그룹회사코드           AS "groupCoCd"        /* 그룹회사코드 */ 
+     , a.심사고객식별자         AS "exmtnCustIdnfr"   /* 심사고객식별자 */ 
+     , a.대표사업자번호         AS "rpsntBzno"        /* 대표사업자번호 */ 
+     , a.대표기업명             AS "rpsntEntpName"    /* 대표기업명 */ 
+     , a.기업신용등급구분코드   AS "corpCvGrdDstcd"   /* 기업신용등급구분코드 */ 
+     , a.기업규모구분코드       AS "corpScalDstcd"    /* 기업규모구분코드 */ 
+     , a.표준산업분류코드       AS "stndIClsfiCd"     /* 표준산업분류코드 */ 
+     , a.고객관리점코드         AS "custMgtBrncd"     /* 고객관리점코드 */ 
+     , a.총여신업무금액         AS "totalLnbzAmt"     /* 총여신업무금액 */ 
+     , a.여신업무잔액           AS "lnbzBal"          /* 여신업무잔액 */ 
+     , a.담보금액               AS "scurtyAmt"        /* 담보금액 */ 
+     , a.상각액                 AS "amov"             /* 상각액 */ 
+     , a.전년총여신업무금액     AS "pyyTotalLnbzAmt" /* 전년총여신업무금액 */ 
+     , a.기업집합그룹코드       AS "corpClctGroupCd"  /* 기업집합그룹코드 */ 
+     , a.기업집합등록코드       AS "corpClctRegiCd"   /* 기업집합등록코드 */ 
+     , a.기업집합등록구분코드   AS "coprGcRegiDstcd"  /* 기업집합등록구분코드 */ 
+     , a.기업집합등록일시       AS "coprGcRegiYms"    /* 기업집합등록일시 */ 
+     , a.기업집합상담직원ID     AS "coprGCnslEmpid"   /* 기업집합상담직원ID */ 
+     , a.기업여신정책구분코드   AS "corpLPlicyDstcd"  /* 기업여신정책구분코드 */ 
+     , a.기업여신정책일련번호   AS "corpLPlicySerno"  /* 기업여신정책일련번호 */ 
+     , a.기업여신정책내용       AS "corpLPlicyCtnt"   /* 기업여신정책내용 */ 
+     , a.조기경보관리구분코드   AS "elyAaMgtDstcd"    /* 조기경보관리구분코드 */ 
+     , a.시설자금채권           AS "fcltFndsClam"     /* 시설자금채권 */ 
+     , a.시설자금잔액           AS "fcltFndsBal"      /* 시설자금잔액 */ 
+     , a.운전자금채권           AS "wrknFndsClam"     /* 운전자금채권 */ 
+     , a.운전자금잔액           AS "wrknFndsBal"      /* 운전자금잔액 */ 
+     , a.인수채권               AS "infcClam"         /* 인수채권 */ 
+     , a.인수잔액               AS "infcBal"          /* 인수잔액 */ 
+     , a.기타자금채권           AS "etcFndsClam"      /* 기타자금채권 */ 
+     , a.기타자금잔액           AS "etcFndsBal"       /* 기타자금잔액 */ 
+     , a.파생상품거래채권       AS "drvtPTranClam"    /* 파생상품거래채권 */ 
+     , a.파생상품거래잔액       AS "drvtPrdctTranBal" /* 파생상품거래잔액 */ 
+     , a.파생상품PC거래채권     AS "drvtPcTranClam"   /* 파생상품PC거래채권 */ 
+     , a.파생상품PS거래채권     AS "drvtPsTranClam"   /* 파생상품PS거래채권 */ 
+     , a.내부보증설정채권       AS "inlsGrcrStupClam" /* 내부보증설정채권 */ 
+     , a.시스템최종처리일시     AS "sysLastPrcssYms"  /* 시스템최종처리일시 */ 
+     , a.시스템최종사용자번호   AS "sysLastUno"       /* 시스템최종사용자번호 */ 
+  FROM INST1.TSKIPA110 a /* 관계기업기본정보 */ 
+ WHERE a.그룹회사코드 = #grCoCd:CHAR#]]>
+   </select>
+
+   <select id="selectSourceKipa111" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* TSKIPA111 조회 | MultiQ4KBBank, 2025-09-15 */
+SELECT b.그룹회사코드           AS "groupCoCd"        /* 그룹회사코드 */ 
+     , b.기업집합그룹코드       AS "corpClctGroupCd"  /* 기업집합그룹코드 */ 
+     , b.기업집합등록코드       AS "corpClctRegiCd"   /* 기업집합등록코드 */ 
+     , b.기업집합명             AS "corpClctName"     /* 기업집합명 */ 
+     , b.주요DA그룹여부         AS "mainDaGroupYn"    /* 주요DA그룹여부 */ 
+     , b.기업GM그룹구분코드     AS "corpGmGroupDstcd" /* 기업GM그룹구분코드 */ 
+     , b.기업여신정책구분코드   AS "corpLPlicyDstcd"  /* 기업여신정책구분코드 */ 
+     , b.기업여신정책일련번호   AS "corpLPlicySerno"  /* 기업여신정책일련번호 */ 
+     , b.기업여신정책내용       AS "corpLPlicyCtnt"   /* 기업여신정책내용 */ 
+     , b.총여신업무금액         AS "totalLnbzAmt"     /* 총여신업무금액 */ 
+     , b.시스템최종처리일시     AS "sysLastPrcssYms"  /* 시스템최종처리일시 */ 
+     , b.시스템최종사용자번호   AS "sysLastUno"       /* 시스템최종사용자번호 */ 
+  FROM INST1.TSKIPA111 b /* 기업관계연결정보 */ 
+ WHERE b.그룹회사코드 = #grCoCd:CHAR#]]>
+   </select>
+
+   <select id="selectTargetKipa120" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* TSKIPA120 삭제용 조회 | MultiQ4KBBank, 2025-09-15 */
+SELECT c.그룹회사코드           AS "groupCoCd"        /* 그룹회사코드 */ 
+     , c.기준년월               AS "baseYm"           /* 기준년월 */ 
+     , c.심사고객식별자         AS "exmtnCustIdnfr"   /* 심사고객식별자 */ 
+  FROM INST1.TSKIPA120 c /* 월별관계기업기본정보 */ 
+ WHERE c.그룹회사코드 = #grCoCd:CHAR#
+   AND c.기준년월 = #workYm:CHAR#]]>
+   </select>
+
+   <select id="selectTargetKipa121" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* TSKIPA121 삭제용 조회 | MultiQ4KBBank, 2025-09-15 */
+SELECT d.그룹회사코드           AS "groupCoCd"        /* 그룹회사코드 */ 
+     , d.기준년월               AS "baseYm"           /* 기준년월 */ 
+     , d.기업집합그룹코드       AS "corpClctGroupCd"  /* 기업집합그룹코드 */ 
+     , d.기업집합등록코드       AS "corpClctRegiCd"   /* 기업집합등록코드 */ 
+  FROM INST1.TSKIPA121 d /* 월별기업관계연결정보 */ 
+ WHERE d.그룹회사코드 = #grCoCd:CHAR#
+   AND d.기준년월 = #workYm:CHAR#]]>
+   </select>
+
+   <delete id="deleteTargetKipa120" parameterClass="map"><![CDATA[/* TSKIPA120 삭제 | MultiQ4KBBank, 2025-09-15 */
+DELETE FROM INST1.TSKIPA120 /* 월별관계기업기본정보 */ 
+ WHERE 그룹회사코드 = #groupCoCd:CHAR#
+   AND 기준년월 = #baseYm:CHAR#
+   AND 심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+   </delete>
+   <delete id="deleteTargetKipa121" parameterClass="map"><![CDATA[/* TSKIPA121 삭제 | MultiQ4KBBank, 2025-09-15 */
+DELETE FROM INST1.TSKIPA121 /* 월별기업관계연결정보 */ 
+ WHERE 그룹회사코드 = #groupCoCd:CHAR#
+   AND 기준년월 = #baseYm:CHAR#
+   AND 기업집합그룹코드 = #corpClctGroupCd:VARCHAR#
+   AND 기업집합등록코드 = #corpClctRegiCd:VARCHAR#]]>
+   </delete>
+
+   <insert id="insertTargetKipa120" parameterClass="map"><![CDATA[/* TSKIPA120 입력 | MultiQ4KBBank, 2025-09-15 */
+INSERT
+  INTO INST1.TSKIPA120 /* 월별관계기업기본정보 */ 
+      ( 그룹회사코드             /* 그룹회사코드 */     
+      , 기준년월                 /* 기준년월 */     
+      , 심사고객식별자           /* 심사고객식별자 */     
+      , 대표사업자번호           /* 대표사업자번호 */     
+      , 대표기업명               /* 대표기업명 */     
+      , 기업신용등급구분코드     /* 기업신용등급구분코드 */     
+      , 기업규모구분코드         /* 기업규모구분코드 */     
+      , 표준산업분류코드         /* 표준산업분류코드 */     
+      , 고객관리점코드           /* 고객관리점코드 */     
+      , 총여신업무금액           /* 총여신업무금액 */     
+      , 여신업무잔액             /* 여신업무잔액 */     
+      , 담보금액                 /* 담보금액 */     
+      , 상각액                   /* 상각액 */     
+      , 전년총여신업무금액       /* 전년총여신업무금액 */     
+      , 기업집합그룹코드         /* 기업집합그룹코드 */     
+      , 기업집합등록코드         /* 기업집합등록코드 */     
+      , 기업집합등록구분코드     /* 기업집합등록구분코드 */     
+      , 기업집합등록일시         /* 기업집합등록일시 */     
+      , 기업집합상담직원ID       /* 기업집합상담직원ID */     
+      , 기업여신정책구분코드     /* 기업여신정책구분코드 */     
+      , 기업여신정책일련번호     /* 기업여신정책일련번호 */     
+      , 기업여신정책내용         /* 기업여신정책내용 */     
+      , 조기경보관리구분코드     /* 조기경보관리구분코드 */     
+      , 시설자금채권             /* 시설자금채권 */     
+      , 시설자금잔액             /* 시설자금잔액 */     
+      , 운전자금채권             /* 운전자금채권 */     
+      , 운전자금잔액             /* 운전자금잔액 */     
+      , 인수채권                 /* 인수채권 */     
+      , 인수잔액                 /* 인수잔액 */     
+      , 기타자금채권             /* 기타자금채권 */     
+      , 기타자금잔액             /* 기타자금잔액 */     
+      , 파생상품거래채권         /* 파생상품거래채권 */     
+      , 파생상품거래잔액         /* 파생상품거래잔액 */     
+      , 파생상품PC거래채권       /* 파생상품PC거래채권 */     
+      , 파생상품PS거래채권       /* 파생상품PS거래채권 */     
+      , 내부보증설정채권         /* 내부보증설정채권 */     
+      , 시스템최종처리일시       /* 시스템최종처리일시 */     
+      , 시스템최종사용자번호     /* 시스템최종사용자번호 */ )    
+VALUES
+      ( #groupCoCd:CHAR#    
+      , #baseYm:CHAR#     
+      , #exmtnCustIdnfr:VARCHAR#     
+      , #rpsntBzno:VARCHAR#     
+      , #rpsntEntpName:VARCHAR#     
+      , #corpCvGrdDstcd:CHAR#     
+      , #corpScalDstcd:CHAR#     
+      , #stndIClsfiCd:VARCHAR#     
+      , #custMgtBrncd:CHAR#     
+      , #totalLnbzAmt:DECIMAL#     
+      , #lnbzBal:DECIMAL#     
+      , #scurtyAmt:DECIMAL#     
+      , #amov:DECIMAL#     
+      , #pyyTotalLnbzAmt:DECIMAL#     
+      , #corpClctGroupCd:VARCHAR#     
+      , #corpClctRegiCd:VARCHAR#     
+      , #coprGcRegiDstcd:CHAR#     
+      , #coprGcRegiYms:CHAR#     
+      , #coprGCnslEmpid:VARCHAR#     
+      , #corpLPlicyDstcd:CHAR#     
+      , #corpLPlicySerno:DECIMAL#     
+      , #corpLPlicyCtnt:VARCHAR#     
+      , #elyAaMgtDstcd:CHAR#     
+      , #fcltFndsClam:DECIMAL#     
+      , #fcltFndsBal:DECIMAL#     
+      , #wrknFndsClam:DECIMAL#     
+      , #wrknFndsBal:DECIMAL#     
+      , #infcClam:DECIMAL#     
+      , #infcBal:DECIMAL#     
+      , #etcFndsClam:DECIMAL#     
+      , #etcFndsBal:DECIMAL#     
+      , #drvtPTranClam:DECIMAL#     
+      , #drvtPrdctTranBal:DECIMAL#     
+      , #drvtPcTranClam:DECIMAL#     
+      , #drvtPsTranClam:DECIMAL#     
+      , #inlsGrcrStupClam:DECIMAL#     
+      , #sysLastPrcssYms:CHAR#     
+      , #sysLastUno:CHAR#)]]>
+   </insert>
+
+   <insert id="insertTargetKipa121" parameterClass="map"><![CDATA[/* TSKIPA121 입력 | MultiQ4KBBank, 2025-09-15 */
+INSERT
+  INTO INST1.TSKIPA121 /* 월별기업관계연결정보 */ 
+      ( 그룹회사코드             /* 그룹회사코드 */     
+      , 기준년월                 /* 기준년월 */     
+      , 기업집합그룹코드         /* 기업집합그룹코드 */     
+      , 기업집합등록코드         /* 기업집합등록코드 */     
+      , 기업집합명               /* 기업집합명 */     
+      , 주요DA그룹여부           /* 주요DA그룹여부 */     
+      , 기업GM그룹구분코드       /* 기업GM그룹구분코드 */     
+      , 기업여신정책구분코드     /* 기업여신정책구분코드 */     
+      , 기업여신정책일련번호     /* 기업여신정책일련번호 */     
+      , 기업여신정책내용         /* 기업여신정책내용 */     
+      , 총여신업무금액           /* 총여신업무금액 */     
+      , 시스템최종처리일시       /* 시스템최종처리일시 */     
+      , 시스템최종사용자번호     /* 시스템최종사용자번호 */ )    
+VALUES
+      ( #groupCoCd:CHAR#    
+      , #baseYm:CHAR#     
+      , #corpClctGroupCd:VARCHAR#     
+      , #corpClctRegiCd:VARCHAR#     
+      , #corpClctName:VARCHAR#     
+      , #mainDaGroupYn:CHAR#     
+      , #corpGmGroupDstcd:CHAR#     
+      , #corpLPlicyDstcd:CHAR#     
+      , #corpLPlicySerno:DECIMAL#     
+      , #corpLPlicyCtnt:VARCHAR#     
+      , #totalLnbzAmt:DECIMAL#     
+      , #sysLastPrcssYms:CHAR#     
+      , #sysLastUno:CHAR#)]]>
+   </insert>
+</sqlMap>

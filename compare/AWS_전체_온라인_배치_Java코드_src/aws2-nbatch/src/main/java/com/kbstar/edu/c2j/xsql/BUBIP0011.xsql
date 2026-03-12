@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- 암호화 서비스 설정 조회 -->
+    <select id="selectEncryptionService" parameterClass="map" resultClass="hmap" fetchSize="1">
+        <![CDATA[
+        /* 암호화서비스설정조회 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            CASE #systemType#
+                WHEN 'ZAD' THEN 'KB0KIID02'
+                WHEN 'ZAB' THEN 'KB0KIIB02' 
+                WHEN 'ZAP' THEN 'KB0KIIP02'
+                ELSE 'KB0KIIB02'
+            END AS "encryptionServiceId"
+        FROM INST1.THKIIK923 /* 신용평가관리 */
+        WHERE 신용평가세부관리코드 = 
+            CASE #systemType#
+                WHEN 'ZAD' THEN 'KB0KIID02'
+                WHEN 'ZAB' THEN 'KB0KIIB02'
+                WHEN 'ZAP' THEN 'KB0KIIP02'
+                ELSE 'KB0KIIB02'
+            END
+        FETCH FIRST 1 ROWS ONLY
+        ]]>
+    </select>
+
+    <!-- 기업집단 평가 데이터 조회 -->
+    <select id="selectCorpGroupData" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 기업집단평가데이터조회 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            -- 기업집단평가기본정보 (BE-003-001)
+            AA.그룹회사코드                                    AS "groupCoCd"           /* 그룹회사코드 */
+           ,(AA.기업집단등록코드 || AA.기업집단그룹코드)        AS "corpClctCd"          /* 기업집단코드 */
+           ,AA.집단평가작성년                                  AS "clctValuaWritYr"     /* 집단평가작성년 */
+           ,AA.집단평가작성번호                                AS "clctValuaWritNo"     /* 집단평가작성번호 */
+           ,AA.평가년월일                                      AS "valuaYmd"            /* 평가년월일 */
+           ,AA.기업집단평가구분                                AS "corpCValuaDstcd"     /* 기업집단평가구분 */
+           ,AA.평가기준년월일                                  AS "valuaBaseYmd"        /* 평가기준년월일 */
+           ,AA.재무점수                                        AS "fnafScor"            /* 재무점수 */
+           ,AA.비재무점수                                      AS "nonFnafScor"         /* 비재무점수 */
+           ,AA.예비집단등급구분                                AS "spareCGrdDstcd"      /* 예비집단등급구분 */
+           ,AA.최종집단등급구분                                AS "lastClctGrdDstcd"    /* 최종집단등급구분 */
+           ,AA.조정점수                                        AS "adjsScor"            /* 조정점수 */
+           ,AA.유효년월일                                      AS "valdYmd"             /* 유효년월일 */
+           
+           -- 직원정보 (BE-003-002)
+           ,AA.평가직원번호                                    AS "valuaEmpid"          /* 평가직원번호 */
+           ,AA.평가직원직위명                                  AS "valuaEJobtlName"     /* 평가직원직위명 */
+           ,AA.평가직원명                                      AS "valuaEmnm"           /* 평가직원명 */
+           ,AA.평가부점코드                                    AS "valuaBrncd"          /* 평가부점코드 */
+           ,AA.관리직원번호                                    AS "mgtEmpid"            /* 관리직원번호 */
+           ,AA.관리직원직위명                                  AS "mgtEmpJobtlName"     /* 관리직원직위명 */
+           ,AA.관리직원명                                      AS "mgtEmnm"             /* 관리직원명 */
+           ,AA.관리부점코드                                    AS "mgtBrncd"            /* 관리부점코드 */
+           
+           -- 기업집단상세정보 (BE-003-003)
+           ,AA.기업집단명                                      AS "corpClctName"        /* 기업집단명 */
+           ,AA.회장성명                                        AS "chrmFname"           /* 회장성명 */
+           ,AA.주거래은행명                                    AS "pritrnBnkName"       /* 주거래은행명 */
+           ,AA.설립년월일                                      AS "incorYmd"            /* 설립년월일 */
+           ,AA.지배자명                                        AS "dmntName"            /* 지배자명 */
+           ,AA.한신평그룹코드                                  AS "kisGroupCd"          /* 한신평그룹코드 */
+           ,AA.기업집단규모구분                                AS "corpCScalDstcd"      /* 기업집단규모구분 */
+           ,AA.주력업종명                                      AS "mafoBztypName"       /* 주력업종명 */
+           ,AA.주력법인등록번호                                AS "mafoCprno"           /* 주력법인등록번호 */
+           ,AA.주력법인명                                      AS "mafoCoprName"        /* 주력법인명 */
+           
+           -- 기업통계정보 (BE-003-004)
+           ,AA.제조상장업체수                                  AS "mnfcListEntpCnt"     /* 제조상장업체수 */
+           ,AA.제조장외업체수                                  AS "mnfcOsdEntpCnt"      /* 제조장외업체수 */
+           ,AA.제조외감업체수                                  AS "mnfcExadEntpCnt"     /* 제조외감업체수 */
+           ,AA.제조일반업체수                                  AS "mnfcGnralEntpCnt"    /* 제조일반업체수 */
+           ,AA.제조종업원수                                    AS "mnfcEmpCnt"          /* 제조종업원수 */
+           ,AA.금융상장업체수                                  AS "finacListEntpCnt"    /* 금융상장업체수 */
+           ,AA.금융장외업체수                                  AS "finacOsdEntpCnt"     /* 금융장외업체수 */
+           ,AA.금융외감업체수                                  AS "finacExadEntpCnt"    /* 금융외감업체수 */
+           ,AA.금융일반업체수                                  AS "finacGEntpCnt"       /* 금융일반업체수 */
+           ,AA.금융업종업원수                                  AS "finacOccuEmpCnt"     /* 금융업종업원수 */
+           
+           -- 재무성과데이터 기준년 (BE-003-005)
+           ,AA.기준년합계업체수                                AS "baseYSumEntpCnt"     /* 기준년합계업체수 */
+           ,AA.기준년매출액                                    AS "baseYrSalepr"        /* 기준년매출액 */
+           ,AA.기준년경상이익                                  AS "baseYrOdnrPrft"      /* 기준년경상이익 */
+           ,AA.기준년순이익                                    AS "baseYrNetPrft"       /* 기준년순이익 */
+           ,AA.기준년총자산금액                                AS "baseYrTotalAsam"     /* 기준년총자산금액 */
+           ,AA.기준년자기자본금                                AS "baseYrOncpAmt"       /* 기준년자기자본금 */
+           ,AA.기준년총차입금                                  AS "baseYrTotalAmbr"     /* 기준년총차입금 */
+           
+           -- 재무성과데이터 N-1년 (BE-003-006)
+           ,AA.N1년전합계업체수                                AS "n1YbSumEntpCnt"      /* N1년전합계업체수 */
+           ,AA.N1년전매출액                                    AS "n1YrBfAsaleAmt"      /* N1년전매출액 */
+           ,AA.N1년전경상이익                                  AS "n1YrBfOdnrPrft"      /* N1년전경상이익 */
+           ,AA.N1년전순이익                                    AS "n1YrBfNetPrft"       /* N1년전순이익 */
+           ,AA.N1년전총자산금액                                AS "n1YrBfTotalAsam"     /* N1년전총자산금액 */
+           ,AA.N1년전자기자본금                                AS "n1YrBfOncpAmt"       /* N1년전자기자본금 */
+           ,AA.N1년전총차입금                                  AS "n1YrBfTotalAmbr"     /* N1년전총차입금 */
+           
+           -- 재무성과데이터 N-2년 (BE-003-007)
+           ,AA.N2년전합계업체수                                AS "n2YbSumEntpCnt"      /* N2년전합계업체수 */
+           ,AA.N2년전매출액                                    AS "n2YrBfAsaleAmt"      /* N2년전매출액 */
+           ,AA.N2년전경상이익                                  AS "n2YrBfOdnrPrft"      /* N2년전경상이익 */
+           ,AA.N2년전순이익                                    AS "n2YrBfNetPrft"       /* N2년전순이익 */
+           ,AA.N2년전총자산금액                                AS "n2YrBfTotalAsam"     /* N2년전총자산금액 */
+           ,AA.N2년전자기자본금                                AS "n2YrBfOncpAmt"       /* N2년전자기자본금 */
+           ,AA.N2년전총차입금                                  AS "n2YrBfTotalAmbr"     /* N2년전총차입금 */
+           
+           -- 추가정보 (BE-003-008)
+           ,AA.한신평조사시가총액                              AS "kisIcTotalAmt"       /* 한신평조사시가총액 */
+           ,AA.주채무계열여부                                  AS "mainDebtAffltYn"     /* 주채무계열여부 */
+           ,AA.시스템최종처리일시                              AS "sysLastPrcssYms"     /* 시스템최종처리일시 */
+           ,AA.시스템최종사용자번호                            AS "sysLastUno"          /* 시스템최종사용자번호 */
+           
+        FROM INST1.TSKIPB110 AA /* 기업집단평가기본 */
+        WHERE AA.그룹회사코드 = #groupCompanyCode#                    /* BR-003-001: KB Financial Group만 처리 */
+          AND AA.시스템최종처리일시 >= #baseDate#                     /* BR-003-002: 기준일자 이후 데이터만 */
+        ORDER BY AA.기업집단등록코드, AA.기업집단그룹코드, AA.집단평가작성년, AA.집단평가작성번호
+        ]]>
+    </select>
+
+</sqlMap>

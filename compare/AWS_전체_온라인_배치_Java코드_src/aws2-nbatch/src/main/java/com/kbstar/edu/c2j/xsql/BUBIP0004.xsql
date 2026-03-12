@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsql>
+    <!-- 암호화 서비스 ID 조회 (THKIIK923) -->
+    <query id="selectEncryptionServiceIds">
+        <![CDATA[
+        SELECT 
+            CASE WHEN :systemTypeCd = 'ZAD' THEN 'ONEWAY_ZAD_01'
+                 WHEN :systemTypeCd = 'ZAB' THEN 'ONEWAY_ZAB_01'  
+                 WHEN :systemTypeCd = 'ZAP' THEN 'ONEWAY_ZAP_01'
+                 ELSE 'ONEWAY_DEFAULT'
+            END AS oneWayServiceId,
+            CASE WHEN :systemTypeCd = 'ZAD' THEN 'TWOWAY_ZAD_01'
+                 WHEN :systemTypeCd = 'ZAB' THEN 'TWOWAY_ZAB_01'
+                 WHEN :systemTypeCd = 'ZAP' THEN 'TWOWAY_ZAP_01'  
+                 ELSE 'TWOWAY_DEFAULT'
+            END AS twoWayServiceId
+        FROM INST1.THKIIK923
+        WHERE 시스템구분코드 = :systemTypeCd
+        FETCH FIRST 1 ROWS ONLY
+        ]]>
+    </query>
+
+    <!-- A110 관계기업기본정보 전체 건수 조회 -->
+    <query id="selectA110TotalCount">
+        <![CDATA[
+        SELECT COUNT(*) AS totalCnt
+        FROM INST1.TSKIPA110 A
+        INNER JOIN INST1.THKAABPCB B ON A.고객고유번호 = B.고객고유번호
+        WHERE A.그룹회사코드 = :groupCoCd
+          AND B.고객고유번호구분 IN ('07','08','09','13','15')
+        ]]>
+    </query>
+
+    <!-- A110 관계기업기본정보 조회 (CUR_C001) -->
+    <query id="selectRelatedCompanyInfo">
+        <![CDATA[
+        SELECT 
+            A.그룹회사코드 AS groupCoCd,
+            A.심사고객식별자 AS exmtnCustIdnfr,
+            '00000' AS custMgtNo,
+            A.고객고유번호 AS custUniqNo,
+            B.고객고유번호구분 AS custUniqNoDstic,
+            A.대표사업자등록번호 AS rpsntBzno,
+            CAST(REPLACE(A.대표업체명,',',' ') AS CHAR(52)) AS rpsntCustNm,
+            A.기업신용평가등급구분코드 AS corpCvGrdDstcd,
+            A.기업규모구분 AS corpScalDstic,
+            A.표준산업분류코드 AS stndIClsfiCd,
+            A.고객관리부점코드 AS custMgtBrncd,
+            A.총여신금액 AS totalLnbzAmt,
+            A.여신잔액 AS lnbzBal,
+            A.담보금액 AS scurtyAmt,
+            A.연체금액 AS amov,
+            A.전년총여신금액 AS pyyTotalLnbzAmt,
+            A.법인그룹연결등록구분코드 AS coprGcRegiDstc,
+            A.법인그룹연결등록일시 AS coprGcRegiYms,
+            A.법인그룹연결직원번호 AS coprGCnslEmpid,
+            A.계열기업군등록구분코드 AS affltCgRegiDstcd,
+            A.한국신용평가그룹코드 AS kisGroupCd
+        FROM INST1.TSKIPA110 A
+        INNER JOIN INST1.THKAABPCB B ON A.고객고유번호 = B.고객고유번호
+        WHERE A.그룹회사코드 = :groupCoCd
+          AND B.고객고유번호구분 IN ('07','08','09','13','15')
+        ORDER BY A.심사고객식별자
+        ]]>
+    </query>
+
+    <!-- A111 기업집단그룹정보 전체 건수 조회 -->
+    <query id="selectA111TotalCount">
+        <![CDATA[
+        SELECT COUNT(*) AS totalCnt
+        FROM INST1.TSKIPA111
+        WHERE 그룹회사코드 = :groupCoCd
+        ]]>
+    </query>
+
+    <!-- A111 기업집단그룹정보 조회 (CUR_C002) -->
+    <query id="selectCorporateGroupInfo">
+        <![CDATA[
+        SELECT 
+            그룹회사코드 AS groupCoCd,
+            기업집단등록코드 AS corpClctRegiCd,
+            기업집단그룹코드 AS corpClctGroupCd,
+            CAST(REPLACE(기업집단명,',',' ') AS CHAR(52)) AS rpsntCustNm,
+            주채무계열그룹여부 AS mainDaGroupYn
+        FROM INST1.TSKIPA111
+        WHERE 그룹회사코드 = :groupCoCd
+        ORDER BY 기업집단등록코드
+        ]]>
+    </query>
+
+    <!-- 고객정보제공통지 등록 (THKJLG001) -->
+    <query id="insertCustomerNotification">
+        <![CDATA[
+        INSERT INTO INST1.THKJLG001 (
+            그룹회사코드,
+            이용그룹회사코드,
+            심사고객식별자,
+            고객관리번호,
+            제공번호,
+            관리자번호,
+            정보제공목적,
+            정보제공항목,
+            시스템사용자,
+            통지일자,
+            등록일시,
+            등록자ID
+        ) VALUES (
+            :groupCoCd,
+            :usageGroupCoCd,
+            :exmtnCustIdnfr,
+            :custMgtNo,
+            :provisionNo,
+            :managerNo,
+            :infoProvisionPurpose,
+            :infoProvisionItems,
+            :systemUser,
+            :notificationDate,
+            CURRENT_TIMESTAMP,
+            :systemUser
+        )
+        ]]>
+    </query>
+</xsql>

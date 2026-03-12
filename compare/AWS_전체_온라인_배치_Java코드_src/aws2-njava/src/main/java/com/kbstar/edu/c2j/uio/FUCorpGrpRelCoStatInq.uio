@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+    <method fixedLength="true" id="processCorpGrpRelCoStatInq">
+        <input>
+            <field additional="" formattingType="" id="prcssDistcd" length="2" lengthRef="" name="처리구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="baseDstic" length="1" lengthRef="" name="기준구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="baseYm" length="6" lengthRef="" name="기준년월" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+        </input>
+        <output>
+            <field additional="" formattingType="" id="returnCd" length="2" lengthRef="" name="리턴코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="returnMsg" length="100" lengthRef="" name="리턴메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+            <field additional="" formattingType="" id="totalCount" length="7" lengthRef="" name="총조회건수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+            <recordSet id="companyList" name="관계사현황 LIST" recordCount="1000" recordCountRef="">
+                <field additional="" formattingType="" id="exmtnCustIdnfr" length="10" lengthRef="" name="심사고객식별자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+                <field additional="" formattingType="" id="rpsntBzno" length="10" lengthRef="" name="대표사업자등록번호" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+                <field additional="" formattingType="" id="rpsntEntpName" length="52" lengthRef="" name="대표업체명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+                <field additional="" formattingType="" id="totalLnbzAmt" length="15" lengthRef="" name="총여신금액" padChar="0x30" padType="left" type="decimal" validationLogic="" validationType=""/>
+                <field additional="" formattingType="" id="lnbzBal" length="15" lengthRef="" name="여신잔액" padChar="0x30" padType="left" type="decimal" validationLogic="" validationType=""/>
+            </recordSet>
+        </output>
+    </method>
+</method-list>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+    <method fixedLength="true" id="inquireCorpGrpAffStat">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" type="string"/>
+        </input>
+        <output>
+            <field id="returnCd" length="2" name="리턴코드" type="string"/>
+            <field id="returnMsg" length="100" name="리턴메시지" type="string"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+        </output>
+    </method>
+    <method fixedLength="true" id="processNewEvaluationAffiliates">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" type="string"/>
+        </input>
+        <output>
+            <recordSet id="LIST" recordCount="1000">
+                <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" type="string"/>
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+    <method fixedLength="true" id="processExistingEvaluationAffiliates">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" type="string"/>
+        </input>
+        <output>
+            <recordSet id="LIST" recordCount="1000">
+                <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" type="string"/>
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+</method-list>

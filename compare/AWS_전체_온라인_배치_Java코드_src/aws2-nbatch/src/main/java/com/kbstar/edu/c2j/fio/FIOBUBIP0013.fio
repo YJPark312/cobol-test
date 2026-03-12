@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fio>
+    <name>기업집단차주변동명세 출력파일</name>
+    <description>Corporate Group Borrower Change Details Output File</description>
+    <encoding>UTF-8</encoding>
+    
+    <!-- OUTFILE - 암호화 출력파일 -->
+    <file id="OUTFILE">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="encryptedRecord" length="1664" name="암호화레코드" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- OUTFILE1 - 평문 출력파일 -->
+    <file id="OUTFILE1">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="plainRecord" length="1232" name="평문레코드" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- OUTCHECK - 체크 출력파일 -->
+    <file id="OUTCHECK">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="checkRecord" length="28" name="체크레코드" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+</fio>

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+	<!-- 기업집단기본정보조회 -->
+	<method fixedLength="true" id="selectCorpGrpBasicInfo">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<recordSet id="LIST" recordCount="1000">
+				<field additional="" formattingType="" id="corpClctName" length="72" lengthRef="" name="기업집단명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mgtBrn" length="22" lengthRef="" name="관리부점" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mainDebtAffltYn" length="1" lengthRef="" name="주채무계열여부" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="belngCorpCnt" length="5" lengthRef="" name="소속기업수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="limt" length="15" lengthRef="" name="한도" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="amus" length="15" lengthRef="" name="사용금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="availAmt" length="15" lengthRef="" name="가용금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="utilRt" length="7" lengthRef="" name="이용률" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskGrd" length="2" lengthRef="" name="위험등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="evalStat" length="2" lengthRef="" name="평가상태" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="lastUpdDt" length="8" lengthRef="" name="최종수정일자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="evalUserId" length="8" lengthRef="" name="평가자ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단기본정보등록 -->
+	<method fixedLength="true" id="insertCorpGrpBasicInfo">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctName" length="72" lengthRef="" name="기업집단명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="mgtBrn" length="22" lengthRef="" name="관리부점" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="processedCount" length="5" lengthRef="" name="처리건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+		</output>
+	</method>
+
+	<!-- 기업집단기본정보수정 -->
+	<method fixedLength="true" id="updateCorpGrpBasicInfo">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctName" length="72" lengthRef="" name="기업집단명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="processedCount" length="5" lengthRef="" name="처리건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+		</output>
+	</method>
+
+	<!-- 기업집단합산연결재무제표조회 -->
+	<method fixedLength="true" id="selectCorpGrpConsolidatedFinStat">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fnafAStlaccDstcd" length="1" lengthRef="" name="결산구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="ambr" length="15" lengthRef="" name="부채총액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단재무비율계산 -->
+	<method fixedLength="true" id="calculateCorpGrpFinancialRatio">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="debtRatio" length="7" lengthRef="" name="부채비율" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="equityRatio" length="7" lengthRef="" name="자기자본비율" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단다년도재무데이터조회 -->
+	<method fixedLength="true" id="selectCorpGrpMultiYearFinData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="baseYear" length="4" lengthRef="" name="기준년도" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="year" length="4" lengthRef="" name="년도" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단계열사현황조회 -->
+	<method fixedLength="true" id="selectCorpGrpAffiliateStatus">
+		<input>
+			<field additional="" formattingType="" id="prcssDstcd" length="2" lengthRef="" name="처리구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="exmtnCustIdnfr" length="13" lengthRef="" name="심사고객식별자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="custName" length="72" lengthRef="" name="고객명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskGrd" length="2" lengthRef="" name="위험등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단계열사재무데이터조회 -->
+	<method fixedLength="true" id="selectCorpGrpAffiliateFinData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="exmtnCustIdnfr" length="13" lengthRef="" name="심사고객식별자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="ambr" length="15" lengthRef="" name="부채총액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단계열사위험평가조회 -->
+	<method fixedLength="true" id="selectCorpGrpAffiliateRiskAssessment">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="riskAsmtId" length="10" lengthRef="" name="위험평가ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="riskGrd" length="2" lengthRef="" name="위험등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskScore" length="7" lengthRef="" name="위험점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단계열사요약정보조회 -->
+	<method fixedLength="true" id="selectCorpGrpAffiliateSummary">
+		<input>
+			<field additional="" formattingType="" id="prcssDstcd" length="2" lengthRef="" name="처리구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="exmtnCustIdnfr" length="13" lengthRef="" name="심사고객식별자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="custName" length="72" lengthRef="" name="고객명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="summaryInfo" length="200" lengthRef="" name="요약정보" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 기업집단계열사평가데이터조회 -->
+	<method fixedLength="true" id="selectCorpGrpAffiliateEvalData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="exmtnCustIdnfr" length="13" lengthRef="" name="심사고객식별자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="evalData" length="500" lengthRef="" name="평가데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="evalScore" length="7" lengthRef="" name="평가점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 승인결의록정보조회 -->
+	<method fixedLength="true" id="selectApprovalResolutionInfo">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<recordSet id="output" recordCount="1000">
+				<field additional="" formattingType="" id="approvalId" length="20" lengthRef="" name="승인ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="resolutionInfo" length="1000" lengthRef="" name="결의록정보" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+
+	<!-- 승인결의록데이터등록 -->
+	<method fixedLength="true" id="insertApprovalResolutionData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="approvalId" length="20" lengthRef="" name="승인ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resolutionData" length="1000" lengthRef="" name="결의록데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="processedCount" length="5" lengthRef="" name="처리건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+		</output>
+	</method>
+
+	<!-- 승인결의록데이터삭제 -->
+	<method fixedLength="true" id="deleteApprovalResolutionData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="approvalId" length="20" lengthRef="" name="승인ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="processedCount" length="5" lengthRef="" name="처리건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+		</output>
+	</method>
+
+	<!-- 위원회위원수조회 -->
+	<method fixedLength="true" id="selectCommitteeMemberCount">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalCount" length="5" lengthRef="" name="총위원수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultCode" length="2" lengthRef="" name="결과코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="resultMessage" length="100" lengthRef="" name="결과메시지" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</output>
+	</method>
+</method-list>

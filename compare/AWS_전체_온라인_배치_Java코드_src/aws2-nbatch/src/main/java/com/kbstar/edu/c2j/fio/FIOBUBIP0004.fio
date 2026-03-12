@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fio>
+    <name>지주사전송파일변환 출력파일</name>
+    <description>Holding Company Transmission File Conversion Output File</description>
+    <encoding>UTF-8</encoding>
+    
+    <!-- A110.DAT - 관계기업기본정보 암호화 파일 -->
+    <file id="A110_DAT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="encryptedCustomerData" length="428" name="암호화된고객정보" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- A110.CHK - A110 검증 체크섬 파일 -->
+    <file id="A110_CHK">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="validationId" length="8" name="검증ID" padChar="0x20" padType="right" type="string"/>
+            <field id="recordCount" length="10" name="레코드수" padChar="0x20" padType="right" type="string"/>
+            <field id="checksum" length="10" name="체크섬" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- A111.DAT - 기업집단그룹정보 암호화 파일 -->
+    <file id="A111_DAT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="encryptedGroupData" length="128" name="암호화된그룹정보" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- A111.CHK - A111 검증 체크섬 파일 -->
+    <file id="A111_CHK">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="validationId" length="8" name="검증ID" padChar="0x20" padType="right" type="string"/>
+            <field id="recordCount" length="10" name="레코드수" padChar="0x20" padType="right" type="string"/>
+            <field id="checksum" length="10" name="체크섬" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+</fio>

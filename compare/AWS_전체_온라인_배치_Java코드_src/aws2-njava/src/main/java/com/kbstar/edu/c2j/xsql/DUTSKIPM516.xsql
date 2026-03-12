@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50">
+		<![CDATA[/* 비재무항목배점 단건 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,APLY_YMD AS "aplyYmd"
+		      ,NON_FNAF_ITEM_NO AS "nonFnafItemNo"
+		      ,WGHT_MOST_UPER_SCOR AS "wghtMostUperScor"
+		      ,WGHT_UPER_SCOR AS "wghtUperScor"
+		      ,WGHT_MIDL_SCOR AS "wghtMidlScor"
+		      ,WGHT_LOWR_SCOR AS "wghtLowrScor"
+		      ,WGHT_MOST_LOWR_SCOR AS "wghtMostLowrScor"
+		  FROM INST1.TSKIPM516
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND APLY_YMD = #aplyYmd#
+		   AND NON_FNAF_ITEM_NO = #nonFnafItemNo#
+		]]>
+	</select>
+
+	<select id="selectList" parameterClass="map" resultClass="hmap" fetchSize="1000">
+		<![CDATA[/* 비재무항목배점 목록 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,APLY_YMD AS "aplyYmd"
+		      ,NON_FNAF_ITEM_NO AS "nonFnafItemNo"
+		      ,WGHT_MOST_UPER_SCOR AS "wghtMostUperScor"
+		      ,WGHT_UPER_SCOR AS "wghtUperScor"
+		      ,WGHT_MIDL_SCOR AS "wghtMidlScor"
+		      ,WGHT_LOWR_SCOR AS "wghtLowrScor"
+		      ,WGHT_MOST_LOWR_SCOR AS "wghtMostLowrScor"
+		  FROM INST1.TSKIPM516
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND APLY_YMD = #aplyYmd#
+		 ORDER BY NON_FNAF_ITEM_NO
+		]]>
+	</select>
+
+	<insert id="insert" parameterClass="map">
+		<![CDATA[/* 비재무항목배점 등록 | MultiQ4KBBank, 2025-10-01 */
+		INSERT INTO INST1.TSKIPM516 (
+			 GROUP_CO_CD
+			,APLY_YMD
+			,NON_FNAF_ITEM_NO
+			,WGHT_MOST_UPER_SCOR
+			,WGHT_UPER_SCOR
+			,WGHT_MIDL_SCOR
+			,WGHT_LOWR_SCOR
+			,WGHT_MOST_LOWR_SCOR
+		) VALUES (
+			 #groupCoCd#
+			,#aplyYmd#
+			,#nonFnafItemNo#
+			,#wghtMostUperScor#
+			,#wghtUperScor#
+			,#wghtMidlScor#
+			,#wghtLowrScor#
+			,#wghtMostLowrScor#
+		)
+		]]>
+	</insert>
+
+	<update id="update" parameterClass="map">
+		<![CDATA[/* 비재무항목배점 수정 | MultiQ4KBBank, 2025-10-01 */
+		UPDATE INST1.TSKIPM516
+		   SET WGHT_MOST_UPER_SCOR = #wghtMostUperScor#
+		      ,WGHT_UPER_SCOR = #wghtUperScor#
+		      ,WGHT_MIDL_SCOR = #wghtMidlScor#
+		      ,WGHT_LOWR_SCOR = #wghtLowrScor#
+		      ,WGHT_MOST_LOWR_SCOR = #wghtMostLowrScor#
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND APLY_YMD = #aplyYmd#
+		   AND NON_FNAF_ITEM_NO = #nonFnafItemNo#
+		]]>
+	</update>
+
+</sqlMap>

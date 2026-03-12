@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+    <method fixedLength="true" id="getCorpGrpCrdtEvalHist">
+        <input>
+            <field id="prcssDstcd" length="2" name="처리구분코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+            <field id="prcssStgeCtnt" length="50" name="처리단계내용" type="string"/>
+        </input>
+        <output>
+            <field id="totalNoitm" length="7" name="총건수" type="numeric"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+            <recordSet id="LIST" recordCount="1000">
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+                <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+                <field id="definsYn" length="1" name="확정여부" type="string"/>
+                <field id="prcssStgeCtnt" length="50" name="처리단계내용" type="string"/>
+                <field id="mainDebtAffltYn" length="1" name="주채무계열여부" type="string"/>
+                <field id="valuaBrnName" length="50" name="평가부점명" type="string"/>
+                <field id="mgtbrnName" length="50" name="관리부점명" type="string"/>
+                <field id="dsticName1" length="50" name="등급조정구분명" type="string"/>
+                <field id="dsticName2" length="50" name="조정단계구분명" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+    <method fixedLength="true" id="processCorpGrpCrdtEvalHist">
+        <input>
+            <field id="prcssDstcd" length="2" name="처리구분코드" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+            <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" type="string"/>
+            <field id="valuaBaseYmd" length="8" name="평가기준년월일" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+        </input>
+        <output>
+            <field id="totalNoitm" length="7" name="총건수" type="numeric"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+        </output>
+    </method>
+</method-list>

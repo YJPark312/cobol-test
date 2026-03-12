@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+    
+    <!-- 기업집단평가데이터 조회 -->
+    <select id="selectCorpGroupEval" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[
+        /* 기업집단평가데이터 조회 */
+        SELECT B110.기업집단그룹코드             AS "corpClctGroupCd"
+             , B110.기업집단등록코드             AS "corpClctRegiCd"
+             , B110.평가년월일                   AS "valuaYmd"
+             , B110.평가기준년월일               AS "valuaBaseYmd"
+             , B110.최종집단등급구분             AS "finalCorpClctCreditRating"
+          FROM INST1.TSKIPB110 B110
+             , (SELECT 그룹회사코드, 기업집단그룹코드, 기업집단등록코드, MAX(평가년월일) AS 평가년월일
+                  FROM INST1.TSKIPB110
+                 WHERE 그룹회사코드 = 'KB0'
+                   AND 기업집단평가구분 IN ('1', '2')
+                   AND 기업집단처리단계구분 = '6'
+                   AND SUBSTR(평가년월일, 1, 4) = #baseYear:CHAR#
+                 GROUP BY 그룹회사코드, 기업집단그룹코드, 기업집단등록코드
+               ) B110_MAX
+         WHERE B110.그룹회사코드 = B110_MAX.그룹회사코드
+           AND B110.기업집단그룹코드 = B110_MAX.기업집단그룹코드
+           AND B110.기업집단등록코드 = B110_MAX.기업집단등록코드
+           AND B110.평가년월일 = B110_MAX.평가년월일
+         ORDER BY B110.기업집단그룹코드, B110.기업집단등록코드
+    ]]></select>
+    
+    <!-- 재무제표데이터 조회 -->
+    <select id="selectFinancialData" parameterClass="map" resultClass="hmap"><![CDATA[
+        /* 재무제표데이터 조회 */
+        SELECT VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '115000' THEN 재무제표항목금액 ELSE 0 END), 0) AS "totalAssets"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '118900' THEN 재무제표항목금액 ELSE 0 END), 0) AS "equityCapital"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '121000' THEN 재무제표항목금액 ELSE 0 END), 0) AS "salesRevenue"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '125000' THEN 재무제표항목금액 ELSE 0 END), 0) AS "operatingProfit"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '129000' THEN 재무제표항목금액 ELSE 0 END), 0) AS "netIncome"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '126110' THEN 재무제표항목금액
+                        WHEN '126120' THEN 재무제표항목금액
+                        WHEN '126132' THEN 재무제표항목금액 ELSE 0 END), 0) AS "financialCosts"
+             , VALUE(SUM(CASE 재무분석보고서구분||재무항목코드
+                        WHEN '115130' THEN 재무제표항목금액
+                        WHEN '115400' THEN 재무제표항목금액
+                        WHEN '115190' THEN 재무제표항목금액
+                        WHEN '116050' THEN 재무제표항목금액
+                        WHEN '116200' THEN 재무제표항목금액 ELSE 0 END), 0) AS "totalBorrowings"
+          FROM INST1.TSKIPC120
+         WHERE 그룹회사코드 = 'KB0'
+           AND 기업집단그룹코드 = #corpClctGroupCd:CHAR#
+           AND 기업집단등록코드 = #corpClctRegiCd:CHAR#
+           AND 재무분석결산구분 = '1'
+           AND 결산년 = #baseYear:CHAR#
+           AND 기준년 = #baseYear:CHAR#
+           AND 재무분석보고서구분 IN ('11', '12')
+    ]]></select>
+    
+    <!-- 재무비율데이터 조회 -->
+    <select id="selectRatioData" parameterClass="map" resultClass="hmap"><![CDATA[
+        /* 재무비율데이터 조회 */
+        SELECT VALUE(기업집단재무비율, 0) AS "debtRatio"
+          FROM INST1.TSKIPC121
+         WHERE 그룹회사코드 = 'KB0'
+           AND 기업집단그룹코드 = #corpClctGroupCd:CHAR#
+           AND 기업집단등록코드 = #corpClctRegiCd:CHAR#
+           AND 재무분석결산구분 = '1'
+           AND 결산년 = #baseYear:CHAR#
+           AND 기준년 = #baseYear:CHAR#
+           AND 재무분석보고서구분 = '19'
+           AND 재무항목코드 = '3060'
+    ]]></select>
+    
+</sqlMap>

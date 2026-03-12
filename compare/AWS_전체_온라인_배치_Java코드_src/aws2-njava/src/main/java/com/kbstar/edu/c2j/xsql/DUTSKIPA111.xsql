@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+<select id="selectByCode" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 기업집단코드정확검색 | MultiQ4KBBank, 2025-10-02 */
+SELECT A111.기업집단등록코드 AS "corpClctRegiCd"
+      ,A111.기업집단그룹코드 AS "corpClctGroupCd"
+      ,A111.기업집단명 AS "corpClctName"
+      ,A111.주채무계열그룹여부 AS "mainDaGroupYn"
+      ,A111.기업군관리그룹구분 AS "corpGmGroupDstcd"
+  FROM INST1.TSKIPA111 A111
+ WHERE A111.그룹회사코드 = #groupCoCd#
+   AND A111.기업집단그룹코드 = #corpClctGroupCd#
+]]></select>
+
+<select id="selectByName" parameterClass="map" resultClass="hmap" fetchSize="100"><![CDATA[/* 기업집단명패턴검색 | MultiQ4KBBank, 2025-10-02 */
+SELECT A111.기업집단등록코드 AS "corpClctRegiCd"
+      ,A111.기업집단그룹코드 AS "corpClctGroupCd"
+      ,A111.기업집단명 AS "corpClctName"
+      ,A111.주채무계열그룹여부 AS "mainDaGroupYn"
+      ,A111.기업군관리그룹구분 AS "corpGmGroupDstcd"
+  FROM INST1.TSKIPA111 A111
+ WHERE A111.그룹회사코드 = #groupCoCd#
+   AND A111.기업집단명 LIKE '%' || #corpClctName# || '%'
+ ORDER BY A111.기업집단명
+]]></select>
+
+<insert id="insert" parameterClass="map"><![CDATA[/* 기업집단정보등록 | MultiQ4KBBank, 2025-10-02 */
+INSERT INTO INST1.TSKIPA111 (
+	그룹회사코드
+	,기업집단그룹코드
+	,기업집단등록코드
+	,기업집단명
+	,주채무계열그룹여부
+	,기업군관리그룹구분
+	,기업여신정책구분
+	,기업여신정책일련번호
+	,기업여신정책내용
+	,총여신금액
+	,시스템최종처리일시
+	,시스템최종사용자번호
+) VALUES (
+	#groupCoCd#
+	,#corpClctGroupCd#
+	,#corpClctRegiCd#
+	,#corpClctName#
+	,#mainDaGroupYn#
+	,#corpGmGroupDstcd#
+	,'01'
+	,1
+	,'기본정책'
+	,0
+	,CURRENT TIMESTAMP
+	,'SYSTEM'
+)
+]]></insert>
+
+</sqlMap>

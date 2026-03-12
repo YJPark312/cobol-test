@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fio>
+    <name>기업집단월별정보생성 파일</name>
+    <description>Corporate Group Monthly Information Generation File</description>
+    <encoding>UTF-8</encoding>
+    
+    <!-- MONTHLY_COMPANY_OUT - 월별관계기업기본정보 출력파일 -->
+    <file id="MONTHLY_COMPANY_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="groupCoCd" length="3" name="그룹회사코드" padChar="0x20" padType="right" type="string"/>
+            <field id="baseYm" length="6" name="기준년월" padChar="0x20" padType="right" type="string"/>
+            <field id="exmtnCustIdnfr" length="10" name="심사고객식별자" padChar="0x20" padType="right" type="string"/>
+            <field id="rpsntBzno" length="10" name="대표사업자번호" padChar="0x20" padType="right" type="string"/>
+            <field id="rpsntEntpName" length="52" name="대표업체명" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" padChar="0x20" padType="right" type="string"/>
+            <field id="totalLnbzAmt" length="15" name="총여신금액" padChar="0x30" padType="left" type="string"/>
+            <field id="lnbzBal" length="15" name="여신잔액" padChar="0x30" padType="left" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- MONTHLY_GROUP_OUT - 월별기업관계연결정보 출력파일 -->
+    <file id="MONTHLY_GROUP_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="groupCoCd" length="3" name="그룹회사코드" padChar="0x20" padType="right" type="string"/>
+            <field id="baseYm" length="6" name="기준년월" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctName" length="72" name="기업집단명" padChar="0x20" padType="right" type="string"/>
+            <field id="mainDaGroupYn" length="1" name="주채무계열그룹여부" padChar="0x20" padType="right" type="string"/>
+            <field id="totalLnbzAmt" length="15" name="총여신금액" padChar="0x30" padType="left" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- STATS_OUT - 처리통계 출력파일 -->
+    <file id="STATS_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="a120DeleteCnt" length="9" name="A120삭제건수" padChar="0x30" padType="left" type="string"/>
+            <field id="a121DeleteCnt" length="9" name="A121삭제건수" padChar="0x30" padType="left" type="string"/>
+            <field id="a110ReadCnt" length="9" name="A110조회건수" padChar="0x30" padType="left" type="string"/>
+            <field id="a120InsertCnt" length="9" name="A120등록건수" padChar="0x30" padType="left" type="string"/>
+            <field id="a111ReadCnt" length="9" name="A111조회건수" padChar="0x30" padType="left" type="string"/>
+            <field id="a121InsertCnt" length="9" name="A121등록건수" padChar="0x30" padType="left" type="string"/>
+            <field id="totalProcessCnt" length="9" name="총처리건수" padChar="0x30" padType="left" type="string"/>
+            <field id="filler" length="57" name="여백" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+</fio>

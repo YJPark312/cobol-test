@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+	<method fixedLength="true" id="processCorpGrpCrdtEvalRpt">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="unit" length="1" lengthRef="" name="단위" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="procUserId" length="8" lengthRef="" name="처리사용자ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="procTermId" length="8" lengthRef="" name="처리단말기ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalProcCnt" length="5" lengthRef="" name="총처리건수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="succProcCnt" length="5" lengthRef="" name="성공처리건수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="errProcCnt" length="5" lengthRef="" name="오류처리건수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="procStatCd" length="2" lengthRef="" name="처리상태코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<recordSet id="CORP_GRP_INFO" recordCount="1000">
+				<field additional="" formattingType="" id="corpClctName" length="72" lengthRef="" name="기업집단명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mgtBrn" length="22" lengthRef="" name="관리부점" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="belngCorpCnt" length="5" lengthRef="" name="소속기업수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskGrd" length="2" lengthRef="" name="위험등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="INDV_FINST_LIST" recordCount="1000">
+				<field additional="" formattingType="" id="rpsntEntpName" length="52" lengthRef="" name="대표업체명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="aplyYmd" length="8" lengthRef="" name="적용년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="fnstDstic" length="10" lengthRef="" name="재무제표구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="netPrft" length="15" lengthRef="" name="순이익" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="CONS_FINST_LIST" recordCount="1000">
+				<field additional="" formattingType="" id="rpsntEntpName" length="52" lengthRef="" name="업체명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="aplyYmd" length="8" lengthRef="" name="적용년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="fnstDstic" length="10" lengthRef="" name="재무제표구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="fmlaProcStat" length="2" lengthRef="" name="산식처리상태" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+</method-list>

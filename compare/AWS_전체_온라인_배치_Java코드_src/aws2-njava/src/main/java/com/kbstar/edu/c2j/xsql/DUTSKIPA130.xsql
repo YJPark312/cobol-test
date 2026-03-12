@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="selectTSKIPA130" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* TSKIPA130 조회 | MultiQ4KBBank, 2025-10-02 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,CUST_IDNFR AS "custIdnfr"
+		      ,SERNO AS "serno"
+		      ,DATA_CTNT AS "dataCtnt"
+		      ,REGI_YMD AS "regiYmd"
+		      ,REGI_EMPID AS "regiEmpid"
+		      ,LAST_MODFI_YMD AS "lastModfiYmd"
+		      ,LAST_MODFI_EMPID AS "lastModfiEmpid"
+		  FROM INST1.TSKIPA130
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CUST_IDNFR = #custIdnfr#
+		   <isNotEmpty property="serno">
+		   AND SERNO = #serno#
+		   </isNotEmpty>
+		 ORDER BY SERNO
+		]]>
+	</select>
+
+	<insert id="insertTSKIPA130" parameterClass="map">
+		<![CDATA[/* TSKIPA130 등록 | MultiQ4KBBank, 2025-10-02 */
+		INSERT INTO INST1.TSKIPA130 (
+			 GROUP_CO_CD
+			,CUST_IDNFR
+			,SERNO
+			,DATA_CTNT
+			,REGI_YMD
+			,REGI_EMPID
+			,LAST_MODFI_YMD
+			,LAST_MODFI_EMPID
+		) VALUES (
+			 #groupCoCd#
+			,#custIdnfr#
+			,#serno#
+			,#dataCtnt#
+			,#regiYmd#
+			,#regiEmpid#
+			,#regiYmd#
+			,#regiEmpid#
+		)
+		]]>
+	</insert>
+
+	<update id="updateTSKIPA130" parameterClass="map">
+		<![CDATA[/* TSKIPA130 수정 | MultiQ4KBBank, 2025-10-02 */
+		UPDATE INST1.TSKIPA130
+		   SET DATA_CTNT = #dataCtnt#
+		      ,LAST_MODFI_YMD = #lastModfiYmd#
+		      ,LAST_MODFI_EMPID = #lastModfiEmpid#
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CUST_IDNFR = #custIdnfr#
+		   AND SERNO = #serno#
+		]]>
+	</update>
+
+	<delete id="deleteTSKIPA130" parameterClass="map">
+		<![CDATA[/* TSKIPA130 삭제 | MultiQ4KBBank, 2025-10-02 */
+		DELETE FROM INST1.TSKIPA130
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CUST_IDNFR = #custIdnfr#
+		   AND SERNO = #serno#
+		]]>
+	</delete>
+
+	<select id="selectFinTargetInfo" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업재무대상관리정보조회 | MultiQ4KBBank, 2025-10-02 */
+		SELECT CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+		      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+		      ,EXMTN_CUST_IDNFR AS "exmtnCustIdnfr"
+		      ,RPSNT_ENTP_NAME AS "rpsntEntpName"
+		  FROM INST1.TSKIPA130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD <= #valuaYmd#
+		 ORDER BY EXMTN_CUST_IDNFR
+		]]>
+	</select>
+
+	<select id="selectFinancialData" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 재무데이터조회 | MultiQ4KBBank, 2025-10-02 */
+		SELECT RPSNT_ENTP_NAME AS "rpsntEntpName"
+		      ,EXMTN_CUST_IDNFR AS "exmtnCustIdnfr"
+		      ,APLY_YMD AS "aplyYmd"
+		      ,FNAF_AB_ORGL_DSTCD AS "fnafAbOrglDstcd"
+		      ,FNST_DSTIC AS "fnstDstic"
+		      ,SOURC AS "sourc"
+		      ,CRCY_CD AS "crcyCd"
+		      ,EXCHG_RT AS "exchgRt"
+		      ,TOTAL_ASST AS "totalAsst"
+		      ,CRNT_ASST AS "crntAsst"
+		      ,NCRNT_ASST AS "ncrntAsst"
+		      ,TOTAL_LIABL AS "totalLiabl"
+		      ,CRNT_LIABL AS "crntLiabl"
+		      ,NCRNT_LIABL AS "ncrntLiabl"
+		      ,ONCP AS "oncp"
+		      ,PAID_CAP AS "paidCap"
+		      ,RETD_EARN AS "retdEarn"
+		      ,AMBR AS "ambr"
+		      ,ST_AMBR AS "stAmbr"
+		      ,LT_AMBR AS "ltAmbr"
+		      ,CSH_ASST AS "cshAsst"
+		      ,SALEPR AS "salepr"
+		      ,COST_SALE AS "costSale"
+		      ,(SALEPR - COST_SALE) AS "grossPrft"
+		      ,OPR_EXP AS "oprExp"
+		      ,OPRFT AS "oprft"
+		      ,NON_OPR_INC AS "nonOprInc"
+		      ,NON_OPR_EXP AS "nonOprExp"
+		      ,FNCS AS "fncs"
+		      ,INC_BFR_TAX AS "incBfrTax"
+		      ,INC_TAX_EXP AS "incTaxExp"
+		      ,NET_PRFT AS "netPrft"
+		      ,BZOPR_NCF AS "bzOprNcf"
+		      ,INV_NCF AS "invNcf"
+		      ,FIN_NCF AS "finNcf"
+		      ,EBITDA AS "ebitda"
+		      ,DEPR AS "depr"
+		      ,AMORT AS "amort"
+		      ,(CASE WHEN ONCP > 0 THEN ROUND((TOTAL_LIABL / ONCP) * 100, 2) ELSE 0 END) AS "liablRato"
+		      ,(CASE WHEN CRNT_LIABL > 0 THEN ROUND(CRNT_ASST / CRNT_LIABL, 2) ELSE 0 END) AS "crntRatio"
+		      ,(CASE WHEN CRNT_LIABL > 0 THEN ROUND((CRNT_ASST - CRNT_LIABL) / CRNT_LIABL, 2) ELSE 0 END) AS "quickRatio"
+		      ,(CASE WHEN TOTAL_ASST > 0 THEN ROUND((AMBR / TOTAL_ASST) * 100, 2) ELSE 0 END) AS "ambrRlnc"
+		      ,(CASE WHEN FNCS > 0 THEN ROUND(OPRFT / FNCS, 2) ELSE 0 END) AS "intCovRatio"
+		      ,(CASE WHEN TOTAL_ASST > 0 THEN ROUND((NET_PRFT / TOTAL_ASST) * 100, 2) ELSE 0 END) AS "roa"
+		      ,(CASE WHEN ONCP > 0 THEN ROUND((NET_PRFT / ONCP) * 100, 2) ELSE 0 END) AS "roe"
+		      ,(CASE WHEN SALEPR > 0 THEN ROUND((OPRFT / SALEPR) * 100, 2) ELSE 0 END) AS "oprMrgn"
+		      ,(CASE WHEN SALEPR > 0 THEN ROUND((NET_PRFT / SALEPR) * 100, 2) ELSE 0 END) AS "netMrgn"
+		      ,(CASE WHEN TOTAL_ASST > 0 THEN ROUND(SALEPR / TOTAL_ASST, 2) ELSE 0 END) AS "asstTurn"
+		      ,(CASE WHEN ONCP > 0 THEN ROUND(TOTAL_ASST / ONCP, 2) ELSE 0 END) AS "eqMult"
+		  FROM INST1.TSKIPA130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND APLY_YMD = #aplyYmd#
+		   AND FNST_DSTIC = #fnstDstic#
+		 ORDER BY RPSNT_ENTP_NAME, APLY_YMD
+		]]>
+	</select>
+
+	<select id="selectCorpGrpFinAnalData" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업집단 재무분석 데이터 조회 (WP-055) | MultiQ4KBBank, 2025-10-02 */
+		SELECT '01' AS "fnafARptdocDstic"
+		      ,'F001' AS "fnafItemCd"
+		      ,'0001' AS "bizSectNo"
+		      ,'주요사업부문' AS "bizSectDsticName"
+		      ,COALESCE(TOTAL_ASST, 0) AS "baseYrItemAmt"
+		      ,CASE WHEN TOTAL_ASST > 0 THEN ROUND((TOTAL_ASST / 1000000), 2) ELSE 0 END AS "baseYrRato"
+		      ,1 AS "baseYrEntpCnt"
+		      ,COALESCE(LAG(TOTAL_ASST, 1) OVER (ORDER BY APLY_YMD), 0) AS "n1YrBfItemAmt"
+		      ,COALESCE(LAG(TOTAL_ASST, 2) OVER (ORDER BY APLY_YMD), 0) AS "n2YrBfItemAmt"
+		  FROM INST1.TSKIPA130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND APLY_YMD <= #valuaYmd#
+		   <isNotEmpty property="valuaBaseYmd">
+		   AND APLY_YMD >= #valuaBaseYmd#
+		   </isNotEmpty>
+		 UNION ALL
+		SELECT '02' AS "fnafARptdocDstic"
+		      ,'F002' AS "fnafItemCd"
+		      ,'0002' AS "bizSectNo"
+		      ,'재무비율분석' AS "bizSectDsticName"
+		      ,COALESCE(NET_PRFT, 0) AS "baseYrItemAmt"
+		      ,CASE WHEN TOTAL_ASST > 0 THEN ROUND((NET_PRFT / TOTAL_ASST) * 100, 2) ELSE 0 END AS "baseYrRato"
+		      ,1 AS "baseYrEntpCnt"
+		      ,COALESCE(LAG(NET_PRFT, 1) OVER (ORDER BY APLY_YMD), 0) AS "n1YrBfItemAmt"
+		      ,COALESCE(LAG(NET_PRFT, 2) OVER (ORDER BY APLY_YMD), 0) AS "n2YrBfItemAmt"
+		  FROM INST1.TSKIPA130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND APLY_YMD <= #valuaYmd#
+		   <isNotEmpty property="valuaBaseYmd">
+		   AND APLY_YMD >= #valuaBaseYmd#
+		   </isNotEmpty>
+		 UNION ALL
+		SELECT '03' AS "fnafARptdocDstic"
+		      ,'F003' AS "fnafItemCd"
+		      ,'0003' AS "bizSectNo"
+		      ,'유동성분석' AS "bizSectDsticName"
+		      ,COALESCE(CRNT_ASST, 0) AS "baseYrItemAmt"
+		      ,CASE WHEN CRNT_LIABL > 0 THEN ROUND(CRNT_ASST / CRNT_LIABL, 2) ELSE 0 END AS "baseYrRato"
+		      ,1 AS "baseYrEntpCnt"
+		      ,COALESCE(LAG(CRNT_ASST, 1) OVER (ORDER BY APLY_YMD), 0) AS "n1YrBfItemAmt"
+		      ,COALESCE(LAG(CRNT_ASST, 2) OVER (ORDER BY APLY_YMD), 0) AS "n2YrBfItemAmt"
+		  FROM INST1.TSKIPA130
+		 WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND APLY_YMD <= #valuaYmd#
+		   <isNotEmpty property="valuaBaseYmd">
+		   AND APLY_YMD >= #valuaBaseYmd#
+		   </isNotEmpty>
+		 ORDER BY "fnafARptdocDstic", "fnafItemCd"
+		]]>
+	</select>
+
+</sqlMap>

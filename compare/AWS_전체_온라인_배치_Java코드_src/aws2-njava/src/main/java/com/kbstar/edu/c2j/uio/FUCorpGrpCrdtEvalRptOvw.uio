@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+	<method fixedLength="true" id="processCorpGrpCrdtEvalRptOvw">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpCValuaDstcd" length="1" lengthRef="" name="기업집단평가구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="outptYn1" length="1" lengthRef="" name="출력여부1" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="outptYn2" length="1" lengthRef="" name="출력여부2" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="outptYn3" length="1" lengthRef="" name="출력여부3" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="unit" length="1" lengthRef="" name="단위" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="nonCtrcBzwkDstcd" length="3" lengthRef="" name="비계약업무구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="returnCd" length="2" lengthRef="" name="리턴코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctName" length="72" lengthRef="" name="기업집단명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaDefinsYmd" length="8" lengthRef="" name="평가확정년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valdYmd" length="8" lengthRef="" name="유효년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="brnHanglName" length="22" lengthRef="" name="부점한글명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fnafScor" length="9" lengthRef="" name="재무점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="nonFnafScor" length="9" lengthRef="" name="비재무점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="chsnScor" length="14" lengthRef="" name="결합점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="spareCGrdDstcd" length="3" lengthRef="" name="예비집단등급구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="newScGrdDstcd" length="3" lengthRef="" name="신예비집단등급구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="lastClctGrdDstcd" length="3" lengthRef="" name="최종집단등급구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="newLcGrdDstcd" length="3" lengthRef="" name="신최종집단등급구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<recordSet id="FINANCIAL_ANALYSIS" recordCount="1000">
+				<field additional="" formattingType="" id="fnafARptdocDstic" length="2" lengthRef="" name="재무분석보고서구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="fnafItemCd" length="4" lengthRef="" name="재무항목코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="bizSectNo" length="4" lengthRef="" name="사업부문번호" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="bizSectDsticName" length="32" lengthRef="" name="사업부문구분명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="baseYrItemAmt" length="15" lengthRef="" name="기준년항목금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="baseYrRato" length="9" lengthRef="" name="기준년비율" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="baseYrEntpCnt" length="5" lengthRef="" name="기준년업체수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="n1YrBfItemAmt" length="15" lengthRef="" name="N1년전항목금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="n2YrBfItemAmt" length="15" lengthRef="" name="N2년전항목금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="EVALUATION_HISTORY" recordCount="1000">
+				<field additional="" formattingType="" id="histRecId" length="12" lengthRef="" name="이력레코드ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="prevValuaYmd" length="8" lengthRef="" name="이전평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="prevFnafScor" length="9" lengthRef="" name="이전재무점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="prevNonFnafScor" length="9" lengthRef="" name="이전비재무점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="prevChsnScor" length="14" lengthRef="" name="이전결합점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="prevLastGrd" length="3" lengthRef="" name="이전최종등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="scorChgAmt" length="14" lengthRef="" name="점수변동금액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="grdChgInd" length="1" lengthRef="" name="등급변동지표" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="chgRsnCd" length="3" lengthRef="" name="변동사유코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="evalCmnt" length="200" lengthRef="" name="평가자의견" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="COMMITTEE_DECISION" recordCount="1000">
+				<field additional="" formattingType="" id="enrlCmmbCnt" length="5" lengthRef="" name="재적위원수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="attndCmmbCnt" length="5" lengthRef="" name="출석위원수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="athorCmmbCnt" length="5" lengthRef="" name="승인위원수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="notAthorCmmbCnt" length="5" lengthRef="" name="불승인위원수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mtagDstcd" length="1" lengthRef="" name="합의구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="cmpreAthorDstcd" length="1" lengthRef="" name="종합승인구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="athorYmd" length="8" lengthRef="" name="승인년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="RISK_ASSESSMENT" recordCount="1000">
+				<field additional="" formattingType="" id="riskAsmtId" length="12" lengthRef="" name="위험평가ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="crdtRiskScor" length="9" lengthRef="" name="신용위험점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mktRiskScor" length="9" lengthRef="" name="시장위험점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="oprRiskScor" length="9" lengthRef="" name="운영위험점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="liqRiskScor" length="9" lengthRef="" name="유동성위험점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="ovrRiskGrd" length="3" lengthRef="" name="종합위험등급" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskAsmtDt" length="8" lengthRef="" name="위험평가일자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskAsmtrId" length="8" lengthRef="" name="위험평가자ID" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskMdlVer" length="5" lengthRef="" name="위험모델버전" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="riskMonYn" length="1" lengthRef="" name="위험모니터링여부" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+			<recordSet id="INDUSTRY_COMPARISON" recordCount="1000">
+				<field additional="" formattingType="" id="indCd" length="5" lengthRef="" name="산업코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="indName" length="50" lengthRef="" name="산업명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="indAvgScor" length="9" lengthRef="" name="산업평균점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="indMedScor" length="9" lengthRef="" name="산업중위점수" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="pctlRank" length="7" lengthRef="" name="백분위순위" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="indSmplSize" length="5" lengthRef="" name="산업표본크기" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="bmrkDt" length="8" lengthRef="" name="벤치마크일자" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="cmpStat" length="1" lengthRef="" name="비교상태" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="indTrnd" length="1" lengthRef="" name="산업동향" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="mktPos" length="2" lengthRef="" name="시장지위" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+</method-list>

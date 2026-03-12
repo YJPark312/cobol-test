@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- F-007-002: 처리대상기업집단선택 -->
+    <!-- BR-007-001: 기업집단선택기준 적용 -->
+    <select id="selectCorpGroups" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 기업집단선택 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            A.기업집단그룹코드                                  AS "corpClctGroupCd"     /* 기업집단그룹코드 */
+           ,A.기업집단등록코드                                  AS "corpClctRegiCd"      /* 기업집단등록코드 */
+           ,SUBSTR(A.평가기준년월일, 1, 6)                      AS "baseYm"              /* 기준년월 */
+        FROM INST1.TSKIPB110 A                                                          /* 기업집단평가기본 */
+           , (SELECT DISTINCT 
+                     그룹회사코드
+                    ,기업집단그룹코드
+                    ,기업집단등록코드
+              FROM INST1.TSKIPC110                                                      /* 기업집단평가기본 */
+              WHERE 그룹회사코드 = 'KB0' 
+                AND 재무제표반영여부 = '0'
+             ) B
+        WHERE A.그룹회사코드 = B.그룹회사코드 
+          AND A.기업집단그룹코드 = B.기업집단그룹코드
+          AND A.기업집단등록코드 = B.기업집단등록코드 
+          AND A.그룹회사코드 = 'KB0'
+          AND A.기업집단처리단계구분 != '6'
+        ORDER BY A.기업집단그룹코드, A.기업집단등록코드
+        ]]>
+    </select>
+
+    <!-- F-007-003: 기존합산현금수지삭제 -->
+    <!-- BR-007-002: 데이터삭제및재생성로직 적용 -->
+    <delete id="deleteExistingCashFlow" parameterClass="map">
+        <![CDATA[
+        /* 기존합산현금수지삭제 | MultiQ4KBBank, 2025-10-01 */
+        DELETE FROM INST1.TSKIPC120                                                     /* 기업집단재무제표항목 */
+        WHERE 그룹회사코드 = #groupCoCd#
+          AND 기업집단그룹코드 = #corpClctGroupCd#
+          AND 기업집단등록코드 = #corpClctRegiCd#
+          AND 재무분석결산구분 = '1'
+          AND 기준년 = #baseYr#
+          AND 재무분석보고서구분 = #fnafARptdocDstcd#
+        ]]>
+    </delete>
+
+    <!-- F-007-004: 결산년처리 -->
+    <!-- BR-007-003: 결산년처리로직 적용 -->
+    <select id="selectSettlementYears" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 결산년선택 | MultiQ4KBBank, 2025-10-01 */
+        SELECT DISTINCT 
+            결산년                                              AS "stlaccYr"            /* 결산년 */
+           ,결산년합계업체수                                    AS "stlaccCnt"           /* 결산년합계업체수 */
+        FROM INST1.TSKIPC120                                                            /* 기업집단재무제표항목 */
+        WHERE 그룹회사코드 = 'KB0' 
+          AND 기업집단그룹코드 = #corpClctGroupCd#
+          AND 기업집단등록코드 = #corpClctRegiCd# 
+          AND 재무분석결산구분 = '1'
+          AND 기준년 = #baseYr#
+        ORDER BY 결산년 DESC
+        ]]>
+    </select>
+
+    <!-- F-007-004: 현금수지공식처리 -->
+    <!-- BR-007-004: 현금수지산식계산규칙 및 BR-007-008: 산식변수치환규칙 적용 -->
+    <select id="selectCashFlowFormulas" parameterClass="map" resultClass="hmap" fetchSize="100">
+        <![CDATA[
+        /* 현금수지공식선택 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            재무분석보고서구분                                  AS "fnafARptdocDstic"    /* 재무분석보고서구분 */
+           ,재무항목코드                                        AS "fnafItemCd"          /* 재무항목코드 */
+           ,계산식내용                                          AS "clfrCtnt"            /* 계산식내용 */
+        FROM INST1.THKIIMB11                                                            /* 재무분석항목기본 */
+        WHERE RTRIM(계산식내용) <> '' 
+          AND 계산식구분 = '15'
+          AND 재무분석보고서구분 = '18'
+        ORDER BY 재무분석보고서구분, 재무항목코드
+        ]]>
+    </select>
+
+    <!-- F-007-005: 합산현금수지계산및저장 -->
+    <insert id="insertConsolidatedCashFlow" parameterClass="map">
+        <![CDATA[
+        /* 합산현금수지삽입 | MultiQ4KBBank, 2025-10-01 */
+        INSERT INTO INST1.TSKIPC120 (                                                   /* 기업집단재무제표항목 */
+            그룹회사코드                                         /* 그룹회사코드 */
+           ,기업집단그룹코드                                     /* 기업집단그룹코드 */
+           ,기업집단등록코드                                     /* 기업집단등록코드 */
+           ,재무분석결산구분                                     /* 재무분석결산구분 */
+           ,기준년                                              /* 기준년 */
+           ,결산년                                              /* 결산년 */
+           ,재무분석보고서구분                                   /* 재무분석보고서구분 */
+           ,재무항목코드                                        /* 재무항목코드 */
+           ,재무분석자료원구분                                   /* 재무분석자료원구분 */
+           ,재무제표항목금액                                     /* 재무제표항목금액 */
+           ,재무항목비율                                        /* 재무항목비율 */
+           ,결산년합계업체수                                     /* 결산년합계업체수 */
+           ,시스템최종처리일시                                   /* 시스템최종처리일시 */
+           ,시스템최종사용자번호                                 /* 시스템최종사용자번호 */
+        ) VALUES (
+            #groupCoCd#                                         /* 그룹회사코드 */
+           ,#corpClctGroupCd#                                   /* 기업집단그룹코드 */
+           ,#corpClctRegiCd#                                    /* 기업집단등록코드 */
+           ,#fnafAStlaccDstcd#                                  /* 재무분석결산구분 */
+           ,#baseYr#                                            /* 기준년 */
+           ,#stlaccYr#                                          /* 결산년 */
+           ,#fnafARptdocDstcd#                                  /* 재무분석보고서구분 */
+           ,#fnafItemCd#                                        /* 재무항목코드 */
+           ,#fnafAbOrglDstcd#                                   /* 재무분석자료원구분 */
+           ,#fnstItemAmt#                                       /* 재무제표항목금액 */
+           ,#fnafItemCmrt#                                      /* 재무항목비율 */
+           ,#stlaccYsEntpCnt#                                   /* 결산년합계업체수 */
+           ,#sysLastPrcssYms#                                   /* 시스템최종처리일시 */
+           ,#sysLastUno#                                        /* 시스템최종사용자번호 */
+        )
+        ]]>
+    </insert>
+
+    <!-- BR-007-008: 변수치환을 위한 재무데이터 조회 -->
+    <select id="selectFinancialData" parameterClass="map" resultClass="hmap" fetchSize="100">
+        <![CDATA[
+        /* 재무데이터조회 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            재무분석보고서구분                                  AS "fnafARptdocDstcd"    /* 재무분석보고서구분 */
+           ,재무항목코드                                        AS "fnafItemCd"          /* 재무항목코드 */
+           ,결산년                                              AS "stlaccYr"            /* 결산년 */
+           ,재무제표항목금액                                     AS "fnstItemAmt"         /* 재무제표항목금액 */
+        FROM INST1.TSKIPC120                                                            /* 기업집단재무제표항목 */
+        WHERE 그룹회사코드 = #groupCoCd#
+          AND 기업집단그룹코드 = #corpClctGroupCd#
+          AND 기업집단등록코드 = #corpClctRegiCd#
+          AND 재무분석결산구분 = '1'
+          AND 기준년 = #baseYr#
+          AND 재무분석보고서구분 = #fnafARptdocDstcd#
+          AND 재무항목코드 = #fnafItemCd#
+          AND 결산년 IN (#stlaccYr#, #stlaccYrB#)
+        ]]>
+    </select>
+
+    <!-- 처리 통계 조회 (선택적) -->
+    <select id="selectProcessingStats" parameterClass="map" resultClass="hmap" fetchSize="1">
+        <![CDATA[
+        /* 처리통계조회 | MultiQ4KBBank, 2025-10-01 */
+        SELECT 
+            COUNT(*) AS "totalCount"                            /* 총 처리건수 */
+        FROM INST1.TSKIPC120                                                            /* 기업집단재무제표항목 */
+        WHERE 그룹회사코드 = 'KB0'
+          AND 기준년 = #baseYr#
+          AND 재무분석결산구분 = '1'
+          AND 재무분석보고서구분 = '18'
+          AND 시스템최종사용자번호 = 'BIP0022'
+        ]]>
+    </select>
+
+</sqlMap>

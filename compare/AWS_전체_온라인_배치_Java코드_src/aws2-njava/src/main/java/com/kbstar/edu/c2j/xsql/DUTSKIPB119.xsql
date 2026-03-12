@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50">
+		<![CDATA[/* 재무비율산출 단건 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+		      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+		      ,VALUA_YMD AS "valuaYmd"
+		      ,MDEL_CZ_CLSFI_DSTCD AS "mdelCzClsfiDstcd"
+		      ,MDEL_CSZ_CLSFI_CD AS "mdelCszClsfiCd"
+		      ,FNAF_RATO_CMPTN_VAL AS "fnafRatoCmptnVal"
+		  FROM INST1.TSKIPB119
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND MDEL_CZ_CLSFI_DSTCD = #mdelCzClsfiDstcd#
+		   AND MDEL_CSZ_CLSFI_CD = #mdelCszClsfiCd#
+		]]>
+	</select>
+
+	<select id="selectList" parameterClass="map" resultClass="hmap" fetchSize="1000">
+		<![CDATA[/* 재무비율산출 목록 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+		      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+		      ,VALUA_YMD AS "valuaYmd"
+		      ,MDEL_CZ_CLSFI_DSTCD AS "mdelCzClsfiDstcd"
+		      ,MDEL_CSZ_CLSFI_CD AS "mdelCszClsfiCd"
+		      ,FNAF_RATO_CMPTN_VAL AS "fnafRatoCmptnVal"
+		  FROM INST1.TSKIPB119
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		 ORDER BY MDEL_CZ_CLSFI_DSTCD, MDEL_CSZ_CLSFI_CD
+		]]>
+	</select>
+
+	<select id="selectFinancialRatios" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 재무비율 통합 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+		      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+		      ,VALUA_YMD AS "valuaYmd"
+		      ,MDEL_CZ_CLSFI_DSTCD AS "mdelCzClsfiDstcd"
+		      ,MDEL_CSZ_CLSFI_CD AS "mdelCszClsfiCd"
+		      ,FNAF_RATO_CMPTN_VAL AS "fnafRatoCmptnVal"
+		  FROM INST1.TSKIPB119
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND MDEL_CSZ_CLSFI_CD IN ('0001', '0002', '0003', '0004', '0005')
+		 ORDER BY MDEL_CSZ_CLSFI_CD
+		]]>
+	</select>
+
+	<insert id="insert" parameterClass="map">
+		<![CDATA[/* 재무비율산출 등록 | MultiQ4KBBank, 2025-10-01 */
+		INSERT INTO INST1.TSKIPB119 (
+			 GROUP_CO_CD
+			,CORP_CLCT_GROUP_CD
+			,CORP_CLCT_REGI_CD
+			,VALUA_YMD
+			,MDEL_CZ_CLSFI_DSTCD
+			,MDEL_CSZ_CLSFI_CD
+			,FNAF_RATO_CMPTN_VAL
+		) VALUES (
+			 #groupCoCd#
+			,#corpClctGroupCd#
+			,#corpClctRegiCd#
+			,#valuaYmd#
+			,#mdelCzClsfiDstcd#
+			,#mdelCszClsfiCd#
+			,#fnafRatoCmptnVal#
+		)
+		]]>
+	</insert>
+
+	<update id="update" parameterClass="map">
+		<![CDATA[/* 재무비율산출 수정 | MultiQ4KBBank, 2025-10-01 */
+		UPDATE INST1.TSKIPB119
+		   SET FNAF_RATO_CMPTN_VAL = #fnafRatoCmptnVal#
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND MDEL_CZ_CLSFI_DSTCD = #mdelCzClsfiDstcd#
+		   AND MDEL_CSZ_CLSFI_CD = #mdelCszClsfiCd#
+		]]>
+	</update>
+
+</sqlMap>

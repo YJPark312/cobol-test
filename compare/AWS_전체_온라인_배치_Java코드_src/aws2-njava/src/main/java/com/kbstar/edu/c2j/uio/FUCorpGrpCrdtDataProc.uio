@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+    <method fixedLength="true" id="getCorpGrpCrdtRating">
+        <input>
+            <field id="groupCoCd" length="3" name="그룹회사코드" type="string"/>
+            <field id="inquryBaseYm" length="6" name="조회기준년월" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+        </input>
+        <output>
+            <field id="totalNoitm" length="7" name="총건수" type="numeric"/>
+            <field id="prsntNoitm" length="7" name="현재건수" type="numeric"/>
+            <recordSet id="LIST" recordCount="1000">
+                <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" type="string"/>
+                <field id="corpClctRegiCd" length="3" name="기업집단등록코드" type="string"/>
+                <field id="corpClctName" length="100" name="기업집단명" type="string"/>
+                <field id="writYr" length="4" name="작성년" type="string"/>
+                <field id="valuaDefinsYmd" length="8" name="평가확정년월일" type="string"/>
+                <field id="valuaBaseYmd" length="8" name="평가기준년월일" type="string"/>
+                <field id="lastClctGrdDstcd" length="3" name="최종집단등급구분" type="string"/>
+                <field id="valdYmd" length="8" name="유효년월일" type="string"/>
+            </recordSet>
+        </output>
+    </method>
+</method-list>

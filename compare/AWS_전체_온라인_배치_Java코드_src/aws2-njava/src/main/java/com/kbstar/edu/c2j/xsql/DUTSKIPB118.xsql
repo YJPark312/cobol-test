@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업집단평가등급조정사유목록조회 | MultiQ4KBBank, 2025-10-02 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+		      ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+		      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+		      ,VALUA_YMD AS "valuaYmd"
+		      ,ADJS_STGE_NO_DSTCD AS "adjsStgeNoDstcd"
+		      ,ADJS_RSN_SEQ AS "adjsRsnSeq"
+		      ,ADJS_RSN_CD AS "adjsRsnCd"
+		      ,ADJS_RSN_CNTN AS "adjsRsnCntn"
+		  FROM INST1.TSKIPB118
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND ADJS_STGE_NO_DSTCD = #adjsStgeNoDstcd#
+		 ORDER BY ADJS_RSN_SEQ
+		]]>
+	</select>
+
+	<delete id="delete" parameterClass="map">
+		<![CDATA[/* 기업집단평가등급조정사유목록삭제 | MultiQ4KBBank, 2025-10-02 */
+		DELETE FROM INST1.TSKIPB118
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND ADJS_STGE_NO_DSTCD = #adjsStgeNoDstcd#
+		   AND ADJS_RSN_SEQ = #adjsRsnSeq#
+		]]>
+	</delete>
+
+</sqlMap>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<method-list>
+    <method id="processCorpGrpConFinStmtComp">
+        <input>
+            <field id="corpClctGroupCd" type="string" length="3" padChar=" " padType="right" description="기업집단그룹코드"/>
+            <field id="corpClctRegiCd" type="string" length="3" padChar=" " padType="right" description="기업집단등록코드"/>
+            <field id="valuaBaseYmd" type="string" length="8" padChar=" " padType="right" description="평가기준년월일"/>
+            <field id="prcssDstic" type="string" length="2" padChar=" " padType="right" description="처리구분"/>
+        </input>
+        <output>
+            <field id="totalNoitm1" type="int" description="총건수"/>
+            <field id="prsntNoitm1" type="int" description="현재건수"/>
+            <recordSet id="corpGrpStatusList" recordCount="500" description="기업집단현황정보 LIST">
+                <field id="groupCoCd" type="string" length="3" padChar=" " padType="right" description="그룹회사코드"/>
+                <field id="stlaccYm" type="string" length="6" padChar=" " padType="right" description="결산년월"/>
+                <field id="exmtnCustIdnfr" type="string" length="10" padChar=" " padType="right" description="심사고객식별자"/>
+                <field id="rpsntEntpName" type="string" length="52" padChar=" " padType="right" description="대표업체명"/>
+                <field id="mamaCCustIdnfr" type="string" length="10" padChar=" " padType="right" description="모기업고객식별자"/>
+                <field id="mamaCorpName" type="string" length="32" padChar=" " padType="right" description="모기업명"/>
+                <field id="mostHSwayCorpYn" type="string" length="1" padChar=" " padType="right" description="최상위지배기업여부"/>
+                <field id="cnslFnstExstYn" type="string" length="1" padChar=" " padType="right" description="연결재무제표존재여부"/>
+                <field id="idiviFnstExstYn" type="string" length="1" padChar=" " padType="right" description="개별재무제표존재여부"/>
+                <field id="fnstReflctYn" type="string" length="1" padChar=" " padType="right" description="재무제표반영여부"/>
+            </recordSet>
+        </output>
+    </method>
+</method-list>

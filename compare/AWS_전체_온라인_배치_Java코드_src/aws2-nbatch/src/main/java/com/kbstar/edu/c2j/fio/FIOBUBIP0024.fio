@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fio>
+    <name>기업집단사업부문구조별참조자료생성 파일</name>
+    <description>Corporate Group Business Sector Structure Reference Data Generation File</description>
+    <encoding>UTF-8</encoding>
+    
+    <!-- REFDATA_OUT - 참조자료 출력파일 -->
+    <file id="REFDATA_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="groupCoCd" length="3" name="그룹회사코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctGroupCd" length="3" name="기업집단그룹코드" padChar="0x20" padType="right" type="string"/>
+            <field id="corpClctRegiCd" length="3" name="기업집단등록코드" padChar="0x20" padType="right" type="string"/>
+            <field id="valuaYmd" length="8" name="평가년월일" padChar="0x20" padType="right" type="string"/>
+            <field id="fnafARptdocDstcd" length="2" name="재무분석보고서구분" padChar="0x20" padType="right" type="string"/>
+            <field id="fnafItemCd" length="4" name="재무항목코드" padChar="0x20" padType="right" type="string"/>
+            <field id="bizSectDstic" length="4" name="사업부문번호" padChar="0x20" padType="right" type="string"/>
+            <field id="bizSectDsticName" length="32" name="사업부문구분명" padChar="0x20" padType="right" type="string"/>
+            <field id="baseYrItemAmt" length="15" name="기준년항목금액" padChar="0x30" padType="left" type="string"/>
+            <field id="baseYrRato" length="7" name="기준년비율" padChar="0x30" padType="left" type="string"/>
+            <field id="baseYrEntpCnt" length="5" name="기준년업체수" padChar="0x30" padType="left" type="string"/>
+            <field id="n1YrBfItemAmt" length="15" name="N1년전항목금액" padChar="0x30" padType="left" type="string"/>
+            <field id="n1YrBfRato" length="7" name="N1년전비율" padChar="0x30" padType="left" type="string"/>
+            <field id="n1YrBfEntpCnt" length="5" name="N1년전업체수" padChar="0x30" padType="left" type="string"/>
+            <field id="n2YrBfItemAmt" length="15" name="N2년전항목금액" padChar="0x30" padType="left" type="string"/>
+            <field id="n2YrBfRato" length="7" name="N2년전비율" padChar="0x30" padType="left" type="string"/>
+            <field id="n2YrBfEntpCnt" length="5" name="N2년전업체수" padChar="0x30" padType="left" type="string"/>
+            <field id="sysLastPrcssYms" length="20" name="시스템최종처리일시" padChar="0x20" padType="right" type="string"/>
+            <field id="sysLastUno" length="7" name="시스템최종사용자번호" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+    
+    <!-- STATS_OUT - 처리통계 출력파일 -->
+    <file id="STATS_OUT">
+        <fileType>FIXED</fileType>
+        <useNewLineChar>true</useNewLineChar>
+        <trimCell>false</trimCell>
+        <layout>
+            <field id="b110FetchCnt" length="9" name="기업집단평가조회건수" padChar="0x30" padType="left" type="string"/>
+            <field id="b113DeleteCnt" length="9" name="참조자료삭제건수" padChar="0x30" padType="left" type="string"/>
+            <field id="b113InsertCnt" length="9" name="참조자료생성건수" padChar="0x30" padType="left" type="string"/>
+            <field id="b113UpdateCnt" length="9" name="참조자료갱신건수" padChar="0x30" padType="left" type="string"/>
+            <field id="totalProcessCnt" length="9" name="총처리건수" padChar="0x30" padType="left" type="string"/>
+            <field id="filler" length="75" name="여백" padChar="0x20" padType="right" type="string"/>
+        </layout>
+    </file>
+</fio>

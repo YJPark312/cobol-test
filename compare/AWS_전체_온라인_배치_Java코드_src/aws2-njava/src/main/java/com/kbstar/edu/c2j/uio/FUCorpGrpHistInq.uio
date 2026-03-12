@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+	<!-- 기업집단연혁조회 -->
+	<method fixedLength="true" id="inquireCorpGrpHistory">
+		<input>
+			<field additional="" formattingType="" id="prcssdstic" length="2" lengthRef="" name="처리구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaYmd" length="8" lengthRef="" name="평가년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalNoitm" length="5" lengthRef="" name="총건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prsntNoitm" length="5" lengthRef="" name="현재건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="inquryNoitm" length="5" lengthRef="" name="조회건수" padChar="0x30" padType="left" type="int" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="mgtBrncd" length="4" lengthRef="" name="관리부점코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="mgtbrnName" length="42" lengthRef="" name="관리부점명" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<recordSet id="historyGrid" recordCount="500">
+				<field additional="" formattingType="" id="ordvlDstic" length="1" lengthRef="" name="연혁구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="ordvlYmd" length="8" lengthRef="" name="연혁년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+				<field additional="" formattingType="" id="ordvlCtnt" length="202" lengthRef="" name="연혁내용" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			</recordSet>
+		</output>
+	</method>
+</method-list>

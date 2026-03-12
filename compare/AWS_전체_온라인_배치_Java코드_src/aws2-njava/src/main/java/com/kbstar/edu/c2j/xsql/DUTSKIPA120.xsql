@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<select id="selectHistoricalCorpGrpCompanyList" parameterClass="map" resultClass="hmap" fetchSize="100"><![CDATA[/* 월별기업집단관계사현황조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.EXMTN_CUST_IDNFR AS "exmtnCustIdnfr"
+		      ,A.RPSNT_BZNO AS "rpsntBzno"
+		      ,A.RPSNT_ENTP_NAME AS "rpsntEntpName"
+		      ,A.CORP_CV_GRD_DSTCD AS "corpCvGrdDstcd"
+		      ,A.CORP_SCAL_DSTCD AS "corpScalDstcd"
+		      ,A.STND_I_CLSFI_CD AS "stndIClsfiCd"
+		      ,A.CUST_MGT_BRNCD AS "custMgtBrncd"
+		      ,A.TOTAL_LNBZ_AMT AS "totalLnbzAmt"
+		      ,A.LNBZ_BAL AS "lnbzBal"
+		      ,A.SCURTY_AMT AS "scurtyAmt"
+		      ,A.AMOV AS "amov"
+		      ,A.PYY_TOTAL_LNBZ_AMT AS "pyyTotalLnbzAmt"
+		      ,A.CORP_L_PLICY_CTNT AS "corpLPlicyCtnt"
+		      ,A.FCLT_FNDS_CLAM AS "fcltFndsClam"
+		      ,A.FCLT_FNDS_BAL AS "fcltFndsBal"
+		      ,A.WRKN_FNDS_CLAM AS "wrknFndsClam"
+		      ,A.WRKN_FNDS_BAL AS "wrknFndsBal"
+		      ,A.INFC_CLAM AS "infcClam"
+		      ,A.INFC_BAL AS "infcBal"
+		      ,A.ETC_FNDS_CLAM AS "etcFndsClam"
+		      ,A.ETC_FNDS_BAL AS "etcFndsBal"
+		      ,A.DRVT_P_TRAN_CLAM AS "drvtPTranClam"
+		      ,A.DRVT_PRDCT_TRAN_BAL AS "drvtPrdctTranBal"
+		      ,A.DRVT_PC_TRAN_CLAM AS "drvtPcTranClam"
+		      ,A.DRVT_PS_TRAN_CLAM AS "drvtPsTranClam"
+		      ,A.INLS_GRCR_STUP_CLAM AS "inlsGrcrStupClam"
+		  FROM TSKIPA120 A
+		 WHERE A.CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND A.CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND A.BASE_YM = #baseYm#
+		 ORDER BY A.EXMTN_CUST_IDNFR
+	]]></select>
+
+	<select id="selectMonthlyCompanyInfo" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 기업집단월별기본정보조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.EXMTN_CUST_IDNFR AS "exmtnCustIdnfr"
+		      ,A.RPSNT_BZNO AS "rpsntBzno"
+		      ,A.RPSNT_ENTP_NAME AS "rpsntEntpName"
+		      ,A.TOTAL_LNBZ_AMT AS "totalLnbzAmt"
+		      ,A.LNBZ_BAL AS "lnbzBal"
+		  FROM TSKIPA120 A
+		 WHERE A.EXMTN_CUST_IDNFR = #exmtnCustIdnfr#
+		   AND A.BASE_YM = #baseYm#
+		 ORDER BY A.EXMTN_CUST_IDNFR
+		 FETCH FIRST 1 ROWS ONLY
+	]]></select>
+
+	<select id="selectIndustryClassificationName" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 산업분류명조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.STND_I_CLSFI_NAME AS "stndIClsfiName"
+		  FROM THKJIUI02 A
+		 WHERE A.STND_I_CLSFI_CD = #stndIClsfiCd#
+		   AND A.USE_YN = #useYn#
+		 FETCH FIRST 1 ROWS ONLY
+	]]></select>
+
+	<select id="selectBranchName" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 부점명조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT A.BRN_NAME AS "brnName"
+		  FROM THKJIBR01 A
+		 WHERE A.CUST_MGT_BRNCD = #custMgtBrncd#
+		   AND A.USE_YN = #useYn#
+		 FETCH FIRST 1 ROWS ONLY
+	]]></select>
+
+</sqlMap>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+<select id="selectTopControllingEntity" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 최상위지배기업 조회 | MultiQ4KBBank, 2025-10-02 */
+SELECT A.GROUP_CO_CD AS "groupCoCd"
+      ,A.CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,A.CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,A.CUST_IDNFR AS "exmtnCustIdnfr"
+      ,B.ENTP_NAME AS "rpsntEntpName"
+      ,A.MAMA_C_CUST_IDNFR AS "mamaCCustIdnfr"
+      ,C.ENTP_NAME AS "mamaCorpName"
+      ,A.MOST_H_SWAY_CORP_YN AS "mostHSwayCorpYn"
+      ,'Y' AS "cnslFnstExstYn"
+      ,'Y' AS "idiviFnstExstYn"
+      ,'Y' AS "fnstReflctYn"
+      ,SUBSTR(A.STLACC_YMD, 1, 6) AS "stlaccYm"
+      ,A.MAMA_C_CUST_IDNFR AS "parentCustIdnfr"
+      ,C.ENTP_NAME AS "parentCorpName"
+      ,A.MOST_H_SWAY_CORP_YN AS "topControllingYn"
+  FROM INST1.TSKIPC110 A
+  LEFT JOIN INST1.THKAABPCB B ON A.CUST_IDNFR = B.CUST_IDNFR
+  LEFT JOIN INST1.THKAABPCB C ON A.MAMA_C_CUST_IDNFR = C.CUST_IDNFR
+ WHERE A.GROUP_CO_CD = #corpClctGroupCd#
+<isNotEmpty prepend="AND" property="corpClctRegiCd">
+   AND A.CORP_CLCT_REGI_CD = #corpClctRegiCd#
+</isNotEmpty>
+<isNotEmpty prepend="AND" property="custIdnfr">
+   AND A.CUST_IDNFR = #custIdnfr#
+</isNotEmpty>
+<isNotEmpty prepend="AND" property="valuaBaseYmd">
+   AND A.STLACC_YMD <= #valuaBaseYmd#
+</isNotEmpty>
+ ORDER BY A.CORP_CLCT_GROUP_CD, A.CORP_CLCT_REGI_CD, A.CUST_IDNFR
+]]></select>
+
+<select id="selectCorpGrpConsolidationTarget" parameterClass="map" resultClass="hmap" fetchSize="100"><![CDATA[/* 기업집단 합산연결대상 조회 | MultiQ4KBBank, 2025-10-02 */
+SELECT A.GROUP_CO_CD AS "groupCoCd"
+      ,A.CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,A.CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,A.CUST_IDNFR AS "custIdnfr"
+      ,B.ENTP_NAME AS "entpName"
+  FROM INST1.TSKIPC110 A
+  LEFT JOIN INST1.THKAABPCB B ON A.CUST_IDNFR = B.CUST_IDNFR
+ WHERE A.GROUP_CO_CD = #corpClctGroupCd#
+   AND A.CORP_CLCT_REGI_CD = #corpClctRegiCd#
+<isNotEmpty prepend="AND" property="baseYear">
+   AND SUBSTR(A.STLACC_YMD, 1, 4) >= #baseYear#
+</isNotEmpty>
+<isNotEmpty prepend="AND" property="stlaccYear">
+   AND SUBSTR(A.STLACC_YMD, 1, 4) <= #stlaccYear#
+</isNotEmpty>
+ ORDER BY A.CORP_CLCT_GROUP_CD, A.CORP_CLCT_REGI_CD, A.CUST_IDNFR
+]]></select>
+
+<insert id="insertTopControllingEntity" parameterClass="map"><![CDATA[/* 최상위지배기업 등록 | MultiQ4KBBank, 2025-10-02 */
+INSERT INTO INST1.TSKIPC110 (
+       GROUP_CO_CD
+      ,CORP_CLCT_GROUP_CD
+      ,CORP_CLCT_REGI_CD
+      ,CUST_IDNFR
+      ,MAMA_C_CUST_IDNFR
+      ,MOST_H_SWAY_CORP_YN
+      ,STLACC_YMD
+      ,REGI_YMD
+      ,REGI_TM
+      ,REGI_USER_ID
+      ,UPDT_YMD
+      ,UPDT_TM
+      ,UPDT_USER_ID
+) VALUES (
+       #corpClctGroupCd#
+      ,#corpClctGroupCd#
+      ,#corpClctRegiCd#
+      ,#custIdnfr#
+      ,#mamaCCustIdnfr#
+      ,#mostHSwayCorpYn#
+      ,#stlaccYmd#
+      ,CURRENT DATE
+      ,CURRENT TIME
+      ,#regiUserId#
+      ,CURRENT DATE
+      ,CURRENT TIME
+      ,#updtUserId#
+)
+]]></insert>
+
+<update id="updateTopControllingEntity" parameterClass="map"><![CDATA[/* 최상위지배기업 수정 | MultiQ4KBBank, 2025-10-02 */
+UPDATE INST1.TSKIPC110 
+   SET MAMA_C_CUST_IDNFR = #mamaCCustIdnfr#
+      ,MOST_H_SWAY_CORP_YN = #mostHSwayCorpYn#
+      ,STLACC_YMD = #stlaccYmd#
+      ,UPDT_YMD = CURRENT DATE
+      ,UPDT_TM = CURRENT TIME
+      ,UPDT_USER_ID = #updtUserId#
+ WHERE GROUP_CO_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND CUST_IDNFR = #custIdnfr#
+]]></update>
+
+<delete id="deleteTopControllingEntity" parameterClass="map"><![CDATA[/* 최상위지배기업 삭제 | MultiQ4KBBank, 2025-10-02 */
+DELETE FROM INST1.TSKIPC110
+ WHERE GROUP_CO_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND CUST_IDNFR = #custIdnfr#
+]]></delete>
+
+</sqlMap>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<method-list>
+	<method fixedLength="true" id="processFinancialCalculation">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="prcssDstic" length="2" lengthRef="" name="처리구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="fnstDstic" length="2" lengthRef="" name="재무제표구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fnafAbOrglDstcd" length="1" lengthRef="" name="재무분석자료원구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="financialStatement" length="1000" lengthRef="" name="재무제표데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="financialRatios" length="1000" lengthRef="" name="재무비율데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</output>
+	</method>
+	<method fixedLength="true" id="processIndividualFinancialStatement">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="fnstDstic" length="2" lengthRef="" name="재무제표구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fnafAbOrglDstcd" length="1" lengthRef="" name="재무분석자료원구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="financialStatement" length="1000" lengthRef="" name="재무제표데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="financialRatios" length="1000" lengthRef="" name="재무비율데이터" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</output>
+	</method>
+	<method fixedLength="true" id="processConsolidatedFinancialStatement">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="fnstDstic" length="2" lengthRef="" name="재무제표구분" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fnafAbOrglDstcd" length="1" lengthRef="" name="재무분석자료원구분코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</output>
+	</method>
+	<method fixedLength="true" id="retrieveFinancialStatementData">
+		<input>
+			<field additional="" formattingType="" id="corpClctGroupCd" length="3" lengthRef="" name="기업집단그룹코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="corpClctRegiCd" length="3" lengthRef="" name="기업집단등록코드" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="valuaBaseYmd" length="8" lengthRef="" name="평가기준년월일" padChar="0x20" padType="right" type="string" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본금" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="ambr" length="15" lengthRef="" name="차입금" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="cshAsst" length="15" lengthRef="" name="현금자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="salepr" length="15" lengthRef="" name="매출액" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="oprft" length="15" lengthRef="" name="영업이익" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="fncs" length="15" lengthRef="" name="금융비용" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="netPrft" length="15" lengthRef="" name="순이익" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="bzoproNcf" length="15" lengthRef="" name="영업NCF" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="ebitda" length="15" lengthRef="" name="EBITDA" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+		</output>
+	</method>
+	<method fixedLength="true" id="calculateFinancialRatios">
+		<input>
+			<field additional="" formattingType="" id="totalAsst" length="15" lengthRef="" name="총자산" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="oncp" length="15" lengthRef="" name="자기자본금" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="ambr" length="15" lengthRef="" name="차입금" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+		</input>
+		<output>
+			<field additional="" formattingType="" id="liablRato" length="7" lengthRef="" name="부채비율" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+			<field additional="" formattingType="" id="ambrRlnc" length="7" lengthRef="" name="차입금의존도" padChar="0x30" padType="left" type="numeric" validationLogic="" validationType=""/>
+		</output>
+	</method>
+</method-list>

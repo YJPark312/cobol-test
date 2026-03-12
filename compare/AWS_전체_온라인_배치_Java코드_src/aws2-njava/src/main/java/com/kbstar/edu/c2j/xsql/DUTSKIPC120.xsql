@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50"><![CDATA[/* 기업집단합산연결재무제표정보조회 | MultiQ4KBBank, 2025-10-01 */
+SELECT CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,STLACC_YR AS "stlaccYr"
+      ,STLACC_YS_ENTP_CNT AS "stlaccYsEntpCnt"
+      ,PRCSS_DSTIC AS "prcssdstic"
+  FROM INST1.TSKIPC120
+ WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND STLACC_YR = #stlaccYr#
+   AND PRCSS_DSTIC = #prcssdstic#
+	]]></select>
+
+	<insert id="insert" parameterClass="map"><![CDATA[/* 기업집단합산연결재무제표정보등록 | MultiQ4KBBank, 2025-10-01 */
+INSERT INTO INST1.TSKIPC120 (
+	CORP_CLCT_GROUP_CD
+	,CORP_CLCT_REGI_CD
+	,STLACC_YR
+	,STLACC_YS_ENTP_CNT
+	,PRCSS_DSTIC
+	,FRST_RGST_YMS
+	,FRST_RGST_USER_ID
+	,LAST_CHNG_YMS
+	,LAST_CHNG_USER_ID
+) VALUES (
+	#corpClctGroupCd#
+	,#corpClctRegiCd#
+	,#stlaccYr#
+	,#stlaccYsEntpCnt#
+	,#prcssdstic#
+	,CURRENT TIMESTAMP
+	,#userId#
+	,CURRENT TIMESTAMP
+	,#userId#
+)
+	]]></insert>
+
+	<update id="update" parameterClass="map"><![CDATA[/* 기업집단합산연결재무제표정보수정 | MultiQ4KBBank, 2025-10-01 */
+UPDATE INST1.TSKIPC120
+   SET STLACC_YS_ENTP_CNT = #stlaccYsEntpCnt#
+      ,LAST_CHNG_YMS = CURRENT TIMESTAMP
+      ,LAST_CHNG_USER_ID = #userId#
+ WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+   AND STLACC_YR = #stlaccYr#
+   AND PRCSS_DSTIC = #prcssdstic#
+	]]></update>
+</sqlMap>

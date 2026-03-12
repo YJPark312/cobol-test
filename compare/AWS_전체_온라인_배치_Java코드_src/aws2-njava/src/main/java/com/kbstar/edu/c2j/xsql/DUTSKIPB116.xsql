@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- 계열사정보삭제 -->
+    <delete id="delete" parameterClass="nexcore.framework.core.data.DataSet">
+        <![CDATA[
+        DELETE FROM INST1.TSKIPB116
+        WHERE CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+          AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+          AND VALUA_YMD = #valuaYmd#
+        ]]>
+    </delete>
+
+    <!-- 계열사정보삽입 -->
+    <insert id="insert" parameterClass="nexcore.framework.core.data.DataSet">
+        <![CDATA[
+        INSERT INTO INST1.TSKIPB116 (
+            CORP_CLCT_GROUP_CD,
+            CORP_CLCT_REGI_CD,
+            VALUA_YMD,
+            VALUA_BASE_YMD,
+            EXMTN_CUST_IDNFR,
+            COPR_NAME,
+            KIS_C_OPBLC_DSTCD,
+            INCOR_YMD,
+            BZTYP_NAME,
+            TOTAL_ASAM,
+            SALEPR,
+            CAPTL_TSUMN_AMT,
+            NET_PRFT,
+            OPRFT,
+            FNCS,
+            EBITDA_AMT,
+            CORP_C_LIABL_RATO,
+            AMBR_RLNC_RT,
+            NET_B_AVTY_CSFW_AMT,
+            RPRS_NAME
+        ) VALUES (
+            #corpClctGroupCd#,
+            #corpClctRegiCd#,
+            #valuaYmd#,
+            #valuaBaseYmd#,
+            #exmtnCustIdnfr#,
+            #coprName#,
+            #kisCOpblcDstcd#,
+            #incorYmd#,
+            #bztypName#,
+            #totalAsam#,
+            #salepr#,
+            #captlTsumnAmt#,
+            #netPrft#,
+            #oprft#,
+            #fncs#,
+            #ebitdaAmt#,
+            #corpCLiablRato#,
+            #ambrRlncRt#,
+            #netBAvtyCsfwAmt#,
+            #rprsName#
+        )
+        ]]>
+    </insert>
+
+</sqlMap>

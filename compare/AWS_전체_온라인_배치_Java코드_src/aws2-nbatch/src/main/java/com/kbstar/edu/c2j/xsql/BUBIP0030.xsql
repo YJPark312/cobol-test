@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- 기업집단평가데이터 선정 (BR-014-001) -->
+    <select id="selectCorporateGroupEvaluation" parameterClass="map" resultClass="hmap" fetchSize="50">
+        <![CDATA[
+        /* 기업집단평가데이터선정 | MultiQ4KBBank, 2025-10-01 */
+        SELECT A.CORP_CLCT_GROUP_CD AS "corpClctGroupCd",
+               A.CORP_CLCT_REGI_CD AS "corpClctRegiCd",
+               A.VALUA_YMD AS "valuaYmd",
+               A.STLACC_YM AS "stlaccYm"
+          FROM INST1.TSKIPB110 A,
+               INST1.TSKIPC110 B
+         WHERE A.GROUP_CO_CD = :groupCoCd
+           AND A.GROUP_CO_CD = B.GROUP_CO_CD
+           AND A.CORP_CLCT_GROUP_CD = B.CORP_CLCT_GROUP_CD
+           AND A.CORP_CLCT_REGI_CD = B.CORP_CLCT_REGI_CD
+           AND A.CORP_CP_STGE_DSTCD != '6'
+           AND B.FNSTMT_RFLCT_YN = '0'
+         ORDER BY A.CORP_CLCT_GROUP_CD, A.CORP_CLCT_REGI_CD
+        ]]>
+    </select>
+
+    <!-- 기존 합산연결재무비율 삭제 (BR-014-003) -->
+    <delete id="deleteExistingRatioData" parameterClass="map">
+        <![CDATA[
+        /* 기존합산연결재무비율삭제 | MultiQ4KBBank, 2025-10-01 */
+        DELETE FROM INST1.TSKIPC131
+         WHERE GROUP_CO_CD = :groupCoCd
+           AND CORP_CLCT_GROUP_CD = :corpClctGroupCd
+           AND CORP_CLCT_REGI_CD = :corpClctRegiCd
+           AND FNAF_A_STLACC_DSTCD = '1'
+           AND BASE_YR = :baseYr
+        ]]>
+    </delete>
+
+    <!-- 계열사별 재무산식 데이터 조회 (BR-014-005) -->
+    <select id="selectAffiliateFinancialData" parameterClass="map" resultClass="hmap" fetchSize="100">
+        <![CDATA[
+        /* 계열사별재무산식데이터조회 | MultiQ4KBBank, 2025-10-01 */
+        WITH T1 AS (
+            SELECT DISTINCT A.CORP_CLCT_GROUP_CD,
+                   A.CORP_CLCT_REGI_CD,
+                   C.FNAF_A_RPTDOC_DSTCD,
+                   C.FNAF_ITEM_CD,
+                   C.CLFR_CTNT
+              FROM INST1.TSKIPC130 A,
+                   INST1.THKIIMB11 C
+             WHERE A.GROUP_CO_CD = :groupCoCd
+               AND A.CORP_CLCT_GROUP_CD = :corpClctGroupCd
+               AND A.CORP_CLCT_REGI_CD = :corpClctRegiCd
+               AND A.FNAF_A_STLACC_DSTCD = '1'
+               AND A.BASE_YR = :baseYr
+               AND C.GROUP_CO_CD = A.GROUP_CO_CD
+               AND C.CLFR_DSTIC = '15'
+               AND RTRIM(C.CLFR_CTNT) <> ''
+        )
+        SELECT T1.FNAF_A_RPTDOC_DSTCD AS "fnafARptdocDstcd",
+               T1.FNAF_ITEM_CD AS "fnafItemCd",
+               T1.CLFR_CTNT AS "clfrCtnt"
+          FROM T1
+         ORDER BY T1.FNAF_A_RPTDOC_DSTCD, T1.FNAF_ITEM_CD
+        ]]>
+    </select>
+
+    <!-- 합산연결재무비율 생성 -->
+    <insert id="insertConsolidatedRatio" parameterClass="map">
+        <![CDATA[
+        /* 합산연결재무비율생성 | MultiQ4KBBank, 2025-10-01 */
+        INSERT INTO INST1.TSKIPC131 (
+            GROUP_CO_CD,
+            CORP_CLCT_GROUP_CD,
+            CORP_CLCT_REGI_CD,
+            FNAF_A_STLACC_DSTCD,
+            BASE_YR,
+            STLACC_YR,
+            FNAF_A_RPTDOC_DSTCD,
+            FNAF_ITEM_CD,
+            CORP_CLCT_FNAF_RATO,
+            NMRT_VAL,
+            DNMN_VAL,
+            STLACC_YS_ENTP_CNT,
+            SYS_LAST_PRCSS_YMS,
+            SYS_LAST_UNO
+        ) VALUES (
+            :groupCoCd,
+            :corpClctGroupCd,
+            :corpClctRegiCd,
+            :fnafAStlaccDstcd,
+            :baseYr,
+            :stlaccYr,
+            :fnafARptdocDstcd,
+            :fnafItemCd,
+            :corpClctFnafRato,
+            :nmrtVal,
+            :dnmnVal,
+            :stlaccYsEntpCnt,
+            :sysLastPrcssYms,
+            :sysLastUno
+        )
+        ]]>
+    </insert>
+
+    <!-- 재무제표반영여부 업데이트 (BR-014-004) -->
+    <update id="updateFinancialStatementReflection" parameterClass="map">
+        <![CDATA[
+        /* 재무제표반영여부업데이트 | MultiQ4KBBank, 2025-10-01 */
+        UPDATE INST1.TSKIPC110
+           SET FNSTMT_RFLCT_YN = :fnstReflctYn,
+               SYS_LAST_PRCSS_YMS = :sysLastPrcssYms,
+               SYS_LAST_UNO = :sysLastUno
+         WHERE GROUP_CO_CD = :groupCoCd
+           AND CORP_CLCT_GROUP_CD = :corpClctGroupCd
+           AND CORP_CLCT_REGI_CD = :corpClctRegiCd
+        ]]>
+    </update>
+
+    <!-- 처리단계구분 업데이트 (BR-014-004) -->
+    <update id="updateProcessingStage" parameterClass="map">
+        <![CDATA[
+        /* 처리단계구분업데이트 | MultiQ4KBBank, 2025-10-01 */
+        UPDATE INST1.TSKIPB110
+           SET CORP_CP_STGE_DSTCD = :corpCpStgeDstcd,
+               SYS_LAST_PRCSS_YMS = :sysLastPrcssYms,
+               SYS_LAST_UNO = :sysLastUno
+         WHERE GROUP_CO_CD = :groupCoCd
+           AND CORP_CLCT_GROUP_CD = :corpClctGroupCd
+           AND CORP_CLCT_REGI_CD = :corpClctRegiCd
+        ]]>
+    </update>
+
+</sqlMap>

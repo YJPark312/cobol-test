@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+	<!-- 기업집단승인결의록위원명세 단건 조회 -->
+	<select id="select" parameterClass="map" resultClass="hmap" fetchSize="50">
+		<![CDATA[/* 기업집단승인결의록위원명세 단건 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+			  ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+			  ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+			  ,VALUA_YMD AS "valuaYmd"
+			  ,ATHOR_CMMB_EMPID AS "athorCmmbEmpid"
+			  ,ATHOR_CMMB_DSTCD AS "athorCmmbDstcd"
+			  ,ATHOR_DSTCD AS "athorDstcd"
+			  ,SYS_LAST_PRCSS_YMS AS "sysLastPrcssYms"
+			  ,SYS_LAST_UNO AS "sysLastUno"
+		  FROM INST1.TSKIPB132
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND ATHOR_CMMB_EMPID = #athorCmmbEmpid#
+		]]>
+	</select>
+
+	<!-- 기업집단승인결의록위원명세 목록 조회 -->
+	<select id="selectList" parameterClass="map" resultClass="hmap" fetchSize="100">
+		<![CDATA[/* 기업집단승인결의록위원명세 목록 조회 | MultiQ4KBBank, 2025-10-01 */
+		SELECT GROUP_CO_CD AS "groupCoCd"
+			  ,CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+			  ,CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+			  ,VALUA_YMD AS "valuaYmd"
+			  ,ATHOR_CMMB_EMPID AS "athorCmmbEmpid"
+			  ,ATHOR_CMMB_DSTCD AS "athorCmmbDstcd"
+			  ,ATHOR_DSTCD AS "athorDstcd"
+			  ,SYS_LAST_PRCSS_YMS AS "sysLastPrcssYms"
+			  ,SYS_LAST_UNO AS "sysLastUno"
+		  FROM INST1.TSKIPB132
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		 ORDER BY ATHOR_CMMB_EMPID
+		]]>
+	</select>
+
+	<!-- 기업집단승인결의록위원명세 등록 -->
+	<insert id="insert" parameterClass="map">
+		<![CDATA[/* 기업집단승인결의록위원명세 등록 | MultiQ4KBBank, 2025-10-01 */
+		INSERT INTO INST1.TSKIPB132 (
+			 GROUP_CO_CD
+			,CORP_CLCT_GROUP_CD
+			,CORP_CLCT_REGI_CD
+			,VALUA_YMD
+			,ATHOR_CMMB_EMPID
+			,ATHOR_CMMB_DSTCD
+			,ATHOR_DSTCD
+			,SYS_LAST_PRCSS_YMS
+			,SYS_LAST_UNO
+		) VALUES (
+			 #groupCoCd#
+			,#corpClctGroupCd#
+			,#corpClctRegiCd#
+			,#valuaYmd#
+			,#athorCmmbEmpid#
+			,#athorCmmbDstcd#
+			,#athorDstcd#
+			,CURRENT TIMESTAMP
+			,#sysLastUno#
+		)
+		]]>
+	</insert>
+
+	<!-- 기업집단승인결의록위원명세 수정 -->
+	<update id="update" parameterClass="map">
+		<![CDATA[/* 기업집단승인결의록위원명세 수정 | MultiQ4KBBank, 2025-10-01 */
+		UPDATE INST1.TSKIPB132
+		   SET ATHOR_CMMB_DSTCD = #athorCmmbDstcd#
+			  ,ATHOR_DSTCD = #athorDstcd#
+			  ,SYS_LAST_PRCSS_YMS = CURRENT TIMESTAMP
+			  ,SYS_LAST_UNO = #sysLastUno#
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND ATHOR_CMMB_EMPID = #athorCmmbEmpid#
+		]]>
+	</update>
+
+	<!-- 기업집단승인결의록위원명세 삭제 -->
+	<delete id="delete" parameterClass="map">
+		<![CDATA[/* 기업집단승인결의록위원명세 삭제 | MultiQ4KBBank, 2025-10-01 */
+		DELETE FROM INST1.TSKIPB132
+		 WHERE GROUP_CO_CD = #groupCoCd#
+		   AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+		   AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+		   AND VALUA_YMD = #valuaYmd#
+		   AND ATHOR_CMMB_EMPID = #athorCmmbEmpid#
+		]]>
+	</delete>
+
+</sqlMap>

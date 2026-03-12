@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BUBIP0029">
+
+    <!-- F-008-002: 처리대상기업집단선택 -->
+    <select id="selectCorpGroups" resultClass="java.util.HashMap">
+        <![CDATA[
+        SELECT A.CORP_CLCT_GROUP_CD AS corpClctGroupCd
+             , A.CORP_CLCT_REGI_CD AS corpClctRegiCd
+             , SUBSTR(A.VALUA_BASE_YMD, 1, 6) AS baseYm
+          FROM TSKIPB110 A
+             , (SELECT DISTINCT GROUP_CO_CD
+                     , CORP_CLCT_GROUP_CD
+                     , CORP_CLCT_REGI_CD
+                  FROM TSKIPC110
+                 WHERE GROUP_CO_CD = 'KB0'
+                   AND FNST_RFLCT_YN = '0') B
+         WHERE A.GROUP_CO_CD = B.GROUP_CO_CD
+           AND A.CORP_CLCT_GROUP_CD = B.CORP_CLCT_GROUP_CD
+           AND A.CORP_CLCT_REGI_CD = B.CORP_CLCT_REGI_CD
+           AND A.GROUP_CO_CD = 'KB0'
+           AND A.CORP_CLCT_PRCSS_STEP_DSTIC != '6'
+         WITH UR
+        ]]>
+    </select>
+
+    <!-- F-008-004: 연결현금수지공식처리 - 결산년 선택 -->
+    <select id="selectSettlementYears" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+        <![CDATA[
+        SELECT DISTINCT CORP_CLCT_GROUP_CD AS corpClctGroupCd
+                      , CORP_CLCT_REGI_CD AS corpClctRegiCd
+                      , BASE_YR AS baseYr
+                      , STLACC_YR AS stlaccYr
+                      , COUNT(*) AS stlaccCnt
+          FROM TSKIPC130
+         WHERE GROUP_CO_CD = #groupCoCd#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+           AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+           AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+           AND BASE_YR = #baseYr#
+         GROUP BY CORP_CLCT_GROUP_CD, CORP_CLCT_REGI_CD, BASE_YR, STLACC_YR
+         WITH UR
+        ]]>
+    </select>
+
+    <!-- F-008-005: 합산연결현금수지계산및저장 - 단순화된 공식 템플릿 조회 -->
+    <select id="selectFormulaTemplates" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+        <![CDATA[
+        SELECT FNAF_A_RPTDOC_DSTIC AS fnafARptdocDstic
+             , FNAF_ITEM_CD AS fnafItemCd
+             , CLFR_CTNT AS clfrCtnt
+          FROM THKIIMB11
+         WHERE GROUP_CO_CD = #groupCoCd#
+           AND CLFR_DSTIC = #formulaType#
+           AND RTRIM(CLFR_CTNT) <> ''
+         ORDER BY FNAF_A_RPTDOC_DSTIC, FNAF_ITEM_CD
+         WITH UR
+        ]]>
+    </select>
+
+    <!-- 공식 변수 값 조회 (WP-007 패턴 적용) -->
+    <select id="getFormulaVariableValue" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+        <![CDATA[
+        SELECT FNST_ITEM_AMT AS fnstItemAmt
+          FROM TSKIPC130
+         WHERE GROUP_CO_CD = #groupCoCd#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+           AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+           AND BASE_YR = #baseYr#
+           AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd#
+           AND FNAF_ITEM_CD = #fnafItemCd#
+           AND STLACC_YR = #stlaccYr#
+           AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+         WITH UR
+        ]]>
+    </select>
+
+    <!-- F-008-003: 기존합산연결현금수지삭제 -->
+    <delete id="deleteExistingConsolidatedCashFlow" parameterClass="java.util.HashMap">
+        <![CDATA[
+        DELETE FROM TSKIPC130
+         WHERE GROUP_CO_CD = #groupCoCd#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd#
+           AND CORP_CLCT_REGI_CD = #corpClctRegiCd#
+           AND FNAF_A_STLACC_DSTCD = #fnafAStlaccDstcd#
+           AND BASE_YR = #baseYr#
+        ]]>
+    </delete>
+
+    <!-- F-008-005: 합산연결현금수지계산및저장 - 데이터 삽입 -->
+    <insert id="insertConsolidatedCashFlow" parameterClass="java.util.HashMap">
+        <![CDATA[
+        INSERT INTO TSKIPC130 (
+            GROUP_CO_CD,
+            CORP_CLCT_GROUP_CD,
+            CORP_CLCT_REGI_CD,
+            FNAF_A_STLACC_DSTCD,
+            BASE_YR,
+            STLACC_YR,
+            FNAF_A_RPTDOC_DSTCD,
+            FNAF_ITEM_CD,
+            FNST_ITEM_AMT,
+            FNAF_ITEM_CMRT,
+            STLACC_YS_ENTP_CNT,
+            SYS_LAST_PRCSS_YMS,
+            SYS_LAST_UNO
+        ) VALUES (
+            #groupCoCd#,
+            #corpClctGroupCd#,
+            #corpClctRegiCd#,
+            #fnafAStlaccDstcd#,
+            #baseYr#,
+            #stlaccYr#,
+            #fnafARptdocDstcd#,
+            #fnafItemCd#,
+            #fnstItemAmt#,
+            #fnafItemCmrt#,
+            #stlaccYsEntpCnt#,
+            CURRENT_TIMESTAMP,
+            #sysLastUno#
+        )
+        ]]>
+    </insert>
+
+</sqlMap>

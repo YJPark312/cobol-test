@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+
+    <!-- CUR_A110: 관계기업기본정보 조회 커서 -->
+    <select id="CUR_A110" parameterClass="map" resultClass="hmap" fetchSize="1000"><![CDATA[/* CUR_A110 관계기업기본정보 조회 | MultiQ4KBBank, 2025-10-02 */
+SELECT A110.그룹회사코드                    AS "groupCoCd"
+     , A110.심사고객식별자                  AS "exmtnCustIdnfr"
+     , A110.대표사업자번호                  AS "rpsntBzno"
+     , A110.대표업체명                      AS "rpsntEntpName"
+     , A110.기업집단그룹코드                AS "corpClctGroupCd"
+     , A110.기업집단등록코드                AS "corpClctRegiCd"
+     , A110.법인그룹연결등록구분            AS "coprGcRegiDstcd"
+     , A110.법인그룹연결등록일시            AS "coprGcRegiYms"
+     , A110.법인그룹연결직원번호            AS "coprGCnslEmpid"
+     , A110.기업신용평가등급구분            AS "corpCvGrdDstcd"
+     , A110.기업규모구분                    AS "corpScalDstcd"
+     , A110.표준산업분류코드                AS "stndIClsfiCd"
+     , A110.고객관리부점코드                AS "custMgtBrncd"
+     , A110.총여신금액                      AS "totalLnbzAmt"
+     , A110.여신잔액                        AS "lnbzBal"
+     , A110.담보금액                        AS "scurtyAmt"
+     , A110.연체금액                        AS "amov"
+     , A110.전년총여신금액                  AS "pyyTotalLnbzAmt"
+     , A110.기업여신정책구분                AS "corpLPlicyDstcd"
+     , A110.기업여신정책일련번호            AS "corpLPlicySerno"
+     , A110.기업여신정책내용                AS "corpLPlicyCtnt"
+     , A110.조기경보사후관리구분            AS "elyAaMgtDstcd"
+     , A110.시설자금한도                    AS "fcltFndsClam"
+     , A110.시설자금잔액                    AS "fcltFndsBal"
+     , A110.운전자금한도                    AS "wrknFndsClam"
+     , A110.운전자금잔액                    AS "wrknFndsBal"
+     , A110.투자금융한도                    AS "infcClam"
+     , A110.투자금융잔액                    AS "infcBal"
+     , A110.기타자금한도금액                AS "etcFndsClam"
+     , A110.기타자금잔액                    AS "etcFndsBal"
+     , A110.파생상품거래한도                AS "drvtPTranClam"
+     , A110.파생상품거래잔액                AS "drvtPrdctTranBal"
+     , A110.파생상품신용거래한도            AS "drvtPcTranClam"
+     , A110.파생상품담보거래한도            AS "drvtPsTranClam"
+     , A110.포괄신용공여설정한도            AS "inlsGrcrStupClam"
+     , A110.시스템최종처리일시              AS "sysLastPrcssYms"
+     , A110.시스템최종사용자번호            AS "sysLastUno"
+  FROM INST1.TSKIPA110 A110
+ WHERE A110.그룹회사코드 = #groupCoCd:VARCHAR#
+   AND A110.심사고객식별자 > ' '
+ ORDER BY A110.심사고객식별자]]>
+    </select>
+
+    <!-- CUR_A111: 기업관계연결정보 조회 커서 -->
+    <select id="CUR_A111" parameterClass="map" resultClass="hmap" fetchSize="1000"><![CDATA[/* CUR_A111 기업관계연결정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT A111.그룹회사코드                    AS "groupCoCd"
+     , A111.기업집단그룹코드                AS "corpClctGroupCd"
+     , A111.기업집단등록코드                AS "corpClctRegiCd"
+     , A111.기업집단명                      AS "corpClctName"
+     , A111.주채무계열그룹여부              AS "mainDaGroupYn"
+     , A111.기업군관리그룹구분              AS "corpGmGroupDstcd"
+     , A111.총여신금액                      AS "totalLnbzAmt"
+     , A111.기업여신정책구분                AS "corpLPlicyDstcd"
+     , A111.기업여신정책일련번호            AS "corpLPlicySerno"
+     , A111.기업여신정책내용                AS "corpLPlicyCtnt"
+     , A111.시스템최종처리일시              AS "sysLastPrcssYms"
+     , A111.시스템최종사용자번호            AS "sysLastUno"
+  FROM INST1.TSKIPA111 A111
+ WHERE A111.그룹회사코드 = #groupCoCd:VARCHAR#
+ ORDER BY A111.기업집단그룹코드, A111.기업집단등록코드]]>
+    </select>
+
+    <!-- 관계기업기본정보 업데이트 -->
+    <update id="updateA110" parameterClass="map"><![CDATA[/* 관계기업기본정보 업데이트 | BUBIP0002, 2024-12-19 */
+UPDATE INST1.TSKIPA110 
+   SET 기업신용평가등급구분 = #corpCvGrdDstcd:VARCHAR#
+     , 기업규모구분 = #corpScalDstcd:VARCHAR#
+     , 표준산업분류코드 = #stndIClsfiCd:VARCHAR#
+     , 고객관리부점코드 = #custMgtBrncd:VARCHAR#
+     , 총여신금액 = #totalLnbzAmt:DECIMAL#
+     , 여신잔액 = #lnbzBal:DECIMAL#
+     , 담보금액 = #scurtyAmt:DECIMAL#
+     , 연체금액 = #amov:DECIMAL#
+     , 전년총여신금액 = #pyyTotalLnbzAmt:DECIMAL#
+     , 기업여신정책구분 = #corpLPlicyDstcd:VARCHAR#
+     , 기업여신정책일련번호 = #corpLPlicySerno:DECIMAL#
+     , 기업여신정책내용 = #corpLPlicyCtnt:VARCHAR#
+     , 조기경보사후관리구분 = #elyAaMgtDstcd:VARCHAR#
+     , 시설자금한도 = #fcltFndsClam:DECIMAL#
+     , 시설자금잔액 = #fcltFndsBal:DECIMAL#
+     , 운전자금한도 = #wrknFndsClam:DECIMAL#
+     , 운전자금잔액 = #wrknFndsBal:DECIMAL#
+     , 투자금융한도 = #infcClam:DECIMAL#
+     , 투자금융잔액 = #infcBal:DECIMAL#
+     , 기타자금한도금액 = #etcFndsClam:DECIMAL#
+     , 기타자금잔액 = #etcFndsBal:DECIMAL#
+     , 파생상품거래한도 = #drvtPTranClam:DECIMAL#
+     , 파생상품거래잔액 = #drvtPrdctTranBal:DECIMAL#
+     , 파생상품신용거래한도 = #drvtPcTranClam:DECIMAL#
+     , 파생상품담보거래한도 = #drvtPsTranClam:DECIMAL#
+     , 포괄신용공여설정한도 = #inlsGrcrStupClam:DECIMAL#
+     , 시스템최종처리일시 = #sysLastPrcssYms:VARCHAR#
+     , 시스템최종사용자번호 = #sysLastUno:VARCHAR#
+ WHERE 그룹회사코드 = #groupCoCd:VARCHAR#
+   AND 심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </update>
+
+    <!-- 기업관계연결정보 업데이트 -->
+    <update id="updateA111" parameterClass="map"><![CDATA[/* 기업관계연결정보 업데이트 | BUBIP0002, 2024-12-19 */
+UPDATE INST1.TSKIPA111 
+   SET 주채무계열그룹여부 = #mainDaGroupYn:VARCHAR#
+     , 기업군관리그룹구분 = #corpGmGroupDstcd:VARCHAR#
+     , 총여신금액 = #totalLnbzAmt:DECIMAL#
+     , 기업여신정책구분 = #corpLPlicyDstcd:VARCHAR#
+     , 기업여신정책일련번호 = #corpLPlicySerno:DECIMAL#
+     , 기업여신정책내용 = #corpLPlicyCtnt:VARCHAR#
+     , 시스템최종처리일시 = #sysLastPrcssYms:VARCHAR#
+     , 시스템최종사용자번호 = #sysLastUno:VARCHAR#
+ WHERE 그룹회사코드 = #groupCoCd:VARCHAR#
+   AND 기업집단그룹코드 = #corpClctGroupCd:VARCHAR#
+   AND 기업집단등록코드 = #corpClctRegiCd:VARCHAR#]]>
+    </update>
+
+    <!-- 기업집단 총액 집계 조회 -->
+    <select id="selectGroupTotals" parameterClass="map" resultClass="hmap"><![CDATA[/* 기업집단 총액 집계 조회 | BUBIP0002, 2024-12-19 */
+SELECT SUM(A110.총여신금액) AS "totalLnbzAmt"
+     , COUNT(*) AS "companyCnt"
+  FROM INST1.TSKIPA110 A110
+ WHERE A110.그룹회사코드 = 'KB0'
+   AND A110.기업집단그룹코드 = #corpClctGroupCd:VARCHAR#
+   AND A110.기업집단등록코드 = #corpClctRegiCd:VARCHAR#]]>
+    </select>
+
+    <!-- 고객정보 조회 (XIAA0019 모듈 시뮬레이션) -->
+    <select id="selectCustomerInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 고객정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT CUST.고객고유번호                   AS "cuniqno"
+     , CUST.고객고유번호구분               AS "cuniqnoDstcd"
+     , CUST.대표업체명                     AS "rpsntEntpName"
+  FROM INST1.THKCUST001 CUST
+ WHERE CUST.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+    <!-- SOHO 고객 분류 조회 (XIIH0059 모듈 시뮬레이션) -->
+    <select id="selectSohoInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* SOHO 고객 분류 조회 | BUBIP0002, 2024-12-19 */
+SELECT SOHO.소호익스포져구분              AS "sohoExpsrDstic"
+     , SOHO.신용등급구분                  AS "corpCvGrdDstcd"
+     , SOHO.산업분류코드                  AS "stndIClsfiCd"
+     , '2'                               AS "corpScalDstcd"
+  FROM INST1.THKSOHO001 SOHO
+ WHERE SOHO.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+    <!-- CRS 신용평가 정보 조회 (XIIIK083 모듈 시뮬레이션) -->
+    <select id="selectCrsInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* CRS 신용평가 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT CRS.최종신용등급구분               AS "corpCvGrdDstcd"
+     , CRS.표준산업분류코드               AS "stndIClsfiCd"
+     , CASE CRS.신용평가기업규모구분
+         WHEN '01' THEN '2'
+         WHEN '02' THEN '7'
+         ELSE '0'
+       END                               AS "corpScalDstcd"
+  FROM INST1.THKCRS001 CRS
+ WHERE CRS.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#
+   AND CRS.처리구분코드 = '01']]>
+    </select>
+
+    <!-- 기업여신정책 정보 조회 (XDINA0V2 모듈 시뮬레이션) -->
+    <select id="selectDinaInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 기업여신정책 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT DINA.기업여신정책구분              AS "corpLPlicyDstcd"
+     , DINA.기업여신정책일련번호          AS "corpLPlicySerno"
+     , DINA.기업여신정책내용              AS "corpLPlicyCtnt"
+  FROM INST1.THKDINA001 DINA
+ WHERE DINA.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+    <!-- 총익스포져 정보 조회 (XIJL4010 모듈 시뮬레이션) -->
+    <select id="selectTeInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 총익스포져 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT TE.총한도합계                      AS "totalLnbzAmt"
+     , TE.총잔액합계                      AS "lnbzBal"
+     , TE.고객관리부점코드                AS "custMgtBrncd"
+     , TE.시설자금한도                    AS "fcltFndsClam"
+     , TE.시설자금잔액                    AS "fcltFndsBal"
+     , TE.운전자금한도                    AS "wrknFndsClam"
+     , TE.운전자금잔액                    AS "wrknFndsBal"
+     , TE.투자금융한도                    AS "infcClam"
+     , TE.투자금융잔액                    AS "infcBal"
+     , TE.기타자금한도금액                AS "etcFndsClam"
+     , TE.기타자금잔액                    AS "etcFndsBal"
+     , TE.파생상품거래한도                AS "drvtPTranClam"
+     , TE.파생상품거래잔액                AS "drvtPrdctTranBal"
+     , TE.파생상품신용거래한도            AS "drvtPcTranClam"
+     , TE.파생상품담보거래한도            AS "drvtPsTranClam"
+     , TE.포괄신용공여설정한도            AS "inlsGrcrStupClam"
+  FROM INST1.THKTE001 TE
+ WHERE TE.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+    <!-- 사후관리 정보 조회 (XIIBAY01 모듈 시뮬레이션) -->
+    <select id="selectSahuInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 사후관리 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT SAHU.대출잔액                      AS "amov"
+  FROM INST1.THKSAHU001 SAHU
+ WHERE SAHU.고객고유번호 = #cuniqno:VARCHAR#
+   AND SAHU.구분 = #custTypeCd:VARCHAR#]]>
+    </select>
+
+    <!-- 통합담보 정보 조회 (XIIEZ187 모듈 시뮬레이션) -->
+    <select id="selectTongInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 통합담보 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT TONG.배분내부회복가치합계          AS "scurtyAmt"
+  FROM INST1.THKTONG001 TONG
+ WHERE TONG.담보고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+    <!-- 조기경보시스템 정보 조회 (XIIF9911 모듈 시뮬레이션) -->
+    <select id="selectEarlyWarningInfo" parameterClass="map" resultClass="hmap"><![CDATA[/* 조기경보시스템 정보 조회 | BUBIP0002, 2024-12-19 */
+SELECT EW.조기경보사후관리구분            AS "elyAaMgtDstcd"
+  FROM INST1.THKEW001 EW
+ WHERE EW.심사고객식별자 = #exmtnCustIdnfr:VARCHAR#]]>
+    </select>
+
+</sqlMap>

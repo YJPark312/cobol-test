@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${__NAMESPACE__}">
+	<select id="selectCorpGrpRegHstList" parameterClass="map" resultClass="hmap" fetchSize="100"><![CDATA[/* 기업집단등록변경이력조회 | MultiQ4KBBank, 2025-10-01 */
+SELECT A755.EXMTN_CUST_IDNFR AS "exmtnCustIdnfr"
+      ,A755.REGI_YMS AS "regiYms"
+      ,A755.REGI_M_TRAN_DSTCD AS "regiMTranDstcd"
+      ,A755.CORP_CLCT_REGI_CD AS "corpClctRegiCd"
+      ,A755.CORP_CLCT_GROUP_CD AS "corpClctGroupCd"
+      ,A755.REGI_BRNCD AS "regiBrncd"
+      ,COALESCE(BR01.BRN_HANGL_NAME, ' ') AS "regiBrnName"
+      ,A755.REGI_EMPID AS "regiEmpid"
+  FROM INST1.TSKIPA112 A755
+  LEFT OUTER JOIN INST1.TBRNM001 BR01
+    ON A755.REGI_BRNCD = BR01.BRN_CD
+ WHERE A755.EXMTN_CUST_IDNFR = #exmtnCustIdnfr#
+   AND A755.CORP_CLCT_REGI_CD = #corpClctRegiCd#
+ ORDER BY A755.REGI_YMS DESC
+	]]></select>
+
+	<insert id="insertCorpGrpRegHst" parameterClass="map"><![CDATA[/* 기업집단등록변경이력등록 | MultiQ4KBBank, 2025-10-01 */
+INSERT INTO INST1.TSKIPA112 (
+       EXMTN_CUST_IDNFR
+      ,REGI_YMS
+      ,REGI_M_TRAN_DSTCD
+      ,CORP_CLCT_REGI_CD
+      ,CORP_CLCT_GROUP_CD
+      ,REGI_BRNCD
+      ,REGI_EMPID
+      ,FRST_REGI_DTTM
+      ,FRST_REGI_USER_ID
+      ,LAST_CHNG_DTTM
+      ,LAST_CHNG_USER_ID
+) VALUES (
+       #exmtnCustIdnfr#
+      ,#regiYms#
+      ,#regiMTranDstcd#
+      ,#corpClctRegiCd#
+      ,#corpClctGroupCd#
+      ,#regiBrncd#
+      ,#regiEmpid#
+      ,CURRENT_TIMESTAMP
+      ,'SYSTEM'
+      ,CURRENT_TIMESTAMP
+      ,'SYSTEM'
+)
+	]]></insert>
+</sqlMap>
