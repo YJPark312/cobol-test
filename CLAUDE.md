@@ -33,8 +33,7 @@ your-project/
 | 사내 Java 가이드 (공통모듈) | java-guide/n-KESA-공통모듈가이드.md | 플래닝, 변환, 검증, 리파인먼트 |
 | COBOL 가이드 (프레임워크) | cobol-guide/z-KESA가이드.md | 분석, 플래닝, 변환 |
 | COBOL 가이드 (공통모듈) | cobol-guide/z-KESA-공통모듈가이드.md | 분석, 플래닝, 변환 |
-| COBOL→Java 갭 분석 | .claude/context/gap-analysis.md | 분석, 플래닝, 변환 |
-| 정적 분석 규칙 | .claude/context/static-rules.md | 검증, 리파인먼트 |
+| COBOL→Java 갭 분석 | gap/ | 분석, 플래닝, 변환 |
 
 ---
 

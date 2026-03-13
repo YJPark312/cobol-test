@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  기업집단신용평가이력관리 DataUnit SQL 매핑 XML
+  COBOL: DIPA301.cbl (DC) 의 DBIO/SQLIO 구문 변환
+  대응 DU: DUCorpEvalHistoryA.java
+  namespace: DUCorpEvalHistoryA
+
+  작성: conversion-agent
+  작성일: 2026-03-13
+
+  주의:
+  - COMMIT/ROLLBACK 절대 금지 (프레임워크가 트랜잭션 관리)
+  - SQLIO 소스(QIPA301~QIPA308) 미확보 → 테이블 스키마 + 업무 로직 기반 역설계
+    해당 SQL에 TODO 주석 표시
+-->
+<sqlMap namespace="DUCorpEvalHistoryA">
+
+    <!-- ============================================================
+         selectExistCheckQipa301
+         대상 COBOL: S3100-QIPA301-CALL-RTN (#DYSQLA QIPA301)
+         역할: 신규평가 등록 시 THKIPB110에 기존재 여부 확인
+               처리단계구분 '6'(확정)인 데이터 조회
+         TODO: [변환 불가] SQLIO QIPA301 소스 미확보 - SQL은 업무 로직 기반 역설계
+               실제 SQLIO SQL과 대조 검증 필요
+    ============================================================ -->
+    <select id="selectExistCheckQipa301" parameterClass="map" resultClass="map">
+        SELECT COUNT(*) AS EXIST_CNT
+          FROM BANKDB.THKIPB110
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND CORP_CP_STGE_DSTCD = #corpCpStgeDstcd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectMainDebtAffltYnQipa307
+         대상 COBOL: S3221-QIPA307-CALL-RTN (#DYSQLA QIPA307)
+         역할: 신규평가 기업집단 주채무계열여부 조회
+         TODO: [변환 불가] SQLIO QIPA307 소스 미확보 - 대상 테이블명 미상
+               업무 담당자 확인 후 실제 테이블명 및 컬럼명으로 교체 필요
+               현재는 THKIPB110 연관 테이블로 추정하여 작성
+    ============================================================ -->
+    <select id="selectMainDebtAffltYnQipa307" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] QIPA307 SQLIO 소스 미확보 - 주채무계열여부 조회 테이블 미상 */
+        /* 업무담당자 확인 후 실제 SQL로 교체 필요 */
+        SELECT MAIN_DEBT_AFFLT_YN
+          FROM BANKDB.THKIPB110
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectEmployeeInfoQipa302
+         대상 COBOL: S5000-QIPA302-CALL-RTN (#DYSQLA QIPA302)
+         역할: 직원기본 조회 (직원한글명, 소속부점코드)
+               BICOM-USER-EMPID로 직원 정보 조회
+         TODO: [변환 불가] SQLIO QIPA302 소스 미확보
+               FUBcEmployee.getPafiarEmpInfo() 공통 유틸 사용으로 대체 가능
+               현재는 직원 테이블 직접 조회로 임시 구현 (테이블명 미상)
+    ============================================================ -->
+    <select id="selectEmployeeInfoQipa302" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] QIPA302 SQLIO 소스 미확보 */
+        /* FUBcEmployee.getPafiarEmpInfo() 공통 유틸 호출로 대체 검토 필요 */
+        /* 임시: n-KESA FUBcEmployee 공통 유틸 사용 권고 */
+        SELECT EMP_HANGL_FNAME
+             , BELNG_BRNCD
+          FROM BANKDB.THKJIHR01
+         WHERE GROUP_CO_CD = #groupCoCd:VARCHAR#
+           AND EMP_NO      = #empId:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         insertThkipb110
+         대상 COBOL: S3200-THKIPB110-INS-RTN (#DYDBIO INSERT-CMD-Y)
+         역할: 기업집단평가기본 신규 INSERT
+         TODO: [변환 불가] TRIPB110 카피북 미확보 - 컬럼 목록은 COBOL 소스 분석 기반
+               실제 테이블 DDL과 대조 검증 필요
+    ============================================================ -->
+    <insert id="insertThkipb110" parameterClass="map">
+        /* TODO: [검토 필요] TRIPB110 카피북 미확보 - 컬럼 목록 COBOL 소스 기반 역설계 */
+        INSERT INTO BANKDB.THKIPB110 (
+            GROUP_CO_CD
+          , CORP_CLCT_GROUP_CD
+          , CORP_CLCT_REGI_CD
+          , VALUA_YMD
+          , CORP_CLCT_NAME
+          , MAIN_DEBT_AFFLT_YN
+          , CORP_C_VALUA_DSTCD
+          , VALUA_DEFINS_YMD
+          , VALUA_BASE_YMD
+          , CORP_CP_STGE_DSTCD
+          , GRD_ADJS_DSTCD
+          , ADJS_STGE_NO_DSTCD
+          , STABL_IF_CMPTN_VAL1
+          , STABL_IF_CMPTN_VAL2
+          , ERN_IF_CMPTN_VAL1
+          , ERN_IF_CMPTN_VAL2
+          , CSFW_FNAF_CMPTN_VAL
+          , FNAF_SCOR
+          , NON_FNAF_SCOR
+          , CHSN_SCOR
+          , SPARE_C_GRD_DSTCD
+          , LAST_CLCT_GRD_DSTCD
+          , VALD_YMD
+          , VALUA_EMPID
+          , VALUA_EMNM
+          , VALUA_BRNCD
+          , MGT_BRNCD
+        ) VALUES (
+            #groupCoCd:VARCHAR#
+          , #corpClctGroupCd:VARCHAR#
+          , #corpClctRegiCd:VARCHAR#
+          , #valuaYmd:VARCHAR#
+          , #corpClctName:VARCHAR#
+          , #mainDebtAffltYn:VARCHAR#
+          , #corpCValuaDstcd:VARCHAR#
+          , #valuaDefinsYmd:VARCHAR#
+          , #valuaBaseYmd:VARCHAR#
+          , #corpCpStgeDstcd:VARCHAR#
+          , #grdAdjsDstcd:VARCHAR#
+          , #adjsStgeNoDstcd:VARCHAR#
+          , #stablIfCmptnVal1:NUMERIC#
+          , #stablIfCmptnVal2:NUMERIC#
+          , #ernIfCmptnVal1:NUMERIC#
+          , #ernIfCmptnVal2:NUMERIC#
+          , #csfwFnafCmptnVal:NUMERIC#
+          , #fnafScor:NUMERIC#
+          , #nonFnafScor:NUMERIC#
+          , #chsnScor:NUMERIC#
+          , #spareCGrdDstcd:VARCHAR#
+          , #lastClctGrdDstcd:VARCHAR#
+          , #valdYmd:VARCHAR#
+          , #valuaEmpid:VARCHAR#
+          , #valuaEmnm:VARCHAR#
+          , #valuaBrncd:VARCHAR#
+          , #mgtBrncd:VARCHAR#
+        )
+    </insert>
+
+    <!-- ============================================================
+         selectThkipb110ForUpdate
+         대상 COBOL: S4210-THKIPB110-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb110ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+          FROM BANKDB.THKIPB110
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb110
+         대상 COBOL: S4210-THKIPB110-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB110 기업집단평가기본 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb110" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB110
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </delete>
+
+    <!-- ============================================================
+         selectListThkipb111ForUpdate
+         대상 COBOL: S4220-THKIPB111-DEL-RTN (OPEN/FETCH/CLOSE CURSOR)
+         역할: 삭제 대상 THKIPB111 목록 조회 (커서 패턴 → List 조회로 전환)
+         TODO: [검토 필요] TKIPB111 카피북 미확보 - PK 컬럼 COBOL 소스 기반 역설계
+    ============================================================ -->
+    <select id="selectListThkipb111ForUpdate" parameterClass="map" resultClass="map">
+        /* TODO: [검토 필요] TKIPB111 PK 컬럼 목록 COBOL 소스 기반 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , SERNO
+          FROM BANKDB.THKIPB111
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+         ORDER BY SERNO
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb111
+         대상 COBOL: S4220-THKIPB111-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB111 기업집단연혁명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb111" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB111
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND SERNO              = #serno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectListThkipb116ForUpdate
+         대상 COBOL: S4230-THKIPB116-DEL-RTN (OPEN/FETCH/CLOSE CURSOR)
+         역할: 삭제 대상 THKIPB116 목록 조회
+         TODO: [검토 필요] TKIPB116 카피북 미확보 - PK 컬럼 역설계
+    ============================================================ -->
+    <select id="selectListThkipb116ForUpdate" parameterClass="map" resultClass="map">
+        /* TODO: [검토 필요] TKIPB116 PK 컬럼 목록 COBOL 소스 기반 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , SERNO
+          FROM BANKDB.THKIPB116
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+         ORDER BY SERNO
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb116
+         대상 COBOL: S4230-THKIPB116-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB116 기업집단계열사명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb116" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB116
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND SERNO              = #serno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectPksQipa303
+         대상 COBOL: S4240-THKIPB113-DEL-RTN (#DYSQLA QIPA303)
+         역할: THKIPB113 삭제 대상 PK 목록 조회
+         TODO: [변환 불가] SQLIO QIPA303 소스 미확보 - SQL 역설계
+    ============================================================ -->
+    <select id="selectPksQipa303" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] SQLIO QIPA303 소스 미확보 - THKIPB113 조회 SQL 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , BSNS_PART_SERNO
+             , ANAL_STGE_SERNO
+          FROM BANKDB.THKIPB113
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectThkipb113ForUpdate
+         대상 COBOL: S4241-THKIPB113-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb113ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , BSNS_PART_SERNO
+             , ANAL_STGE_SERNO
+          FROM BANKDB.THKIPB113
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND BSNS_PART_SERNO    = #bsnsPartSerno:NUMERIC#
+           AND ANAL_STGE_SERNO    = #analStgeSerno:NUMERIC#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb113
+         대상 COBOL: S4241-THKIPB113-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB113 기업집단사업부분구조분석명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb113" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB113
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND BSNS_PART_SERNO    = #bsnsPartSerno:NUMERIC#
+           AND ANAL_STGE_SERNO    = #analStgeSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectPksQipa304
+         대상 COBOL: S4250-THKIPB112-DEL-RTN (#DYSQLA QIPA304)
+         역할: THKIPB112 삭제 대상 PK 목록 조회
+         TODO: [변환 불가] SQLIO QIPA304 소스 미확보 - SQL 역설계
+    ============================================================ -->
+    <select id="selectPksQipa304" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] SQLIO QIPA304 소스 미확보 - THKIPB112 조회 SQL 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , FNAF_ANAL_SERNO
+          FROM BANKDB.THKIPB112
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectThkipb112ForUpdate
+         대상 COBOL: S4251-THKIPB112-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb112ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , FNAF_ANAL_SERNO
+          FROM BANKDB.THKIPB112
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND FNAF_ANAL_SERNO    = #fnafAnalSerno:NUMERIC#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb112
+         대상 COBOL: S4251-THKIPB112-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB112 기업집단재무분석목록 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb112" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB112
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND FNAF_ANAL_SERNO    = #fnafAnalSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectListThkipb114ForUpdate
+         대상 COBOL: S4260-THKIPB114-DEL-RTN (OPEN/FETCH/CLOSE CURSOR)
+         역할: 삭제 대상 THKIPB114 목록 조회
+         TODO: [검토 필요] TKIPB114 카피북 미확보 - PK 컬럼 역설계
+    ============================================================ -->
+    <select id="selectListThkipb114ForUpdate" parameterClass="map" resultClass="map">
+        /* TODO: [검토 필요] TKIPB114 PK 컬럼 목록 COBOL 소스 기반 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , EVAL_ITEM_SERNO
+          FROM BANKDB.THKIPB114
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+         ORDER BY EVAL_ITEM_SERNO
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb114
+         대상 COBOL: S4260-THKIPB114-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB114 기업집단항목별평가목록 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb114" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB114
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND EVAL_ITEM_SERNO    = #evalItemSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectThkipb118ForUpdate
+         대상 COBOL: S4290-THKIPB118-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: THKIPB118 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb118ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+          FROM BANKDB.THKIPB118
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb118
+         대상 COBOL: S4290-THKIPB118-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB118 기업집단평가등급조정사유목록 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb118" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB118
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </delete>
+
+    <!-- ============================================================
+         selectPksQipa305
+         대상 COBOL: S42A0-THKIPB130-DEL-RTN (#DYSQLA QIPA305)
+         역할: THKIPB130 삭제 대상 PK 목록 조회
+         TODO: [변환 불가] SQLIO QIPA305 소스 미확보 - SQL 역설계
+    ============================================================ -->
+    <select id="selectPksQipa305" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] SQLIO QIPA305 소스 미확보 - THKIPB130 조회 SQL 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , NOTE_SERNO
+          FROM BANKDB.THKIPB130
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectThkipb130ForUpdate
+         대상 COBOL: S42A1-THKIPB130-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb130ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , NOTE_SERNO
+          FROM BANKDB.THKIPB130
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND NOTE_SERNO         = #noteSerno:NUMERIC#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb130
+         대상 COBOL: S42A1-THKIPB130-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB130 기업집단주석명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb130" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB130
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND NOTE_SERNO         = #noteSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectThkipb131ForUpdate
+         대상 COBOL: S42B0-THKIPB131-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: THKIPB131 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb131ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+          FROM BANKDB.THKIPB131
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb131
+         대상 COBOL: S42B0-THKIPB131-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB131 기업집단승인결의록명세 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb131" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB131
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </delete>
+
+    <!-- ============================================================
+         selectListThkipb132ForUpdate
+         대상 COBOL: S42C0-THKIPB132-DEL-RTN (OPEN/FETCH/CLOSE CURSOR)
+         역할: 삭제 대상 THKIPB132 목록 조회
+         TODO: [검토 필요] TKIPB132 카피북 미확보 - PK 컬럼 역설계
+    ============================================================ -->
+    <select id="selectListThkipb132ForUpdate" parameterClass="map" resultClass="map">
+        /* TODO: [검토 필요] TKIPB132 PK 컬럼 목록 COBOL 소스 기반 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , COMMITTEE_SERNO
+          FROM BANKDB.THKIPB132
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+         ORDER BY COMMITTEE_SERNO
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb132
+         대상 COBOL: S42C0-THKIPB132-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB132 기업집단승인결의록위원명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb132" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB132
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND COMMITTEE_SERNO    = #committeeSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectPksQipa306
+         대상 COBOL: S42D0-THKIPB133-DEL-RTN (#DYSQLA QIPA306)
+         역할: THKIPB133 삭제 대상 PK 목록 조회
+         TODO: [변환 불가] SQLIO QIPA306 소스 미확보 - SQL 역설계
+    ============================================================ -->
+    <select id="selectPksQipa306" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] SQLIO QIPA306 소스 미확보 - THKIPB133 조회 SQL 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , OPINION_SERNO
+          FROM BANKDB.THKIPB133
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectThkipb133ForUpdate
+         대상 COBOL: S42D1-THKIPB133-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb133ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , OPINION_SERNO
+          FROM BANKDB.THKIPB133
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND OPINION_SERNO      = #opinionSerno:NUMERIC#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb133
+         대상 COBOL: S42D1-THKIPB133-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB133 기업집단승인결의록의견명세 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb133" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB133
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND OPINION_SERNO      = #opinionSerno:NUMERIC#
+    </delete>
+
+    <!-- ============================================================
+         selectPksQipa308
+         대상 COBOL: S42E0-THKIPB119-DEL-RTN (#DYSQLA QIPA308)
+         역할: THKIPB119 삭제 대상 PK 목록 조회
+         TODO: [변환 불가] SQLIO QIPA308 소스 미확보 - SQL 역설계
+    ============================================================ -->
+    <select id="selectPksQipa308" parameterClass="map" resultClass="map">
+        /* TODO: [변환 불가] SQLIO QIPA308 소스 미확보 - THKIPB119 조회 SQL 역설계 */
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , FNAF_SCOR_STGE_SERNO
+          FROM BANKDB.THKIPB119
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+    </select>
+
+    <!-- ============================================================
+         selectThkipb119ForUpdate
+         대상 COBOL: S42E1-THKIPB119-DEL-RTN (#DYDBIO SELECT-CMD-Y)
+         역할: 삭제 전 LOCK SELECT
+    ============================================================ -->
+    <select id="selectThkipb119ForUpdate" parameterClass="map" resultClass="map">
+        SELECT GROUP_CO_CD
+             , CORP_CLCT_GROUP_CD
+             , CORP_CLCT_REGI_CD
+             , VALUA_YMD
+             , FNAF_SCOR_STGE_SERNO
+          FROM BANKDB.THKIPB119
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND FNAF_SCOR_STGE_SERNO = #fnafScorStgeSerno:NUMERIC#
+        FOR UPDATE
+    </select>
+
+    <!-- ============================================================
+         deleteThkipb119
+         대상 COBOL: S42E1-THKIPB119-DEL-RTN (#DYDBIO DELETE-CMD-Y)
+         역할: THKIPB119 기업집단재무평점단계별목록 건별 DELETE
+    ============================================================ -->
+    <delete id="deleteThkipb119" parameterClass="map">
+        DELETE FROM BANKDB.THKIPB119
+         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD          = #valuaYmd:VARCHAR#
+           AND FNAF_SCOR_STGE_SERNO = #fnafScorStgeSerno:NUMERIC#
+    </delete>
+
+</sqlMap>

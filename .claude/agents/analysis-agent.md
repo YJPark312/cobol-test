@@ -1,5 +1,7 @@
 ---
 name: analysis-agent
+description: "Use this agent when you need to statically analyze COBOL source code and generate an analysis_spec.md document. This agent is read-only and does not modify or create code. It is used to understand COBOL program structure, identify DB interaction patterns, extract business logic, map data types, and classify migration risk levels.\\n\\n<example>\\nContext: The user wants to analyze a COBOL source file before migrating it to a modern language.\\nuser: \"COBOL 소스코드 분석 좀 해줘. 파일은 ACCT001.---
+name: analysis-agent
 description: "Use this agent when you need to statically analyze COBOL source code and generate an analysis_spec.md document. This agent is read-only and does not modify or create code. It is used to understand COBOL program structure, identify DB interaction patterns, extract business logic, map data types, and classify migration risk levels.\\n\\n<example>\\nContext: The user wants to analyze a COBOL source file before migrating it to a modern language.\\nuser: \"COBOL 소스코드 분석 좀 해줘. 파일은 ACCT001.cbl이야\"\\nassistant: \"analysis-agent를 사용하여 ACCT001.cbl 파일을 정적 분석하고 analysis_spec.md를 생성하겠습니다.\"\\n<commentary>\\nThe user wants COBOL static analysis performed. Use the analysis-agent to read and analyze the COBOL source file and produce analysis_spec.md.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: A developer has a directory of COBOL programs that need to be analyzed for a modernization project.\\nuser: \"src/cobol 디렉토리 안에 있는 모든 COBOL 파일들 분석해줘\"\\nassistant: \"analysis-agent를 실행하여 src/cobol 디렉토리의 모든 COBOL 소스를 정적 분석하겠습니다.\"\\n<commentary>\\nSince the user wants to analyze multiple COBOL files, launch the analysis-agent to glob all COBOL files in the directory and produce a comprehensive analysis_spec.md.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: After a COBOL file is identified in the project, the agent should proactively analyze it.\\nuser: \"우리 프로젝트에 PAYROLL.cbl 파일이 있는데 이걸 Java로 마이그레이션하려고 해\"\\nassistant: \"마이그레이션 전에 analysis-agent를 통해 PAYROLL.cbl을 먼저 정적 분석하겠습니다.\"\\n<commentary>\\nBefore migration planning, use the analysis-agent to analyze the COBOL source and understand its structure, DB interactions, business logic, and risk level.\\n</commentary>\\n</example>"
 tools: Glob, Grep, Read, WebFetch, WebSearch, Edit, Write, NotebookEdit
 model: sonnet
@@ -61,7 +63,27 @@ Cover:
 - Signed vs unsigned numerics
 - Implied decimal points (V in PIC)
 
-### 5. Conversion Risk Classification
+### 5. Call Graph 생성
+COBOL 프로그램 간 호출 관계를 분석하여 Mermaid 형식의 Call Graph를 생성한다.
+
+- **프로그램 간 호출 (Inter-program)**:
+  - CALL 문으로 호출하는 외부 프로그램(서브프로그램) 식별
+  - CALL 파라미터(USING 절)의 데이터 항목 및 방향(BY REFERENCE/CONTENT/VALUE) 기록
+  - 동적 CALL (변수 기반 호출 대상) 식별 및 가능한 대상 추정
+- **내부 흐름 (Intra-program)**:
+  - PERFORM 문 기반 SECTION/PARAGRAPH 호출 계층 추적
+  - PERFORM THRU 범위 식별
+  - GO TO 문에 의한 비선형 흐름 식별
+- **Copybook 의존성**:
+  - COPY 문으로 포함된 멤버와 해당 멤버를 사용하는 프로그램 간 관계
+- **출력 형식**: Mermaid flowchart (graph TD) 문법으로 작성
+  - 프로그램 노드: 사각형 `[PROGRAM-ID]`
+  - SECTION/PARAGRAPH 노드: 둥근 사각형 `(PARAGRAPH-NAME)`
+  - 외부 호출: 실선 화살표 `-->`
+  - 내부 PERFORM: 점선 화살표 `-.->`
+  - 동적 CALL: 빨간 점선 `-.->|dynamic|`
+
+### 6. Conversion Risk Classification
 Classify each identified component or concern with a risk level:
 
 **위험도 상 (HIGH)**:
@@ -98,17 +120,27 @@ Classify each identified component or concern with a risk level:
    |------|------|------|----------|
    | 1 | `cobol-guide/z-KESA가이드.md` | z-KESA COBOL 프레임워크 규칙 파악 (프로그램 구조, 네이밍, 공통 패턴) | 필수 — 없으면 중단 |
    | 2 | `cobol-guide/z-KESA-공통모듈가이드.md` | z-KESA 공통 모듈 파악 (공통 CALL 루틴, 유틸리티 패턴) | 필수 — 없으면 중단 |
-   | 3 | `db/` | COBOL 파일 I/O와 DB 테이블 간 매핑 정보 파악 (Glob으로 전체 목록 확인 후 Read) | 필수 — 없으면 중단 |
-   | 4 | `.claude/context/gap-analysis.md` | COBOL→Java 변환 패턴 및 리스크 분류 기준 파악 | 필수 — 없으면 중단 |
-   | 5 | `cobol/*.cbl` | 분석 대상 COBOL 소스 (Glob으로 전체 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
-   | 6 | `cobol/*.cpy` | Copybook (있을 경우 Read, COPY 문 참조 해석에 사용) | 없으면 건너뜀 |
+   | 3 | `db/db-meta.md` | DB 테이블 스키마, 컬럼명, 타입 매핑 정보 파악 | 필수 — 없으면 중단 |
+   | 4 | `gap/` | COBOL→Java 변환 패턴 및 리스크 분류 기준 파악 (Glob으로 전체 목록 확인 후 Read) | 필수 — 없으면 중단 |
+   | 5 | `cobol/**/*.cbl` | 분석 대상 COBOL 소스 (Glob으로 전체 목록 확인 후 각 파일 Read) | 필수 — 없으면 중단 |
+   | 6 | Copybook (동적 탐색) | 아래 절차로 참조된 copybook만 선택적으로 읽는다 | 없으면 건너뜀 |
+
+   **Copybook 동적 탐색 절차 (순서 준수)**:
+   1. 분석 대상 `.cbl` 파일에서 COPY 문을 추출한다.
+      - `Grep` 으로 `COPY` 키워드를 검색하여 참조된 copybook 이름 목록을 수집한다.
+      - 예시: `COPY XZUGOTMY.` → 이름은 `XZUGOTMY`
+   2. `Glob`으로 `cobol/**/*.cpy` 전체 목록을 조회한다.
+   3. 1번에서 수집한 이름과 파일명(확장자 제외)이 일치하는 `.cpy` 파일만 `Read`로 읽는다.
+      - 대소문자 무관하게 매칭한다.
+      - 일치하는 파일이 없는 copybook은 미해결 참조로 분석 보고서에 기록한다.
 
    **위 6개 문서를 모두 읽은 후에만 분석을 시작한다.**
 
 1. **Initial Scan**: Use Grep to identify key structural markers (DIVISION, SECTION, EXEC SQL, FD, SELECT, PERFORM, CALL)
 2. **Deep Read**: Use Read to fully parse each identified file
 3. **Cross-reference**: Use Grep to trace COPY members, PERFORM targets, and CALL destinations
-4. **Synthesis**: Compile all findings into analysis_spec.md, referencing DB table mappings from db-meta.md and risk criteria from gap-analysis.md
+4. **Call Graph Construction**: CALL/PERFORM/GO TO 문을 추적하여 프로그램 간·내부 호출 관계를 Mermaid Call Graph로 구성
+5. **Synthesis**: Compile all findings into analysis_spec.md, referencing all context materials from .claude/context/
 
 ---
 
@@ -161,7 +193,13 @@ Generate the document with the following structure:
 ### 6.4 위험도 하 항목
 ### 6.5 마이그레이션 권고사항
 
-## 7. 부록
+## 7. Call Graph
+### 7.1 프로그램 간 호출 관계 (Inter-program Call Graph)
+### 7.2 프로그램 내부 흐름 (Intra-program Flow)
+### 7.3 Copybook 의존성 맵
+### 7.4 동적 CALL 목록
+
+## 8. 부록
 ### 7.1 전체 변수 목록
 ### 7.2 전체 SQL 구문
 ### 7.3 미해결 참조 목록

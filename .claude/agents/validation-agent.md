@@ -27,18 +27,16 @@ You perform static-only analysis across four domains:
 
 ### Step 0: 필수 선행 읽기 (작업 시작 전 순서 준수)
 
-분석을 시작하기 전에 아래 5개 문서를 반드시 순서대로 읽는다.
+분석을 시작하기 전에 아래 4개 문서를 반드시 순서대로 읽는다.
 
 | 순서 | 경로 | 목적 |
 |------|------|------|
-| 1 | `.claude/context/static-rules.md` | 검증 기준 규칙 파악 (CR/WR/IR/CV 규칙 및 체크리스트) |
-| 2 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 파악 (네이밍, 예외처리, VO/DTO, 로깅 규칙) |
-| 3 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) |
-| 4 | `output/conversion_log.md` | 변환 특이사항 확인 (TODO 항목, 수동 검토 필요 구간) |
-| 5 | `src/main/java/**/*.java` | 분석 대상 소스 (Glob으로 전체 목록 확인 후 Read) |
+| 1 | `java-guide/n-KESA가이드.md` | 사내 Java 표준 파악 (네이밍, 예외처리, VO/DTO, 로깅 규칙) |
+| 2 | `java-guide/n-KESA-공통모듈가이드.md` | 사내 Java 공통 모듈 파악 (공통 유틸리티, 공통 서비스) |
+| 3 | `output/conversion_log.md` | 변환 특이사항 확인 (TODO 항목, 수동 검토 필요 구간) |
+| 4 | `src/main/java/**/*.java` | 분석 대상 소스 (Glob으로 전체 목록 확인 후 Read) |
 
 위 4개 문서를 모두 읽은 후에만 분석을 시작한다.
-특히 `static-rules.md`의 체크리스트를 기준으로 각 규칙을 순서대로 검증한다.
 
 ---
 
@@ -236,33 +234,6 @@ Examples of what to record:
 # Persistent Agent Memory
 
 You have a persistent Persistent Agent Memory directory at `/Users/datapipeline-poc/Desktop/claude_code/02.cobol-test2/.claude/agent-memory/validation-agent/`. Its contents persist across conversations.
-
-As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
-
-Guidelines:
-- `MEMORY.md` is always loaded into your system prompt — lines after 200 will be truncated, so keep it concise
-- Create separate topic files (e.g., `debugging.md`, `patterns.md`) for detailed notes and link to them from MEMORY.md
-- Update or remove memories that turn out to be wrong or outdated
-- Organize memory semantically by topic, not chronologically
-- Use the Write and Edit tools to update your memory files
-
-What to save:
-- Stable patterns and conventions confirmed across multiple interactions
-- Key architectural decisions, important file paths, and project structure
-- User preferences for workflow, tools, and communication style
-- Solutions to recurring problems and debugging insights
-
-What NOT to save:
-- Session-specific context (current task details, in-progress work, temporary state)
-- Information that might be incomplete — verify against project docs before writing
-- Anything that duplicates or contradicts existing CLAUDE.md instructions
-- Speculative or unverified conclusions from reading a single file
-
-Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
-- When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
-- When the user corrects you on something you stated from memory, you MUST update or remove the incorrect entry. A correction means the stored memory is wrong — fix it at the source before continuing, so the same mistake does not repeat in future conversations.
-- Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 
 ## MEMORY.md
 

@@ -117,12 +117,12 @@ Update this file at every meaningful event: stage start, stage success, stage fa
 ### 참고 자료 (Read Only · 수정 금지)
 | 파일 경로 | 내용 | 전달할 에이전트 |
 |-----------|------|----------------|
-| db/ | DB 테이블/컬럼/타입 메타 정보 | analysis, conversion, unittest |
+| db/db-meta.md | DB 테이블/컬럼/타입 메타 정보 | analysis, conversion, unittest |
 | java-guide/n-KESA가이드.md | 사내 Java 프레임워크 규칙 | planning, conversion, validation, refinement, build, unittest |
 | java-guide/n-KESA-공통모듈가이드.md | 사내 Java 공통 모듈 가이드 | planning, conversion, validation, refinement, build, unittest |
 | cobol-guide/z-KESA가이드.md | COBOL z-KESA 프레임워크 규칙 | analysis, planning, conversion |
 | cobol-guide/z-KESA-공통모듈가이드.md | COBOL z-KESA 공통 모듈 가이드 | analysis, planning, conversion |
-| .claude/context/gap-analysis.md | COBOL→Java 변환 패턴 차이 | analysis, planning, conversion |
+| gap/ | COBOL→Java 변환 패턴 차이 | analysis, planning, conversion |
 | .claude/context/static-rules.md | 사내 정적 분석 규칙 | validation, refinement |
 | .claude/context/playbook-validation.md | validation 실패 패턴별 RULE-V* 자동 복구 규칙 | orchestrator, refinement |
 | .claude/context/playbook-build.md | 빌드 실패 패턴별 RULE-B* 자동 복구 규칙 | orchestrator, build |
@@ -169,33 +169,6 @@ Examples of what to record:
 # Persistent Agent Memory
 
 You have a persistent Persistent Agent Memory directory at `/Users/datapipeline-poc/Desktop/claude_code/02.cobol-test2/.claude/agent-memory/c2j-orchestrator/`. Its contents persist across conversations.
-
-As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
-
-Guidelines:
-- `MEMORY.md` is always loaded into your system prompt — lines after 200 will be truncated, so keep it concise
-- Create separate topic files (e.g., `debugging.md`, `patterns.md`) for detailed notes and link to them from MEMORY.md
-- Update or remove memories that turn out to be wrong or outdated
-- Organize memory semantically by topic, not chronologically
-- Use the Write and Edit tools to update your memory files
-
-What to save:
-- Stable patterns and conventions confirmed across multiple interactions
-- Key architectural decisions, important file paths, and project structure
-- User preferences for workflow, tools, and communication style
-- Solutions to recurring problems and debugging insights
-
-What NOT to save:
-- Session-specific context (current task details, in-progress work, temporary state)
-- Information that might be incomplete — verify against project docs before writing
-- Anything that duplicates or contradicts existing CLAUDE.md instructions
-- Speculative or unverified conclusions from reading a single file
-
-Explicit user requests:
-- When the user asks you to remember something across sessions (e.g., "always use bun", "never auto-commit"), save it — no need to wait for multiple interactions
-- When the user asks to forget or stop remembering something, find and remove the relevant entries from your memory files
-- When the user corrects you on something you stated from memory, you MUST update or remove the incorrect entry. A correction means the stored memory is wrong — fix it at the source before continuing, so the same mistake does not repeat in future conversations.
-- Since this memory is project-scope and shared with your team via version control, tailor your memories to this project
 
 ## MEMORY.md
 
