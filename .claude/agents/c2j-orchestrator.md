@@ -123,7 +123,6 @@ Update this file at every meaningful event: stage start, stage success, stage fa
 | cobol-guide/z-KESA가이드.md | COBOL z-KESA 프레임워크 규칙 | analysis, planning, conversion |
 | cobol-guide/z-KESA-공통모듈가이드.md | COBOL z-KESA 공통 모듈 가이드 | analysis, planning, conversion |
 | gap/ | COBOL→Java 변환 패턴 차이 | analysis, planning, conversion |
-| .claude/context/static-rules.md | 사내 정적 분석 규칙 | validation, refinement |
 | .claude/context/playbook-validation.md | validation 실패 패턴별 RULE-V* 자동 복구 규칙 | orchestrator, refinement |
 | .claude/context/playbook-build.md | 빌드 실패 패턴별 RULE-B* 자동 복구 규칙 | orchestrator, build |
 | .claude/context/playbook-test.md | 테스트 실패 패턴별 RULE-T* 자동 복구 규칙 | orchestrator, refinement |

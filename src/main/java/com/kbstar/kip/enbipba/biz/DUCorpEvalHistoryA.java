@@ -67,7 +67,7 @@ public class DUCorpEvalHistoryA extends DataUnit {
      * @return 처리 결과 IDataSet (totalNoitm: 총건수, nowNoitm: 현재건수)
      * @throws BusinessException 입력값 오류, DB 처리 오류 발생 시
      */
-    @BizMethod
+    @BizMethod("기업집단신용평가이력 관리 DM")
     public IDataSet manageCorpEvalHistory(IDataSet requestData, IOnlineContext onlineCtx) {
 
         ILog log = getLog(onlineCtx);
@@ -79,10 +79,7 @@ public class DUCorpEvalHistoryA extends DataUnit {
         // 처리구분 취득
         String prcssDstcd = requestData.getString("prcssDstcd");
 
-        log.debug("★[처리구분]=" + prcssDstcd);
-        log.debug("★[기업집단그룹코드]=" + requestData.getString("corpClctGroupCd"));
-        log.debug("★[평가년월일]=" + requestData.getString("valuaYmd"));
-        log.debug("★[기업집단등록코드]=" + requestData.getString("corpClctRegiCd"));
+        log.debug("[DUCorpEvalHistoryA.manageCorpEvalHistory] prcssDstcd={}", prcssDstcd.replaceAll("[\r\n]", "_"));
 
         // ----------------------------------------------------------------
         // 처리구분 분기 (COBOL EVALUATE XDIPA301-I-PRCSS-DSTCD 대응)
@@ -181,7 +178,7 @@ public class DUCorpEvalHistoryA extends DataUnit {
             wkBelngBrncd = empInfo.getString("belngBrncd") != null
                     ? empInfo.getString("belngBrncd") : "";
         }
-        log.debug("★[S5000] 직원한글명=" + wkEmpHanglFname + ", 소속부점코드=" + wkBelngBrncd);
+        log.debug("[S5000] 직원정보 조회 완료");
 
         // ----------------------------------------------------------------
         // STEP4: THKIPB110 INSERT (COBOL S3200-THKIPB110-INS-RTN 대응)
@@ -204,8 +201,10 @@ public class DUCorpEvalHistoryA extends DataUnit {
         // 레코드 항목 SET (COBOL S3220 대응)
         // 기업집단명
         insertParam.put("corpClctName", requestData.getString("corpClctName"));
-        // 평가기준년월일
-        insertParam.put("valuaStdYmd", requestData.getString("valuaStdYmd"));
+        // 평가확정년월일 (VALUA_DEFINS_YMD) - 초기 NULL 허용
+        insertParam.put("valuaDefinsYmd", requestData.getString("valuaDefinsYmd"));
+        // 평가기준년월일 (VALUA_BASE_YMD) - XML 바인드 변수명과 일치
+        insertParam.put("valuaBaseYmd", requestData.getString("valuaStdYmd"));
         // 비계약업무구분코드 (신평: '060')
         insertParam.put("nonCtrcBzwkDstcd", CCorpEvalConsts.NON_CTRC_BZWK_DSTCD);
         // 기업집단처리단계구분 - 해당무 초기값 ('0')
@@ -216,16 +215,46 @@ public class DUCorpEvalHistoryA extends DataUnit {
         insertParam.put("grdAdjsDstcd", CCorpEvalConsts.GRD_ADJS_DSTCD_NONE);
         // 조정단계번호구분 - 해당무 ('00')
         insertParam.put("adjsStgeNoDstcd", CCorpEvalConsts.ADJS_STGE_NO_DSTCD_NONE);
+        // 안정성지표완성도1 (STABL_IF_CMPTN_VAL1) - 초기 0
+        insertParam.put("stablIfCmptnVal1", requestData.getString("stablIfCmptnVal1") != null
+                ? requestData.getString("stablIfCmptnVal1") : "0");
+        // 안정성지표완성도2 (STABL_IF_CMPTN_VAL2) - 초기 0
+        insertParam.put("stablIfCmptnVal2", requestData.getString("stablIfCmptnVal2") != null
+                ? requestData.getString("stablIfCmptnVal2") : "0");
+        // 수익성지표완성도1 (ERN_IF_CMPTN_VAL1) - 초기 0
+        insertParam.put("ernIfCmptnVal1", requestData.getString("ernIfCmptnVal1") != null
+                ? requestData.getString("ernIfCmptnVal1") : "0");
+        // 수익성지표완성도2 (ERN_IF_CMPTN_VAL2) - 초기 0
+        insertParam.put("ernIfCmptnVal2", requestData.getString("ernIfCmptnVal2") != null
+                ? requestData.getString("ernIfCmptnVal2") : "0");
+        // 재무등급분류완성도 (CSFW_FNAF_CMPTN_VAL) - 초기 0
+        insertParam.put("csfwFnafCmptnVal", requestData.getString("csfwFnafCmptnVal") != null
+                ? requestData.getString("csfwFnafCmptnVal") : "0");
+        // 재무점수 (FNAF_SCOR) - 초기 0
+        insertParam.put("fnafScor", requestData.getString("fnafScor") != null
+                ? requestData.getString("fnafScor") : "0");
+        // 비재무점수 (NON_FNAF_SCOR) - 초기 0
+        insertParam.put("nonFnafScor", requestData.getString("nonFnafScor") != null
+                ? requestData.getString("nonFnafScor") : "0");
+        // 선정점수 (CHSN_SCOR) - 초기 0
+        insertParam.put("chsnScor", requestData.getString("chsnScor") != null
+                ? requestData.getString("chsnScor") : "0");
         // 예비집단등급구분 - 해당무 ('000')
         insertParam.put("spareCGrdDstcd", CCorpEvalConsts.SPARE_C_GRD_DSTCD_NONE);
         // 최종집단등급구분 - 해당무 ('000')
         insertParam.put("lastClctGrdDstcd", CCorpEvalConsts.LAST_CLCT_GRD_DSTCD_NONE);
+        // 유효년월일 (VALD_YMD) - 초기 NULL 허용
+        insertParam.put("valdYmd", requestData.getString("valdYmd"));
         // 주채무계열여부 (QIPA307 조회 결과)
         insertParam.put("mainDebtAffltYn", wkMainDebtAffltYn);
-        // 담당직원명 (QIPA302 조회 결과)
-        insertParam.put("empHanglFname", wkEmpHanglFname);
-        // 소속부점코드 (QIPA302 조회 결과)
-        insertParam.put("belngBrncd", wkBelngBrncd);
+        // 평가직원번호 (VALUA_EMPID) - COBOL BICOM-USER-EMPID 대응
+        insertParam.put("valuaEmpid", requestData.getString("userEmpid"));
+        // 평가직원명 (VALUA_EMNM) - QIPA302 조회 결과 직원한글명 매핑
+        insertParam.put("valuaEmnm", wkEmpHanglFname);
+        // 평가부점코드 (VALUA_BRNCD) - QIPA302 조회 결과 소속부점코드 매핑
+        insertParam.put("valuaBrncd", wkBelngBrncd);
+        // 관리부점코드 (MGT_BRNCD) - 초기 NULL 허용
+        insertParam.put("mgtBrncd", requestData.getString("mgtBrncd"));
         // 등록직원번호 (COBOL BICOM-USER-EMPID 대응)
         insertParam.put("regiEmpid", requestData.getString("userEmpid"));
         // 최종수정직원번호 (COBOL BICOM-USER-EMPID 대응)

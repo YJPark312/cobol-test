@@ -24,7 +24,7 @@
                실제 SQLIO SQL과 대조 검증 필요
     ============================================================ -->
     <select id="selectExistCheckQipa301" parameterClass="map" resultClass="map">
-        SELECT COUNT(*) AS EXIST_CNT
+        SELECT COUNT(*) AS CNT
           FROM BANKDB.THKIPB110
          WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
            AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
@@ -67,7 +67,7 @@
              , BELNG_BRNCD
           FROM BANKDB.THKJIHR01
          WHERE GROUP_CO_CD = #groupCoCd:VARCHAR#
-           AND EMP_NO      = #empId:VARCHAR#
+           AND EMP_NO      = #userEmpid:VARCHAR#
     </select>
 
     <!-- ============================================================
@@ -181,6 +181,7 @@
              , CORP_CLCT_GROUP_CD
              , CORP_CLCT_REGI_CD
              , VALUA_YMD
+             , CORP_HSTRY_DSTCD
              , SERNO
           FROM BANKDB.THKIPB111
          WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
@@ -253,8 +254,9 @@
              , CORP_CLCT_GROUP_CD
              , CORP_CLCT_REGI_CD
              , VALUA_YMD
-             , BSNS_PART_SERNO
-             , ANAL_STGE_SERNO
+             , FNAF_A_RPTDOC_DSTCD AS fnafARptdocDstcd
+             , FNAF_ITEM_CD        AS fnafItemCd
+             , BIZ_SECT_NO         AS bizSectNo
           FROM BANKDB.THKIPB113
          WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
            AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
@@ -272,15 +274,17 @@
              , CORP_CLCT_GROUP_CD
              , CORP_CLCT_REGI_CD
              , VALUA_YMD
-             , BSNS_PART_SERNO
-             , ANAL_STGE_SERNO
+             , FNAF_A_RPTDOC_DSTCD
+             , FNAF_ITEM_CD
+             , BIZ_SECT_NO
           FROM BANKDB.THKIPB113
          WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
            AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
            AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
            AND VALUA_YMD          = #valuaYmd:VARCHAR#
-           AND BSNS_PART_SERNO    = #bsnsPartSerno:NUMERIC#
-           AND ANAL_STGE_SERNO    = #analStgeSerno:NUMERIC#
+           AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd:VARCHAR#
+           AND FNAF_ITEM_CD        = #fnafItemCd:VARCHAR#
+           AND BIZ_SECT_NO         = #bizSectNo:NUMERIC#
         FOR UPDATE
     </select>
 
@@ -295,8 +299,9 @@
            AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
            AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
            AND VALUA_YMD          = #valuaYmd:VARCHAR#
-           AND BSNS_PART_SERNO    = #bsnsPartSerno:NUMERIC#
-           AND ANAL_STGE_SERNO    = #analStgeSerno:NUMERIC#
+           AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd:VARCHAR#
+           AND FNAF_ITEM_CD        = #fnafItemCd:VARCHAR#
+           AND BIZ_SECT_NO         = #bizSectNo:NUMERIC#
     </delete>
 
     <!-- ============================================================
@@ -311,7 +316,9 @@
              , CORP_CLCT_GROUP_CD
              , CORP_CLCT_REGI_CD
              , VALUA_YMD
-             , FNAF_ANAL_SERNO
+             , ANLS_I_CLSFI_DSTCD  AS anlsIClsfiDstcd
+             , FNAF_A_RPTDOC_DSTCD AS fnafARptdocDstcd
+             , FNAF_ITEM_CD         AS fnafItemCd
           FROM BANKDB.THKIPB112
          WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
            AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
@@ -329,13 +336,17 @@
              , CORP_CLCT_GROUP_CD
              , CORP_CLCT_REGI_CD
              , VALUA_YMD
-             , FNAF_ANAL_SERNO
+             , ANLS_I_CLSFI_DSTCD
+             , FNAF_A_RPTDOC_DSTCD
+             , FNAF_ITEM_CD
           FROM BANKDB.THKIPB112
-         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
-           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
-           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
-           AND VALUA_YMD          = #valuaYmd:VARCHAR#
-           AND FNAF_ANAL_SERNO    = #fnafAnalSerno:NUMERIC#
+         WHERE GROUP_CO_CD         = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD  = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD   = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD           = #valuaYmd:VARCHAR#
+           AND ANLS_I_CLSFI_DSTCD  = #anlsIClsfiDstcd:VARCHAR#
+           AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd:VARCHAR#
+           AND FNAF_ITEM_CD         = #fnafItemCd:VARCHAR#
         FOR UPDATE
     </select>
 
@@ -346,11 +357,13 @@
     ============================================================ -->
     <delete id="deleteThkipb112" parameterClass="map">
         DELETE FROM BANKDB.THKIPB112
-         WHERE GROUP_CO_CD        = #groupCoCd:VARCHAR#
-           AND CORP_CLCT_GROUP_CD = #corpClctGroupCd:VARCHAR#
-           AND CORP_CLCT_REGI_CD  = #corpClctRegiCd:VARCHAR#
-           AND VALUA_YMD          = #valuaYmd:VARCHAR#
-           AND FNAF_ANAL_SERNO    = #fnafAnalSerno:NUMERIC#
+         WHERE GROUP_CO_CD         = #groupCoCd:VARCHAR#
+           AND CORP_CLCT_GROUP_CD  = #corpClctGroupCd:VARCHAR#
+           AND CORP_CLCT_REGI_CD   = #corpClctRegiCd:VARCHAR#
+           AND VALUA_YMD           = #valuaYmd:VARCHAR#
+           AND ANLS_I_CLSFI_DSTCD  = #anlsIClsfiDstcd:VARCHAR#
+           AND FNAF_A_RPTDOC_DSTCD = #fnafARptdocDstcd:VARCHAR#
+           AND FNAF_ITEM_CD         = #fnafItemCd:VARCHAR#
     </delete>
 
     <!-- ============================================================
