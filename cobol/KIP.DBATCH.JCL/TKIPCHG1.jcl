@@ -1,0 +1,20 @@
+//TKIPCHG1 JOB (DB2),CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
+//*************************************************************
+//* DOC : DATASET 내용 변경 JCL (DSNIN의 DATASET 수정 후 실행)
+//*************************************************************
+//FILEMGR  EXEC PGM=FMNMAIN
+//STEPLIB  DD DISP=SHR,DSN=DB2ATS.DSNC10.RUNLIB.LOAD.CHARCHG
+//SYSPRINT DD SYSOUT=*
+//FMNTSPRT DD SYSOUT=*
+//SYSTERM  DD SYSOUT=*
+//SYSIN    DD *
+$$FILEM FCH ,
+$$FILEM MEMBER=*,
+$$FILEM PACK=ASIS,
+$$FILEM JCL=YES,
+$$FILEM DSNIN=KIP.DBATCH.JCL
+C 'DB2ATS.DSNC10.'  'DB2ATS.DSNC10.'
+C 'DSNTEP12'        'DSNTEP12'
+C 'DSNTP412'        'DSNTP412'
+C 'DSNTIA12'        'DSNTIA12'
+C 'DSNTIB12'        'DSNTIB12'
