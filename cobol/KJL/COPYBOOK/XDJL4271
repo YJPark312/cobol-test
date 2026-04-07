@@ -1,0 +1,175 @@
+      *================================================================*
+      *@ NAME : XDJL4271                                               *
+      *@ DESC : DC포괄신용공여한도기준한도조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-05 14:32:46                          *
+      *  생성일시     : 2023-09-05 14:32:46                          *
+      *  전체길이     : 00000022 BYTES                               *
+      *================================================================*
+           03  XDJL4271-RETURN.
+             05  XDJL4271-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4271-OK            VALUE  '00'.
+                 88  COND-XDJL4271-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4271-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4271-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4271-ERROR         VALUE  '09'.
+                 88  COND-XDJL4271-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4271-SYSERROR      VALUE  '99'.
+             05  XDJL4271-R-LINE                 PIC  9(006).
+             05  XDJL4271-R-ERRCD                PIC  X(008).
+             05  XDJL4271-R-TREAT-CD             PIC  X(008).
+             05  XDJL4271-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4271-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4271-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJL4271-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJL4271-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4271-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XDJL4271-O-DBTRZ-NAME           PIC  X(052).
+      *--       여신성최고한도
+             05  XDJL4271-O-LNBZ-I-HGST-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹명
+             05  XDJL4271-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       유효기일
+             05  XDJL4271-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       포괄신용공여관리한도
+             05  XDJL4271-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹신용등급
+             05  XDJL4271-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       업종명
+             05  XDJL4271-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       최종포괄신용공여관리한도
+             05  XDJL4271-O-LAST-INLS-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업신용등급
+             05  XDJL4271-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       기사용액
+             05  XDJL4271-O-INLS-GRCR-LIMT-AUC   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             05  XDJL4271-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업평가등급구분
+             05  XDJL4271-O-IDSTRY-V-GRD-DSTCD   PIC  X(004).
+      *--       총자산
+             05  XDJL4271-O-TOTAL-ASST           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총자산
+             05  XDJL4271-O-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       매출액
+             05  XDJL4271-O-SALEPR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정매출액
+             05  XDJL4271-O-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준년자기자본금
+             05  XDJL4271-O-BASE-YR-ONCP-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정기준년자기자본금
+             05  XDJL4271-O-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       금융비용차입금
+             05  XDJL4271-O-FNCS-AMBR            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정금융비용차입금
+             05  XDJL4271-O-AMND-FNCS-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       당행차입금
+             05  XDJL4271-O-OWBNK-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정당행차입금
+             05  XDJL4271-O-AMND-OWBNK-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       영업현금흐름액
+             05  XDJL4271-O-BZOPR-ACF            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정영업현금흐름액
+             05  XDJL4271-O-AMND-BZOPR-ACF       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       업체평균이자율
+             05  XDJL4271-O-ENTP-AVG-INT-RT      PIC  9(003)V9(02).
+      *--       수정업체평균이자율
+             05  XDJL4271-O-AMND-ENTP-AVG-IRT    PIC  9(003)V9(02).
+      *--       여신성자산한도금액
+             05  XDJL4271-O-LNBZ-I-ASST-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정여신성자산한도금액
+             05  XDJL4271-O-AMND-LI-ASST-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본기준금액
+             05  XDJL4271-O-ONCP-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본기준금액
+             05  XDJL4271-O-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       영업활동기준한도금액
+             05  XDJL4271-O-BZOPR-A-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정영업활동기준한도금액
+             05  XDJL4271-O-AMND-BA-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       포괄설정가능금액
+             05  XDJL4271-O-INLS-STUP-ABLAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정포괄설정가능금액
+             05  XDJL4271-O-AMND-I-STUP-ABLAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신용등급지원비율
+             05  XDJL4271-O-CRDRAT-SPORT-RATO    PIC  9(003).
+      *--       관리여부
+             05  XDJL4271-O-MGT-YN               PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  4  2  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4271-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4271-I-KB-PIN             ;KB-PIN
+      *X  XDJL4271-I-APLCN-NO           ;신청번호
+      *X  XDJL4271-O-DBTRZ-NAME         ;채무자명
+      *S  XDJL4271-O-LNBZ-I-HGST-LIMT   ;여신성최고한도
+      *X  XDJL4271-O-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XDJL4271-O-MGT-LIMT-VALD-YMD  ;유효기일
+      *S  XDJL4271-O-MGT-CLAM           ;포괄신용공여관리한도
+      *X  XDJL4271-O-INTNL-CV-GRD-DSTCD ;그룹신용등급
+      *X  XDJL4271-O-STND-IDSTRY-CD-NAME;업종명
+      *S  XDJL4271-O-LAST-INLS-LIMT     ;최종포괄신용공여관리한도
+      *X  XDJL4271-O-INTNL-CV-GRD-DSTCD1;기업신용등급
+      *S  XDJL4271-O-INLS-GRCR-LIMT-AUC ;기사용액
+      *S  XDJL4271-O-LIMT-SEXTR-AMT     ;한도여유액
+      *X  XDJL4271-O-IDSTRY-V-GRD-DSTCD ;산업평가등급구분
+      *S  XDJL4271-O-TOTAL-ASST         ;총자산
+      *S  XDJL4271-O-AMND-TOTAL-ASST    ;수정총자산
+      *S  XDJL4271-O-SALEPR             ;매출액
+      *S  XDJL4271-O-AMND-SALEPR        ;수정매출액
+      *S  XDJL4271-O-BASE-YR-ONCP-AMT   ;기준년자기자본금
+      *S  XDJL4271-O-AMND-B-YR-ONCP-AMT ;수정기준년자기자본금
+      *S  XDJL4271-O-FNCS-AMBR          ;금융비용차입금
+      *S  XDJL4271-O-AMND-FNCS-AMBR     ;수정금융비용차입금
+      *S  XDJL4271-O-OWBNK-AMBR         ;당행차입금
+      *S  XDJL4271-O-AMND-OWBNK-AMBR    ;수정당행차입금
+      *S  XDJL4271-O-BZOPR-ACF          ;영업현금흐름액
+      *S  XDJL4271-O-AMND-BZOPR-ACF     ;수정영업현금흐름액
+      *N  XDJL4271-O-ENTP-AVG-INT-RT    ;업체평균이자율
+      *N  XDJL4271-O-AMND-ENTP-AVG-IRT  ;수정업체평균이자율
+      *S  XDJL4271-O-LNBZ-I-ASST-CLAM   ;여신성자산한도금액
+      *S  XDJL4271-O-AMND-LI-ASST-CLAM
+      * 수정여신성자산한도금액
+      *S  XDJL4271-O-ONCP-BSAMT         ;자기자본기준금액
+      *S  XDJL4271-O-AMND-O-CAPTL-BSAMT ;수정자기자본기준금액
+      *S  XDJL4271-O-BZOPR-A-BASE-CLAM  ;영업활동기준한도금액
+      *S  XDJL4271-O-AMND-BA-BASE-CLAM
+      * 수정영업활동기준한도금액
+      *S  XDJL4271-O-INLS-STUP-ABLAMT   ;포괄설정가능금액
+      *S  XDJL4271-O-AMND-I-STUP-ABLAMT ;수정포괄설정가능금액
+      *N  XDJL4271-O-CRDRAT-SPORT-RATO  ;신용등급지원비율
+      *X  XDJL4271-O-MGT-YN             ;관리여부

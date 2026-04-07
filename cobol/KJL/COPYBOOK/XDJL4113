@@ -1,0 +1,157 @@
+      *================================================================*
+      *@ NAME : XDJL4113                                               *
+      *@ DESC : DC(EAD)과목별TE현황조회 COPYBOOK                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2010-10-26 14:11:39                          *
+      *  생성일시     : 2010-10-26 14:11:41                          *
+      *  전체길이     : 00000023 BYTES                               *
+      *================================================================*
+           03  XDJL4113-RETURN.
+             05  XDJL4113-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4113-OK            VALUE  '00'.
+                 88  COND-XDJL4113-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4113-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4113-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4113-ERROR         VALUE  '09'.
+                 88  COND-XDJL4113-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4113-SYSERROR      VALUE  '99'.
+             05  XDJL4113-R-LINE                 PIC  9(006).
+             05  XDJL4113-R-ERRCD                PIC  X(008).
+             05  XDJL4113-R-TREAT-CD             PIC  X(008).
+             05  XDJL4113-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4113-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4113-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XDJL4113-I-BRWR-NO              PIC  X(013).
+      *--       기준년월일
+             05  XDJL4113-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4113-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4113-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XDJL4113-O-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       차주명
+             05  XDJL4113-O-BRWR-NAME            PIC  X(052).
+      *--       TE기준한도
+             05  XDJL4113-O-TE-BASE-LIMT         PIC  9(015).
+      *--       기준한도산출일
+             05  XDJL4113-O-BASE-LIMT-CMPTN-DD   PIC  X(008).
+      *--       한도설정유효일
+             05  XDJL4113-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       여신성관리한도
+             05  XDJL4113-O-LNBZ-I-MGT-LIMT      PIC  9(015).
+      *--       여신성한도기준TE
+             05  XDJL4113-O-LNBZ-I-LIMT-BASE-TE  PIC  9(015).
+      *--       여신성잔액기준TE
+             05  XDJL4113-O-LNBZ-I-BAL-BASE-TE   PIC  9(015).
+      *--       여신성한도여유액
+             05  XDJL4113-O-LNBZ-IL-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XDJL4113-O-MRKTY-MGT-LIMT       PIC  9(015).
+      *--       시장성한도기준TE
+             05  XDJL4113-O-MRKTY-LIMT-BASE-TE   PIC  9(015).
+      *--       시장성잔액기준TE
+             05  XDJL4113-O-MRKTY-BAL-BASE-TE    PIC  9(015).
+      *--       시장성한도여유액
+             05  XDJL4113-O-MRKTY-L-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도
+             05  XDJL4113-O-MGT-LIMT             PIC  9(015).
+      *--       한도기준TE
+             05  XDJL4113-O-LIMT-BASE-TE         PIC  9(015).
+      *--       잔액기준TE
+             05  XDJL4113-O-BAL-BASE-TE          PIC  9(015).
+      *--       한도여유액
+             05  XDJL4113-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       파생상품총거래한도
+             05  XDJL4113-O-DRVT-PT-TRAN-LIMT    PIC  9(015).
+      *--       파생상품익스포져
+             05  XDJL4113-O-DRVT-PRDCT-EXPSR     PIC  9(015).
+      *--       그리드1
+             05  XDJL4113-O-GRID1                OCCURS 001000 TIMES.
+      *--         항목구분
+               07  XDJL4113-O-TE-ITEM-DSTIC1     PIC  X(025).
+      *--         상품코드
+               07  XDJL4113-O-PRDCT-CD1          PIC  X(012).
+      *--         상품명
+               07  XDJL4113-O-PRDCT-NAME1        PIC  X(252).
+      *--         자산구분
+               07  XDJL4113-O-TE-ASST-DSTCD1     PIC  X(010).
+      *--         명목액기준한도
+               07  XDJL4113-O-TTL-AMT-BASE-CLAM1 PIC  9(015).
+      *--         명목액기준잔액
+               07  XDJL4113-O-TTL-AMT-BASE-BAL1  PIC  9(015).
+      *--         한도기준TE
+               07  XDJL4113-O-TE-LIMT-AUC1       PIC  9(015).
+      *--         잔액기준TE
+               07  XDJL4113-O-TE-BAL-AUC1        PIC  9(015).
+      *--       그리드2
+             05  XDJL4113-O-GRID2                OCCURS 001000 TIMES.
+      *--         항목구분
+               07  XDJL4113-O-TE-ITEM-DSTIC2     PIC  X(025).
+      *--         상품코드
+               07  XDJL4113-O-PRDCT-CD2          PIC  X(012).
+      *--         상품명
+               07  XDJL4113-O-PRDCT-NAME2        PIC  X(252).
+      *--         자산구분
+               07  XDJL4113-O-TE-ASST-DSTCD2     PIC  X(010).
+      *--         명목액기준한도
+               07  XDJL4113-O-TTL-AMT-BASE-CLAM2 PIC  9(015).
+      *--         명목액기준잔액
+               07  XDJL4113-O-TTL-AMT-BASE-BAL2  PIC  9(015).
+      *--         한도기준TE
+               07  XDJL4113-O-TE-LIMT-AUC2       PIC  9(015).
+      *--         잔액기준TE
+               07  XDJL4113-O-TE-BAL-AUC2        PIC  9(015).
+      *================================================================*
+      *        X  D  J  L  4  1  1  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4113-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4113-I-BRWR-NO            ;차주번호
+      *X  XDJL4113-I-BASE-YMD           ;기준년월일
+      *N  XDJL4113-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XDJL4113-O-OUTPT-LINE-CNT2    ;출력라인수2
+      *X  XDJL4113-O-BRWR-NAME          ;차주명
+      *N  XDJL4113-O-TE-BASE-LIMT       ;TE기준한도
+      *X  XDJL4113-O-BASE-LIMT-CMPTN-DD ;기준한도산출일
+      *X  XDJL4113-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *N  XDJL4113-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *N  XDJL4113-O-LNBZ-I-LIMT-BASE-TE;여신성한도기준TE
+      *N  XDJL4113-O-LNBZ-I-BAL-BASE-TE ;여신성잔액기준TE
+      *S  XDJL4113-O-LNBZ-IL-SEXTR-AMT  ;여신성한도여유액
+      *N  XDJL4113-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *N  XDJL4113-O-MRKTY-LIMT-BASE-TE ;시장성한도기준TE
+      *N  XDJL4113-O-MRKTY-BAL-BASE-TE  ;시장성잔액기준TE
+      *S  XDJL4113-O-MRKTY-L-SEXTR-AMT  ;시장성한도여유액
+      *N  XDJL4113-O-MGT-LIMT           ;관리한도
+      *N  XDJL4113-O-LIMT-BASE-TE       ;한도기준TE
+      *N  XDJL4113-O-BAL-BASE-TE        ;잔액기준TE
+      *S  XDJL4113-O-LIMT-SEXTR-AMT     ;한도여유액
+      *N  XDJL4113-O-DRVT-PT-TRAN-LIMT  ;파생상품총거래한도
+      *N  XDJL4113-O-DRVT-PRDCT-EXPSR   ;파생상품익스포져
+      *A  XDJL4113-O-GRID1              ;그리드1
+      *X  XDJL4113-O-TE-ITEM-DSTIC1     ;항목구분
+      *X  XDJL4113-O-PRDCT-CD1          ;상품코드
+      *X  XDJL4113-O-PRDCT-NAME1        ;상품명
+      *X  XDJL4113-O-TE-ASST-DSTCD1     ;자산구분
+      *N  XDJL4113-O-TTL-AMT-BASE-CLAM1 ;명목액기준한도
+      *N  XDJL4113-O-TTL-AMT-BASE-BAL1  ;명목액기준잔액
+      *N  XDJL4113-O-TE-LIMT-AUC1       ;한도기준TE
+      *N  XDJL4113-O-TE-BAL-AUC1        ;잔액기준TE
+      *A  XDJL4113-O-GRID2              ;그리드2
+      *X  XDJL4113-O-TE-ITEM-DSTIC2     ;항목구분
+      *X  XDJL4113-O-PRDCT-CD2          ;상품코드
+      *X  XDJL4113-O-PRDCT-NAME2        ;상품명
+      *X  XDJL4113-O-TE-ASST-DSTCD2     ;자산구분
+      *N  XDJL4113-O-TTL-AMT-BASE-CLAM2 ;명목액기준한도
+      *N  XDJL4113-O-TTL-AMT-BASE-BAL2  ;명목액기준잔액
+      *N  XDJL4113-O-TE-LIMT-AUC2       ;한도기준TE
+      *N  XDJL4113-O-TE-BAL-AUC2        ;잔액기준TE

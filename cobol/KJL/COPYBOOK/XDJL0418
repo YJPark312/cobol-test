@@ -1,0 +1,168 @@
+      *================================================================*
+      *@ NAME : XDJL0418                                               *
+      *@ DESC : 포괄신용공여한도적정성점검대상조회                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-05-02 13:09:47                          *
+      *  생성일시     : 2024-05-02 13:09:47                          *
+      *  전체길이     : 00000029 BYTES                               *
+      *================================================================*
+           03  XDJL0418-RETURN.
+             05  XDJL0418-R-STAT                 PIC  X(002).
+                 88  COND-XDJL0418-OK            VALUE  '00'.
+                 88  COND-XDJL0418-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL0418-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL0418-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL0418-ERROR         VALUE  '09'.
+                 88  COND-XDJL0418-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL0418-SYSERROR      VALUE  '99'.
+             05  XDJL0418-R-LINE                 PIC  9(006).
+             05  XDJL0418-R-ERRCD                PIC  X(008).
+             05  XDJL0418-R-TREAT-CD             PIC  X(008).
+             05  XDJL0418-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL0418-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL0418-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객식별자
+             05  XDJL0418-I-CUST-IDNFR           PIC  X(010).
+      *--       담당심사역
+             05  XDJL0418-I-RSPBL-EXMTN-DTY      PIC  X(007).
+      *--       한도신청번호
+             05  XDJL0418-I-LIMT-APLCN-NO        PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL0418-OUT.
+      *----------------------------------------------------------------*
+      *--       조회결과
+             05  XDJL0418-O-INQURY-RSULT         PIC  X(050).
+      *--       한도신청번호
+             05  XDJL0418-O-LIMT-APLCN-NO        PIC  X(010).
+      *--       한도점검진행상태구분
+             05  XDJL0418-O-LIMT-CP-STUS-DSTIC   PIC  X(001).
+      *--       최종한도승인구분
+             05  XDJL0418-O-LAST-L-ATHOR-DSTIC   PIC  X(001).
+      *--       기준년월일
+             05  XDJL0418-O-BASE-YMD             PIC  X(008).
+      *--       신청신용등급
+             05  XDJL0418-O-APLCN-CRDRAT         PIC  X(004).
+      *--       신용등급
+             05  XDJL0418-O-CRDRAT               PIC  X(004).
+      *--       관리한도설정년월일
+             05  XDJL0418-O-MGT-LIMT-STUP-YMD    PIC  X(008).
+      *--       유효기일
+             05  XDJL0418-O-VALD-FXDT            PIC  X(008).
+      *--       여신성한도
+             05  XDJL0418-O-LNBZ-INCLIN-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       포괄한도
+             05  XDJL0418-O-INLS-LIMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       사용액
+             05  XDJL0418-O-USE-AMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       적정성여부
+             05  XDJL0418-O-PRTY-YN              PIC  X(001).
+      *--       보고서첨부
+             05  XDJL0418-O-RPTDOC-APNDX         PIC  X(001).
+      *--       적정성점검구분
+             05  XDJL0418-O-PRTY-CHKUP-DSTCD     PIC  X(001).
+      *--       영업점코드
+             05  XDJL0418-O-BBRN-CD              PIC  X(004).
+      *--       부점명
+             05  XDJL0418-O-BRN-NAME             PIC  X(062).
+      *--       고객식별자
+             05  XDJL0418-O-CUST-IDNFR           PIC  X(010).
+      *--       차주명
+             05  XDJL0418-O-BRWR-NAME            PIC  X(052).
+      *--       그룹명
+             05  XDJL0418-O-GROUP-NAME           PIC  X(052).
+      *--       신청그룹등급
+             05  XDJL0418-O-APLCN-GROUP-GRD      PIC  X(003).
+      *--       그룹등급
+             05  XDJL0418-O-GROUP-GRD            PIC  X(003).
+      *--       설정상태
+             05  XDJL0418-O-STUP-STUS            PIC  X(010).
+      *--       간접익스포져
+             05  XDJL0418-O-INDR-EXPSR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율
+             05  XDJL0418-O-EXHS-RT              PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       조기경보사후관리구분
+             05  XDJL0418-O-ELY-AA-MGT-DSTIC     PIC  X(001).
+      *--       기업여신정책내용
+             05  XDJL0418-O-CORP-L-PLICY-CTNT    PIC  X(202).
+      *--       출력라인수1
+             05  XDJL0418-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XDJL0418-O-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       그리드1
+             05  XDJL0418-O-GRID1                OCCURS 000010 TIMES.
+      *--         직원번호
+               07  XDJL0418-O-EMPID              PIC  X(007).
+      *--         직원명
+               07  XDJL0418-O-EMNM               PIC  X(052).
+      *--       그리드2
+             05  XDJL0418-O-GRID2                OCCURS 000010 TIMES.
+      *--         첨부파일일련번호
+               07  XDJL0418-O-APNDX-FILE-SERNO   PIC  9(003).
+      *--         첨부파일식별자
+               07  XDJL0418-O-APNDX-FILE-IDNFR   PIC  X(040).
+      *--         첨부파일내용
+               07  XDJL0418-O-APNDX-FILE-CTNT    PIC  X(172).
+      *--         첨부파일명
+               07  XDJL0418-O-APNDX-FILE-NAME    PIC  X(172).
+      *--         등록년월일
+               07  XDJL0418-O-REGI-YMD           PIC  X(008).
+      *--         등록직원번호
+               07  XDJL0418-O-REGI-EMPID         PIC  X(007).
+      *--         등록직원명
+               07  XDJL0418-O-REGI-EMNM          PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  0  4  1  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL0418-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL0418-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL0418-I-RSPBL-EXMTN-DTY    ;담당심사역
+      *X  XDJL0418-I-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJL0418-O-INQURY-RSULT       ;조회결과
+      *X  XDJL0418-O-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJL0418-O-LIMT-CP-STUS-DSTIC ;한도점검진행상태구분
+      *X  XDJL0418-O-LAST-L-ATHOR-DSTIC ;최종한도승인구분
+      *X  XDJL0418-O-BASE-YMD           ;기준년월일
+      *X  XDJL0418-O-APLCN-CRDRAT       ;신청신용등급
+      *X  XDJL0418-O-CRDRAT             ;신용등급
+      *X  XDJL0418-O-MGT-LIMT-STUP-YMD  ;관리한도설정년월일
+      *X  XDJL0418-O-VALD-FXDT          ;유효기일
+      *S  XDJL0418-O-LNBZ-INCLIN-LIMT   ;여신성한도
+      *S  XDJL0418-O-INLS-LIMT          ;포괄한도
+      *S  XDJL0418-O-USE-AMT            ;사용액
+      *X  XDJL0418-O-PRTY-YN            ;적정성여부
+      *X  XDJL0418-O-RPTDOC-APNDX       ;보고서첨부
+      *X  XDJL0418-O-PRTY-CHKUP-DSTCD   ;적정성점검구분
+      *X  XDJL0418-O-BBRN-CD            ;영업점코드
+      *X  XDJL0418-O-BRN-NAME           ;부점명
+      *X  XDJL0418-O-CUST-IDNFR         ;고객식별자
+      *X  XDJL0418-O-BRWR-NAME          ;차주명
+      *X  XDJL0418-O-GROUP-NAME         ;그룹명
+      *X  XDJL0418-O-APLCN-GROUP-GRD    ;신청그룹등급
+      *X  XDJL0418-O-GROUP-GRD          ;그룹등급
+      *X  XDJL0418-O-STUP-STUS          ;설정상태
+      *S  XDJL0418-O-INDR-EXPSR         ;간접익스포져
+      *S  XDJL0418-O-EXHS-RT            ;소진율
+      *X  XDJL0418-O-ELY-AA-MGT-DSTIC   ;조기경보사후관리구분
+      *X  XDJL0418-O-CORP-L-PLICY-CTNT  ;기업여신정책내용
+      *N  XDJL0418-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XDJL0418-O-OUTPT-LINE-CNT2    ;출력라인수2
+      *A  XDJL0418-O-GRID1              ;그리드1
+      *X  XDJL0418-O-EMPID              ;직원번호
+      *X  XDJL0418-O-EMNM               ;직원명
+      *A  XDJL0418-O-GRID2              ;그리드2
+      *N  XDJL0418-O-APNDX-FILE-SERNO   ;첨부파일일련번호
+      *X  XDJL0418-O-APNDX-FILE-IDNFR   ;첨부파일식별자
+      *X  XDJL0418-O-APNDX-FILE-CTNT    ;첨부파일내용
+      *X  XDJL0418-O-APNDX-FILE-NAME    ;첨부파일명
+      *X  XDJL0418-O-REGI-YMD           ;등록년월일
+      *X  XDJL0418-O-REGI-EMPID         ;등록직원번호
+      *X  XDJL0418-O-REGI-EMNM          ;등록직원명

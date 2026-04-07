@@ -1,0 +1,73 @@
+      *================================================================*
+      *@ NAME : XDJL4017                                               *
+      *@ DESC : DC피어코드별TE현황조회 COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-12-23 10:16:29                          *
+      *  생성일시     : 2019-12-23 10:16:30                          *
+      *  전체길이     : 00000016 BYTES                               *
+      *================================================================*
+           03  XDJL4017-RETURN.
+             05  XDJL4017-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4017-OK            VALUE  '00'.
+                 88  COND-XDJL4017-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4017-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4017-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4017-ERROR         VALUE  '09'.
+                 88  COND-XDJL4017-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4017-SYSERROR      VALUE  '99'.
+             05  XDJL4017-R-LINE                 PIC  9(006).
+             05  XDJL4017-R-ERRCD                PIC  X(008).
+             05  XDJL4017-R-TREAT-CD             PIC  X(008).
+             05  XDJL4017-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4017-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4017-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준일자
+             05  XDJL4017-I-BASE-YMD             PIC  X(008).
+      *--       피어코드
+             05  XDJL4017-I-PEER-DSTCD           PIC  X(005).
+      *--       국내외구분코드
+             05  XDJL4017-I-HMAB-DSTCD           PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJL4017-OUT.
+      *----------------------------------------------------------------*
+      *--       피어코드명
+             05  XDJL4017-O-PEER-CD-NAME         PIC  X(102).
+      *--       출력라인수1
+             05  XDJL4017-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4017-O-GRID1                OCCURS 000500 TIMES.
+      *--         피어코드
+               07  XDJL4017-O-PEER-DSTCD1        PIC  X(010).
+      *--         피어코드명
+               07  XDJL4017-O-PEER-CD-NAME1      PIC  X(102).
+      *--         대상업체수
+               07  XDJL4017-O-TAGET-ENTP-NOITM1  PIC  9(015).
+      *--         명목액기준한도
+               07  XDJL4017-O-TTL-AMT-BASE-CLAM1 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준잔액
+               07  XDJL4017-O-TTL-AMT-BASE-BAL1  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         한도기준TE(B)
+               07  XDJL4017-O-TE-LIMT-AUC1       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  1  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4017-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4017-I-BASE-YMD           ;조회기준일자
+      *X  XDJL4017-I-PEER-DSTCD         ;피어코드
+      *X  XDJL4017-I-HMAB-DSTCD         ;국내외구분코드
+      *X  XDJL4017-O-PEER-CD-NAME       ;피어코드명
+      *N  XDJL4017-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4017-O-GRID1              ;그리드1
+      *X  XDJL4017-O-PEER-DSTCD1        ;피어코드
+      *X  XDJL4017-O-PEER-CD-NAME1      ;피어코드명
+      *N  XDJL4017-O-TAGET-ENTP-NOITM1  ;대상업체수
+      *S  XDJL4017-O-TTL-AMT-BASE-CLAM1 ;명목액기준한도
+      *S  XDJL4017-O-TTL-AMT-BASE-BAL1  ;명목액기준잔액
+      *S  XDJL4017-O-TE-LIMT-AUC1       ;한도기준TE(B)

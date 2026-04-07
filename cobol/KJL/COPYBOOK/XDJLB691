@@ -1,0 +1,61 @@
+      *================================================================*
+      *@ NAME : XDJLB691                                               *
+      *@ DESC : DC산업별지역별SUB한도등록COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2013-04-15 16:10:22                          *
+      *  생성일시     : 2013-04-15 16:10:24                          *
+      *  전체길이     : 00002115 BYTES                               *
+      *================================================================*
+           03  XDJLB691-RETURN.
+             05  XDJLB691-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB691-OK            VALUE  '00'.
+                 88  COND-XDJLB691-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB691-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB691-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB691-ERROR         VALUE  '09'.
+                 88  COND-XDJLB691-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB691-SYSERROR      VALUE  '99'.
+             05  XDJLB691-R-LINE                 PIC  9(006).
+             05  XDJLB691-R-ERRCD                PIC  X(008).
+             05  XDJLB691-R-TREAT-CD             PIC  X(008).
+             05  XDJLB691-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB691-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB691-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월일
+             05  XDJLB691-I-BASE-YMD             PIC  X(008).
+      *--       그리드
+             05  XDJLB691-I-GRID.
+      *--         총라인수
+               07  XDJLB691-I-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJLB691-I-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           대분류업종코드
+                 09  XDJLB691-I-LAG-CLSFI-BZTYP-CD
+                                                 PIC  X(003).
+      *--           지역구분
+                 09  XDJLB691-I-AREA-DSTCD       PIC  X(002).
+      *--           지역별SUB한도
+                 09  XDJLB691-I-AREA-PER-SUB-CLAM
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB691-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB691-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  6  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB691-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB691-I-BASE-YMD           ;기준년월일
+      *G  XDJLB691-I-GRID               ;그리드
+      *N  XDJLB691-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB691-I-DATA-BOOK          ;데이터부
+      *X  XDJLB691-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJLB691-I-AREA-DSTCD         ;지역구분
+      *S  XDJLB691-I-AREA-PER-SUB-CLAM  ;지역별SUB한도
+      *X  XDJLB691-O-PRCSS-RSULT        ;처리결과

@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : XBJLEXP1                                               *
+      *@ DESC : SUBCCF명목잔액환산 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2010-09-14 14:08:42                          *
+      *  생성일시     : 2010-09-14 14:08:45                          *
+      *  전체길이     : 00000035 BYTES                               *
+      *================================================================*
+           03  XBJLEXP1-RETURN.
+             05  XBJLEXP1-R-STAT                 PIC  X(002).
+                 88  COND-XBJLEXP1-OK            VALUE  '00'.
+                 88  COND-XBJLEXP1-KEYDUP        VALUE  '01'.
+                 88  COND-XBJLEXP1-NOTFOUND      VALUE  '02'.
+                 88  COND-XBJLEXP1-SPVSTOP       VALUE  '05'.
+                 88  COND-XBJLEXP1-ERROR         VALUE  '09'.
+                 88  COND-XBJLEXP1-ABNORMAL      VALUE  '98'.
+                 88  COND-XBJLEXP1-SYSERROR      VALUE  '99'.
+             05  XBJLEXP1-R-LINE                 PIC  9(006).
+             05  XBJLEXP1-R-ERRCD                PIC  X(008).
+             05  XBJLEXP1-R-TREAT-CD             PIC  X(008).
+             05  XBJLEXP1-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XBJLEXP1-IN.
+      *----------------------------------------------------------------*
+      *--       그룹회사코드
+             05  XBJLEXP1-I-GROUP-CO-CD          PIC  X(002).
+      *--       기준년월
+             05  XBJLEXP1-I-BASE-YM              PIC  X(006).
+      *--       상품대분류코드
+             05  XBJLEXP1-I-PRDCT-LAG-CLSFI-CD   PIC  X(002).
+      *--       상품중분류코드
+             05  XBJLEXP1-I-PRDCT-MEDM-CLSFI-CD  PIC  X(002).
+      *--       상품템플릿코드
+             05  XBJLEXP1-I-PRDCT-TMPLT-CD       PIC  X(003).
+      *--       상품번호
+             05  XBJLEXP1-I-PRDCT-NO             PIC  X(005).
+      *--       명목액기준잔액
+             05  XBJLEXP1-I-TTL-AMT-BASE-BAL     PIC  9(015).
+      *----------------------------------------------------------------*
+           03  XBJLEXP1-OUT.
+      *----------------------------------------------------------------*
+      *--       CCF명목잔액환산금액
+             05  XBJLEXP1-O-CCF-TTL-BAL-AUC      PIC  9(015).
+      *================================================================*
+      *        X  B  J  L  E  X  P  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XBJLEXP1-I-GROUP-CO-CD        ;그룹회사코드
+      *X  XBJLEXP1-I-BASE-YM            ;기준년월
+      *X  XBJLEXP1-I-PRDCT-LAG-CLSFI-CD ;상품대분류코드
+      *X  XBJLEXP1-I-PRDCT-MEDM-CLSFI-CD;상품중분류코드
+      *X  XBJLEXP1-I-PRDCT-TMPLT-CD     ;상품템플릿코드
+      *X  XBJLEXP1-I-PRDCT-NO           ;상품번호
+      *N  XBJLEXP1-I-TTL-AMT-BASE-BAL   ;명목액기준잔액
+      *N  XBJLEXP1-O-CCF-TTL-BAL-AUC    ;CCF명목잔액환산금액

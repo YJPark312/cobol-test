@@ -1,0 +1,93 @@
+      *================================================================*
+      *@ NAME : XPJL4007                                               *
+      *@ DESC : PCTE한도관리대상조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-09 13:17:38                          *
+      *  생성일시     : 2009-06-09 13:17:40                          *
+      *================================================================*
+           03  XPJL4007-RETURN.
+             05  XPJL4007-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4007-OK            VALUE  '00'.
+                 88  COND-XPJL4007-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4007-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4007-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4007-ERROR         VALUE  '09'.
+                 88  COND-XPJL4007-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4007-SYSERROR      VALUE  '99'.
+             05  XPJL4007-R-LINE                 PIC  9(006).
+             05  XPJL4007-R-ERRCD                PIC  X(008).
+             05  XPJL4007-R-TREAT-CD             PIC  X(008).
+             05  XPJL4007-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4007-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4007-I-PRCSS-DSTIC          PIC  X(002).
+      *--       부점코드
+             05  XPJL4007-I-BRNCD                PIC  X(004).
+      *--       고객구분
+             05  XPJL4007-I-CUST-DSTIC           PIC  X(001).
+      *--       설정상태
+             05  XPJL4007-I-STUP-STUS            PIC  X(001).
+      *--       기준년월일
+             05  XPJL4007-I-BASE-YMD             PIC  X(008).
+      *--       금액1
+             05  XPJL4007-I-AMT1                 PIC  9(015).
+      *--       금액2
+             05  XPJL4007-I-AMT2                 PIC  9(015).
+      *----------------------------------------------------------------*
+           03  XPJL4007-OUT.
+      *----------------------------------------------------------------*
+      *--       부점명
+             05  XPJL4007-O-BRN-NAME             PIC  X(062).
+      *--       출력라인수1
+             05  XPJL4007-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4007-O-GRID1                OCCURS 005000 TIMES.
+      *--         차주번호
+               07  XPJL4007-O-BRWR-NO            PIC  X(013).
+      *--         채무자명
+               07  XPJL4007-O-DBTRZ-NAME         PIC  X(042).
+      *--         기업규모
+               07  XPJL4007-O-CORP-SCAL          PIC  X(020).
+      *--         관리한도금액
+               07  XPJL4007-O-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준한도
+               07  XPJL4007-O-TTL-AMT-BASE-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         토탈익스포져금액
+               07  XPJL4007-O-TE-AMT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         한도소진율
+               07  XPJL4007-O-LIMT-EXHS-RT       PIC  9(003)V9(02).
+      *--         동일인외화신용공여한도액
+               07  XPJL4007-O-SMPSN-FG-LIMT-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         동일인외화신용공여액
+               07  XPJL4007-O-SMPSN-FC-GRCR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  P  J  L  4  0  0  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4007-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4007-I-BRNCD              ;부점코드
+      *X  XPJL4007-I-CUST-DSTIC         ;고객구분
+      *X  XPJL4007-I-STUP-STUS          ;설정상태
+      *X  XPJL4007-I-BASE-YMD           ;기준년월일
+      *N  XPJL4007-I-AMT1               ;금액1
+      *N  XPJL4007-I-AMT2               ;금액2
+      *X  XPJL4007-O-BRN-NAME           ;부점명
+      *N  XPJL4007-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4007-O-GRID1              ;그리드1
+      *X  XPJL4007-O-BRWR-NO            ;차주번호
+      *X  XPJL4007-O-DBTRZ-NAME         ;채무자명
+      *X  XPJL4007-O-CORP-SCAL          ;기업규모
+      *S  XPJL4007-O-MGT-CLAM           ;관리한도금액
+      *S  XPJL4007-O-TTL-AMT-BASE-LIMT  ;명목액기준한도
+      *S  XPJL4007-O-TE-AMT             ;토탈익스포져금액
+      *N  XPJL4007-O-LIMT-EXHS-RT       ;한도소진율
+      *S  XPJL4007-O-SMPSN-FG-LIMT-AMT
+      * 동일인외화신용공여한도액
+      *S  XPJL4007-O-SMPSN-FC-GRCR-AMT  ;동일인외화신용공여액

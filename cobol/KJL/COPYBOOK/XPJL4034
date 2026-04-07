@@ -1,0 +1,87 @@
+      *================================================================*
+      *@ NAME : XPJL4034                                               *
+      *@ DESC : PC동일인신용공여조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-13 13:35:08                          *
+      *  생성일시     : 2009-07-13 13:35:09                          *
+      *================================================================*
+           03  XPJL4034-RETURN.
+             05  XPJL4034-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4034-OK            VALUE  '00'.
+                 88  COND-XPJL4034-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4034-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4034-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4034-ERROR         VALUE  '09'.
+                 88  COND-XPJL4034-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4034-SYSERROR      VALUE  '99'.
+             05  XPJL4034-R-LINE                 PIC  9(006).
+             05  XPJL4034-R-ERRCD                PIC  X(008).
+             05  XPJL4034-R-TREAT-CD             PIC  X(008).
+             05  XPJL4034-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4034-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4034-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XPJL4034-I-BRWR-NO              PIC  X(013).
+      *--       기준년월
+             05  XPJL4034-I-BASE-YM              PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XPJL4034-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XPJL4034-O-DBTRZ-NAME           PIC  X(052).
+      *--       신용공여한도
+             05  XPJL4034-O-GRCR-LIMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신용공여잔액
+             05  XPJL4034-O-GRCR-BAL             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             05  XPJL4034-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       업무규제자기자본
+             05  XPJL4034-O-BZWK-REGUL-ONCP      PIC  9(015).
+      *--       자기자본기준년월
+             05  XPJL4034-O-ONCP-BASE-YM         PIC  X(006).
+      *--       출력라인수1
+             05  XPJL4034-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4034-O-GRID1                OCCURS 000300 TIMES.
+      *--         상품코드
+               07  XPJL4034-O-PRDCT-CD           PIC  X(012).
+      *--         상품명
+               07  XPJL4034-O-PRDCT-NAME         PIC  X(262).
+      *--         보고대상
+               07  XPJL4034-O-RPTNG-TAGET        PIC  X(010).
+      *--         BS기준잔액
+               07  XPJL4034-O-BS-BASE-BAL        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         CA담보환산금액
+               07  XPJL4034-O-CA-SCURTY-AUC      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         제외자산금액
+               07  XPJL4034-O-ECLUD-ASAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  P  J  L  4  0  3  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4034-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4034-I-BRWR-NO            ;차주번호
+      *X  XPJL4034-I-BASE-YM            ;기준년월
+      *X  XPJL4034-O-DBTRZ-NAME         ;채무자명
+      *S  XPJL4034-O-GRCR-LIMT          ;신용공여한도
+      *S  XPJL4034-O-GRCR-BAL           ;신용공여잔액
+      *S  XPJL4034-O-LIMT-SEXTR-AMT     ;한도여유액
+      *N  XPJL4034-O-BZWK-REGUL-ONCP    ;업무규제자기자본
+      *X  XPJL4034-O-ONCP-BASE-YM       ;자기자본기준년월
+      *N  XPJL4034-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4034-O-GRID1              ;그리드1
+      *X  XPJL4034-O-PRDCT-CD           ;상품코드
+      *X  XPJL4034-O-PRDCT-NAME         ;상품명
+      *X  XPJL4034-O-RPTNG-TAGET        ;보고대상
+      *S  XPJL4034-O-BS-BASE-BAL        ;BS기준잔액
+      *S  XPJL4034-O-CA-SCURTY-AUC      ;CA담보환산금액
+      *S  XPJL4034-O-ECLUD-ASAM         ;제외자산금액

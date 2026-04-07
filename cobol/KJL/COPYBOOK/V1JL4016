@@ -1,0 +1,47 @@
+      *================================================================*
+      *@ NAME : V1JL4016                                               *
+      *@ DESC : 그룹등급별TE현황조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-26 16:30:16                          *
+      *  생성일시     : 2009-06-26 16:30:24                          *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4016-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4016-GRID1                    OCCURS 0 TO 000030
+               DEPENDING ON V1JL4016-OUTPT-LINE-CNT1.
+      *--       내부신용평가등급구분코드
+             09  V1JL4016-INTNL-CV-GRD-DSTCD     PIC  X(006).
+      *--       대상그룹수
+             09  V1JL4016-TAGET-GROUP-CNT        PIC  9(015).
+      *--       관리한도금액
+             09  V1JL4016-MGT-CLAM               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준한도금액
+             09  V1JL4016-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  V1JL4016-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액
+             09  V1JL4016-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져잔액환산금액
+             09  V1JL4016-TE-BAL-AUC             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율
+             09  V1JL4016-EXHS-RT                PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  4  0  1  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4016-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4016-GRID1                ;그리드1
+      *X  V1JL4016-INTNL-CV-GRD-DSTCD
+      * 내부신용평가등급구분코드
+      *N  V1JL4016-TAGET-GROUP-CNT      ;대상그룹수
+      *S  V1JL4016-MGT-CLAM             ;관리한도금액
+      *S  V1JL4016-TTL-AMT-BASE-CLAM    ;명목액기준한도금액
+      *S  V1JL4016-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *S  V1JL4016-TE-LIMT-AUC          ;토탈익스포져한도환산금액
+      *S  V1JL4016-TE-BAL-AUC           ;토탈익스포져잔액환산금액
+      *N  V1JL4016-EXHS-RT              ;소진율

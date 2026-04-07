@@ -1,0 +1,43 @@
+//TKJLP062 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0062 포괄시용공여한도설정대상차주 TABLE LOAD
+//*********************************************************************
+//LOAD62  EXEC DSNUPROC,PARM='DAPG,KJL0062',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC62 DD  DSN=KJL.PT.PIN.LOAD.KJL0062,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC62 INTO TABLE
+      DB2DBA.THKJL0062
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "고객식별자"                         POSITION(       4         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      14         )
+   CHAR(                     13)                ,
+   "포괄한도관리대상구분"               POSITION(      27         )
+   CHAR(                      1)                ,
+   "채무자명"                           POSITION(      28         )
+   CHAR(                     52)                ,
+   "등록년월일"                         POSITION(      80         )
+   CHAR(                      8)                ,
+   "시스템최종처리일시"                 POSITION(      88         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     108         )
+   CHAR(                      7)
+   )
+/*
+//

@@ -1,0 +1,82 @@
+      *================================================================*
+      *@ NAME : XDJL4054                                               *
+      *@ DESC : DC거액익스포져(LEX)총액조회 COPYBOOK               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-01-24 16:10:44                          *
+      *  생성일시     : 2024-01-24 16:10:44                          *
+      *  전체길이     : 00000008 BYTES                               *
+      *================================================================*
+           03  XDJL4054-RETURN.
+             05  XDJL4054-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4054-OK            VALUE  '00'.
+                 88  COND-XDJL4054-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4054-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4054-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4054-ERROR         VALUE  '09'.
+                 88  COND-XDJL4054-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4054-SYSERROR      VALUE  '99'.
+             05  XDJL4054-R-LINE                 PIC  9(006).
+             05  XDJL4054-R-ERRCD                PIC  X(008).
+             05  XDJL4054-R-TREAT-CD             PIC  X(008).
+             05  XDJL4054-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4054-IN.
+      *----------------------------------------------------------------*
+      *--       조회기준일
+             05  XDJL4054-I-INQURY-BASE-DD       PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4054-OUT.
+      *----------------------------------------------------------------*
+      *--       기본자본기준년월
+             05  XDJL4054-O-BASC-CAPTL-BASE-YM   PIC  X(006).
+      *--       은행기본자본
+             05  XDJL4054-O-BNK-BASC-CAPTL       PIC  9(015).
+      *--       한도규제1
+             05  XDJL4054-O-LIMT-REGUL1          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도규제2
+             05  XDJL4054-O-LIMT-REGUL2          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       현재건수1
+             05  XDJL4054-O-PRSNT-NOITM1         PIC  9(005).
+      *--       그리드
+             05  XDJL4054-O-GRID                 OCCURS 000500 TIMES.
+      *--         순위
+               07  XDJL4054-O-RANKG              PIC  9(003).
+      *--         차주고객식별자
+               07  XDJL4054-O-BRWR-CUST-IDNFR    PIC  X(010).
+      *--         단일거래상대방
+               07  XDJL4054-O-UNY-TRAN-CNPRT     PIC  X(052).
+      *--         총익스포져
+               07  XDJL4054-O-TOTAL-EXPSR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         거액익스포져비율
+               07  XDJL4054-O-BSM-EXPSR-RATO     PIC S9(013)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         총익스포져변동
+               07  XDJL4054-O-TOTAL-EXPSR-FLXBL  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         거액익스포져비율변동
+               07  XDJL4054-O-BSM-E-RATO-FLXBL   PIC S9(013)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         거액거래상대방구분
+               07  XDJL4054-O-BSM-T-CNPRT-DSTCD  PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  4  0  5  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4054-I-INQURY-BASE-DD     ;조회기준일
+      *X  XDJL4054-O-BASC-CAPTL-BASE-YM ;기본자본기준년월
+      *N  XDJL4054-O-BNK-BASC-CAPTL     ;은행기본자본
+      *S  XDJL4054-O-LIMT-REGUL1        ;한도규제1
+      *S  XDJL4054-O-LIMT-REGUL2        ;한도규제2
+      *N  XDJL4054-O-PRSNT-NOITM1       ;현재건수1
+      *A  XDJL4054-O-GRID               ;그리드
+      *N  XDJL4054-O-RANKG              ;순위
+      *X  XDJL4054-O-BRWR-CUST-IDNFR    ;차주고객식별자
+      *X  XDJL4054-O-UNY-TRAN-CNPRT     ;단일거래상대방
+      *S  XDJL4054-O-TOTAL-EXPSR        ;총익스포져
+      *S  XDJL4054-O-BSM-EXPSR-RATO     ;거액익스포져비율
+      *S  XDJL4054-O-TOTAL-EXPSR-FLXBL  ;총익스포져변동
+      *S  XDJL4054-O-BSM-E-RATO-FLXBL   ;거액익스포져비율변동
+      *X  XDJL4054-O-BSM-T-CNPRT-DSTCD  ;거액거래상대방구분

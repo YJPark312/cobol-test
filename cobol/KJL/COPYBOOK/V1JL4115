@@ -1,0 +1,73 @@
+      *================================================================*
+      *@ NAME : V1JL4115                                               *
+      *@ DESC : EAD개별그룹TotalExposure현황조회                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-11-06 15:15:39                          *
+      *  생성일시     : 2024-11-06 15:15:41                          *
+      *  전체길이     : 00022905 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4115-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4115-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4115-OUTPT-LINE-CNT1.
+      *--       그룹순위
+             09  V1JL4115-GROUP-RANKG            PIC  9(003).
+      *--       그룹코드
+             09  V1JL4115-GROUP-CD               PIC  X(006).
+      *--       그룹명
+             09  V1JL4115-GROUP-NAME             PIC  X(052).
+      *--       그룹등급
+             09  V1JL4115-GROUP-GRD              PIC  X(003).
+      *--       그룹관리한도
+             09  V1JL4115-GROUP-MGT-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액직접한도
+             09  V1JL4115-TTL-AMT-DRCT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액간접한도
+             09  V1JL4115-TTL-AMT-INDR-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준합계한도
+             09  V1JL4115-TTL-AB-SUM-LIMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액직접잔액
+             09  V1JL4115-TTL-AMT-DRCT-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액간접잔액
+             09  V1JL4115-TTL-AMT-INDR-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준합계잔액
+             09  V1JL4115-TTL-A-BASE-BALSUM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       직접한도금액
+             09  V1JL4115-DRCT-CLAM              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       간접한도금액
+             09  V1JL4115-INDR-CLAM              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       합계한도기준금액
+             09  V1JL4115-SUM-LIMT-BSAMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율
+             09  V1JL4115-EXHS-RT                PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  4  1  1  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4115-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4115-GRID1                ;그리드1
+      *N  V1JL4115-GROUP-RANKG          ;그룹순위
+      *X  V1JL4115-GROUP-CD             ;그룹코드
+      *X  V1JL4115-GROUP-NAME           ;그룹명
+      *X  V1JL4115-GROUP-GRD            ;그룹등급
+      *S  V1JL4115-GROUP-MGT-LIMT       ;그룹관리한도
+      *S  V1JL4115-TTL-AMT-DRCT-LIMT    ;명목액직접한도
+      *S  V1JL4115-TTL-AMT-INDR-LIMT    ;명목액간접한도
+      *S  V1JL4115-TTL-AB-SUM-LIMT      ;명목액기준합계한도
+      *S  V1JL4115-TTL-AMT-DRCT-BAL     ;명목액직접잔액
+      *S  V1JL4115-TTL-AMT-INDR-BAL     ;명목액간접잔액
+      *S  V1JL4115-TTL-A-BASE-BALSUM    ;명목액기준합계잔액
+      *S  V1JL4115-DRCT-CLAM            ;직접한도금액
+      *S  V1JL4115-INDR-CLAM            ;간접한도금액
+      *S  V1JL4115-SUM-LIMT-BSAMT       ;합계한도기준금액
+      *N  V1JL4115-EXHS-RT              ;소진율

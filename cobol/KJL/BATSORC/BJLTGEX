@@ -1,0 +1,491 @@
+      *=================================================================
+      *@업무명    : KJL (토탈익스포져)
+      *@프로그램명: BJLTGEX (통화별　환산율　적용　서브프로그램)
+      *@처리유형  : BATCHSUB
+      *@처리개요  :통화별　환산　및　외화매매익　역환산
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20090309: 신규작성
+      * HYH    :20170404:통화코드= MMK (미얀마)
+      *                  전신환매도율이 없어 매매기준환율을 사용
+      * HYH    :20240425: 통화코드= MMK (미얀마) 예외로직 삭제
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM         : 테이블명               : 접근유형
+      **  ---------------------   --------------------------------------
+      **  기준환율　조회      : THKJIEX04                : R
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLTGEX.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/03/09.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBS01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBS01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBS02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBS02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBS03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBS03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBS04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBS04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBS05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBS05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBS09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBS09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBS91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBS91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBS92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBS92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLTGEX'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CONT-100             PIC  X(003) VALUE '100'.
+           03  CO-CONT-1               PIC  X(001) VALUE '0'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+
+      *----
+      *   매매기준환율
+      *   전신환매도환율
+      *    N100단위통화여부
+      *   환율고시단위구분
+      *----
+           03  WK-DEAL-BASE-EXRT       PIC  9(005)V9(004).
+           03  WK-TELCHK-SEL-EXRT      PIC  9(005)V9(004).
+           03  WK-N100-UNIT-CRNCY-YN   PIC  X(0001).
+           03  WK-HWGSCD               PIC  S9(0003) COMP-3.
+
+      *----
+      *    전신환매도율환산 －한도액（명목액기준한도）
+      *    전신환매도율환산 －잔액　（명목액기준잔액）
+      *    매매기준율환산   －잔액  (BS기준잔액)
+
+           03  WK-TTL-AMT-BASE-CLAM    PIC S9(00018) COMP-3.
+           03  WK-TTL-AMT-BASE-BAL     PIC S9(00018) COMP-3.
+           03  WK-BS-BASE-BAL          PIC S9(00018) COMP-3.
+           03  WK-BS-BAL               PIC S9(00018) COMP-3.
+           03  WK-BS-BASE-CLAM         PIC S9(00018) COMP-3.
+
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * 기준환율정보 조회 Parameter
+       01  XCJIEX01-CA.
+           COPY  XCJIEX01.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+       01  XBJLTGEX-CA.
+           COPY  XBJLTGEX.
+      *=================================================================
+       PROCEDURE                       DIVISION
+      *=================================================================
+                                       USING       YCCOMMON-CA
+                                                   XBJLTGEX-CA.
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM  S3000-PROCESS-RTN
+              THRU  S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *    WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE       XCJIEX01-CA
+                            WK-AREA
+           .
+      *   출력영역　및　결과코드　초기화
+           INITIALIZE       XBJLTGEX-OUT
+                            XBJLTGEX-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *처리구분(1:통화별환산2:외환매매익　역환산)
+           IF  XBJLTGEX-I-GBCD = SPACE
+      *@에러메시지 : 필수항목 미입력 오류입니다.
+      *@조치메시지 : 필수 항목입력요망!
+              #USRLOG '<< ERROR  - XBJLTGEX-I-GBCD >>'
+              #ERROR   CO-EBS03001  CO-UBS03001  CO-STAT-ERROR
+           END-IF
+
+      *그룹회사코드
+           IF  BICOM-GROUP-CO-CD = SPACE
+      *@에러메시지 : 필수항목 미입력 오류입니다.
+      *@조치메시지 : 필수 항목입력요망!
+              #USRLOG '<< ERROR  - BICOM-GROUP-CO-CD >>'
+              #ERROR   CO-EBS03001  CO-UBS03001  CO-STAT-ERROR
+           END-IF
+
+      *유효년월일
+           IF  XBJLTGEX-I-BASE-YMD = SPACE
+      *@에러메시지 : 필수항목 미입력 오류입니다.
+      *@조치메시지 : 필수 항목입력요망!
+              #USRLOG '<< ERROR  - XBJLTGEX-I-BASE-YMD >>'
+              #ERROR   CO-EBS03001  CO-UBS03001  CO-STAT-ERROR
+           END-IF
+
+      *통화코드
+           IF  XBJLTGEX-I-CNCYCD = SPACE
+      *@에러메시지 : 필수항목 미입력 오류입니다.
+      *@조치메시지 : 필수 항목입력요망!
+              #USRLOG '<< ERROR  - XBJLTGEX-I-CNCYCD >>'
+              #ERROR   CO-EBS03001  CO-UBS03001  CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@  통화별환산율(THKJIEX04)조회
+            PERFORM  S3100-THKJIEX04-SELECT-RTN
+               THRU  S3100-THKJIEX04-SELECT-EXT
+
+
+      *@ 처리구분(1:통화별환산2:외환매매익　역환산)
+            IF  XBJLTGEX-I-GBCD = '1'
+
+      *        통화별　환산
+                PERFORM  S3500-TONGCDEX-SELECT-RTN
+                   THRU  S3500-TONGCDEX-SELECT-EXT
+
+            ELSE
+
+      *        외환매매익　역환산
+                PERFORM  S3600-TONGRVEX-SELECT-RTN
+                   THRU  S3600-TONGRVEX-SELECT-EXT
+
+            END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  통화별환산율(THKJIEX04)조회
+      *-----------------------------------------------------------------
+       S3100-THKJIEX04-SELECT-RTN.
+
+           INITIALIZE       XCJIEX01-CA
+
+      *---처리조건 데이터 MOVE
+      *   구분코드
+      *   그룹회사코드
+      *   출력구분코드
+      *   유효년월일－기준년월일
+      *   통화코드
+      *   환율적용회차
+      *----
+           MOVE  '1'                   TO  XCJIEX01-I-DSTCD
+           MOVE  BICOM-GROUP-CO-CD     TO  XCJIEX01-I-GROUP-CO-CD
+           MOVE  '1'                   TO  XCJIEX01-I-OUTPT-DSTCD
+           MOVE  XBJLTGEX-I-BASE-YMD   TO  XCJIEX01-I-BASE-YMD
+           MOVE  XBJLTGEX-I-CNCYCD     TO  XCJIEX01-I-CNCYCD
+           MOVE  1                     TO  XCJIEX01-I-EXRT-APLY-NTH
+
+      * 공통 UTILITY CALL
+          #DYCALL   CJIEX01  YCCOMMON-CA  XCJIEX01-CA
+
+      * RETURN 정보 확인
+           IF XCJIEX01-R-STAT    =  ZEROS
+      *----
+      *     매매기준환율
+      *     전신환매도환율
+      *      N100단위통화여부
+      *----
+             MOVE XCJIEX01-O-DEAL-BASE-EXRT(1)  TO WK-DEAL-BASE-EXRT
+             MOVE XCJIEX01-O-TELCHK-SEL-EXRT(1) TO WK-TELCHK-SEL-EXRT
+             MOVE XCJIEX01-O-N100-UNIT-CRNCY-YN(1)
+                  TO  WK-N100-UNIT-CRNCY-YN
+           ELSE
+      *      통화별환산&통화환산율정보가　없으면　달러로　처리
+      *        IF  XCJIEX01-R-STAT   NOT =  '07'
+      *             #ERROR CO-EBS09001 CO-UBS09001 CO-STAT-ERROR
+      *        END-IF
+      *해당통화가　없으면USD로　적용하지　않음
+               IF  XCJIEX01-R-STAT  =  '07'
+                    MOVE   0        TO    WK-DEAL-BASE-EXRT
+                    MOVE   0        TO    WK-TELCHK-SEL-EXRT
+                    MOVE   0        TO    WK-N100-UNIT-CRNCY-YN
+               ELSE
+                   #ERROR CO-EBS09001 CO-UBS09001 CO-STAT-ERROR
+               END-IF
+
+           END-IF
+           .
+       S3100-THKJIEX04-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  통화별환산율(THKJIEX04)조회－외환매매익
+      *@     - 전신환매도율이 0 이면 USD 대비율로　계산함
+      *-----------------------------------------------------------------
+       S3300-THKJIEX04-SELECT3-RTN.
+
+           INITIALIZE       XCJIEX01-CA
+
+      *   처리조건 데이터 MOVE
+      *----
+      *   구분코드
+      *   그룹회사코드
+      *   출력구분코드
+      *   유효년월일－기준년월일
+      *   통화코드
+      *   환율적용회차
+      *----
+           MOVE  '1'                   TO  XCJIEX01-I-DSTCD
+           MOVE  BICOM-GROUP-CO-CD     TO  XCJIEX01-I-GROUP-CO-CD
+           MOVE  '1'                   TO  XCJIEX01-I-OUTPT-DSTCD
+           MOVE  XBJLTGEX-I-BASE-YMD   TO  XCJIEX01-I-BASE-YMD
+           MOVE  'USD'                 TO  XCJIEX01-I-CNCYCD
+           MOVE  1                     TO  XCJIEX01-I-EXRT-APLY-NTH
+
+      * 공통 UTILITY CALL
+          #DYCALL   CJIEX01  YCCOMMON-CA  XCJIEX01-CA
+
+      * RETURN 정보 확인
+           IF XCJIEX01-R-STAT    =  ZEROS
+      *------
+      *     매매기준환율
+      *     전신환매도환율
+      *      N100단위통화여부
+      *------
+             MOVE XCJIEX01-O-DEAL-BASE-EXRT(1)  TO WK-DEAL-BASE-EXRT
+             MOVE XCJIEX01-O-TELCHK-SEL-EXRT(1) TO WK-TELCHK-SEL-EXRT
+             MOVE XCJIEX01-O-N100-UNIT-CRNCY-YN(1)
+                  TO  WK-N100-UNIT-CRNCY-YN
+           ELSE
+               IF  XCJIEX01-R-STAT  =  '07'
+                    MOVE   1        TO    WK-DEAL-BASE-EXRT
+                    MOVE   1        TO    WK-TELCHK-SEL-EXRT
+                    MOVE   1        TO    WK-N100-UNIT-CRNCY-YN
+               ELSE
+                   #ERROR CO-EBS09001 CO-UBS09001 CO-STAT-ERROR
+               END-IF
+
+           END-IF
+           .
+       S3300-THKJIEX04-SELECT3-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  환산율별　금액게산
+      *-----------------------------------------------------------------
+       S3500-TONGCDEX-SELECT-RTN.
+
+      *환율고시단위구분
+           IF  WK-N100-UNIT-CRNCY-YN = '1'
+               MOVE 100       TO WK-HWGSCD
+           ELSE
+               MOVE 1         TO WK-HWGSCD
+           END-IF
+
+
+      * 전신환매도율환산－한도액（명목액기준한도）
+           COMPUTE   WK-TTL-AMT-BASE-CLAM
+                  =  XBJLTGEX-I-CRNCY-CLAM
+                  *  WK-TELCHK-SEL-EXRT
+                  /  WK-HWGSCD
+
+           MOVE  WK-TTL-AMT-BASE-CLAM
+             TO  XBJLTGEX-O-TTL-AMT-BASE-CLAM
+
+      * 전신환매도율환산－잔액　（명목액기준잔액）
+           COMPUTE   WK-TTL-AMT-BASE-BAL
+                  =  XBJLTGEX-I-CRNCY-BAL
+                  *  WK-TELCHK-SEL-EXRT
+                  /  WK-HWGSCD
+
+           MOVE WK-TTL-AMT-BASE-BAL
+             TO XBJLTGEX-O-TTL-AMT-BASE-BAL
+
+      * 매매기준율환산－잔액 ( BS기준잔액)
+           COMPUTE   WK-BS-BASE-BAL
+                  =  XBJLTGEX-I-CRNCY-BAL
+                  *  WK-DEAL-BASE-EXRT
+                  /  WK-HWGSCD
+
+           MOVE WK-BS-BASE-BAL
+             TO XBJLTGEX-O-BS-BASE-BAL
+
+      * 매매기준율환산－잔액 ( BS기준잔액-파생상품BS)
+           COMPUTE   WK-BS-BAL
+                  =  XBJLTGEX-I-BS-BAL
+                  *  WK-DEAL-BASE-EXRT
+                  /  WK-HWGSCD
+
+           MOVE WK-BS-BAL
+             TO XBJLTGEX-O-BS-BAL
+
+      *   매매기준환율
+           MOVE  WK-DEAL-BASE-EXRT
+             TO  XBJLTGEX-O-DEAL-BASE-EXRT
+
+      *   전신환매도환율
+           MOVE  WK-TELCHK-SEL-EXRT
+             TO  XBJLTGEX-O-TELCHK-SEL-EXRT
+
+      *    N100단위통화여부
+           MOVE  WK-N100-UNIT-CRNCY-YN
+             TO  XBJLTGEX-O-N100-UNIT-CRNCY-YN
+
+170224*    BS기준한도 = 통화한도 * 1회차매매기준환율
+           COMPUTE   WK-BS-BASE-CLAM
+                  =  XBJLTGEX-I-CRNCY-CLAM
+                  *  WK-DEAL-BASE-EXRT
+                  /  WK-HWGSCD
+
+           MOVE WK-BS-BASE-CLAM
+             TO XBJLTGEX-O-BS-BASE-CLAM
+
+           .
+       S3500-TONGCDEX-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  외환매매익　역환산
+      *-----------------------------------------------------------------
+       S3600-TONGRVEX-SELECT-RTN.
+
+      *환율고시단위구분
+           IF  WK-N100-UNIT-CRNCY-YN = '1'
+               MOVE 100       TO WK-HWGSCD
+           ELSE
+               MOVE 1         TO WK-HWGSCD
+           END-IF
+
+      * 전신환매도율환산－한도액（명목액기준한도）
+           MOVE  ZERO
+             TO  XBJLTGEX-O-TTL-AMT-BASE-CLAM
+
+      * 전신환매도율환산－잔액　（명목액기준잔액）
+           MOVE  ZERO
+             TO  XBJLTGEX-O-TTL-AMT-BASE-BAL
+
+      * 매매기준율환산－잔액 ( BS기준잔액)
+           MOVE  ZERO
+             TO  XBJLTGEX-O-BS-BASE-BAL
+
+      *-----------------------------------------------------
+      *-    전신환매도율이 0 이면 USD 대비율로　계산함
+      *-    값 = (통화매매기준율 * USD전신환매도율)
+      *-           --------------------------------------
+      *-                   USD매매기준율
+      *-----------------------------------------------------
+           IF  WK-TELCHK-SEL-EXRT  =  ZERO
+
+                  PERFORM  S3300-THKJIEX04-SELECT3-RTN
+                     THRU  S3300-THKJIEX04-SELECT3-EXT
+
+                  COMPUTE   WK-TELCHK-SEL-EXRT
+                        =  ( WK-DEAL-BASE-EXRT
+                           * WK-TELCHK-SEL-EXRT )
+                        / WK-TELCHK-SEL-EXRT
+           END-IF
+
+      *   매매기준율환산－잔액 ( 외환매매익　역환산금액 )
+           COMPUTE   WK-BS-BAL
+                 =   XBJLTGEX-I-BS-BAL
+                  *  WK-DEAL-BASE-EXRT
+                  /  WK-HWGSCD
+
+           MOVE  WK-BS-BAL
+             TO  XBJLTGEX-O-BS-BAL
+
+      *   매매기준환율
+           MOVE  WK-DEAL-BASE-EXRT
+             TO  XBJLTGEX-O-DEAL-BASE-EXRT
+
+      *   전신환매도환율
+           MOVE  WK-TELCHK-SEL-EXRT
+             TO  XBJLTGEX-O-TELCHK-SEL-EXRT
+
+      *    N100단위통화여부
+           MOVE  WK-N100-UNIT-CRNCY-YN
+             TO  XBJLTGEX-O-N100-UNIT-CRNCY-YN
+
+      *    BS기준한도
+           MOVE  ZERO
+             TO  XBJLTGEX-O-BS-BASE-CLAM
+
+           .
+       S3600-TONGRVEX-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

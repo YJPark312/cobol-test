@@ -1,0 +1,67 @@
+      *================================================================*
+      *@ NAME : XDJL4030                                               *
+      *@ DESC : DC계열그룹조회 COPYBOOK                              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-10-12 13:34:07                          *
+      *  생성일시     : 2022-10-12 13:34:07                          *
+      *  전체길이     : 00000009 BYTES                               *
+      *================================================================*
+           03  XDJL4030-RETURN.
+             05  XDJL4030-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4030-OK            VALUE  '00'.
+                 88  COND-XDJL4030-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4030-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4030-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4030-ERROR         VALUE  '09'.
+                 88  COND-XDJL4030-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4030-SYSERROR      VALUE  '99'.
+             05  XDJL4030-R-LINE                 PIC  9(006).
+             05  XDJL4030-R-ERRCD                PIC  X(008).
+             05  XDJL4030-R-TREAT-CD             PIC  X(008).
+             05  XDJL4030-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4030-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4030-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회구분
+             05  XDJL4030-I-INQURY-DSTIC         PIC  X(001).
+      *--       계열기업군코드
+             05  XDJL4030-I-AFFLT-CORP-GROUP-CD  PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XDJL4030-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4030-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4030-O-GRID1                OCCURS 001000 TIMES.
+      *--         그룹순위
+               07  XDJL4030-O-AFFLT-CORP-RANKG   PIC  9(003).
+      *--         그룹코드
+               07  XDJL4030-O-AFFLT-CORP-GROUP-CD
+                                                 PIC  X(006).
+      *--         그룹명
+               07  XDJL4030-O-AFFLT-C-GROUP-NAME PIC  X(052).
+      *--         주채권은행
+               07  XDJL4030-O-MAIN-BND-BNK-CD    PIC  X(003).
+      *--         그룹(내부)평가등급
+               07  XDJL4030-O-INTNL-CV-GRD-DSTCD PIC  X(003).
+      *--         최종집단등급구분
+               07  XDJL4030-O-LAST-CLCT-GRD-DSTCD
+                                                 PIC  X(003).
+      *================================================================*
+      *        X  D  J  L  4  0  3  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4030-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4030-I-INQURY-DSTIC       ;조회구분
+      *X  XDJL4030-I-AFFLT-CORP-GROUP-CD;계열기업군코드
+      *N  XDJL4030-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4030-O-GRID1              ;그리드1
+      *N  XDJL4030-O-AFFLT-CORP-RANKG   ;그룹순위
+      *X  XDJL4030-O-AFFLT-CORP-GROUP-CD;그룹코드
+      *X  XDJL4030-O-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XDJL4030-O-MAIN-BND-BNK-CD    ;주채권은행
+      *X  XDJL4030-O-INTNL-CV-GRD-DSTCD
+      * 그룹(내부)평가등급
+      *X  XDJL4030-O-LAST-CLCT-GRD-DSTCD;최종집단등급구분

@@ -1,0 +1,606 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: IJL4010 (관계기업현황조회)
+      *@처리유형  : IC
+      *@처리개요  : 채무자번호로
+      *@            자금별여신／파생상품／포괄신용공여한도조회
+      *@호출업무  : ALPS
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20170131: 신규개발
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     IJL4010.
+       AUTHOR.                         하윤희.
+       DATE-WRITTEN.                   17/01/31.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3800083             PIC  X(008) VALUE 'B3800083'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'IJL4010'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-5                PIC  X(001) VALUE '5'.
+           03  CO-CHA-6                PIC  X(001) VALUE '6'.
+           03  CO-CHA-7                PIC  X(001) VALUE '7'.
+           03  CO-CHA-9                PIC  X(001) VALUE '9'.
+           03  CO-CHA-A                PIC  X(001) VALUE 'A'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+150904     03  CO-CHA-16               PIC  X(002) VALUE '16'.
+
+           03  CO-CHA-00000            PIC  X(005) VALUE '00000'.
+
+      *사용자메시지상수（거래시간정의）
+           03  CO-CHA-130000           PIC  X(006) VALUE '130000'.
+           03  CO-CHA-200000           PIC  X(006) VALUE '200000'.
+           03  CO-CHA-220000           PIC  X(006) VALUE '220000'.
+
+       01  CO-CSTMSG.
+      *사용자메시지
+           03  CO-MSG1                 PIC  X(032) VALUE
+           '토탈익스포져　작업　중입니다．'.
+           03  CO-MSG2                 PIC  X(050) VALUE
+           '２２시　이후　다시　조회하십시오．'.
+           03  CO-MSG3                 PIC  X(050) VALUE
+           '１３시　이후　다시　조회하십시오．'.
+           03  CO-MSG4                 PIC  X(050) VALUE
+           '잠시후　다시　조회하십시오．'.
+           03  CO-SUBMSG               PIC  X(050) VALUE
+           '토탈익스포져　조회　오류'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *거래시각
+           03  WK-TRAN-HMS             PIC  X(006).
+      *조립　사용자　메세지
+           03  WK-MSG                  PIC  X(100).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *   토탈익스포져일일배치작업결과　조회
+       01  XQJLI056-CA.
+           COPY    XQJLI056.
+      *   자금별여신현황 조회
+       01  XQJL1271-CA.
+           COPY    XQJL1271.
+      *   파생상품현황 조회
+       01  XQJLR071-CA.
+           COPY    XQJLR071.
+      *   포괄신용공여한도 조회
+       01  XQJL0078-CA.
+           COPY    XQJL0078.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    IC COPYBOOK
+       01  XIJL4010-CA.
+           COPY  XIJL4010.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XIJL4010-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *   초기화
+      *@1  WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1  DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1 출력영역　및　결과코드　초기화
+           INITIALIZE    XIJL4010-OUT
+                         XIJL4010-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@1 조회기준일자미입력CHECK
+      *@실행조건:XIJL4010-I-BASE-YMD = SPACE
+      *@처리내용:조회기준일자미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4010-I-BASE-YMD = SPACE
+               #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@1 채무자번호미입력CHECK
+      *@실행조건:XIJL4010-I-CUST-IDNFR   = SPACE
+      *@처리내용:고객식별자미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4010-I-CUST-IDNFR   = SPACE
+               #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1 토탈익스포져일일배치작업결과　조회(2011.04.22)
+      *@  진행중이면　＇진행중＇　사용자　메세지띄움
+           PERFORM S3900-QJLI056-CALL-RTN
+              THRU S3900-QJLI056-CALL-EXT
+
+      *@1 업무처리
+      *@2 자금별여신현황 조회
+           PERFORM S3100-QJL1271-CALL-RTN
+              THRU S3100-QJL1271-CALL-EXT
+
+      *@2 파생상품현황 조회
+           PERFORM S3200-QJLR071-CALL-RTN
+              THRU S3200-QJLR071-CALL-EXT
+
+      *@2 포괄신용공여한도 조회
+           PERFORM S3300-QJL0078-CALL-RTN
+              THRU S3300-QJL0078-CALL-EXT
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ 토탈익스포져일일배치작업결과　조회
+      *-----------------------------------------------------------------
+       S3900-QJLI056-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJLI056-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJLI056)입력파라메타=
+      *@   SET(그룹회사코드,토탈익스포져업무구분,배치작업완료여부)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLI056-I-GROUP-CO-CD
+
+      *    토탈익스포져업무구분
+           MOVE CO-CHA-1
+             TO XQJLI056-I-TE-BZWK-DSTCD
+
+      *    배치작업완료여부
+           MOVE CO-CHA-1
+             TO XQJLI056-I-BTCH-FNSH-YN
+
+      *@1  SLQIO프로그램 호출
+      *@  처리내용:QJLI056프로그램을 호출한다
+      *@  관련테이블:THKJLLOG1 접근유형:READ
+           #DYSQLA QJLI056 XQJLI056-CA
+
+      *@1 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    IF XQJLI056-O-BTCH-FNSH-YN = CO-CHA-0
+      *#2정상이지만 배치가 종료되기 전이면
+      *@2             NOT FOUND로 처리
+                       PERFORM  S8000-ERRMSG-RTN
+                          THRU  S8000-ERRMSG-EXT
+      *@2원장FOUND인경우
+      *@토탈익스포져일일배치작업결과（진행중）이면　사용자메세지띄움
+      *@에러메세지 : 지정된　처리작업이　가능하지　않습니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                       #ERROR CO-B3800083 CO-UKJL0036 CO-STAT-ERROR
+                    END-IF
+               WHEN COND-DBSQL-MRNF
+      *#2원장NOT FOUND인경우
+      *@2          사용자　맞춤　메시지
+                    PERFORM  S8000-ERRMSG-RTN
+                       THRU  S8000-ERRMSG-EXT
+      *@2토탈익스포져일일배치작업결과（진행중）이면　사용자메세지띄움
+      *@에러메세지 : 지정된　처리작업이　가능하지　않습니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3800083 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *#2원장조회에러인경우
+      *@2에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3900-QJLI056-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  자금별여신현황 조회
+      *-----------------------------------------------------------------
+       S3100-QJL1271-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJL1271-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJL1271) 입력파라메타=
+      *@  SET(고객식별자,기준일,기준년월)
+
+      *    고객식별자
+           MOVE XIJL4010-I-CUST-IDNFR
+             TO XQJL1271-I-CUST-IDNFR
+
+      *    기준일
+           MOVE XIJL4010-I-BASE-YMD(7:2)
+             TO XQJL1271-I-BASE-DD
+
+      *    기준년월
+           MOVE XIJL4010-I-BASE-YMD(1:6)
+             TO XQJL1271-I-BASE-YM
+
+      *@1 SLQIO프로그램 호출
+      *@  처리내용:QJLI051프로그램을 호출한다
+      *@  관련테이블:THKJL0127  접근유형:READ
+           #DYSQLA QJL1271 XQJL1271-CA
+
+      *   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+      *             명목액기준한도
+                    MOVE  ZERO
+                      TO  XQJL1271-O-TTL-AMT-BASE-CLAM
+      *             명목액기준잔액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-TTL-AMT-BASE-BAL
+      *             고객관리부점코드
+                    MOVE  SPACE
+                      TO  XQJL1271-O-CUST-MGT-BRNCD
+      *             시설자금총여신금액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-FCLT-BASE-CLAM
+      *             시설자금여신잔액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-FCLT-BASE-BAL
+      *             운전자금총여신금액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-WRKN-BASE-CLAM
+      *             운전자금여신잔액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-WRKN-BASE-BAL
+      *             투자금융총여신금액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-INFC-BASE-CLAM
+      *             투자금융여신잔액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-INFC-BASE-BAL
+      *             기타총여신금액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-ETC-BASE-CLAM
+      *             기타여신잔액
+                    MOVE  ZERO
+                      TO  XQJL1271-O-ECT-BASE-BAL
+               WHEN OTHER
+      * 원장조회에러인경우
+      * 에러메세지 : 테이블 SELECT 오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3100-QJL1271-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  파생상품현황 조회
+      *-----------------------------------------------------------------
+       S3200-QJLR071-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJLR071-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJLR071) 입력파라메타=
+      *@  SET(기준년월일,채무자번호)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLR071-I-GROUP-CO-CD
+
+      *    기준년월일
+           MOVE XIJL4010-I-BASE-YMD
+             TO XQJLR071-I-BASE-YMD
+
+      *    고객식별자
+           MOVE XIJL4010-I-CUST-IDNFR
+             TO XQJLR071-I-CUST-IDNFR
+
+      *@1 SLQIO프로그램 호출
+      *@  처리내용:QJLR071 프로그램을 호출한다
+      *@  관련테이블:THKJLR007  접근유형:READ
+           #DYSQLA QJLR071 XQJLR071-CA
+
+      *   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+
+      *             총거래한도
+                    MOVE  ZERO
+                      TO  XQJLR071-O-TOTAL-TRAN-CLAM
+      *             담보거래한도
+                    MOVE  ZERO
+                      TO  XQJLR071-O-SCURTY-TRAN-CLAM
+      *             신용거래한도
+                    MOVE  ZERO
+                      TO  XQJLR071-O-CRDT-TRAN-CLAM
+      *             외환총한도소진율
+                    MOVE  ZERO
+                      TO  XQJLR071-O-FX-T-LIMT-EXHS-RT
+      *             신용한도소진율
+                    MOVE  ZERO
+                      TO  XQJLR071-O-CDLN-EXHS-RT
+      *             담보소진율
+                    MOVE  ZERO
+                      TO  XQJLR071-O-SCURTY-EXHS-RT
+               WHEN OTHER
+      * 원장조회에러인경우
+      * 에러메세지 : 테이블 SELECT 오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3200-QJLR071-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  포괄신용공여한도 조회
+      *-----------------------------------------------------------------
+       S3300-QJL0078-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJL0078-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJL0078) 입력파라메타=
+      *@  SET(고객식별자)
+
+      *    고객식별자
+           MOVE XIJL4010-I-CUST-IDNFR
+             TO XQJL0078-I-CUST-IDNFR
+
+      *@1 SLQIO프로그램 호출
+      *@  처리내용:QJL0078 프로그램을 호출한다
+      *@  관련테이블:THKJL0007  접근유형:READ
+           #DYSQLA  QJL0078  XQJL0078-CA
+
+      *   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+      *             한도승인금액
+                    MOVE ZERO
+                      TO XQJL0078-O-LIMT-ATHOR-AMT
+      *             한도설정유효년월일
+                    MOVE SPACE
+                      TO XQJL0078-O-LIMT-STUP-VALD-YMD
+               WHEN OTHER
+      * 원장조회에러인경우
+      * 에러메세지 : 테이블 SELECT 오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3300-QJL0078-CALL-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+
+      *@1 출력 조립
+
+      *   그룹1(자금별여신현황조회)
+      *   고객관리부점코드
+           MOVE  XQJL1271-O-CUST-MGT-BRNCD
+             TO  XIJL4010-O-CUST-MGT-BRNCD
+      *   명목액기준한도
+           MOVE  XQJL1271-O-TTL-AMT-BASE-CLAM
+             TO  XIJL4010-O-TTL-AMT-BASE-CLAM
+      *   명목액기준잔액
+           MOVE  XQJL1271-O-TTL-AMT-BASE-BAL
+             TO  XIJL4010-O-TTL-AMT-BASE-BAL
+      *   시설자금명목액기준한도
+           MOVE  XQJL1271-O-FCLT-BASE-CLAM
+             TO  XIJL4010-O-FCLT-BASE-CLAM
+      *   시설자금명목액기준잔액
+           MOVE  XQJL1271-O-FCLT-BASE-BAL
+             TO  XIJL4010-O-FCLT-BASE-BAL
+      *   운전자금명목액기준한도
+           MOVE  XQJL1271-O-WRKN-BASE-CLAM
+             TO  XIJL4010-O-WRKN-BASE-CLAM
+      *   운전자금명목액기준잔액
+           MOVE  XQJL1271-O-WRKN-BASE-BAL
+             TO  XIJL4010-O-WRKN-BASE-BAL
+      *   투자금융명목액기준한도
+           MOVE  XQJL1271-O-INFC-BASE-CLAM
+             TO  XIJL4010-O-INFC-BASE-CLAM
+      *   투자금융명목액기준잔액
+           MOVE  XQJL1271-O-INFC-BASE-BAL
+             TO  XIJL4010-O-INFC-BASE-BAL
+      *   기타명목액기준한도
+           MOVE  XQJL1271-O-ETC-BASE-CLAM
+             TO  XIJL4010-O-ETC-BASE-CLAM
+      *   기타자금명목액기준잔액
+           MOVE  XQJL1271-O-ECT-BASE-BAL
+             TO  XIJL4010-O-ECT-BASE-BAL
+      *   예비1
+           MOVE  SPACE
+             TO  XIJL4010-O-FILLER1
+
+      *   그룹2(파생상품현황조회)
+      *   총거래한도
+           MOVE  XQJLR071-O-TOTAL-TRAN-CLAM
+             TO  XIJL4010-O-TOTAL-TRAN-CLAM
+      *   신용한도소진율
+           MOVE  XQJLR071-O-CDLN-EXHS-RT
+             TO  XIJL4010-O-CDLN-EXHS-RT
+      *   신용거래한도
+           MOVE  XQJLR071-O-CRDT-TRAN-CLAM
+             TO  XIJL4010-O-CRDT-TRAN-CLAM
+      *   담보거래한도
+           MOVE  XQJLR071-O-SCURTY-TRAN-CLAM
+             TO  XIJL4010-O-SCURTY-TRAN-CLAM
+      *   외환총한도소진율　
+           MOVE  XQJLR071-O-FX-T-LIMT-EXHS-RT
+             TO  XIJL4010-O-FX-T-LIMT-EXHS-RT
+      *   담보소진율　
+           MOVE  XQJLR071-O-SCURTY-EXHS-RT
+             TO  XIJL4010-O-SCURTY-EXHS-RT
+      *   예비2
+           MOVE  SPACE
+             TO  XIJL4010-O-FILLER2
+
+      *   그룹3(포괄신용공여조회)
+      *   한도승인금액
+           MOVE  XQJL0078-O-LIMT-ATHOR-AMT
+             TO  XIJL4010-O-LIMT-ATHOR-AMT
+      *   한도설정유효년월일
+           MOVE  XQJL0078-O-LIMT-STUP-VALD-YMD
+             TO  XIJL4010-O-LIMT-STUP-VALD-YMD
+      *   예비3
+           MOVE  SPACE
+             TO  XIJL4010-O-FILLER3
+
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *----------------------------------------------------------------
+      *@  사용자　맞춤　메시지
+      *----------------------------------------------------------------
+       S8000-ERRMSG-RTN.
+
+      *   거래시각
+           MOVE  FUNCTION  CURRENT-DATE(9:6)
+             TO  WK-TRAN-HMS
+
+      *   거래시각　２０시?２２시이면　２２시　이후　거래메세지
+           IF (WK-TRAN-HMS > CO-CHA-200000 AND
+               WK-TRAN-HMS < CO-CHA-220000)
+               STRING CO-MSG1
+                      CO-MSG2
+               DELIMITED BY SIZE INTO  WK-MSG
+           ELSE
+      *   거래시각　１３시이전이면　１３시　이후　거래메세지
+               IF WK-TRAN-HMS < CO-CHA-130000
+                  STRING CO-MSG1
+                         CO-MSG3
+                  DELIMITED BY SIZE INTO  WK-MSG
+               ELSE
+      *   거래시각　그외이면　잠시후　거래메세지
+                  STRING CO-MSG1
+                         CO-MSG4
+                  DELIMITED BY SIZE INTO  WK-MSG
+               END-IF
+           END-IF
+
+      *   사용자　메세지　에러　발생
+           #CSTMSG WK-MSG       CO-SUBMSG
+           .
+       S8000-ERRMSG-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@1 프로그램 종료
+      *@  처리내용:프로그램을 정상종료함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

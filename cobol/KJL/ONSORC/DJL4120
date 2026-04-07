@@ -1,0 +1,391 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020001
+      *@프로그램명: DJL4120 (EAD-상품정보원장조회)                  00030001
+      *@처리유형  : DC                                                00040001
+      *@처리개요  : 상품정보원장조회출력하는 프로그램이다         00050001
+      *@구현방법  : OPEN-FETCH-CLOSE                                  00050001
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   변　경　이　력                00070001
+      *-----------------------------------------------------------------00080001
+      *@성명 : 일자 : 변　경　내　용                              00090001
+      * ----------------------------------------------------------------00100001
+      *김진태:20101029: 신규작성
+      *정윤섭:20200330: 국외영업점편중관리대상여부 추가
+      * YBH    :20231130: 중단거래 및 환산률 항목 추가
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형 00150001
+      **  ----------------   -------------------------------------------00160001
+      **  상품코드목록   : THKJL0118                     : XRXX       00170001
+      ******************************************************************00190001
+       IDENTIFICATION                  DIVISION.                        00200001
+      *=================================================================00210001
+       PROGRAM-ID.                     DJL4120.                         00220001
+       AUTHOR.                         김진태.                        00230001
+       DATE-WRITTEN.                   10/10/29.                        00240001
+      *=================================================================00260001
+       ENVIRONMENT                     DIVISION.                        00270001
+      *=================================================================00280001
+       CONFIGURATION                   SECTION.                         00290001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00310001
+       DATA                            DIVISION.                        00320001
+      *=================================================================00330001
+       WORKING-STORAGE                 SECTION.                         00340001
+      *-----------------------------------------------------------------00360001
+      *CONSTANT ERROR AREA                                              00370001
+      *-----------------------------------------------------------------00380001
+       01  CO-ERROR-AREA.                                               00390001
+      *에러메시지정의                                                 00400003
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.    00410003
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.    00420003
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200220             PIC  X(008) VALUE 'B4200220'.
+           03  CO-B4200231             PIC  X(008) VALUE 'B4200231'.
+      *조치메시지정의                                                 00440003
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.    00450003
+      *-----------------------------------------------------------------00490001
+      * CONSTANT AREA                                                   00500001
+      *-----------------------------------------------------------------00510001
+       01  CO-AREA.                                                     00520001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4120'.     00530001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00540001
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00550001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00560001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00570001
+                                                                        00580001
+           03  CO-MAX-CNT              PIC  9(003) VALUE 100.
+           03  CO-NUM-12               PIC  9(002) VALUE 12.            00600001
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00740001
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.           00750001
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-CHA-Y                PIC  X(001) VALUE '1'.
+           03  CO-CHA-N                PIC  X(001) VALUE '0'.
+      *-----------------------------------------------------------------00710001
+      * WORKING AREA                                                    00720001
+      *-----------------------------------------------------------------00730001
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-LEN                  PIC  9(003).
+           03  WK-CUR-CNT              PIC  9(005) COMP.
+231130     03  WK-NEXT-KEY.
+               05 WK-ACCTG-DSTCD           PIC  X(001).
+               05 WK-PRD-LAG-CLSFI-CD      PIC  X(002).
+               05 WK-PRD-MEDM-CLSFI-CD     PIC  X(002).
+               05 WK-PRD-TMPLT-CD          PIC  X(003).
+               05 WK-PRD-NO                PIC  X(005).
+
+      *-----------------------------------------------------------------00940001
+      * PGM INTERFACE PARAMETER                                         00950001
+      *-----------------------------------------------------------------00960001
+      * SQLIO COPY BOOK                                                 00970001
+       01  XQJL1201-CA.                                                 00980001
+           COPY  XQJL1201.                                              00990001
+      *-----------------------------------------------------------------01010001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01020001
+      *-----------------------------------------------------------------01030001
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.                                              01050001
+      *-----------------------------------------------------------------01070001
+       LINKAGE                         SECTION.                         01080001
+      *-----------------------------------------------------------------01090001
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.                                                 01100001
+           COPY  YCCOMMON.                                              01110001
+                                                                        01120001
+      * DC COPYBOOK
+       01  XDJL4120-CA.                                                 01130001
+           COPY  XDJL4120.                                              01140001
+      *=================================================================01160001
+       PROCEDURE                       DIVISION                         01170001
+                                       USING       YCCOMMON-CA          01180001
+                                                   XDJL4120-CA          01190001
+                                                   .                    01200001
+      *=================================================================01210001
+                                                                        01220001
+      *-----------------------------------------------------------------01230001
+      *@  처리메인                                                    01240001
+      *-----------------------------------------------------------------01250001
+       S0000-MAIN-RTN.                                                  01260001
+                                                                        01270001
+      *@  초기화                                                      01280001
+           PERFORM  S1000-INITIALIZE-RTN                                01290001
+              THRU  S1000-INITIALIZE-EXT                                01300001
+                                                                        01310001
+      *@  입력값　CHECK                                               01320001
+           PERFORM  S2000-VALIDATION-RTN                                01330001
+              THRU  S2000-VALIDATION-EXT                                01340001
+                                                                        01350001
+      *@  업무처리                                                    01360001
+           PERFORM  S3000-PROCESS-RTN                                   01370001
+              THRU  S3000-PROCESS-EXT                                   01380001
+                                                                        01390001
+      *@  처리종료                                                    01440001
+           PERFORM  S9000-FINAL-RTN                                     01450001
+              THRU  S9000-FINAL-EXT                                     01460001
+           .                                                            01470001
+       S0000-MAIN-EXT.                                                  01490001
+           EXIT.                                                        01500001
+      *-----------------------------------------------------------------01510001
+      *@  초기화                                                      01520001
+      *-----------------------------------------------------------------01530001
+       S1000-INITIALIZE-RTN.                                            01540001
+                                                                        01550001
+      *@   WK-AREA 및　프로그램파라미터　초기화                       01560001
+           INITIALIZE WK-AREA                                           01570001
+      *               SQLIO
+                      YCDBSQLA-CA                                       01600001
+                                                                        01610001
+      *@  출력영역　및　결과코드　초기화                              01620001
+           INITIALIZE XDJL4120-OUT                                      01630001
+                      XDJL4120-RETURN                                   01640001
+           .                                                            01650001
+       S1000-INITIALIZE-EXT.                                            01670001
+           EXIT.                                                        01680001
+      *-----------------------------------------------------------------01690001
+      *@  입력값검증                                                  01700001
+      *-----------------------------------------------------------------01710001
+       S2000-VALIDATION-RTN.                                            01720001
+                                                                        01730001
+      *@   1 DC필수입력파라미터 검증
+      *@   1.1 처리구분코드체크
+      *@   실행조건 : 입력.처리구분코드=01
+      *@   처리내용 : 에러처리
+           IF XDJL4120-I-PRCSS-DSTIC NOT = CO-CHA-01
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.2 기준년월체크
+      *@   실행조건 : 입력.기준년월=SPACE
+      *@   처리내용 : 에러처리
+           IF XDJL4120-I-BASE-YM = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            01850001
+       S2000-VALIDATION-EXT.                                            01870001
+           EXIT.                                                        01880001
+      *-----------------------------------------------------------------01890001
+      *@  업무처리                                                    01900001
+      *-----------------------------------------------------------------01910001
+       S3000-PROCESS-RTN.                                               01920001
+                                                                        01930004
+      *@   SQLIO CALL
+           PERFORM S3110-QJL1201-SELECT-RTN                             04300022
+              THRU S3110-QJL1201-SELECT-EXT                             04310022
+           .                                                            02000001
+
+       S3000-PROCESS-EXT.                                               02020001
+           EXIT.                                                        02030001
+
+      *-----------------------------------------------------------------04500022
+      *@  SQLIO QJL1201 SELECT
+      *-----------------------------------------------------------------04520022
+       S3110-QJL1201-SELECT-RTN.                                        04530022
+                                                                        04540022
+      *@   변수초기화
+           INITIALIZE XQJL1201-IN
+
+      *@   변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL1201-I-GROUP-CO-CD                                  01880024
+      *@   기준년월                                                   01940024
+           MOVE XDJL4120-I-BASE-YM                                      01950024
+             TO XQJL1201-I-BASE-YM                                      01960024
+
+      *@유효문자 뒤의 모든 공백을 '%' 로 채워준다
+      *@유효문자　뒤의　공백을 COUNT
+           MOVE ZERO                   TO WK-LEN
+           INSPECT FUNCTION REVERSE(XDJL4120-I-PRDCT-CD)
+           TALLYING WK-LEN FOR LEADING SPACE.
+      *@유효문자　뒤의　모든공백을 '%'  로　채움
+           IF WK-LEN NOT = ZERO
+              MOVE ALL '%'
+                TO XDJL4120-I-PRDCT-CD(CO-NUM-12 - WK-LEN + 1 :
+                                       WK-LEN)
+           END-IF
+
+      *@   상품코드                                                   01940024
+           MOVE XDJL4120-I-PRDCT-CD                                     01950024
+             TO XQJL1201-I-PRDCT-CD                                     01960024
+
+231130*@   NEXT KEY
+           IF BICOM-DSCN-TRAN-DSTCD = CO-CHA-1 OR CO-CHA-2
+              MOVE BOCOM-BF-TDK-INFO-CTNT
+                TO WK-NEXT-KEY
+170224*        N회계구분
+               MOVE WK-ACCTG-DSTCD
+                 TO XQJL1201-I-N-ACCTG-DSTCD
+170224*        N상품대분류코드
+               MOVE WK-PRD-LAG-CLSFI-CD
+                 TO XQJL1201-I-N-PRD-LAG-CLSFI-CD
+170224*        N상품중분류코드
+               MOVE WK-PRD-MEDM-CLSFI-CD
+                 TO XQJL1201-I-N-PRD-MEDM-CLSFI-CD
+170224*        N상품템플릿코드
+               MOVE WK-PRD-TMPLT-CD
+                 TO XQJL1201-I-N-PRD-TMPLT-CD
+231130*        N상품번호
+               MOVE WK-PRD-NO
+                 TO XQJL1201-I-N-PRD-NO
+           END-IF
+
+      *@   SQLIO CALL
+           #DYSQLA QJL1201 SELECT XQJL1201-CA
+                                                                        04690022
+      *@   호출결과확인
+           EVALUATE TRUE                                                04890022
+               WHEN COND-DBSQL-OK                                       04900022
+      *@            OUTPUT CALL
+                    PERFORM S6000-OUTPUT-SET-RTN                        04910022
+                       THRU S6000-OUTPUT-SET-EXT                        04920022
+               WHEN COND-DBSQL-MRNF                                     04930022
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER                                               04950022
+      *@원장패치에러일경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．                    04960022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              04970022
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR        04980022
+           END-EVALUATE                                                 04990022
+           .                                                            05000022
+
+       S3110-QJL1201-SELECT-EXT.
+           EXIT.                                                        05020022
+
+      *-----------------------------------------------------------------07750022
+      *@ 상품코드　출력　조립                                         07760022
+      *-----------------------------------------------------------------07770022
+       S6000-OUTPUT-SET-RTN.                                            07780022
+                                                                        07790022
+      *@출력을위한　반복문　수행
+           PERFORM VARYING WK-I FROM 1 BY 1                             07800022
+                     UNTIL WK-I > DBSQL-SELECT-CNT
+                        OR WK-I > 100
+                                                                        07820022
+               ADD 1 TO WK-CUR-CNT                                      07830022
+
+               MOVE WK-CUR-CNT
+                 TO XDJL4120-O-OUTPT-LINE-CNT1
+
+      *@       회계구분명                                             07840022
+               MOVE XQJL1201-O-ACCTG-DSTCD                (WK-I)
+                 TO XDJL4120-O-ACCTG-DSTIC                (WK-CUR-CNT)
+      *@       상품대분류코드
+               MOVE XQJL1201-O-PRDCT-LAG-CLSFI-CD         (WK-I)
+                 TO XDJL4120-O-PRDCT-LAG-CLSFI-CD         (WK-CUR-CNT)
+      *@       상품중분류코드
+               MOVE XQJL1201-O-PRDCT-MEDM-CLSFI-CD        (WK-I)
+                 TO XDJL4120-O-PRDCT-MEDM-CLSFI-CD        (WK-CUR-CNT)
+      *@       상품템플릿코드
+               MOVE XQJL1201-O-PRDCT-TMPLT-CD             (WK-I)
+                 TO XDJL4120-O-PRDCT-TMPLT-CD             (WK-CUR-CNT)
+      *@       상품번호
+               MOVE XQJL1201-O-PRDCT-NO                   (WK-I)
+                 TO XDJL4120-O-PRDCT-NO                   (WK-CUR-CNT)
+      *@       자산구분
+               MOVE XQJL1201-O-ASST-DSTIC                 (WK-I)
+                 TO XDJL4120-O-ASST-DSTIC                 (WK-CUR-CNT)
+      *@       잔액CCF환산율
+               MOVE XQJL1201-O-BAL-CCF-UTCRT              (WK-I)
+                 TO XDJL4120-O-BAL-CCF-UTCRT              (WK-CUR-CNT)
+      *@       EAD한도CCF환산율
+               MOVE XQJL1201-O-EAD-LIMT-CCF-UTCRT         (WK-I)
+                 TO XDJL4120-O-EAD-LIMT-CCF-UTCRT         (WK-CUR-CNT)
+      *@       EAD한도NCCF환산율
+               MOVE XQJL1201-O-EAD-LIMT-NCCF-UTCRT        (WK-I)
+                 TO XDJL4120-O-EAD-LIMT-NCCF-UTCRT        (WK-CUR-CNT)
+      *@       한도기준TE환산율
+               MOVE XQJL1201-O-LIMT-BASE-TE-UTCRT         (WK-I)
+                 TO XDJL4120-O-LIMT-BASE-TE-UTCRT         (WK-CUR-CNT)
+      *@       CP대상계정여부                                         08200022
+               MOVE XQJL1201-O-INLS-GT-ACITM-YN           (WK-I)
+                 TO XDJL4120-O-INLS-GT-ACITM-YN           (WK-CUR-CNT)
+      *@       CA대상계정여부
+               MOVE XQJL1201-O-CA-TAGET-ACITM-YN          (WK-I)
+                 TO XDJL4120-O-CA-TAGET-ACITM-YN          (WK-CUR-CNT)
+      *@       신용공여한도환산율                                     08200022
+               MOVE XQJL1201-O-GRCR-LIMT-UTCRT            (WK-I)
+                 TO XDJL4120-O-GRCR-LIMT-UTCRT            (WK-CUR-CNT)
+      *@       상품명                                                 08200022
+               MOVE XQJL1201-O-PRDCT-NAME                 (WK-I)
+                 TO XDJL4120-O-PRDCT-NAME                 (WK-CUR-CNT)
+      *@       중분류코드(EAD)                                        08200022
+               MOVE XQJL1201-O-EAD-MEDM-CLSFI-CD          (WK-I)
+                 TO XDJL4120-O-EAD-MEDM-CLSFI-CD          (WK-CUR-CNT)
+      *@       중분류명(EAD)                                          08200022
+               MOVE XQJL1201-O-EAD-MEDM-CLSFI-NAME        (WK-I)
+                 TO XDJL4120-O-EAD-MEDM-CLSFI-NAME        (WK-CUR-CNT)
+      *@       중분류코드(T/E)                                        08200022
+               MOVE XQJL1201-O-TE-MEDM-CLSFI-CD           (WK-I)
+                 TO XDJL4120-O-TE-MEDM-CLSFI-CD           (WK-CUR-CNT)
+      *@       중분류명(T/E)                                          08200022
+               MOVE XQJL1201-O-TE-MEDM-CLSFI-NAME         (WK-I)
+                 TO XDJL4120-O-TE-MEDM-CLSFI-NAME         (WK-CUR-CNT)
+      *@       중분류코드(CA)                                         08200022
+               MOVE XQJL1201-O-CA-MEDM-CLSFI-CD           (WK-I)
+                 TO XDJL4120-O-CA-MEDM-CLSFI-CD           (WK-CUR-CNT)
+      *@       중분류명(CA)                                           08200022
+               MOVE XQJL1201-O-CA-MEDM-CLSFI-NAME         (WK-I)
+                 TO XDJL4120-O-CA-MEDM-CLSFI-NAME         (WK-CUR-CNT)
+      *@       통합계정과목코드                                       08200022
+               MOVE XQJL1201-O-INTGRA-TIACC-CD            (WK-I)
+                 TO XDJL4120-O-INTGRA-TIACC-CD            (WK-CUR-CNT)
+200330*@       국외영업점편중관리대상여부
+               MOVE XQJL1201-O-ABRD-L-MGT-TAGET-YN        (WK-I)
+                 TO XDJL4120-O-ABRD-L-MGT-TAGET-YN        (WK-CUR-CNT)
+231130*@       바젤기준신용환산률
+               MOVE XQJL1201-O-BSL-B-CRDT-UTCNG-RT        (WK-I)
+                 TO XDJL4120-O-BSL-B-CRDT-UTCNG-RT        (WK-CUR-CNT)
+231130*@       거액익스포져대상여부
+               MOVE XQJL1201-O-BSM-EXPSR-TAGET-YN         (WK-I)
+                 TO XDJL4120-O-BSM-EXPSR-TAGET-YN         (WK-CUR-CNT)
+231130*@       신용익스포져대상여부
+               MOVE XQJL1201-O-CRDT-EXPSR-TAGET-YN        (WK-I)
+                 TO XDJL4120-O-CRDT-EXPSR-TAGET-YN        (WK-CUR-CNT)
+           END-PERFORM                                                  08210022
+
+      *@4.1 출력라인수 조립
+           IF DBSQL-SELECT-CNT >= CO-MAX-CNT
+      *@       NEXT DATA KEY SET
+      *       회계구분
+171130         MOVE XQJL1201-O-ACCTG-DSTCD(100)
+                 TO WK-ACCTG-DSTCD
+      *       상품대분류코드
+               MOVE XQJL1201-O-PRDCT-LAG-CLSFI-CD(100)
+                 TO WK-PRD-LAG-CLSFI-CD
+      *       상품중분류코드
+171130         MOVE XQJL1201-O-PRDCT-MEDM-CLSFI-CD(100)
+                 TO WK-PRD-MEDM-CLSFI-CD
+      *       상품템플릿코드
+               MOVE XQJL1201-O-PRDCT-TMPLT-CD(100)
+                 TO WK-PRD-TMPLT-CD
+      *       상품번호
+               MOVE XQJL1201-O-PRDCT-NO(100)
+                 TO WK-PRD-NO
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+           .                                                            08220022
+
+       S6000-OUTPUT-SET-EXT.                                            08230022
+           EXIT.                                                        08240022
+
+      *-----------------------------------------------------------------03570001
+      *@  처리종료                                                    03580001
+      *-----------------------------------------------------------------03590001
+       S9000-FINAL-RTN.                                                 03600001
+      *@정상종료                                                      03610001
+           #OKEXIT  CO-STAT-OK                                          03620001
+           .                                                            03630001
+       S9000-FINAL-EXT.                                                 03650001
+           EXIT.                                                        03660001

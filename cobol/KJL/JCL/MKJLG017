@@ -1,0 +1,180 @@
+//MKJLG017 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* 지주사 리스크분석DATA 구축 UNLOAD
+//*  TE국별관리한도 (THKJL0056)
+//*  KJL.SM.KJL0056.EXPM23.G017 => KB0_FBJ_EXP_M23_YYYYMM.DAT
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 1 6
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0056.EXPM23.G017.CHKTMP'
+  DELETE  'KJL.SM.KJL0056.EXPM23.G017.CHK'
+  DELETE  'KJL.SM.KJL0056.EXPM23.G017.DATTMP'
+  DELETE  'KJL.SM.KJL0056.EXPM23.G017.DAT'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0056.EXPM23.G017.CHKTMP,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 기준년월
+        ,CHAR(',')
+        ,HEX(CURRENT DATE)
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0056
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '%%B'
+	 GROUP BY 기준년월
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0056.EXPM23.G017.CHKTMP,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0056.EXPM23.G017.CHK,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0056.EXPM23.G017.DATTMP,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=131,BLKSIZE=27903)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 기준년월
+        ,CHAR(',')
+        ,그룹회사코드
+        ,CHAR(',')
+        ,"ISO국가코드"
+        ,CHAR(',')
+        ,영문국가명
+        ,CHAR(',')
+        ,한도관리지역구분
+        ,CHAR(',')
+        ,한도국가체질구분
+        ,CHAR(',')
+        ,경보발령여부
+        ,CHAR(',')
+        ,경보발령등록년월일
+        ,CHAR(',')
+        ,모니터링여부
+        ,CHAR(',')
+        ,모니터링등록년월일
+        ,CHAR(',')
+        ,"SNP등급구분"
+        ,CHAR(',')
+        ,무디스등급구분
+        ,CHAR(',')
+        ,피치등급구분
+        ,CHAR(',')
+        ,CHAR(DIGITS(전체관리한도))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 그룹회사코드
+                                    ,기준년월
+                                    ,"ISO국가코드") AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0056
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '%%B'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0056.EXPM23.G017.DATTMP,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0056.EXPM23.G017.DAT,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=131,BLKSIZE=27903)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//

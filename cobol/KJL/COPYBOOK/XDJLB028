@@ -1,0 +1,53 @@
+      *================================================================*
+      *@ NAME : XDJLB028                                               *
+      *@ DESC : DC계열사등록 COPYBOOK                                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-18 19:51:06                          *
+      *  생성일시     : 2009-03-18 19:51:10                          *
+      *================================================================*
+           03  XDJLB028-RETURN.
+             05  XDJLB028-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB028-OK            VALUE  '00'.
+                 88  COND-XDJLB028-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB028-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB028-ERROR         VALUE  '09'.
+                 88  COND-XDJLB028-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB028-SYSERROR      VALUE  '99'.
+             05  XDJLB028-R-LINE                 PIC  9(006).
+             05  XDJLB028-R-ERRCD                PIC  X(008).
+             05  XDJLB028-R-TREAT-CD             PIC  X(008).
+             05  XDJLB028-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB028-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB028-I-PRCSS-DSTIC          PIC  X(002).
+      *--       계열적용구분
+             05  XDJLB028-I-AFFLT-APLY-DSTCD     PIC  X(001).
+      *--       계열코드
+             05  XDJLB028-I-AFFLT-C-GROUP-CD     PIC  X(006).
+      *--       채무자번호
+             05  XDJLB028-I-BRWR-NO              PIC  X(013).
+      *--       채무자명
+             05  XDJLB028-I-DBTR-NAME            PIC  X(042).
+      *--       기업규모
+             05  XDJLB028-I-CORP-SCAL            PIC  X(001).
+      *--       자동갱신여부
+             05  XDJLB028-I-MODFI-YN             PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB028-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB028-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  2  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB028-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB028-I-AFFLT-APLY-DSTCD   ;계열적용구분
+      *X  XDJLB028-I-AFFLT-C-GROUP-CD   ;계열코드
+      *X  XDJLB028-I-BRWR-NO            ;채무자번호
+      *X  XDJLB028-I-DBTR-NAME          ;채무자명
+      *X  XDJLB028-I-CORP-SCAL          ;기업규모
+      *X  XDJLB028-I-MODFI-YN           ;자동갱신여부
+      *X  XDJLB028-O-PRCSS-RSULT        ;처리결과

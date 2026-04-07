@@ -1,0 +1,62 @@
+      *================================================================*
+      *@ NAME : YPJL4008                                               *
+      *@ DESC : AS신청접수내역및승인결과조회 COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-10-05 09:50:25                          *
+      *  생성일시     : 2021-10-05 09:50:28                          *
+      *  전체길이     : 00232119 BYTES                               *
+      *================================================================*
+      *--     영업점명
+           07  YPJL4008-BRN-NAME                 PIC  X(062).
+      *--     채무자명
+           07  YPJL4008-DBTRZ-NAME               PIC  X(052).
+      *--     출력라인수1
+           07  YPJL4008-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4008-GRID1                    OCCURS 001000 TIMES.
+      *--       영업점명
+             09  YPJL4008-BRN-NAME1              PIC  X(062).
+      *--       KB-PIN
+             09  YPJL4008-KB-PIN                 PIC  X(010).
+      *--       채무자명1
+             09  YPJL4008-DBTRZ-NAME1            PIC  X(052).
+      *--       진행상태
+             09  YPJL4008-LIMT-P-STUS-DSTCD      PIC  X(010).
+      *--       승인구분
+             09  YPJL4008-ATHOR-DSTIC            PIC  X(001).
+      *--       관리한도금액
+             09  YPJL4008-MGT-CLAM               PIC  9(015).
+      *--       신청번호
+             09  YPJL4008-LIMT-APLCN-NO          PIC  X(010).
+      *--       승인번호
+             09  YPJL4008-ATHOR-NO               PIC  X(010).
+      *--       승인권자
+             09  YPJL4008-LIMT-ATRZ-DSTCD        PIC  X(020).
+      *--       승인년월일
+             09  YPJL4008-ATHOR-YMD              PIC  X(008).
+      *--       기존T/E관리한도
+             09  YPJL4008-EXSTN-TE-MGT-LIMT      PIC  9(015).
+      *--       기준한도
+             09  YPJL4008-BASE-CLAM              PIC  9(015).
+      *--       내부신용평가등급구분
+             09  YPJL4008-INTNL-CV-GRD-DSTCD     PIC  X(004).
+      *================================================================*
+      *        Y  P  J  L  4  0  0  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4008-BRN-NAME             ;영업점명
+      *X  YPJL4008-DBTRZ-NAME           ;채무자명
+      *N  YPJL4008-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4008-GRID1                ;그리드1
+      *X  YPJL4008-BRN-NAME1            ;영업점명
+      *X  YPJL4008-KB-PIN               ;KB-PIN
+      *X  YPJL4008-DBTRZ-NAME1          ;채무자명1
+      *X  YPJL4008-LIMT-P-STUS-DSTCD    ;진행상태
+      *X  YPJL4008-ATHOR-DSTIC          ;승인구분
+      *N  YPJL4008-MGT-CLAM             ;관리한도금액
+      *X  YPJL4008-LIMT-APLCN-NO        ;신청번호
+      *X  YPJL4008-ATHOR-NO             ;승인번호
+      *X  YPJL4008-LIMT-ATRZ-DSTCD      ;승인권자
+      *X  YPJL4008-ATHOR-YMD            ;승인년월일
+      *N  YPJL4008-EXSTN-TE-MGT-LIMT    ;기존T/E관리한도
+      *N  YPJL4008-BASE-CLAM            ;기준한도
+      *X  YPJL4008-INTNL-CV-GRD-DSTCD   ;내부신용평가등급구분

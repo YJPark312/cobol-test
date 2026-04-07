@@ -1,0 +1,52 @@
+      *================================================================*
+      *@ NAME : V1JL4072                                               *
+      *@ DESC : 국외영업점TE현황조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-17 15:21:06                          *
+      *  생성일시     : 2020-03-17 15:21:28                          *
+      *  전체길이     : 00043405 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4072-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4072-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4072-OUTPT-LINE-CNT1.
+      *--       기준년월일
+             09  V1JL4072-BASE-YMD               PIC  X(008).
+      *--       관리부점코드
+             09  V1JL4072-MGT-BRNCD              PIC  X(004).
+      *--       부점명
+             09  V1JL4072-BRN-NAME               PIC  X(022).
+      *--       한도계좌번호
+             09  V1JL4072-LIMT-ACNO              PIC  X(020).
+      *--       차주고객식별자
+             09  V1JL4072-BRWR-CUST-IDNFR        PIC  X(010).
+      *--       채무자명
+             09  V1JL4072-DBTRZ-NAME             PIC  X(052).
+      *--       대분류업종코드
+             09  V1JL4072-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  V1JL4072-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       상품코드
+             09  V1JL4072-PRDCT-CD               PIC  X(015).
+      *--       상품명
+             09  V1JL4072-PRDCT-NAME             PIC  X(252).
+      *--       한도기준토탈익스포져금액
+             09  V1JL4072-LIMT-BASE-TE-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  7  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4072-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4072-GRID1                ;그리드1
+      *X  V1JL4072-BASE-YMD             ;기준년월일
+      *X  V1JL4072-MGT-BRNCD            ;관리부점코드
+      *X  V1JL4072-BRN-NAME             ;부점명
+      *X  V1JL4072-LIMT-ACNO            ;한도계좌번호
+      *X  V1JL4072-BRWR-CUST-IDNFR      ;차주고객식별자
+      *X  V1JL4072-DBTRZ-NAME           ;채무자명
+      *X  V1JL4072-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4072-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *X  V1JL4072-PRDCT-CD             ;상품코드
+      *X  V1JL4072-PRDCT-NAME           ;상품명
+      *S  V1JL4072-LIMT-BASE-TE-AMT     ;한도기준토탈익스포져금액

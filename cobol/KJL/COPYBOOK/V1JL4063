@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : V1JL4063                                               *
+      *@ DESC : 산업별기업규모별T/E현황조회                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-01-16 11:28:17                          *
+      *  생성일시     : 2018-01-16 11:28:23                          *
+      *  전체길이     : 00065510 BYTES                               *
+      *================================================================*
+      *--     현재건수
+ROWCNT     07  V1JL4063-PRSNT-NOITM              PIC  9(005).
+      *--     총건수
+           07  V1JL4063-TOTAL-NOITM              PIC  9(005).
+      *--     그리드1
+           07  V1JL4063-GRID1                    OCCURS 0 TO 000500
+               DEPENDING ON V1JL4063-PRSNT-NOITM.
+      *--       업종대분류코드
+             09  V1JL4063-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       업종명
+             09  V1JL4063-LAG-C-BZTYP-NAME       PIC  X(032).
+      *--       대기업토탈익스포져
+             09  V1JL4063-CNGL-TE                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       중소기업토탈익스포져
+             09  V1JL4063-SME-TE                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업형소호토탈익스포져
+             09  V1JL4063-CORP-TYP-SOHO-TE       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소매형소호토탈익스포져
+             09  V1JL4063-RTLSAL-TYP-SOHO-TE     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기타토탈익스포져
+             09  V1JL4063-ETC-TE                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소계
+             09  V1JL4063-SUBT                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  6  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4063-PRSNT-NOITM          ;현재건수
+      *N  V1JL4063-TOTAL-NOITM          ;총건수
+      *A  V1JL4063-GRID1                ;그리드1
+      *X  V1JL4063-LAG-CLSFI-BZTYP-CD   ;업종대분류코드
+      *X  V1JL4063-LAG-C-BZTYP-NAME     ;업종명
+      *S  V1JL4063-CNGL-TE              ;대기업토탈익스포져
+      *S  V1JL4063-SME-TE               ;중소기업토탈익스포져
+      *S  V1JL4063-CORP-TYP-SOHO-TE     ;기업형소호토탈익스포져
+      *S  V1JL4063-RTLSAL-TYP-SOHO-TE   ;소매형소호토탈익스포져
+      *S  V1JL4063-ETC-TE               ;기타토탈익스포져
+      *S  V1JL4063-SUBT                 ;소계

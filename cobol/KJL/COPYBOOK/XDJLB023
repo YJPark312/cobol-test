@@ -1,0 +1,212 @@
+      *================================================================*
+      *@ NAME : XDJLB023                                               *
+      *@ DESC : DC본부부서기준값등록 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-10-12 14:09:41                          *
+      *  생성일시     : 2021-10-12 14:09:42                          *
+      *  전체길이     : 00021519 BYTES                               *
+      *================================================================*
+           03  XDJLB023-RETURN.
+             05  XDJLB023-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB023-OK            VALUE  '00'.
+                 88  COND-XDJLB023-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB023-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB023-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB023-ERROR         VALUE  '09'.
+                 88  COND-XDJLB023-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB023-SYSERROR      VALUE  '99'.
+             05  XDJLB023-R-LINE                 PIC  9(006).
+             05  XDJLB023-R-ERRCD                PIC  X(008).
+             05  XDJLB023-R-TREAT-CD             PIC  X(008).
+             05  XDJLB023-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB023-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB023-I-PRCSS-DSTIC          PIC  X(002).
+      *--       출력라인수1
+             05  XDJLB023-I-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XDJLB023-I-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       출력라인수3
+             05  XDJLB023-I-OUTPT-LINE-CNT3      PIC  9(005).
+      *--       출력라인수4
+             05  XDJLB023-I-OUTPT-LINE-CNT4      PIC  9(005).
+      *--       출력라인수5
+             05  XDJLB023-I-OUTPT-LINE-CNT5      PIC  9(005).
+      *--       출력라인수6
+             05  XDJLB023-I-OUTPT-LINE-CNT6      PIC  9(005).
+      *--       출력라인수7
+             05  XDJLB023-I-OUTPT-LINE-CNT7      PIC  9(005).
+      *--       출력라인수8
+             05  XDJLB023-I-OUTPT-LINE-CNT8      PIC  9(005).
+      *--       BIS기준자기자본
+             05  XDJLB023-I-BIS-BASE-ONCP        PIC  9(012).
+      *--       기준년월1
+             05  XDJLB023-I-BASE-YM1             PIC  X(006).
+      *--       동일인외화자기자본
+             05  XDJLB023-I-SMPSN-FC-ONCP        PIC  9(012).
+      *--       기준년월2
+             05  XDJLB023-I-BASE-YM2             PIC  X(006).
+      *--       그리드1
+             05  XDJLB023-I-GRID1                OCCURS 000030 TIMES.
+      *--         기타신용등급
+               07  XDJLB023-I-INTNL-CV-GRD-DSTCD1
+                                                 PIC  X(004).
+      *--         기타지원비율
+               07  XDJLB023-I-SPORT-RATO1        PIC  9(003).
+      *--         기타상환예상비율
+               07  XDJLB023-I-RPAY-ANTICI-RATO1  PIC  9(003).
+      *--       그리드2
+             05  XDJLB023-I-GRID2                OCCURS 000030 TIMES.
+      *--         그룹신용등급
+               07  XDJLB023-I-INTNL-CV-GRD-DSTCD2
+                                                 PIC  X(004).
+      *--         그룹지원비율
+               07  XDJLB023-I-SPORT-RATO2        PIC  9(003).
+      *--         그룹상환예상비율
+               07  XDJLB023-I-RPAY-ANTICI-RATO2  PIC  9(003).
+      *--       그리드3
+             05  XDJLB023-I-GRID3                OCCURS 000030 TIMES.
+      *--         건설신용등급
+               07  XDJLB023-I-INTNL-CV-GRD-DSTCD3
+                                                 PIC  X(004).
+      *--         건설지원비율
+               07  XDJLB023-I-SPORT-RATO3        PIC  9(003).
+      *--         건설상환예상비율
+               07  XDJLB023-I-RPAY-ANTICI-RATO3  PIC  9(003).
+      *--       그리드4
+             05  XDJLB023-I-GRID4                OCCURS 000030 TIMES.
+      *--         조선신용등급
+               07  XDJLB023-I-INTNL-CV-GRD-DSTCD4
+                                                 PIC  X(004).
+      *--         조선지원비율
+               07  XDJLB023-I-SPORT-RATO4        PIC  9(003).
+      *--         조선상환예상비율
+               07  XDJLB023-I-RPAY-ANTICI-RATO4  PIC  9(003).
+      *--       그리드5
+             05  XDJLB023-I-GRID5                OCCURS 000030 TIMES.
+      *--         계산신용등급
+               07  XDJLB023-I-INTNL-CV-GRD-DSTCD5
+                                                 PIC  X(004).
+      *--         계산지원비율
+               07  XDJLB023-I-SPORT-RATO5        PIC  9(003).
+      *--       그리드6
+             05  XDJLB023-I-GRID6                OCCURS 000150 TIMES.
+      *--         기준일자
+               07  XDJLB023-I-BASE-YM6           PIC  X(006).
+      *--         한국은행MC코드
+               07  XDJLB023-I-BOK-MTCN-CD6       PIC  X(006).
+      *--         업종명
+               07  XDJLB023-I-BOK-MTCN-NAME6     PIC  X(032).
+      *--         가중평균이자율
+               07  XDJLB023-I-BZTYP-WGHTG-AVG-RT6
+                                                 PIC  9(003)V9(02).
+      *--         차입금/매출액
+               07  XDJLB023-I-AMBR-SALEPR-RATO6  PIC  9(003)V9(02).
+      *--         차입금/자기자본
+               07  XDJLB023-I-AMBR-ONCP-RT6      PIC  9(003)V9(02).
+      *--         차입금/총자산
+               07  XDJLB023-I-AMBR-T-ASST-RATO6  PIC  9(003)V9(02).
+      *--       건설업
+             05  XDJLB023-I-CNST-A-USAG-MLPL     PIC  9(003)V9(02).
+      *--       조선업
+             05  XDJLB023-I-CREW-AA-USAG-MLPL    PIC  9(003)V9(02).
+      *--       렌탈업
+             05  XDJLB023-I-RENTL-O-APLY-MLPL    PIC  9(003)V9(02).
+      *--       장기자산한도금액
+             05  XDJLB023-I-SUB-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그리드7
+             05  XDJLB023-I-GRID7                OCCURS 000100 TIMES.
+      *--         기준년월
+               07  XDJLB023-I-BASE-YM7           PIC  X(006).
+      *--         TE산업분류코드
+               07  XDJLB023-I-TE-IDSTRY-CLSFI-CD PIC  X(003).
+      *--         TE산업분류코드명
+               07  XDJLB023-I-TE-I-CLSFI-CD-NAME PIC  X(052).
+      *--         TE자기자본비율
+               07  XDJLB023-I-TE-ONCP-RATO       PIC  9(003)V9(02).
+      *--         TE매출액비율
+               07  XDJLB023-I-TE-SALEPR-RATO     PIC  9(003)V9(02).
+      *--         TE총자산비율
+               07  XDJLB023-I-TE-TOTAL-ASST-RATO PIC  9(003)V9(02).
+      *--       그리드8
+             05  XDJLB023-I-GRID8                OCCURS 000100 TIMES.
+      *--         기준년월8
+               07  XDJLB023-I-BASE-YM8           PIC  X(006).
+      *--         한신평재무업종구분
+               07  XDJLB023-I-KIS-FZ-BZTYP-DSTIC PIC  X(002).
+      *--         금융자기자본비율
+               07  XDJLB023-I-FINAC-ONCP-RATO    PIC  9(003)V9(02).
+      *--         등록직원번호
+               07  XDJLB023-I-REGI-EMPID         PIC  X(007).
+      *--         등록년월일
+               07  XDJLB023-I-REGI-YMD           PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJLB023-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB023-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  2  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB023-I-PRCSS-DSTIC        ;처리구분
+      *N  XDJLB023-I-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XDJLB023-I-OUTPT-LINE-CNT2    ;출력라인수2
+      *N  XDJLB023-I-OUTPT-LINE-CNT3    ;출력라인수3
+      *N  XDJLB023-I-OUTPT-LINE-CNT4    ;출력라인수4
+      *N  XDJLB023-I-OUTPT-LINE-CNT5    ;출력라인수5
+      *N  XDJLB023-I-OUTPT-LINE-CNT6    ;출력라인수6
+      *N  XDJLB023-I-OUTPT-LINE-CNT7    ;출력라인수7
+      *N  XDJLB023-I-OUTPT-LINE-CNT8    ;출력라인수8
+      *N  XDJLB023-I-BIS-BASE-ONCP      ;BIS기준자기자본
+      *X  XDJLB023-I-BASE-YM1           ;기준년월1
+      *N  XDJLB023-I-SMPSN-FC-ONCP      ;동일인외화자기자본
+      *X  XDJLB023-I-BASE-YM2           ;기준년월2
+      *A  XDJLB023-I-GRID1              ;그리드1
+      *X  XDJLB023-I-INTNL-CV-GRD-DSTCD1;기타신용등급
+      *N  XDJLB023-I-SPORT-RATO1        ;기타지원비율
+      *N  XDJLB023-I-RPAY-ANTICI-RATO1  ;기타상환예상비율
+      *A  XDJLB023-I-GRID2              ;그리드2
+      *X  XDJLB023-I-INTNL-CV-GRD-DSTCD2;그룹신용등급
+      *N  XDJLB023-I-SPORT-RATO2        ;그룹지원비율
+      *N  XDJLB023-I-RPAY-ANTICI-RATO2  ;그룹상환예상비율
+      *A  XDJLB023-I-GRID3              ;그리드3
+      *X  XDJLB023-I-INTNL-CV-GRD-DSTCD3;건설신용등급
+      *N  XDJLB023-I-SPORT-RATO3        ;건설지원비율
+      *N  XDJLB023-I-RPAY-ANTICI-RATO3  ;건설상환예상비율
+      *A  XDJLB023-I-GRID4              ;그리드4
+      *X  XDJLB023-I-INTNL-CV-GRD-DSTCD4;조선신용등급
+      *N  XDJLB023-I-SPORT-RATO4        ;조선지원비율
+      *N  XDJLB023-I-RPAY-ANTICI-RATO4  ;조선상환예상비율
+      *A  XDJLB023-I-GRID5              ;그리드5
+      *X  XDJLB023-I-INTNL-CV-GRD-DSTCD5;계산신용등급
+      *N  XDJLB023-I-SPORT-RATO5        ;계산지원비율
+      *A  XDJLB023-I-GRID6              ;그리드6
+      *X  XDJLB023-I-BASE-YM6           ;기준일자
+      *X  XDJLB023-I-BOK-MTCN-CD6       ;한국은행MC코드
+      *X  XDJLB023-I-BOK-MTCN-NAME6     ;업종명
+      *N  XDJLB023-I-BZTYP-WGHTG-AVG-RT6;가중평균이자율
+      *N  XDJLB023-I-AMBR-SALEPR-RATO6  ;차입금/매출액
+      *N  XDJLB023-I-AMBR-ONCP-RT6      ;차입금/자기자본
+      *N  XDJLB023-I-AMBR-T-ASST-RATO6  ;차입금/총자산
+      *N  XDJLB023-I-CNST-A-USAG-MLPL   ;건설업
+      *N  XDJLB023-I-CREW-AA-USAG-MLPL  ;조선업
+      *N  XDJLB023-I-RENTL-O-APLY-MLPL  ;렌탈업
+      *S  XDJLB023-I-SUB-CLAM           ;장기자산한도금액
+      *A  XDJLB023-I-GRID7              ;그리드7
+      *X  XDJLB023-I-BASE-YM7           ;기준년월
+      *X  XDJLB023-I-TE-IDSTRY-CLSFI-CD ;TE산업분류코드
+      *X  XDJLB023-I-TE-I-CLSFI-CD-NAME ;TE산업분류코드명
+      *N  XDJLB023-I-TE-ONCP-RATO       ;TE자기자본비율
+      *N  XDJLB023-I-TE-SALEPR-RATO     ;TE매출액비율
+      *N  XDJLB023-I-TE-TOTAL-ASST-RATO ;TE총자산비율
+      *A  XDJLB023-I-GRID8              ;그리드8
+      *X  XDJLB023-I-BASE-YM8           ;기준년월8
+      *X  XDJLB023-I-KIS-FZ-BZTYP-DSTIC ;한신평재무업종구분
+      *N  XDJLB023-I-FINAC-ONCP-RATO    ;금융자기자본비율
+      *X  XDJLB023-I-REGI-EMPID         ;등록직원번호
+      *X  XDJLB023-I-REGI-YMD           ;등록년월일
+      *X  XDJLB023-O-PRCSS-RSULT        ;처리결과

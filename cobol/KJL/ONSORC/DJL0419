@@ -1,0 +1,1066 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL0419 (DC포괄신용공여한도적정성점검대상조회)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도적정성점검대상조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *최주원 : 20210726 : 신규작성
+      *박정수 : 20230330 : P20232237652 첨부파일조회 추가
+      *박정수 : 20240321 : 중단거래 보완
+      *박정수 : 20240530 : 적정성점검구분 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **  THKJL0018 : 포괄신용공여한도 점검기본
+      **  THKJL0005 : 한도승인결의록관리
+      **  THKJL0002 : 기업 및 그룹 한도신청 첨부파일관리 기본
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL0419.
+       AUTHOR.                         최주원.
+       DATE-WRITTEN.                   21/07/26.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지
+      *처리구분코드 오류입니다.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+      *필수항목 오류입니다.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+      *데이터를 검색할 수 없습니다.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지
+      *전산업무담당자에게 문의바랍니다.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL0419'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-5                PIC  X(001) VALUE '5'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-99               PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-0000             PIC  X(004) VALUE '0000'.
+           03  CO-CHA-9999             PIC  X(004) VALUE '9999'.
+
+           03  CO-CHA-9999999          PIC  X(007) VALUE '9999999'.
+           03  CO-CHA-PCT7             PIC  X(007) VALUE '%%%%%%%'.
+           03  CO-CHA-PCT10            PIC  X(010) VALUE '%%%%%%%%%%'.
+
+           03  CO-NUM-1                PIC  9(001) VALUE 1.
+           03  CO-NUM-3                PIC  9(001) VALUE 3.
+
+           03  CO-NUM-100              PIC  9(003) VALUE 100.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *    QJL2761 ARRAY
+           03  WK-I                    PIC S9(004) COMP.
+      *    QJL2762 ARRAY
+           03  WK-J                    PIC S9(004) COMP.
+
+      *    QJL1241 ARRAY
+           03  WK-K                    PIC S9(004) COMP.
+           03  WK-L                    PIC S9(004) COMP.
+
+           03  WK-AR        PIC  9(004).
+
+      *       고객식별자
+           03  WK-TEMP-CUST-IDNFR      PIC  X(010).
+      *       소진율
+           03  WK-TEMP-EXHS-RT         PIC  9(005)V9999.
+      *--     포괄한도
+           03  WK-TEMP-INLS-LIMT       PIC  9(016).
+      *--     사용액
+           03  WK-TEMP-USE-AMT         PIC  9(016).
+
+           03  WK-BASEYMD              PIC  X(008).
+
+      *    NEXT KEY 항목정의
+           03  WK-BF-KEY.
+               05  WK-BF-LIMT-APLCN-NO      PIC  X(010).
+           03  WK-AF-KEY.
+               05  WK-AF-LIMT-APLCN-NO      PIC  X(010).
+               05  WK-AF-ATHOR-CMMB-EMPID   PIC  X(007).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *   채무자번호　전체
+       01  XQJL1241-CA.
+           COPY    XQJL1241.
+
+      *    승인대상조회(협의위원)
+       01  XQJL2761-CA.
+           COPY    XQJL2761.
+
+      *    승인대상조회(담당심사역)
+       01  XQJL2762-CA.
+           COPY    XQJL2762.
+
+      *    협의위원 조회
+       01  XQJL2754-CA.
+           COPY    XQJL2754.
+
+230330*   파일첨부조회
+       01  XQJL4022-CA.
+           COPY    XQJL4022.
+
+240530*전영업일추출매크로
+       01  XCJIDT16-CA.
+           COPY  XCJIDT16.
+
+      * 만기일/역만기일 산출 Parameter
+       01  XCJIIL03-CA.
+           COPY  XCJIIL03.
+
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TKJL0018-KEY.
+           COPY  TKJL0018.
+
+       01  TRJL0018-REC.
+           COPY  TRJL0018.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIOV INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      * SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *    DC COPYBOOK
+       01  XDJL0419-CA.
+           COPY  XDJL0419.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL0419-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL0419-OUT
+                      XDJL0419-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.1 처리구분코드체크
+      *@   실행조건 : 입력.처리구분코드
+      *@   처리내용 : 에러처리
+
+           #USRLOG  "=================================================="
+           #USRLOG  " PRGRS-STUS-DSTIC : " XDJL0419-I-PRCSS-DSTIC
+           #USRLOG  "=================================================="
+           #USRLOG  " APLCN-YMD1       : " XDJL0419-I-APLCN-YMD1
+           #USRLOG  " APLCN-YMD2       : " XDJL0419-I-APLCN-YMD2
+           #USRLOG  " CUST-IDNFR       : " XDJL0419-I-INQURY-CUST-IDNFR
+           #USRLOG  " CNGP-DSTIC       : " XDJL0419-I-CNGP-DSTIC
+           #USRLOG  " ATHOR-CMMB-EMPID : " XDJL0419-I-ATHOR-CMMB-EMPID
+           #USRLOG  "=================================================="
+           #USRLOG  " CUST-IDNFR       : " XDJL0419-I-CUST-IDNFR
+           #USRLOG  " LIMT-APLCN-NO    : " XDJL0419-I-LIMT-APLCN-NO
+           #USRLOG  "=================================================="
+
+
+      *     01:승인대상조회 / 02:승인의견조회 / 03:결의록탭조회
+           IF XDJL0419-I-PRCSS-DSTIC   = ( CO-CHA-01 OR
+                                           CO-CHA-02 OR
+                                           CO-CHA-03 )
+              CONTINUE
+           ELSE
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *    PRCSS-DSTIC
+      *     01:승인대상조회 / 02:승인의견조회 / 03:결의록탭조회
+           EVALUATE  XDJL0419-I-PRCSS-DSTIC
+           WHEN  CO-CHA-01
+
+      *        협의체구분 : 담당심사역 OR 협의위원
+               IF  XDJL0419-I-CNGP-DSTIC         = CO-CHA-1
+
+                   PERFORM S3100-QJL2761-CALL-RTN
+                      THRU S3100-QJL2761-CALL-EXT
+               ELSE
+
+                   PERFORM S3200-QJL2762-CALL-RTN
+                      THRU S3200-QJL2762-CALL-EXT
+               END-IF
+
+      *        승인대상조회건수가 존재할 경우
+               IF  XDJL0419-O-OUTPT-LINE-CNT1    > ZERO
+
+                   PERFORM VARYING WK-K FROM 1 BY 1
+                   UNTIL   WK-K > XDJL0419-O-OUTPT-LINE-CNT1
+
+                      INITIALIZE       WK-TEMP-CUST-IDNFR
+
+                      MOVE XDJL0419-O-CUST-IDNFR(WK-K)
+                        TO WK-TEMP-CUST-IDNFR
+
+      *               QJL1241
+                      PERFORM S3300-QJL1241-CALL-RTN
+                         THRU S3300-QJL1241-CALL-EXT
+
+                   END-PERFORM
+               END-IF
+
+           WHEN  CO-CHA-02
+           WHEN  CO-CHA-03
+      *@       결의록 조회 (THKJL0005)
+               PERFORM S3400-QJL2754-CALL-RTN
+                  THRU S3400-QJL2754-CALL-EXT
+
+230330*        첨부파일 조회(THKJL0002)
+               PERFORM S3500-QJL4022-CALL-RTN
+                  THRU S3500-QJL4022-CALL-EXT
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ QJL1241 조회
+      *-----------------------------------------------------------------
+       S3300-QJL1241-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE                  XQJL1241-IN
+
+      *@   변수 MOVE
+
+      *@  그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1241-I-GROUP-CO-CD
+
+      *    전영업일 1개월전 날짜 구함
+           PERFORM S5000-CJIIL03-CALL-RTN
+              THRU S5000-CJIIL03-CALL-EXT
+
+      *    전영업일 추출
+           PERFORM S4000-CJIDT16-CALL-RTN
+              THRU S4000-CJIDT16-CALL-EXT
+
+      *@   기준년월일 - 전영업일 조회
+      *   신청년월일의 전영업일로 조회해야함.
+      *    MOVE JICOM-BF-BZOPR-YMD
+           MOVE XCJIDT16-O-BF-BZOPR-YMD
+             TO XQJL1241-I-BASE-YMD
+
+      *@   월말구분(1:일,2:월)
+           IF WK-BASEYMD < XQJL1241-I-BASE-YMD
+               MOVE '1'
+                 TO XQJL1241-I-ENMN-DSTIC
+           ELSE
+               MOVE '2'
+                 TO XQJL1241-I-ENMN-DSTIC
+           END-IF
+
+
+      *@   KB-PIN (QJL2761 & QJL2762 OUT CUST-IDNFR)
+           MOVE WK-TEMP-CUST-IDNFR
+             TO XQJL1241-I-KB-PIN
+
+      *@   고객관리부점코드
+           MOVE SPACES
+             TO XQJL1241-I-BRNCD1
+           MOVE CO-CHA-9999
+             TO XQJL1241-I-BRNCD2
+
+220324*    조회구분(1:전체,2:설정,3:미설정)
+           MOVE '1'
+             TO XQJL1241-I-INQURY-DSTIC
+
+      *@   SQLIO SELECT
+           #DYSQLA QJL1241 SELECT XQJL1241-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@            출력파라미터 조립
+                    PERFORM S3310-QJL1241-OUTPUT-RTN
+                       THRU S3310-QJL1241-OUTPUT-EXT
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장오픈에러인경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3300-QJL1241-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ QJL1241 OUTPUT SET
+      *-----------------------------------------------------------------
+       S3310-QJL1241-OUTPUT-RTN.
+
+      *@   OUTPUT DATA PUT LOOP
+           PERFORM VARYING WK-L FROM 1 BY 1
+                   UNTIL   WK-L > DBSQL-SELECT-CNT
+      *@       차주명
+               MOVE XQJL1241-O-BRWR-NAME(WK-L)
+                 TO XDJL0419-O-BRWR-NAME(WK-K)
+
+      *@       신용등급（신청시）
+               MOVE XQJL1241-O-CRDRAT1(WK-L)
+                 TO XDJL0419-O-APLCN-CRDRAT(WK-K)
+
+      *@       신용등급（최근）
+               MOVE XQJL1241-O-CRDRAT2(WK-L)
+                 TO XDJL0419-O-CRDRAT(WK-K)
+
+      *@       관리한도설정년월일
+               MOVE XQJL1241-O-MGT-LIMT-STUP-YMD(WK-L)
+                 TO XDJL0419-O-MGT-LIMT-STUP-YMD(WK-K)
+
+      *@       관리한도유효년월일
+               MOVE XQJL1241-O-MGT-LIMT-VALD-YMD(WK-L)
+                 TO XDJL0419-O-VALD-FXDT(WK-K)
+
+220324*    포괄신용관리한도가 0이 아니면(설정상태:설정)이면
+               IF XQJL1241-O-INLS-LIMT(WK-L) NOT = ZERO
+      *@           여신성자산최고한도＝여신성한도－간접익스포져
+                   COMPUTE XDJL0419-O-LNBZ-INCLIN-LIMT(WK-K)
+                         = FUNCTION MAX(
+                           XQJL1241-O-LNBZ-IA-HGST-LIMT(WK-L) / 1000000,
+                           0)
+
+      *@           포괄한도
+                   COMPUTE WK-TEMP-INLS-LIMT
+                         = XQJL1241-O-INLS-LIMT(WK-L) / 1000000
+
+      *@           2011.06.03추가
+      *@          최종포괄한도= MIN(여신성최고한도,포괄한도)
+                   COMPUTE XDJL0419-O-INLS-LIMT(WK-K)
+                         = FUNCTION MAX(
+                           FUNCTION MIN(
+                           XDJL0419-O-LNBZ-INCLIN-LIMT(WK-K),
+                           WK-TEMP-INLS-LIMT), 0)
+
+220324*@           기사용액 = MIN(사용액, 최종적용 포괄신용공여한도)
+                   COMPUTE WK-TEMP-USE-AMT
+                         = FUNCTION MAX(
+                           FUNCTION MIN(
+                           XQJL1241-O-PRVIUS-AMUS(WK-L) / 1000000,
+                           XDJL0419-O-INLS-LIMT(WK-K)), 0)
+
+      *@            2011.06.03변경
+      *@           소진율=최고포괄한도로　소진율　계산으로　변경
+                   INITIALIZE WK-TEMP-EXHS-RT
+
+                   IF XDJL0419-O-INLS-LIMT(WK-K) > 0
+                       COMPUTE WK-TEMP-EXHS-RT
+                             = WK-TEMP-USE-AMT /
+                               XDJL0419-O-INLS-LIMT(WK-K)
+
+                       COMPUTE XDJL0419-O-EXHS-RT(WK-K)
+                             = FUNCTION MAX(
+                               FUNCTION MIN(
+                               WK-TEMP-EXHS-RT * 100, 999.99), 0)
+      *@           그렇지않은경우　０으로　산출
+                   ELSE
+                       MOVE ZERO
+                         TO XDJL0419-O-EXHS-RT(WK-K)
+                   END-IF
+               END-IF
+           END-PERFORM
+
+           .
+       S3310-QJL1241-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ 협의위원)포괄신용공여한도적정성점검승인조회
+      *-----------------------------------------------------------------
+       S3100-QJL2761-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE                  XQJL2761-IN
+
+      *            그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XQJL2761-I-GROUP-CO-CD
+
+      *            고객식별자
+           IF    XDJL0419-I-INQURY-CUST-IDNFR    NOT = SPACE
+
+                 MOVE  XDJL0419-I-INQURY-CUST-IDNFR
+                   TO  XQJL2761-I-CUST-IDNFR
+           ELSE
+                 MOVE  CO-CHA-PCT10
+                   TO  XQJL2761-I-CUST-IDNFR
+           END-IF
+
+      *--        진행상태구분(1전체 2진행중 3완료)
+      *          최종한도승인구분 (0:해당무 1:승인 4:불승인)
+           EVALUATE  XDJL0419-I-PRGRS-STUS-DSTIC
+           WHEN  CO-CHA-1
+                 MOVE  CO-CHA-0   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-4   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD2
+           WHEN  CO-CHA-2
+                 MOVE  CO-CHA-0   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-0   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD2
+           WHEN  CO-CHA-3
+                 MOVE  CO-CHA-1   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-4   TO  XQJL2761-I-LAST-L-ATHOR-DSTCD2
+           END-EVALUATE
+
+      *            신청년월일1
+           MOVE  XDJL0419-I-APLCN-YMD1
+             TO  XQJL2761-I-APLCN-YMD1
+      *            신청년월일2
+           MOVE  XDJL0419-I-APLCN-YMD2
+             TO  XQJL2761-I-APLCN-YMD2
+
+      *            승인위원직원번호
+           IF    XDJL0419-I-ATHOR-CMMB-EMPID     = CO-CHA-9999999
+                 MOVE  CO-CHA-PCT7
+                   TO  XQJL2761-I-ATHOR-CMMB-EMPID
+           ELSE
+                 MOVE  XDJL0419-I-ATHOR-CMMB-EMPID
+                   TO  XQJL2761-I-ATHOR-CMMB-EMPID
+           END-IF
+
+      *@   한도신청번호 - NEXT KEY
+      *@   자동거래일경우 NEXT KEY 처리한다
+           IF BICOM-DSCN-TRAN-DSTCD = CO-CHA-1 OR CO-CHA-2
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*                 NEXT    KEY                    *"
+           #USRLOG  "=================================================="
+
+              MOVE BOCOM-BF-TDK-INFO-CTNT(1:10)
+                TO XQJL2761-I-LIMT-APLCN-NO
+
+              MOVE BOCOM-BF-TDK-INFO-CTNT(11:7)
+                TO XQJL2761-I-ATHOR-CMMB-EMPID2
+
+           #USRLOG  " LIMT-APLCN-NO : " XQJL2761-I-LIMT-APLCN-NO
+           #USRLOG  "=================================================="
+           END-IF
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL2761 XQJL2761-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블SELECT오류입니다.
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+           IF DBSQL-SELECT-CNT         > CO-NUM-100
+              MOVE CO-NUM-100
+                TO XDJL0419-O-OUTPT-LINE-CNT1
+           ELSE
+              MOVE DBSQL-SELECT-CNT
+                TO XDJL0419-O-OUTPT-LINE-CNT1
+           END-IF
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL0419-O-OUTPT-LINE-CNT1
+
+      *@            출력파라미터 조립
+                   PERFORM S3110-QJL2761-OUTPUT-RTN
+                      THRU S3110-QJL2761-OUTPUT-EXT
+
+           END-PERFORM
+
+           #USRLOG  "=================================================="
+           #USRLOG  " DBSQL-SELECT-CNT : " DBSQL-SELECT-CNT
+           #USRLOG  "=================================================="
+
+           IF DBSQL-SELECT-CNT         >=  CO-NUM-100
+
+           #USRLOG  " XQJL2761-O-LIMT-APLCN-NO(100)(100) : "
+                      XQJL2761-O-LIMT-APLCN-NO(100)
+
+              MOVE XQJL2761-O-LIMT-APLCN-NO(100)
+                TO WK-AF-LIMT-APLCN-NO
+
+              MOVE XQJL2761-O-ATHOR-CMMB-EMPID(100)
+                TO WK-AF-ATHOR-CMMB-EMPID
+
+              #DSCNTR 2 WK-AF-KEY
+           END-IF
+
+           .
+       S3100-QJL2761-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ QJL2761 OUTPUT SET
+      *-----------------------------------------------------------------
+       S3110-QJL2761-OUTPUT-RTN.
+
+      *            한도신청번호
+           MOVE  XQJL2761-O-LIMT-APLCN-NO (WK-I)
+             TO  XDJL0419-O-LIMT-APLCN-NO (WK-I)
+      *            고객식별자
+           MOVE  XQJL2761-O-CUST-IDNFR (WK-I)
+             TO  XDJL0419-O-CUST-IDNFR (WK-I)
+      *            한도점검진행상태구분
+           MOVE  XQJL2761-O-LIMT-CP-STUS-DSTCD (WK-I)
+             TO  XDJL0419-O-LIMT-CP-STUS-DSTIC (WK-I)
+      *            신청년월일
+           MOVE  XQJL2761-O-APLCN-YMD (WK-I)
+             TO  XDJL0419-O-APLCN-YMD (WK-I)
+      *            신청부점코드
+           MOVE  XQJL2761-O-APLCN-BRNCD (WK-I)
+             TO  XDJL0419-O-APLCN-BRNCD (WK-I)
+      *            신청직원번호
+           MOVE  XQJL2761-O-APLCN-EMPID (WK-I)
+             TO  XDJL0419-O-APLCN-EMPID (WK-I)
+      *            신청직원명
+           MOVE  XQJL2761-O-APLCN-EMNM (WK-I)
+             TO  XDJL0419-O-APLCN-EMNM (WK-I)
+      *            최종승인년월일
+           MOVE  XQJL2761-O-LAST-ATHOR-YMD (WK-I)
+             TO  XDJL0419-O-LAST-ATHOR-YMD (WK-I)
+      *            최종승인직원번호
+           MOVE  XQJL2761-O-LAST-ATHOR-EMPID (WK-I)
+             TO  XDJL0419-O-LAST-ATHOR-EMPID (WK-I)
+      *            최종한도승인구분
+           MOVE  XQJL2761-O-LAST-L-ATHOR-DSTCD (WK-I)
+             TO  XDJL0419-O-LAST-L-ATHOR-DSTIC (WK-I)
+240530*            적정성점검구분
+           MOVE  XQJL2761-O-PRTY-CHKUP-DSTCD(WK-I)
+             TO  XDJL0419-O-PRTY-CHKUP-DSTCD(WK-I)
+      *            적정성여부
+           MOVE  XQJL2761-O-PRTY-YN (WK-I)
+             TO  XDJL0419-O-PROPR-DSTIC (WK-I)
+      *            진행구분
+           MOVE  XQJL2761-O-LIMT-ATHOR-DSTCD (WK-I)
+             TO  XDJL0419-O-PRGRS-DSTIC (WK-I)
+      *            의견등록여부
+           MOVE  XQJL2761-O-OPIN-REGI-YN (WK-I)
+             TO  XDJL0419-O-OPIN-REGI-YN (WK-I)
+      *            승인위원직원번호
+           MOVE  XQJL2761-O-ATHOR-CMMB-EMPID (WK-I)
+             TO  XDJL0419-O-ATHOR-CMMB-EMPID (WK-I)
+
+           .
+       S3110-QJL2761-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ 담당심사역)포괄신용공여한도적정성점검승인조회
+      *-----------------------------------------------------------------
+       S3200-QJL2762-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE                  XQJL2762-IN
+
+      *            그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XQJL2762-I-GROUP-CO-CD
+
+      *            고객식별자
+           IF    XDJL0419-I-INQURY-CUST-IDNFR    NOT = SPACE
+
+                 MOVE  XDJL0419-I-INQURY-CUST-IDNFR
+                   TO  XQJL2762-I-CUST-IDNFR
+           ELSE
+                 MOVE  CO-CHA-PCT10
+                   TO  XQJL2762-I-CUST-IDNFR
+           END-IF
+
+      *--        진행상태구분(1전체 2진행중 3완료)
+      *          최종한도승인구분 (0:해당무 1:승인 4:불승인)
+           EVALUATE  XDJL0419-I-PRGRS-STUS-DSTIC
+           WHEN  CO-CHA-1
+                 MOVE  CO-CHA-0   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-4   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD2
+           WHEN  CO-CHA-2
+                 MOVE  CO-CHA-0   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-0   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD2
+           WHEN  CO-CHA-3
+                 MOVE  CO-CHA-1   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD1
+                 MOVE  CO-CHA-4   TO  XQJL2762-I-LAST-L-ATHOR-DSTCD2
+           END-EVALUATE
+
+      *            신청년월일1
+           MOVE  XDJL0419-I-APLCN-YMD1
+             TO  XQJL2762-I-APLCN-YMD1
+      *            신청년월일2
+           MOVE  XDJL0419-I-APLCN-YMD2
+             TO  XQJL2762-I-APLCN-YMD2
+
+      *            승인위원직원번호
+           IF    XDJL0419-I-ATHOR-CMMB-EMPID     = CO-CHA-9999999
+                 MOVE  CO-CHA-PCT7
+                   TO  XQJL2762-I-APLCN-EMPID
+           ELSE
+                 MOVE  XDJL0419-I-ATHOR-CMMB-EMPID
+                   TO  XQJL2762-I-APLCN-EMPID
+           END-IF
+
+      *@   한도신청번호 - NEXT KEY
+      *@   자동거래일경우 NEXT KEY 처리한다
+           IF BICOM-DSCN-TRAN-DSTCD = CO-CHA-1 OR CO-CHA-2
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*                 NEXT    KEY                    *"
+           #USRLOG  "=================================================="
+
+              MOVE BOCOM-BF-TDK-INFO-CTNT
+                TO WK-BF-KEY
+              MOVE WK-BF-LIMT-APLCN-NO
+                TO XQJL2762-I-LIMT-APLCN-NO
+
+           #USRLOG  " LIMT-APLCN-NO : " XQJL2762-I-LIMT-APLCN-NO
+           #USRLOG  "=================================================="
+           END-IF
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL2762 XQJL2762-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블SELECT오류입니다.
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+           IF DBSQL-SELECT-CNT         > CO-NUM-100
+              MOVE CO-NUM-100
+                TO XDJL0419-O-OUTPT-LINE-CNT1
+           ELSE
+              MOVE DBSQL-SELECT-CNT
+                TO XDJL0419-O-OUTPT-LINE-CNT1
+           END-IF
+
+           PERFORM VARYING WK-J FROM 1 BY 1
+             UNTIL WK-J > XDJL0419-O-OUTPT-LINE-CNT1
+
+                   MOVE WK-J
+                     TO WK-AR
+
+      *@            출력파라미터 조립
+                   PERFORM S3210-QJL2762-OUTPUT-RTN
+                      THRU S3210-QJL2762-OUTPUT-EXT
+
+           END-PERFORM
+
+           #USRLOG  "=================================================="
+           #USRLOG  " DBSQL-SELECT-CNT : " DBSQL-SELECT-CNT
+           #USRLOG  "=================================================="
+
+           IF DBSQL-SELECT-CNT         >=  CO-NUM-100
+
+           #USRLOG  " XQJL2762-O-LIMT-APLCN-NO(100): "
+                      XQJL2762-O-LIMT-APLCN-NO(100)
+
+              MOVE XQJL2762-O-LIMT-APLCN-NO(100)
+                TO WK-AF-LIMT-APLCN-NO
+              #DSCNTR 2 WK-AF-KEY
+           END-IF
+           .
+       S3200-QJL2762-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ QJL2762 OUTPUT SET
+      *-----------------------------------------------------------------
+       S3210-QJL2762-OUTPUT-RTN.
+
+           #USRLOG "S3210-QJL2762-OUTPUT-RTN"
+
+      *            한도신청번호
+           MOVE  XQJL2762-O-LIMT-APLCN-NO (WK-J)
+             TO  XDJL0419-O-LIMT-APLCN-NO (WK-J)
+      *            고객식별자
+           MOVE  XQJL2762-O-CUST-IDNFR (WK-J)
+             TO  XDJL0419-O-CUST-IDNFR (WK-J)
+      *            한도점검진행상태구분
+           MOVE  XQJL2762-O-LIMT-CP-STUS-DSTCD (WK-J)
+             TO  XDJL0419-O-LIMT-CP-STUS-DSTIC (WK-J)
+      *            신청년월일
+           MOVE  XQJL2762-O-APLCN-YMD (WK-J)
+             TO  XDJL0419-O-APLCN-YMD (WK-J)
+      *            신청부점코드
+           MOVE  XQJL2762-O-APLCN-BRNCD (WK-J)
+             TO  XDJL0419-O-APLCN-BRNCD (WK-J)
+      *            신청직원번호
+           MOVE  XQJL2762-O-APLCN-EMPID (WK-J)
+             TO  XDJL0419-O-APLCN-EMPID (WK-J)
+      *            신청직원명
+           MOVE  XQJL2762-O-APLCN-EMNM (WK-J)
+             TO  XDJL0419-O-APLCN-EMNM (WK-J)
+      *            최종승인년월일
+           MOVE  XQJL2762-O-LAST-ATHOR-YMD (WK-J)
+             TO  XDJL0419-O-LAST-ATHOR-YMD (WK-J)
+      *            최종승인직원번호
+           MOVE  XQJL2762-O-LAST-ATHOR-EMPID (WK-J)
+             TO  XDJL0419-O-LAST-ATHOR-EMPID (WK-J)
+      *            최종한도승인구분
+           MOVE  XQJL2762-O-LAST-L-ATHOR-DSTCD (WK-J)
+             TO  XDJL0419-O-LAST-L-ATHOR-DSTIC (WK-J)
+240530*            적정성점검구분
+           MOVE  XQJL2762-O-PRTY-CHKUP-DSTCD(WK-J)
+             TO  XDJL0419-O-PRTY-CHKUP-DSTCD(WK-J)
+      *            적정성여부
+           MOVE  XQJL2762-O-PRTY-YN (WK-J)
+             TO  XDJL0419-O-PROPR-DSTIC (WK-J)
+      *            진행구분
+           MOVE  XQJL2762-O-LIMT-ATHOR-DSTCD (WK-J)
+             TO  XDJL0419-O-PRGRS-DSTIC (WK-J)
+      *            의견등록여부
+           MOVE  XQJL2762-O-OPIN-REGI-YN (WK-J)
+             TO  XDJL0419-O-OPIN-REGI-YN (WK-J)
+      *            승인위원직원번호
+           MOVE  XQJL2762-O-ATHOR-CMMB-EMPID (WK-J)
+             TO  XDJL0419-O-ATHOR-CMMB-EMPID (WK-J)
+
+           .
+       S3210-QJL2762-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ THKJL0005 : 결의록 조회
+      *-----------------------------------------------------------------
+       S3400-QJL2754-CALL-RTN.
+
+           INITIALIZE                  XQJL2754-IN
+
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XQJL2754-I-GROUP-CO-CD
+      *    한도신청번호
+           MOVE  XDJL0419-I-LIMT-APLCN-NO
+             TO  XQJL2754-I-LIMT-APLCN-NO
+
+      *@3  프로그램 호출
+           #DYSQLA  QJL2754  XQJL2754-CA
+
+      *@3  호출결과 확인
+           EVALUATE  TRUE
+           WHEN  COND-DBSQL-OK
+
+               PERFORM S3410-QJL2754-OUTPUT-RTN
+                  THRU S3410-QJL2754-OUTPUT-EXT
+           WHEN  COND-DBSQL-MRNF
+               CONTINUE
+           WHEN  OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3400-QJL2754-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ QJL2754 OUTPUT
+      *-----------------------------------------------------------------
+       S3410-QJL2754-OUTPUT-RTN.
+
+      *    승인의견조회
+           IF  XDJL0419-I-PRCSS-DSTIC  = CO-CHA-02
+
+               MOVE CO-NUM-1
+                 TO XDJL0419-O-OUTPT-LINE-CNT2
+           ELSE
+      *       출력라인수2 - 승인위원수
+               MOVE DBSQL-SELECT-CNT
+                 TO XDJL0419-O-OUTPT-LINE-CNT2
+           END-IF
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-J FROM 1 BY 1 UNTIL WK-J > 10
+                        OR WK-J > DBSQL-SELECT-CNT
+
+      *     승인의견조회
+            IF   XDJL0419-I-PRCSS-DSTIC          = CO-CHA-02
+
+                 IF XDJL0419-I-ATHOR-CMMB-EMPID  =
+                    XQJL2754-O-ATHOR-CMMB-EMPID(WK-J)
+      *            한도승인구분
+                    MOVE XQJL2754-O-LIMT-ATHOR-DSTCD(WK-J)
+                      TO XDJL0419-O-LIMT-ATHOR-DSTIC(1)
+      *            승인의견내용
+                    MOVE XQJL2754-O-ATHOR-OPIN-CTNT(WK-J)
+                      TO XDJL0419-O-ATHOR-OPIN-CTNT(1)
+                 END-IF
+            ELSE
+      *       승인위원직원번호
+               MOVE XQJL2754-O-ATHOR-CMMB-EMPID(WK-J)
+                 TO XDJL0419-O-EMPID(WK-J)
+      *       승인위원직원명
+               MOVE XQJL2754-O-ATHOR-CMMB-EMNM(WK-J)
+                 TO XDJL0419-O-EMNM(WK-J)
+      *            한도승인구분
+               MOVE XQJL2754-O-LIMT-ATHOR-DSTCD(WK-J)
+                 TO XDJL0419-O-LIMT-ATHOR-DSTIC(WK-J)
+      *            승인의견내용
+               MOVE XQJL2754-O-ATHOR-OPIN-CTNT(WK-J)
+                 TO XDJL0419-O-ATHOR-OPIN-CTNT(WK-J)
+      *            최종처리일시
+               MOVE XQJL2754-O-LAST-PRCSS-YMS(WK-J)
+                 TO XDJL0419-O-LAST-PRCSS-YMS(WK-J)
+
+            END-IF
+           END-PERFORM
+
+           .
+       S3410-QJL2754-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+230330*@ THKJL0002 : 첨부파일 조회
+      *-----------------------------------------------------------------
+       S3500-QJL4022-CALL-RTN.
+
+           INITIALIZE                  XQJL4022-IN
+
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XQJL4022-I-GROUP-CO-CD
+      *    한도신청번호
+           MOVE  XDJL0419-I-LIMT-APLCN-NO
+             TO  XQJL4022-I-LIMT-APLCN-NO
+
+      *@3  프로그램 호출
+           #DYSQLA  QJL4022  XQJL4022-CA
+
+      *@3  호출결과 확인
+           EVALUATE  TRUE
+           WHEN  COND-DBSQL-OK
+               PERFORM S3510-QJL4022-OUTPUT-RTN
+                  THRU S3510-QJL4022-OUTPUT-EXT
+           WHEN  COND-DBSQL-MRNF
+               CONTINUE
+           WHEN  OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3500-QJL4022-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+230330*@ QJL4022 OUTPUT
+      *-----------------------------------------------------------------
+       S3510-QJL4022-OUTPUT-RTN.
+
+      *   출력라인수3 - 첨부파일수
+           MOVE  DBSQL-SELECT-CNT
+             TO  XDJL0419-O-OUTPT-LINE-CNT3
+
+
+           PERFORM VARYING  WK-K FROM   1  BY  1
+                     UNTIL  WK-K >   DBSQL-SELECT-CNT
+
+      *       첨부파일일련번호
+               MOVE  XQJL4022-O-APNDX-FILE-SERNO(WK-K)
+                 TO  XDJL0419-O-APNDX-FILE-SERNO(WK-K)
+
+      *       첨부파일식별자
+               MOVE  XQJL4022-O-APNDX-FILE-IDNFR(WK-K)
+                 TO  XDJL0419-O-APNDX-FILE-IDNFR(WK-K)
+
+      *       등록년월일
+               MOVE  XQJL4022-O-REGI-YMD (WK-K)
+                 TO  XDJL0419-O-REGI-YMD (WK-K)
+
+      *       등록직원번호
+               MOVE  XQJL4022-O-REGI-EMPID (WK-K)
+                 TO  XDJL0419-O-REGI-EMPID (WK-K)
+
+      *       등록직원명
+               MOVE  XQJL4022-O-EMP-HANGL-FNAME(WK-K)
+                 TO  XDJL0419-O-REGI-EMNM(WK-K)
+
+      *       첨부파일내용
+               MOVE  XQJL4022-O-APNDX-FILE-CTNT(WK-K)
+                 TO  XDJL0419-O-APNDX-FILE-CTNT(WK-K)
+
+      *       첨부파일명
+               MOVE  XQJL4022-O-APNDX-FILE-NAME(WK-K)
+                 TO  XDJL0419-O-APNDX-FILE-NAME(WK-K)
+
+           END-PERFORM
+
+           .
+       S3510-QJL4022-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+240530*@  전영업년월일을 구한다.
+      *-----------------------------------------------------------------
+       S4000-CJIDT16-CALL-RTN.
+
+      *@    초기화
+           INITIALIZE XCJIDT16-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD          TO XCJIDT16-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL0419-O-APLCN-YMD(WK-K) TO XCJIDT16-I-YMD
+      *@   구분코드
+           MOVE CO-CHA-1                   TO XCJIDT16-I-DSTCD
+      *@   공통 UTILITY CALL
+           #DYCALL CJIDT16 YCCOMMON-CA XCJIDT16-CA
+      *@    호출결과　확인
+           IF XCJIDT16-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIDT16-R-ERRCD
+                     XCJIDT16-R-TREAT-CD
+                     XCJIDT16-R-STAT
+           END-IF
+           .
+       S4000-CJIDT16-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+240530*@  만기일/역만기일 산출(거래일 1개월전 날짜 구함)
+      *-----------------------------------------------------------------
+       S5000-CJIIL03-CALL-RTN.
+
+           INITIALIZE     XCJIIL03-IN
+
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XCJIIL03-I-GROUP-CO-CD
+      *    구분코드
+           MOVE  '4'
+             TO  XCJIIL03-I-DSTCD
+      *    년월일
+           MOVE  JICOM-BF-BZOPR-YMD
+            TO   XCJIIL03-I-YMD
+      *    일수/월수
+           MOVE  1
+             TO  XCJIIL03-I-NODAY-NOMN
+
+      *@1 공통 UTILITY CALL
+           #DYCALL     CJIIL03  YCCOMMON-CA  XCJIIL03-CA
+
+      *@1 RETURN 정보 확인
+           IF  XCJIIL03-R-STAT    =  ZEROS
+      *        거래일 1개월전 날짜
+               MOVE  XCJIIL03-O-YMD
+                 TO  WK-BASEYMD
+           ELSE
+               #ERROR XCJIIL03-R-ERRCD
+                      XCJIIL03-R-TREAT-CD
+                      XCJIIL03-R-STAT
+           END-IF
+           .
+
+       S5000-CJIIL03-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@정상종료
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

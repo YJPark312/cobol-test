@@ -1,0 +1,249 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: IJL4002 (장외파생CURRENT EXPOSURE조회)
+      *@처리유형  : IC
+      *@처리개요  : 장외파생CURRENT EXPOSURE조회하는프로그램
+      *@호출업무  : 소호여신OP업무후선집중화
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *김진태:20100608: NEW
+      *박주희:20170201: KB-PIN
+      * YBH    :20170803: 암호화 작업
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     IJL4002.
+       AUTHOR.                         김진태.
+       DATE-WRITTEN.                   10/06/08.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'IJL4002'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *장외파생CURRENT_EXPOSURE조회
+       01  XQJLI021-CA.
+           COPY    XQJLI021.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    IC COPYBOOK
+       01  XIJL4002-CA.
+           COPY  XIJL4002.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XIJL4002-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 초기화
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XIJL4002-OUT
+                         XIJL4002-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XIJL4002-I-PRCSS-DSTIC = SPACE
+      *@처리내용:처리구분미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4002-I-PRCSS-DSTIC = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@2.2 차주번호미입력CHECK
+      *@실행조건:XIJL4002-I-KB-PIN = SPACE
+      *@처리내용:차주번호미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4002-I-KB-PIN = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@3 업무처리
+      *@3.1 장외파생CURRENT_EXPOSURE조회
+           PERFORM S3100-QJLI021-CALL-RTN
+              THRU S3100-QJLI021-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  장외파생CURRENT_EXPOSURE조회
+      *-----------------------------------------------------------------
+       S3100-QJLI021-CALL-RTN.
+
+      *@3.1.1 초기화
+           INITIALIZE    XQJLI021-IN
+
+      *@3.1.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJLI021)입력파라메타=
+      *@SET(그룹회사코드,기준년월일,차주번호)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLI021-I-GROUP-CO-CD
+
+      *    기준년월일-전영업일
+           MOVE JICOM-BF-BZOPR-YMD
+             TO XQJLI021-I-BASE-YMD
+
+170201*    고객식별자
+           MOVE XIJL4002-I-KB-PIN
+             TO XQJLI021-I-KB-PIN
+
+      *@3.1.3 SLQIO프로그램 호출
+      *@처리내용:QJLI021프로그램을 호출한다
+      *@관련테이블:THKJLR007 접근유형:READ
+           #DYSQLA QJLI021 XQJLI021-CA
+
+      *@3.1.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+      *             신용거래한도
+                    MOVE ZERO
+                      TO XQJLI021-O-CRDT-TRAN-CLAM
+      *             위험가중자산금액
+                    MOVE ZERO
+                      TO XQJLI021-O-RISK-WGHTG-ASAM
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3100-QJLI021-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력 조립
+
+      *@   기준년월일
+           MOVE JICOM-BF-BZOPR-YMD
+             TO XIJL4002-O-BASE-YMD
+      *@   파생상품EXPOSURE
+      *@   신용거래한도가　０보다크면　신용거래한도를 MOVE
+      *@   그렇지않으면　위험가중자산금액을 MOVE 한다
+           IF XQJLI021-O-CRDT-TRAN-CLAM > 0
+              MOVE XQJLI021-O-CRDT-TRAN-CLAM
+                TO XIJL4002-O-DRVT-PRDCT-EXPSR
+           ELSE
+              MOVE XQJLI021-O-RISK-WGHTG-ASAM
+                TO XIJL4002-O-DRVT-PRDCT-EXPSR
+           END-IF
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상종료함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

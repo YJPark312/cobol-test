@@ -1,0 +1,57 @@
+      *================================================================*
+      *@ NAME : V1JL4021                                               *
+      *@ DESC : 표준산업코드정보관리                                 *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-10-05 14:46:05                          *
+      *  생성일시     : 2021-10-05 14:46:08                          *
+      *  전체길이     : 00510007 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JL4021-PRCSS-RSULT              PIC  X(002).
+      *--     출력라인수1
+ROWCNT     07  V1JL4021-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4021-GRID1                    OCCURS 0 TO 002000
+               DEPENDING ON V1JL4021-OUTPT-LINE-CNT1.
+      *--       신표준산업분류코드
+             09  V1JL4021-NEW-SI-CLSFI-CD        PIC  X(005).
+      *--       표준산업코드명
+             09  V1JL4021-STND-IDSTRY-CD-NAME    PIC  X(042).
+      *--       PEER구분코드
+             09  V1JL4021-PEER-DSTCD             PIC  X(005).
+      *--       PEER코드명
+             09  V1JL4021-PEER-CD-NAME           PIC  X(102).
+      *--       대분류업종코드
+             09  V1JL4021-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  V1JL4021-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       산업평가등급구분코드
+             09  V1JL4021-IDSTRY-V-GRD-DSTCD     PIC  X(004).
+      *--       IR등급평가년월일
+             09  V1JL4021-INRT-GRD-VALUA-YMD     PIC  X(008).
+      *--       한국은행매칭코드
+             09  V1JL4021-BOK-MTCN-CD            PIC  X(006).
+      *--       SUB업종코드
+             09  V1JL4021-SUB-BZTYP-CD           PIC  X(003).
+      *--       SUB업종코드명
+             09  V1JL4021-SUB-BZTYP-CD-NAME      PIC  X(042).
+      *--       TE산업분류코드
+             09  V1JL4021-TE-IDSTRY-CLSFI-CD     PIC  X(003).
+      *================================================================*
+      *        V  1  J  L  4  0  2  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4021-PRCSS-RSULT          ;처리결과
+      *L  V1JL4021-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4021-GRID1                ;그리드1
+      *X  V1JL4021-NEW-SI-CLSFI-CD      ;신표준산업분류코드
+      *X  V1JL4021-STND-IDSTRY-CD-NAME  ;표준산업코드명
+      *X  V1JL4021-PEER-DSTCD           ;PEER구분코드
+      *X  V1JL4021-PEER-CD-NAME         ;PEER코드명
+      *X  V1JL4021-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4021-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *X  V1JL4021-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분코드
+      *X  V1JL4021-INRT-GRD-VALUA-YMD   ;IR등급평가년월일
+      *X  V1JL4021-BOK-MTCN-CD          ;한국은행매칭코드
+      *X  V1JL4021-SUB-BZTYP-CD         ;SUB업종코드
+      *X  V1JL4021-SUB-BZTYP-CD-NAME    ;SUB업종코드명
+      *X  V1JL4021-TE-IDSTRY-CLSFI-CD   ;TE산업분류코드

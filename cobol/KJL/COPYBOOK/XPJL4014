@@ -1,0 +1,213 @@
+      *================================================================*
+      *@ NAME : XPJL4014                                               *
+      *@ DESC : PC개별그룹TE현황조회 COPYBOOK                      *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-08-20 10:49:19                          *
+      *  생성일시     : 2009-08-20 10:49:26                          *
+      *================================================================*
+           03  XPJL4014-RETURN.
+             05  XPJL4014-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4014-OK            VALUE  '00'.
+                 88  COND-XPJL4014-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4014-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4014-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4014-ERROR         VALUE  '09'.
+                 88  COND-XPJL4014-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4014-SYSERROR      VALUE  '99'.
+             05  XPJL4014-R-LINE                 PIC  9(006).
+             05  XPJL4014-R-ERRCD                PIC  X(008).
+             05  XPJL4014-R-TREAT-CD             PIC  X(008).
+             05  XPJL4014-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4014-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4014-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월일
+             05  XPJL4014-I-BASE-YMD             PIC  X(008).
+      *--       그룹코드
+             05  XPJL4014-I-GROUP-CD             PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XPJL4014-OUT.
+      *----------------------------------------------------------------*
+      *--       그룹명
+             05  XPJL4014-O-GROUP-NAME           PIC  X(052).
+      *--       그룹순위
+             05  XPJL4014-O-GROUP-RANKG          PIC  9(003).
+      *--       그룹등급
+             05  XPJL4014-O-GROUP-GRD            PIC  X(004).
+      *--       그룹등급평가일
+             05  XPJL4014-O-GROUP-GRD-VALUA-DD   PIC  X(008).
+      *--       소속기업수
+             05  XPJL4014-O-BELNG-CORP-CNT       PIC  9(015).
+      *--       그룹관리한도
+             05  XPJL4014-O-GROUP-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹익스포져
+             05  XPJL4014-O-GROUP-EXPSR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             05  XPJL4014-O-LIMT-EXHS-RT         PIC  9(003)V9(02).
+      *--       그룹직접익스포져
+             05  XPJL4014-O-GROUP-DRCT-EXPSR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹간접익스포져
+             05  XPJL4014-O-GROUP-INDR-EXPSR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       출력라인수1
+             05  XPJL4014-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XPJL4014-O-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       그리드1
+             05  XPJL4014-O-GRID1                OCCURS 001000 TIMES.
+      *--         차주번호
+               07  XPJL4014-O-BRWR-NO            PIC  X(013).
+      *--         차주명
+               07  XPJL4014-O-BRWR-NAME          PIC  X(052).
+      *--         기업신용등급
+               07  XPJL4014-O-CORP-CRDRAT        PIC  X(004).
+      *--         관리한도금액
+               07  XPJL4014-O-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액직접한도
+               07  XPJL4014-O-TTL-AMT-DRCT-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액간접한도
+               07  XPJL4014-O-TTL-AMT-INDR-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준합계한도
+               07  XPJL4014-O-TTL-AB-SUM-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액직접잔액
+               07  XPJL4014-O-TTL-AMT-DRCT-BAL   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액간접잔액
+               07  XPJL4014-O-TTL-AMT-INDR-BAL   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준합계잔액
+               07  XPJL4014-O-TTL-A-BASE-BALSUM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         직접한도금액
+               07  XPJL4014-O-DRCT-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         간접한도금액
+               07  XPJL4014-O-INDR-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         합계한도기준금액
+               07  XPJL4014-O-SUM-LIMT-BSAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         직접한도잔액
+               07  XPJL4014-O-DRCT-LIMT-BAL      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         간접한도잔액
+               07  XPJL4014-O-INDR-LIMT-BAL      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         합계잔액기준금액
+               07  XPJL4014-O-BALSUM-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         소진율
+               07  XPJL4014-O-EXHS-RT            PIC  9(003)V9(02).
+      *--       그리드2
+             05  XPJL4014-O-GRID2                OCCURS 001000 TIMES.
+      *--         차주번호2
+               07  XPJL4014-O-BRWR-NO2           PIC  X(013).
+      *--         차주명2
+               07  XPJL4014-O-BRWR-NAME2         PIC  X(052).
+      *--         기업신용등급2
+               07  XPJL4014-O-CORP-CRDRAT2       PIC  X(004).
+      *--         관리한도금액2
+               07  XPJL4014-O-MGT-CLAM2          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액직접한도2
+               07  XPJL4014-O-TTL-AMT-DRCT-LIMT2 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액간접한도2
+               07  XPJL4014-O-TTL-AMT-INDR-LIMT2 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준합계한도2
+               07  XPJL4014-O-TTL-AB-SUM-LIMT2   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액직접잔액2
+               07  XPJL4014-O-TTL-AMT-DRCT-BAL2  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액간접잔액2
+               07  XPJL4014-O-TTL-AMT-INDR-BAL2  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준합계잔액2
+               07  XPJL4014-O-TTL-A-BASE-BALSUM2 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         직접한도금액2
+               07  XPJL4014-O-DRCT-CLAM2         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         간접한도금액2
+               07  XPJL4014-O-INDR-CLAM2         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         합계한도기준금액2
+               07  XPJL4014-O-SUM-LIMT-BSAMT2    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         직접한도잔액2
+               07  XPJL4014-O-DRCT-LIMT-BAL2     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         간접한도잔액2
+               07  XPJL4014-O-INDR-LIMT-BAL2     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         합계잔액기준금액2
+               07  XPJL4014-O-BALSUM-BSAMT2      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         소진율2
+               07  XPJL4014-O-EXHS-RT2           PIC  9(003)V9(02).
+      *================================================================*
+      *        X  P  J  L  4  0  1  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4014-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4014-I-BASE-YMD           ;기준년월일
+      *X  XPJL4014-I-GROUP-CD           ;그룹코드
+      *X  XPJL4014-O-GROUP-NAME         ;그룹명
+      *N  XPJL4014-O-GROUP-RANKG        ;그룹순위
+      *X  XPJL4014-O-GROUP-GRD          ;그룹등급
+      *X  XPJL4014-O-GROUP-GRD-VALUA-DD ;그룹등급평가일
+      *N  XPJL4014-O-BELNG-CORP-CNT     ;소속기업수
+      *S  XPJL4014-O-GROUP-MGT-LIMT     ;그룹관리한도
+      *S  XPJL4014-O-GROUP-EXPSR        ;그룹익스포져
+      *N  XPJL4014-O-LIMT-EXHS-RT       ;한도소진율
+      *S  XPJL4014-O-GROUP-DRCT-EXPSR   ;그룹직접익스포져
+      *S  XPJL4014-O-GROUP-INDR-EXPSR   ;그룹간접익스포져
+      *N  XPJL4014-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XPJL4014-O-OUTPT-LINE-CNT2    ;출력라인수2
+      *A  XPJL4014-O-GRID1              ;그리드1
+      *X  XPJL4014-O-BRWR-NO            ;차주번호
+      *X  XPJL4014-O-BRWR-NAME          ;차주명
+      *X  XPJL4014-O-CORP-CRDRAT        ;기업신용등급
+      *S  XPJL4014-O-MGT-CLAM           ;관리한도금액
+      *S  XPJL4014-O-TTL-AMT-DRCT-LIMT  ;명목액직접한도
+      *S  XPJL4014-O-TTL-AMT-INDR-LIMT  ;명목액간접한도
+      *S  XPJL4014-O-TTL-AB-SUM-LIMT    ;명목액기준합계한도
+      *S  XPJL4014-O-TTL-AMT-DRCT-BAL   ;명목액직접잔액
+      *S  XPJL4014-O-TTL-AMT-INDR-BAL   ;명목액간접잔액
+      *S  XPJL4014-O-TTL-A-BASE-BALSUM  ;명목액기준합계잔액
+      *S  XPJL4014-O-DRCT-CLAM          ;직접한도금액
+      *S  XPJL4014-O-INDR-CLAM          ;간접한도금액
+      *S  XPJL4014-O-SUM-LIMT-BSAMT     ;합계한도기준금액
+      *S  XPJL4014-O-DRCT-LIMT-BAL      ;직접한도잔액
+      *S  XPJL4014-O-INDR-LIMT-BAL      ;간접한도잔액
+      *S  XPJL4014-O-BALSUM-BSAMT       ;합계잔액기준금액
+      *N  XPJL4014-O-EXHS-RT            ;소진율
+      *A  XPJL4014-O-GRID2              ;그리드2
+      *X  XPJL4014-O-BRWR-NO2           ;차주번호2
+      *X  XPJL4014-O-BRWR-NAME2         ;차주명2
+      *X  XPJL4014-O-CORP-CRDRAT2       ;기업신용등급2
+      *S  XPJL4014-O-MGT-CLAM2          ;관리한도금액2
+      *S  XPJL4014-O-TTL-AMT-DRCT-LIMT2 ;명목액직접한도2
+      *S  XPJL4014-O-TTL-AMT-INDR-LIMT2 ;명목액간접한도2
+      *S  XPJL4014-O-TTL-AB-SUM-LIMT2   ;명목액기준합계한도2
+      *S  XPJL4014-O-TTL-AMT-DRCT-BAL2  ;명목액직접잔액2
+      *S  XPJL4014-O-TTL-AMT-INDR-BAL2  ;명목액간접잔액2
+      *S  XPJL4014-O-TTL-A-BASE-BALSUM2 ;명목액기준합계잔액2
+      *S  XPJL4014-O-DRCT-CLAM2         ;직접한도금액2
+      *S  XPJL4014-O-INDR-CLAM2         ;간접한도금액2
+      *S  XPJL4014-O-SUM-LIMT-BSAMT2    ;합계한도기준금액2
+      *S  XPJL4014-O-DRCT-LIMT-BAL2     ;직접한도잔액2
+      *S  XPJL4014-O-INDR-LIMT-BAL2     ;간접한도잔액2
+      *S  XPJL4014-O-BALSUM-BSAMT2      ;합계잔액기준금액2
+      *N  XPJL4014-O-EXHS-RT2           ;소진율2

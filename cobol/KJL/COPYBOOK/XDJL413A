@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : XDJL413A                                               *
+      *@ DESC : DC계열기업순위조회COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-07-24 09:43:59                          *
+      *  생성일시     : 2017-07-24 09:44:00                          *
+      *  전체길이     : 00000016 BYTES                               *
+      *================================================================*
+           03  XDJL413A-RETURN.
+             05  XDJL413A-R-STAT                 PIC  X(002).
+                 88  COND-XDJL413A-OK            VALUE  '00'.
+                 88  COND-XDJL413A-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL413A-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL413A-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL413A-ERROR         VALUE  '09'.
+                 88  COND-XDJL413A-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL413A-SYSERROR      VALUE  '99'.
+             05  XDJL413A-R-LINE                 PIC  9(006).
+             05  XDJL413A-R-ERRCD                PIC  X(008).
+             05  XDJL413A-R-TREAT-CD             PIC  X(008).
+             05  XDJL413A-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL413A-IN.
+      *----------------------------------------------------------------*
+      *--       기준년월
+             05  XDJL413A-I-BASE-YM              PIC  X(006).
+      *--       KB-PIN
+             05  XDJL413A-I-KB-PIN               PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL413A-OUT.
+      *----------------------------------------------------------------*
+      *--       계열기업군코드
+             05  XDJL413A-O-AFFLT-CORP-GROUP-CD  PIC  X(006).
+      *--       계열기업순위
+             05  XDJL413A-O-AFFLT-CORP-RANKG     PIC  9(003).
+      *--       계열기업군명
+             05  XDJL413A-O-AFFLT-C-GROUP-NAME   PIC  X(042).
+      *================================================================*
+      *        X  D  J  L  4  1  3  A    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL413A-I-BASE-YM            ;기준년월
+      *X  XDJL413A-I-KB-PIN             ;KB-PIN
+      *X  XDJL413A-O-AFFLT-CORP-GROUP-CD;계열기업군코드
+      *N  XDJL413A-O-AFFLT-CORP-RANKG   ;계열기업순위
+      *X  XDJL413A-O-AFFLT-C-GROUP-NAME ;계열기업군명

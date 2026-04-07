@@ -1,0 +1,23 @@
+//TKJLGM04 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%MPEND%%$OYEAR.%%OMONTH
+//* %%SET %%B = %%SUBSTR %%A 1 6
+//*********************************************************************
+//*  고객정보 제공이력 파일UNLOAD
+//*********************************************************************
+//NDMPROC   EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD   SYSOUT=*
+//SYSIN     DD   *
+ SIGNON USERID=(C160491,) ESF=NO CASE=YES
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0               -
+  &SNODE=NDM.DDMDBO01                          -
+  &FTDSN=KJL.SM.UNLOAD.KJLG001                 -
+  &TODSN1="/fsshare02/edwsam"                  -
+  &TODSN2="/TETAACU82_%%B%%._02_2.DAT"
+ SIGNOFF
+/*
+//

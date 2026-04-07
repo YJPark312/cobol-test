@@ -1,0 +1,120 @@
+      *================================================================*
+      *@ NAME : XDJL4272                                               *
+      *@ DESC : DC포괄신용공여한도신청조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-05 14:45:40                          *
+      *  생성일시     : 2023-09-05 14:45:40                          *
+      *  전체길이     : 00000022 BYTES                               *
+      *================================================================*
+           03  XDJL4272-RETURN.
+             05  XDJL4272-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4272-OK            VALUE  '00'.
+                 88  COND-XDJL4272-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4272-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4272-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4272-ERROR         VALUE  '09'.
+                 88  COND-XDJL4272-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4272-SYSERROR      VALUE  '99'.
+             05  XDJL4272-R-LINE                 PIC  9(006).
+             05  XDJL4272-R-ERRCD                PIC  X(008).
+             05  XDJL4272-R-TREAT-CD             PIC  X(008).
+             05  XDJL4272-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4272-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4272-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJL4272-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJL4272-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4272-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XDJL4272-O-DBTRZ-NAME           PIC  X(052).
+      *--       여신성최고한도
+             05  XDJL4272-O-LNBZ-I-HGST-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹명
+             05  XDJL4272-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       유효기일
+             05  XDJL4272-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       포괄신용공여관리한도
+             05  XDJL4272-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹신용등급
+             05  XDJL4272-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       업종명
+             05  XDJL4272-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       최종포괄신용공여관리한도
+             05  XDJL4272-O-LAST-INLS-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업신용등급
+             05  XDJL4272-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       부실회계기업등급
+             05  XDJL4272-O-INSL-ACCTG-CORP-GRD  PIC  X(001).
+      *--       기사용액
+             05  XDJL4272-O-INLS-GRCR-LIMT-AUC   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             05  XDJL4272-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업평가등급구분
+             05  XDJL4272-O-IDSTRY-V-GRD-DSTCD   PIC  X(004).
+      *--       한도신청종류구분코드
+             05  XDJL4272-O-LIMT-A-KND-DSTCD     PIC  X(001).
+      *--       신청년월일
+             05  XDJL4272-O-APLCN-YMD            PIC  X(008).
+      *--       신청부점코드
+             05  XDJL4272-O-APLCN-BRNCD          PIC  X(004).
+      *--       부점한글명
+             05  XDJL4272-O-BRN-HANGL-NAME       PIC  X(052).
+      *--       신청직원번호
+             05  XDJL4272-O-APLCN-EMPID          PIC  X(007).
+      *--       직원명
+             05  XDJL4272-O-EMNM                 PIC  X(052).
+      *--       한도설정가능금액
+             05  XDJL4272-O-LIMT-STUP-ABLAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도신청금액
+             05  XDJL4272-O-LIMT-APLCN-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신청사유내용
+             05  XDJL4272-O-APLCN-RESN-CTNT      PIC  X(302).
+      *--       관리여부
+             05  XDJL4272-O-MGT-YN               PIC  X(001).
+      *--       포괄한도관리대상구분
+             05  XDJL4272-O-INLS-LM-TAGET-DSTCD  PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  4  2  7  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4272-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4272-I-KB-PIN             ;KB-PIN
+      *X  XDJL4272-I-APLCN-NO           ;신청번호
+      *X  XDJL4272-O-DBTRZ-NAME         ;채무자명
+      *S  XDJL4272-O-LNBZ-I-HGST-LIMT   ;여신성최고한도
+      *X  XDJL4272-O-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XDJL4272-O-MGT-LIMT-VALD-YMD  ;유효기일
+      *S  XDJL4272-O-MGT-CLAM           ;포괄신용공여관리한도
+      *X  XDJL4272-O-INTNL-CV-GRD-DSTCD ;그룹신용등급
+      *X  XDJL4272-O-STND-IDSTRY-CD-NAME;업종명
+      *S  XDJL4272-O-LAST-INLS-LIMT     ;최종포괄신용공여관리한도
+      *X  XDJL4272-O-INTNL-CV-GRD-DSTCD1;기업신용등급
+      *X  XDJL4272-O-INSL-ACCTG-CORP-GRD;부실회계기업등급
+      *S  XDJL4272-O-INLS-GRCR-LIMT-AUC ;기사용액
+      *S  XDJL4272-O-LIMT-SEXTR-AMT     ;한도여유액
+      *X  XDJL4272-O-IDSTRY-V-GRD-DSTCD ;산업평가등급구분
+      *X  XDJL4272-O-LIMT-A-KND-DSTCD   ;한도신청종류구분코드
+      *X  XDJL4272-O-APLCN-YMD          ;신청년월일
+      *X  XDJL4272-O-APLCN-BRNCD        ;신청부점코드
+      *X  XDJL4272-O-BRN-HANGL-NAME     ;부점한글명
+      *X  XDJL4272-O-APLCN-EMPID        ;신청직원번호
+      *X  XDJL4272-O-EMNM               ;직원명
+      *S  XDJL4272-O-LIMT-STUP-ABLAMT   ;한도설정가능금액
+      *S  XDJL4272-O-LIMT-APLCN-AMT     ;한도신청금액
+      *X  XDJL4272-O-APLCN-RESN-CTNT    ;신청사유내용
+      *X  XDJL4272-O-MGT-YN             ;관리여부
+      *X  XDJL4272-O-INLS-LM-TAGET-DSTCD
+      * 포괄한도관리대상구분

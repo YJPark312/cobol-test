@@ -1,0 +1,117 @@
+      *================================================================*
+      *@ NAME : XDJL4125                                               *
+      *@ DESC : DC(EAD)포괄신용공여한도기업여신현황 COPYBOOK         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-03-10 14:39:28                          *
+      *  생성일시     : 2022-03-10 14:39:29                          *
+      *  전체길이     : 00000020 BYTES                               *
+      *================================================================*
+           03  XDJL4125-RETURN.
+             05  XDJL4125-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4125-OK            VALUE  '00'.
+                 88  COND-XDJL4125-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4125-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4125-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4125-ERROR         VALUE  '09'.
+                 88  COND-XDJL4125-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4125-SYSERROR      VALUE  '99'.
+             05  XDJL4125-R-LINE                 PIC  9(006).
+             05  XDJL4125-R-ERRCD                PIC  X(008).
+             05  XDJL4125-R-TREAT-CD             PIC  X(008).
+             05  XDJL4125-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4125-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4125-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJL4125-I-KB-PIN               PIC  X(010).
+      *--       조회기준일자
+             05  XDJL4125-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4125-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XDJL4125-O-DBTRZ-NAME           PIC  X(052).
+      *--       여신성최고한도
+             05  XDJL4125-O-LNBZ-I-HGST-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹명
+             05  XDJL4125-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       유효기일
+             05  XDJL4125-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       포괄신용공여관리한도
+             05  XDJL4125-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹신용등급
+             05  XDJL4125-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       업종명
+             05  XDJL4125-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       최종포괄신용공여관리한도
+             05  XDJL4125-O-LAST-INLS-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업신용등급
+             05  XDJL4125-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       기사용액
+             05  XDJL4125-O-INLS-GRCR-LIMT-AUC   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             05  XDJL4125-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       출력라인수1
+             05  XDJL4125-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4125-O-GRID1                OCCURS 005000 TIMES.
+      *--         기준년월일
+               07  XDJL4125-O-BASE-YMD           PIC  X(008).
+      *--         계좌번호
+               07  XDJL4125-O-ACNO               PIC  X(020).
+      *--         상품코드
+               07  XDJL4125-O-PRDCT-CD           PIC  X(012).
+      *--         상품명
+               07  XDJL4125-O-PRDCT-NAME         PIC  X(252).
+      *--         명목액기준한도
+               07  XDJL4125-O-TTL-AMT-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준잔액
+               07  XDJL4125-O-TTL-AMT-BASE-BAL   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         대출일
+               07  XDJL4125-O-START-YMD          PIC  X(008).
+      *--         만기일
+               07  XDJL4125-O-EXPIR-YMD          PIC  X(008).
+      *--         별도전결권적용여부
+               07  XDJL4125-O-SEPA-DAR-APLY-YN   PIC  X(001).
+      *--       별도전결권적용금액
+             05  XDJL4125-O-SEPA-DAR-APLY-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  1  2  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4125-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4125-I-KB-PIN             ;KB-PIN
+      *X  XDJL4125-I-BASE-YMD           ;조회기준일자
+      *X  XDJL4125-O-DBTRZ-NAME         ;채무자명
+      *S  XDJL4125-O-LNBZ-I-HGST-LIMT   ;여신성최고한도
+      *X  XDJL4125-O-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XDJL4125-O-MGT-LIMT-VALD-YMD  ;유효기일
+      *S  XDJL4125-O-MGT-CLAM           ;포괄신용공여관리한도
+      *X  XDJL4125-O-INTNL-CV-GRD-DSTCD ;그룹신용등급
+      *X  XDJL4125-O-STND-IDSTRY-CD-NAME;업종명
+      *S  XDJL4125-O-LAST-INLS-LIMT     ;최종포괄신용공여관리한도
+      *X  XDJL4125-O-INTNL-CV-GRD-DSTCD1;기업신용등급
+      *S  XDJL4125-O-INLS-GRCR-LIMT-AUC ;기사용액
+      *S  XDJL4125-O-LIMT-SEXTR-AMT     ;한도여유액
+      *N  XDJL4125-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4125-O-GRID1              ;그리드1
+      *X  XDJL4125-O-BASE-YMD           ;기준년월일
+      *X  XDJL4125-O-ACNO               ;계좌번호
+      *X  XDJL4125-O-PRDCT-CD           ;상품코드
+      *X  XDJL4125-O-PRDCT-NAME         ;상품명
+      *S  XDJL4125-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *S  XDJL4125-O-TTL-AMT-BASE-BAL   ;명목액기준잔액
+      *X  XDJL4125-O-START-YMD          ;대출일
+      *X  XDJL4125-O-EXPIR-YMD          ;만기일
+      *X  XDJL4125-O-SEPA-DAR-APLY-YN   ;별도전결권적용여부
+      *S  XDJL4125-O-SEPA-DAR-APLY-AMT  ;별도전결권적용금액

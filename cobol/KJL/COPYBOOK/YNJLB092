@@ -1,0 +1,92 @@
+      *================================================================*
+      *@ NAME : YNJLB092                                               *
+      *@ DESC : AS기업및그룹한도신청및승인(금융기관기준한도저장    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-30 16:46:47                          *
+      *  생성일시     : 2021-11-30 16:46:52                          *
+      *  전체길이     : 00000207 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB092-PRCSS-DSTIC              PIC  X(002).
+      *--     고객구분
+           07  YNJLB092-CUST-DSTIC               PIC  X(001).
+      *--     KB-PIN
+           07  YNJLB092-KB-PIN                   PIC  X(010).
+      *--     신청번호
+           07  YNJLB092-APLCN-NO                 PIC  X(010).
+      *--     신용등급
+           07  YNJLB092-CRDRAT                   PIC  X(004).
+      *--     결산년월
+           07  YNJLB092-STLACC-YM                PIC  X(006).
+      *--     한신평재무업종구분
+           07  YNJLB092-KIS-FZ-BZTYP-DSTIC       PIC  X(002).
+      *--     업종평균기준년
+           07  YNJLB092-BZTYP-AVG-BASE-YR        PIC  X(004).
+      *--     신용등급별지원비율
+           07  YNJLB092-CRDRAT-P-SPORT-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전기법인세비율차감전계속사업이익
+           07  YNJLB092-BF-PCRSBC-BIZ-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전기법인세비율차감전계속사업이익
+           07  YNJLB092-PRPRID-CRSBCB-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     당기법인세비율차감전계속사업이익
+           07  YNJLB092-CRTM-CRSBC-BIZ-PRFT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     이익가중치값
+           07  YNJLB092-PRFT-WGHT-VAL            PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     최근업종평균자기자본비율
+           07  YNJLB092-LA-B-AVG-ONCP-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     상환능력기준한도
+           07  YNJLB092-SOLVN-BASE-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전기자기자본
+           07  YNJLB092-BF-PRPRID-ONCP           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전기자기자본
+           07  YNJLB092-PRPRID-ONCP              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     당기자기자본
+           07  YNJLB092-CRTM-ONCP                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자본가중치값
+           07  YNJLB092-CAPTL-WGHT-VAL           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     규모기준한도
+           07  YNJLB092-SCAL-BASE-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도
+           07  YNJLB092-BASE-LIMT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  N  J  L  B  0  9  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB092-PRCSS-DSTIC          ;처리구분
+      *X  YNJLB092-CUST-DSTIC           ;고객구분
+      *X  YNJLB092-KB-PIN               ;KB-PIN
+      *X  YNJLB092-APLCN-NO             ;신청번호
+      *X  YNJLB092-CRDRAT               ;신용등급
+      *X  YNJLB092-STLACC-YM            ;결산년월
+      *X  YNJLB092-KIS-FZ-BZTYP-DSTIC   ;한신평재무업종구분
+      *X  YNJLB092-BZTYP-AVG-BASE-YR    ;업종평균기준년
+      *S  YNJLB092-CRDRAT-P-SPORT-RATO  ;신용등급별지원비율
+      *S  YNJLB092-BF-PCRSBC-BIZ-PRFT
+      * 전전기법인세비율차감전계속사업이익
+      *S  YNJLB092-PRPRID-CRSBCB-PRFT
+      * 전기법인세비율차감전계속사업이익
+      *S  YNJLB092-CRTM-CRSBC-BIZ-PRFT
+      * 당기법인세비율차감전계속사업이익
+      *S  YNJLB092-PRFT-WGHT-VAL        ;이익가중치값
+      *S  YNJLB092-LA-B-AVG-ONCP-RATO
+      * 최근업종평균자기자본비율
+      *S  YNJLB092-SOLVN-BASE-LIMT      ;상환능력기준한도
+      *S  YNJLB092-BF-PRPRID-ONCP       ;전전기자기자본
+      *S  YNJLB092-PRPRID-ONCP          ;전기자기자본
+      *S  YNJLB092-CRTM-ONCP            ;당기자기자본
+      *S  YNJLB092-CAPTL-WGHT-VAL       ;자본가중치값
+      *S  YNJLB092-SCAL-BASE-LIMT       ;규모기준한도
+      *S  YNJLB092-BASE-LIMT            ;기준한도

@@ -1,0 +1,1118 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLDR16 (BT연결회계수익증권정보적재)
+      *@처리유형  : BATCH
+      *@처리개요  : 연결회계수익증권정보적재
+      *@원천파일  : TSKEETB09(400 BYTES) - CMBS
+      *@수보파일  : KEE.SD.SHRKJL.KEETB09
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20191002: 신규작성
+      * YBH    :20200116: SMS 전송시간 변경
+      *정윤섭:20200327: 고객통지 전송파일 변경
+      * YBH    :20210128: 회신전화번호 하드코딩 수정
+      * YBH    :20221108: 데이터품질관리 처리 보완
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM        : 테이블명                : 접근유형
+      **------------------------   -------------------------------------
+      ** 연결회계수익증권정보  : THKJLR016               : CD
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLDR16.
+       AUTHOR.                         하윤희
+       DATE-WRITTEN.                   09/10/02.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *-----------------------------------------------------------------
+       INPUT-OUTPUT                    SECTION.
+      *-----------------------------------------------------------------
+       FILE-CONTROL.
+           SELECT IN-FILE              ASSIGN       TO  INFILE
+                                       ORGANIZATION IS  SEQUENTIAL
+                                       FILE STATUS  IS  WK-IN-F-ST.
+           SELECT  WK-IN-FILE          ASSIGN  TO  INF
+                   FILE  STATUS        IS      WK-IN-FILE-ST.
+
+           SELECT  WK-O1-FILE          ASSIGN  TO  OUTF1
+                   FILE  STATUS        IS      WK-O1-FILE-ST.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       FILE                             SECTION.
+      *-----------------------------------------------------------------
+       FD  IN-FILE LABEL RECORD IS      STANDARD RECORDING MODE F.
+       01  IN-REC.
+      *       기준년월일
+           03 IN-BASE-YMD               PIC  X(00008).
+      *       데이터일련번호
+           03 IN-DATA-SERNO             PIC  9(00007).
+      *       부점코드
+           03 IN-BRNCD                  PIC  X(00004).
+      *       수익증권펀드번호
+           03 IN-BENCRT-FUND-NO         PIC  X(00012).
+      *       일련번호
+           03 IN-SERNO                  PIC  9(00006).
+      *       수익증권펀드명
+           03 IN-BENCRT-FUND-NAME       PIC  X(00100).
+      *       매입년월일
+           03 IN-BUY-YMD                PIC  X(00008).
+      *       펀드자산구분
+           03 IN-FUND-ASST-DSTCD        PIC  X(00002).
+      *       표준종목코드
+           03 IN-STND-ITEMS-CD          PIC  X(00012).
+      *       수익증권종목명
+           03 IN-BENCRT-ITEMS-NAME      PIC  X(00100).
+      *       발행기관명
+           03 IN-ISSU-INSTI-NAME        PIC  X(00050).
+      *       발행년월일
+           03 IN-ISSU-YMD               PIC  X(00008).
+      *       상환년월일
+           03 IN-RPAY-YMD               PIC  X(00008).
+      *       세부자산ISO국가코드
+           03 IN-DTALS-AI-NATNL-CD      PIC  X(00002).
+      *       통화코드
+           03 IN-CNCYCD                 PIC  X(00003).
+      *       장부평가액
+           03 IN-ACBK-VALUA-AMT         PIC  -(00013)9.999.
+      *       시가평가액
+           03 IN-CRNTPR-VALUA-AMT       PIC  -(00013)9.999.
+      *       기준가산출방법구분
+           03 IN-BSPRC-C-WAY-DSTCD      PIC  X(00001).
+      *       세부자산신용등급내용
+           03 IN-DTALS-A-CRDRAT-CTNT    PIC  X(00003).
+      *       세부자산신용평가기관
+           03 IN-DTALS-A-CRA-DSTCD      PIC  X(00001).
+      *       펀드식별자
+           03 IN-FUND-IDNFR             PIC  X(00014).
+      *       장외파생여부
+           03 IN-OSD-DRVT-YN            PIC  X(00001).
+      *       장외파생명목금액
+           03 IN-OSD-DRVT-TTL-AMT       PIC  -(00013)9.999.
+      *       장외파생평가손익
+           03 IN-OSD-D-VALUA-PTLOS      PIC  -(00013)9.999.
+      *       국가신용등급내용
+           03 IN-NATNL-CRDRAT-CTNT      PIC  X(00005).
+      *       국가등급평가기관구분
+           03 IN-NATNL-GVI-DSTCD        PIC  X(00001).
+      *       수익증권종목코드
+           03 IN-BENCRT-ITEMS-CD        PIC  X(00012).
+      *       연결회계적용여부
+           03 IN-LNKG-ACCTG-APLY-YN     PIC  X(00001).
+
+      *    SMS대상입력LAYOUT(72 BYTE)
+       FD  WK-IN-FILE                  RECORDING  MODE  F.
+       01  WK-IN-REC.
+      *       수신자휴대폰번호
+           03  WK-IN-CPHN-NO                PIC  X(016).
+      *       고객명
+           03  WK-IN-CUST-NM                PIC  X(040).
+210128*       회신전화번호
+           03  WK-IN-RPLY-TELNO             PIC  X(016).
+
+190808*    SMS예약발송　데이터파일　포맷(300 BYTE)
+       FD  WK-O1-FILE                  RECORDING  MODE  F.
+       01  WK-O1-REC.
+           03  WK-OUT1                       PIC  X(300).
+
+200327*    HEADER RECORD
+           03  WK-H1-REC               REDEFINES WK-OUT1.
+      *       데이터구분
+               05  WK-H1-DATA-DSTIC          PIC  X(002).
+      *       그룹회사코드
+               05  WK-H1-GROUP-CO-CD         PIC  X(003).
+      *       메시지생성코드
+               05  WK-H1-MSG-CRETN-CD        PIC  X(006).
+      *       예약발송년월일
+               05  WK-H1-PENGAG-SEND-YMD     PIC  X(008).
+      *       예약발송시간
+               05  WK-H1-PENGAG-SEND-TTM     PIC  X(006).
+      *       결과반환여부
+               05  WK-H1-RSULT-RETUN-YN      PIC  X(001).
+      *       후처리프로그램명
+               05  WK-H1-AF-PRCSS-PGM-NAME   PIC  X(016).
+               05  WK-H1-FIL                 PIC  X(258).
+
+200327*    DATA  RECORD
+           03  WK-D1-REC               REDEFINES WK-OUT1.
+      *       데이터구분
+               05  WK-D1-DATA-DSTIC          PIC  X(002).
+      *       일련번호
+               05  WK-D1-SERNO               PIC  9(007).
+      *       고객식별자
+               05  WK-D1-CUST-IDNFR          PIC  X(010).
+      *       고객관리번호
+               05  WK-D1-CUST-MGT-NO         PIC  X(005).
+      *       고객휴대폰번호
+               05  WK-D1-CUST-CPHN-NO        PIC  X(016).
+      *       고객명
+               05  WK-D1-CUSTNM              PIC  X(050).
+      *       회신전화번호
+               05  WK-D1-RPLY-TELNO          PIC  X(016).
+      *       메시지내용
+               05  WK-D1-MSG-CTNT            PIC  X(080).
+      *       업무접수식별ID
+               05  WK-D1-BZWK-RCEPT-IDNFI-ID PIC  X(050).
+      *       발송부점코드
+               05  WK-D1-SEND-BRNCD          PIC  X(004).
+      *       발송직원번호
+               05  WK-D1-SEND-EMPID          PIC  X(007).
+               05  WK-D1-FIL                 PIC  X(053).
+
+200327*    TRAIL  RECORD
+           03  WK-T1-REC               REDEFINES WK-OUT1.
+      *       데이터구분
+               05  WK-T1-DATA-DSTIC          PIC  X(002).
+      *       발송대상건수
+               05  WK-T1-SEND-TAGET-NOITM    PIC  9(007).
+               05  WK-T1-FIL                 PIC  X(291).
+
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLDR16'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-OK                   PIC  9(003) VALUE  000.
+           03  CO-NOT-FOUND            PIC  9(003) VALUE  100.
+           03  CO-EOF                  PIC  X(003) VALUE 'EOF'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-15               PIC  X(002) VALUE '15'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+           03  CO-CHA-00000            PIC  X(005) VALUE '00000'.
+           03  CO-CHA-0000000          PIC  X(007) VALUE '0000000'.
+           03  CO-CHA-000              PIC  X(003) VALUE '000'.
+
+           03  CO-NUM-0                PIC  9(001) VALUE  0.
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+      *-----------------------------------------------------------------
+      * FILE STATUS
+      *-----------------------------------------------------------------
+       01  WK-FILE-STATUS.
+           03  WK-IN-F-ST              PIC  X(002) VALUE  SPACE.
+           03  WK-IN-FILE-ST           PIC  X(002) VALUE  SPACE.
+           03  WK-O1-FILE-ST           PIC  X(002) VALUE  SPACE.
+
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-READ-CNT          PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-INSERT-CNT        PIC  9(013) VALUE  ZEROS.
+           03  WK-READ-CNT             PIC  9(013) VALUE  ZEROS.
+200327     03  WK-WRITE-CNT            PIC  9(007) VALUE  ZEROS.
+           03  WK-WRITE-CNT1           PIC  9(007) VALUE  ZEROS.
+           03  WK-CNT                  PIC  9(013) VALUE  ZEROS.
+           03  WK-NUM05                PIC  ---,---,---,---,--9.
+
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  IN-EOF-Y                        VALUE 'Y'.
+           03  WK-EOF                  PIC  X(003).
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-J                    PIC S9(007) COMP.
+
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * TABLE KEY COPYBOOK
+       01  TKJLR016-KEY.
+           COPY    TKJLR016.
+      * TABLE RECORD COPYBOOK
+       01  TRJLR016-REC.
+           COPY    TRJLR016.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO INTERFACE COPYBOOK
+           COPY  YCDBIOCA.
+170224* SQLIO
+           COPY  YCDBSQLA.
+
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+       EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+       01  WK-HOST-IN.
+      *        그룹회사코드
+           03  WK-H-I-GROUP-CO-CD           PIC  X(00003).
+      *        기준년월일
+           03  WK-H-I-BASE-YMD              PIC  X(00008).
+
+       EXEC  SQL  END    DECLARE            SECTION  END-EXEC.
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@   SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@  업무처리
+           PERFORM  S3000-KJLR016-DELETE-RTN
+              THRU  S3000-KJLR016-DELETE-EXT
+           PERFORM  S3000-KJLR016-PROCESS-RTN
+              THRU  S3000-KJLR016-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@   초기화
+           INITIALIZE  WK-AREA
+                       WK-SYSIN
+                       YCDBIOCA-CA
+170224                 YCDBSQLA-CA
+                       XZUGEROR-CA
+
+      *@   JCL SYSIN ACCEPT  처리기준
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLDR16 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *@   그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *@   구분코드
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *@   공통 UTILITY CALL
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+      *@   RETURN 정보 확인
+           IF  XBJISTDT-R-STAT = ZEROS
+      *@       정상처리
+               CONTINUE
+           ELSE
+      *@       에러처리
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+
+      *@   FILE OPEN ROUTINE CALL
+           PERFORM  S1100-FILE-OPEN-RTN
+              THRU  S1100-FILE-OPEN-EXT
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   사용하는 File을 OPEN 함
+      *-----------------------------------------------------------------
+       S1100-FILE-OPEN-RTN.
+
+      *@   초기화
+           INITIALIZE   WK-SWITCHES
+
+      *@   OPEN  FILE
+           OPEN  INPUT  IN-FILE
+
+      *@   파일상태확인
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1  O1-FILE OPEN
+           OPEN    OUTPUT    WK-O1-FILE
+
+           IF  WK-O1-FILE-ST NOT = CO-STAT-OK
+               DISPLAY '** S1100 : OUTPUT1  파일오픈ERROR !!'
+               DISPLAY '*- WK-O1-FILE-ST ; ' WK-O1-FILE-ST
+               MOVE   "S1100 : OUTPUT1 파일오픈"
+                 TO    XZUGEROR-I-MSG
+               MOVE    WK-O1-FILE-ST   TO    XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-O1-FILE-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+
+       S1100-FILE-OPEN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   그룹회사구분코드
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   작업실행일
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   작업명
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   처리회차
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   배치작업구분
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   작업자ID
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@   자료기준년월일
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+      *@   초기화
+           INITIALIZE  WK-HOST-IN
+
+      *@   그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-H-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  WK-H-I-BASE-YMD
+
+           .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   연결회계수익증권정보(THKJLR016)삭제
+      *-----------------------------------------------------------------
+       S3000-KJLR016-DELETE-RTN.
+
+      *@ TABLE LOCK
+           EXEC SQL
+               LOCK TABLE DB2DBA.THKJLR016 IN EXCLUSIVE MODE
+           END-EXEC
+
+           EXEC SQL
+             DELETE  FROM  DB2DBA.THKJLR016
+              WHERE  그룹회사코드           = :WK-H-I-GROUP-CO-CD
+                AND  기준년월일             = :WK-H-I-BASE-YMD
+           END-EXEC
+
+      *@   결과확인
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+               WHEN  CO-NOT-FOUND
+                     #USRLOG '<< THKJLR016 DELETE OK >>'
+               WHEN  OTHER
+                     MOVE 'KJLR016'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'DELETE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DELETE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+      *에러메시지:내부 본 처리
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           EXEC SQL
+             COMMIT
+           END-EXEC
+
+      *@Commit 처리결과 SQL-CODE를 확인하여 정상/오류 처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJLR016'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'COMMIT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DB  Commit 시   오류가   발생했습니다 '
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3000-KJLR016-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-KJLR016-PROCESS-RTN.
+
+      *@   FILE READ ROUTINE CALL
+           PERFORM  S3200-READ-FILE-RTN
+              THRU  S3200-READ-FILE-EXT
+
+      *@  기준년월일＝자료기준일자　일치　확인
+           PERFORM  S3100-BASEYMD-CHK-RTN
+              THRU  S3100-BASEYMD-CHK-EXT
+
+      *@   READ FILE LOOP
+           PERFORM  UNTIL  IN-EOF-Y
+      *@     THKJLR016 INSERT ROUTINE CALL
+             PERFORM  S3300-KJLR016-INSERT-RTN
+                THRU  S3300-KJLR016-INSERT-EXT
+      *@     FILE READ ROUTINE CALL
+             PERFORM  S3200-READ-FILE-RTN
+                THRU  S3200-READ-FILE-EXT
+           END-PERFORM
+           .
+       S3000-KJLR016-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ READ FILE
+      *-----------------------------------------------------------------
+       S3200-READ-FILE-RTN.
+
+      *@   READ  FILE
+           READ  IN-FILE               AT  END
+                 SET IN-EOF-Y          TO  TRUE
+           END-READ
+
+      *@   파일상태확인
+           EVALUATE  WK-IN-F-ST
+               WHEN  ZERO
+               WHEN  CO-CHA-04
+                     ADD   CO-NUM-1    TO  WK-AC-READ-CNT
+               WHEN  CO-CHA-10
+                     SET   IN-EOF-Y    TO  TRUE
+               WHEN  OTHER
+                     MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+                     MOVE  WK-IN-F-ST  TO  XZUGEROR-I-MSG(34:2)
+                     #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3200-READ-FILE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  연결회계수익증권정보(THKJLR016)등록
+      *-----------------------------------------------------------------
+       S3300-KJLR016-INSERT-RTN.
+
+      *    초기화
+           INITIALIZE TKJLR016-KEY
+                      TRJLR016-REC
+
+      *    그룹회사코드
+           MOVE  WK-H-I-GROUP-CO-CD
+             TO  RJLR016-GROUP-CO-CD
+
+      *    기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  RJLR016-BASE-YMD
+
+      *    데이터일련번호
+           MOVE  IN-DATA-SERNO
+             TO  RJLR016-DATA-SERNO
+
+      *    부점코드
+           MOVE  IN-BRNCD
+             TO  RJLR016-BRNCD
+
+      *    수익증권펀드번호
+           MOVE  IN-BENCRT-FUND-NO
+             TO  RJLR016-BENCRT-FUND-NO
+
+      *    일련번호
+           MOVE  IN-SERNO
+             TO  RJLR016-SERNO
+
+      *    수익증권펀드명
+           MOVE  IN-BENCRT-FUND-NAME
+             TO  RJLR016-BENCRT-FUND-NAME
+
+      *    매입년월일
+           MOVE  IN-BUY-YMD
+             TO  RJLR016-BUY-YMD
+
+      *    펀드자산구분
+221108     IF IN-FUND-ASST-DSTCD(2:1) = SPACE
+               MOVE  '0'
+                 TO  RJLR016-FUND-ASST-DSTCD(1:1)
+               MOVE  IN-FUND-ASST-DSTCD(1:1)
+                 TO  RJLR016-FUND-ASST-DSTCD(2:1)
+           ELSE
+               MOVE  IN-FUND-ASST-DSTCD
+                 TO  RJLR016-FUND-ASST-DSTCD
+           END-IF
+
+      *    표준종목코드
+           MOVE  IN-STND-ITEMS-CD
+             TO  RJLR016-STND-ITEMS-CD
+
+      *    수익증권종목명
+           MOVE  IN-BENCRT-ITEMS-NAME
+             TO  RJLR016-BENCRT-ITEMS-NAME
+
+      *    발행기관명
+           MOVE  IN-ISSU-INSTI-NAME
+             TO  RJLR016-ISSU-INSTI-NAME
+
+      *    발행년월일
+           MOVE  IN-ISSU-YMD
+             TO  RJLR016-ISSU-YMD
+
+      *    상환년월일
+           MOVE  IN-RPAY-YMD
+             TO  RJLR016-RPAY-YMD
+
+      *    세부자산ISO국가코드
+           MOVE  IN-DTALS-AI-NATNL-CD
+             TO  RJLR016-DTALS-AI-NATNL-CD
+
+      *    통화코드
+           MOVE  IN-CNCYCD
+             TO  RJLR016-CNCYCD
+
+      *    장부평가액
+           MOVE  IN-ACBK-VALUA-AMT
+             TO  RJLR016-ACBK-VALUA-AMT
+
+      *    시가평가액
+           MOVE  IN-CRNTPR-VALUA-AMT
+             TO  RJLR016-CRNTPR-VALUA-AMT
+
+      *    기준가산출방법구분
+           MOVE  IN-BSPRC-C-WAY-DSTCD
+             TO  RJLR016-BSPRC-C-WAY-DSTCD
+
+      *    세부자산신용등급내용
+           MOVE  IN-DTALS-A-CRDRAT-CTNT
+             TO  RJLR016-DTALS-A-CRDRAT-CTNT
+
+      *    세부자산신용평가기관
+           MOVE  IN-DTALS-A-CRA-DSTCD
+             TO  RJLR016-DTALS-A-CRA-DSTCD
+
+      *    펀드식별자
+           MOVE  IN-FUND-IDNFR
+             TO  RJLR016-FUND-IDNFR
+
+      *    장외파생여부
+           MOVE  IN-OSD-DRVT-YN
+             TO  RJLR016-OSD-DRVT-YN
+
+      *    장외파생명목금액
+           MOVE  IN-OSD-DRVT-TTL-AMT
+             TO  RJLR016-OSD-DRVT-TTL-AMT
+
+      *    장외파생평가손익
+           MOVE  IN-OSD-D-VALUA-PTLOS
+             TO  RJLR016-OSD-D-VALUA-PTLOS
+
+      *    국가신용등급내용
+           MOVE  IN-NATNL-CRDRAT-CTNT
+             TO  RJLR016-NATNL-CRDRAT-CTNT
+
+      *    국가등급평가기관구분
+           MOVE  IN-NATNL-GVI-DSTCD
+             TO  RJLR016-NATNL-GVI-DSTCD
+
+      *    수익증권종목코드
+           MOVE  IN-BENCRT-ITEMS-CD
+             TO  RJLR016-BENCRT-ITEMS-CD
+
+      *    연결회계적용여부
+           MOVE  IN-LNKG-ACCTG-APLY-YN
+             TO  RJLR016-LNKG-ACCTG-APLY-YN
+
+
+      *@   DBIO CALL
+           #DYDBIO  INSERT-CMD-Y TKJLR016-PK TRJLR016-REC
+
+      *@   호출결과확인
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-INSERT-CNT
+               WHEN  OTHER
+                     MOVE 'KJLR016'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'INSERT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'INSERT시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR   CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *@   1000 건　마다　 COMMIT & USRLOG
+           IF  FUNCTION MOD(WK-AC-INSERT-CNT, 1000) = CO-NUM-0
+
+               #USRLOG '* WK-AC-INSERT-CNT = ' WK-AC-INSERT-CNT
+
+               EXEC SQL
+                 COMMIT
+               END-EXEC
+
+      *@ Commit 처리결과 SQL-CODE를 확인하여 정상/오류 처리
+               EVALUATE  SQLCODE
+                   WHEN  CO-OK
+                         CONTINUE
+                   WHEN  OTHER
+                         MOVE 'KJLR016'    TO  XZUGEROR-I-TBL-ID
+                         MOVE 'COMMIT'     TO  XZUGEROR-I-FUNC-CD
+                         MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                         MOVE 'DBCommit시오류가발생했습니다 '
+                                           TO  XZUGEROR-I-MSG
+                         #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                         #OKEXIT CO-CHA-08
+               END-EVALUATE
+           END-IF
+           .
+       S3300-KJLR016-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+190808*@   기준년월일＝자료기준일자　일치　확인
+      *-----------------------------------------------------------------
+       S3100-BASEYMD-CHK-RTN.
+
+200327*@1  HEADER FILE WRITE
+           PERFORM S4300-HEADER-WRITE-RTN
+              THRU S4300-HEADER-WRITE-EXT
+
+           IF  WK-SYSIN-BASE-YMD NOT = IN-BASE-YMD
+               #USRLOG '*--------------------------------------*'
+               #USRLOG '작업기준일자／자료기준일자　불일치.'
+               #USRLOG 'SYSIN  DATE = ' WK-SYSIN-BASE-YMD
+               #USRLOG 'INFILE DATE = ' IN-BASE-YMD
+
+      *@2      SMS발송 FILE WRITE
+               PERFORM  S4000-SMS-WRITE-RTN
+                  THRU  S4000-SMS-WRITE-EXT
+           END-IF
+
+      *@1  SMS발송 TAIL FILE WRITE
+           PERFORM  S4400-SMS-TAIL-WRITE-RTN
+              THRU  S4400-SMS-TAIL-WRITE-EXT
+           .
+
+       S3100-BASEYMD-CHK-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SMS발송 FILE WRITE
+      *-----------------------------------------------------------------
+       S4000-SMS-WRITE-RTN.
+
+      *@   SMS INFO FILE OPEN ROUTINE CALL
+           PERFORM  S4100-FILE-OPEN-RTN
+              THRU  S4100-FILE-OPEN-EXT
+
+           MOVE    SPACE               TO    WK-EOF
+
+      *@1  IN FILE READ
+           PERFORM  S4200-READ-FILE-RTN
+              THRU  S4200-READ-FILE-EXT
+
+      *@1  END OF FILE 까지 LOOP
+           PERFORM  UNTIL  WK-EOF  =  CO-EOF
+      *@2      SMS발송 DATA FILE WRITE
+               PERFORM  S4300-SMS-DATA-WRITE-RTN
+                  THRU  S4300-SMS-DATA-WRITE-EXT
+
+      *@2      IN FILE READ
+               PERFORM  S4200-READ-FILE-RTN
+                  THRU  S4200-READ-FILE-EXT
+           END-PERFORM
+
+      *@   SMS INFO FILE OPEN ROUTINE CALL
+           PERFORM  S4500-FILE-CLOSE-RTN
+              THRU  S4500-FILE-CLOSE-EXT
+           .
+
+       S4000-SMS-WRITE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SMS INFO File을 OPEN 함
+      *-----------------------------------------------------------------
+       S4100-FILE-OPEN-RTN.
+
+      *@1  IN FILE OPEN
+           OPEN    INPUT    WK-IN-FILE
+
+           IF  WK-IN-FILE-ST  NOT = '00'
+               DISPLAY '*** S4100 : FILE OPEN ERROR !!'
+               DISPLAY '*-- WK-IN-FILE-ST => ' WK-IN-FILE-ST
+               MOVE   "S4100 : INPUT파일오픈"
+                                       TO    XZUGEROR-I-MSG
+               MOVE    WK-IN-FILE-ST   TO    XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-FILE-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+
+       S4100-FILE-OPEN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   IN FILE READ
+      *-----------------------------------------------------------------
+       S4200-READ-FILE-RTN.
+
+      *********************************
+      *  INPUT FILE READ
+      *  1. INPUT  END OF FILE : SET WK-EOF TO TRUE
+      *  2. READ INPUT FILE STATUS
+      *********************************
+
+           READ    WK-IN-FILE          AT    END
+                   MOVE   'EOF'        TO    WK-EOF
+           END-READ
+
+           IF  WK-EOF  =  SPACE
+               ADD     1               TO    WK-READ-CNT
+
+               COMPUTE  WK-CNT  =  ( WK-READ-CNT / 1000 )
+                                *    1000
+               IF   WK-CNT  =  WK-READ-CNT
+                    MOVE    WK-READ-CNT
+                      TO    WK-NUM05
+                    DISPLAY '=> READ  COUNT : ' WK-NUM05
+               END-IF
+           END-IF
+           .
+
+       S4200-READ-FILE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+200327*@  HEADER FILE WRITE
+      *-----------------------------------------------------------------
+       S4300-HEADER-WRITE-RTN.
+
+           INITIALIZE                  WK-H1-REC
+
+      *   데이터구분
+           MOVE  'HD'
+             TO  WK-H1-DATA-DSTIC
+      *   그룹회사코드
+           MOVE  'KB0'
+             TO  WK-H1-GROUP-CO-CD
+      *   메시지생성코드
+           MOVE  'KJL101'
+             TO  WK-H1-MSG-CRETN-CD
+200116*   예약발송년월일
+           MOVE  BICOM-SYS-YMD
+             TO  WK-H1-PENGAG-SEND-YMD
+      *   예약발송시간
+           MOVE  '073000'
+             TO  WK-H1-PENGAG-SEND-TTM
+      *   결과반환여부
+           MOVE  '0'
+             TO  WK-H1-RSULT-RETUN-YN
+      *   후처리프로그램명
+           MOVE  SPACE
+             TO  WK-H1-AF-PRCSS-PGM-NAME
+
+      *@1  HEADER OUTPUT FILE WRITE
+           WRITE  WK-O1-REC
+           ADD     1                   TO    WK-WRITE-CNT1
+           .
+
+       S4300-HEADER-WRITE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+190808*@   SMS발송 DATA FILE WRITE
+      *-----------------------------------------------------------------
+       S4300-SMS-DATA-WRITE-RTN.
+
+           INITIALIZE                  WK-D1-REC
+
+      *   데이터구분
+           MOVE  'DT'
+             TO  WK-D1-DATA-DSTIC
+
+           ADD   1
+            TO   WK-J
+      *   일련번호
+           MOVE  WK-J
+             TO  WK-D1-SERNO
+      *   고객식별자
+           MOVE  SPACE
+             TO  WK-D1-CUST-IDNFR
+      *   고객관리번호
+           MOVE  SPACE
+             TO  WK-D1-CUST-MGT-NO
+      *   고객휴대폰번호
+           MOVE  WK-IN-CPHN-NO
+             TO  WK-D1-CUST-CPHN-NO
+      *   고객명
+           MOVE  WK-IN-CUST-NM
+             TO  WK-D1-CUSTNM
+      *   회신전화번호
+210128     MOVE  WK-IN-RPLY-TELNO
+             TO  WK-D1-RPLY-TELNO
+      *   메시지내용(80 BYTE)
+           STRING  'R16:CMBS연결회계수익증권 '
+                   '작업일(' WK-SYSIN-BASE-YMD ') / '
+                   '기준일(' IN-BASE-YMD       ') 불일치'
+                   DELIMITED BY SIZE
+           INTO  WK-D1-MSG-CTNT
+      *   업무접수식별ID
+           MOVE  SPACE
+             TO  WK-D1-BZWK-RCEPT-IDNFI-ID
+      *   발송부점코드
+           MOVE  '4055'
+             TO  WK-D1-SEND-BRNCD
+      *   발송직원번호
+           MOVE  CO-PGM-ID
+             TO  WK-D1-SEND-EMPID
+
+           WRITE   WK-O1-REC
+           ADD     1                   TO    WK-WRITE-CNT
+           ADD     1                   TO    WK-WRITE-CNT1
+           .
+
+       S4300-SMS-DATA-WRITE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+190808*@   SMS발송 TAIL FILE WRITE
+      *-----------------------------------------------------------------
+       S4400-SMS-TAIL-WRITE-RTN.
+
+           INITIALIZE                  WK-T1-REC
+
+      *   데이터구분
+           MOVE  'TR'
+             TO  WK-T1-DATA-DSTIC
+      *   발송대상건수
+           MOVE  WK-WRITE-CNT
+             TO  WK-T1-SEND-TAGET-NOITM
+
+           WRITE   WK-O1-REC
+           ADD     1                   TO    WK-WRITE-CNT1
+           .
+       S4400-SMS-TAIL-WRITE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SMS INFO File을 CLOSE 함
+      *-----------------------------------------------------------------
+       S4500-FILE-CLOSE-RTN.
+
+      *@1  IN FILE CLOSE
+           CLOSE  WK-IN-FILE
+           IF  WK-IN-FILE-ST NOT = CO-STAT-OK
+               MOVE 'WK-IN-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-FILE-ST     TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-FILE-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+
+       S4500-FILE-CLOSE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@   CLOSE  FILE
+           CLOSE  IN-FILE
+
+      *@   파일상태확인
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1  O1-FILE CLOSE
+           CLOSE  WK-O1-FILE
+           IF  WK-O1-FILE-ST NOT = CO-STAT-OK
+               MOVE 'WK-O1-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-O1-FILE-ST     TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-O1-FILE-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* FILE READ       COUNT  = ' WK-AC-READ-CNT
+           #USRLOG '* KJLR016 INSERT  COUNT  = ' WK-AC-INSERT-CNT
+           #USRLOG '* SMS    READ     COUNT  = ' WK-READ-CNT
+           #USRLOG '* SMS    WRITE    COUNT  = ' WK-WRITE-CNT1
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLDR16 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

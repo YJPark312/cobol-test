@@ -1,0 +1,37 @@
+      *===========================================================
+      *  프로그램명    : QJL0323
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0323
+      *  사용예        : 01  XQJL0323-CA.
+      *                      COPY  XQJL0323.
+      *  최종변경일시  : 2017년02월07일10시45분25초
+      *===========================================================
+           03  XQJL0323-IN.
+      *            그룹회사코드
+               05  XQJL0323-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL0323-I-BASE-YM
+                                          PIC  X(00006).
+      *            계열기업군코드
+               05  XQJL0323-I-AFFLT-CORP-GROUP-CD
+                                          PIC  X(00006).
+           03  XQJL0323-OUT.
+      *            고객식별자
+               05  XQJL0323-O-CUST-IDNFR
+                           OCCURS  00100  PIC  X(00010).
+      *            채무자명
+               05  XQJL0323-O-DBTRZ-NAME
+                           OCCURS  00100  PIC  X(00052).
+      *            BS기준잔액
+               05  XQJL0323-O-BS-BASE-BAL
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            CA담보환산금액
+               05  XQJL0323-O-CA-SCURTY-AUC
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            제외자산금액
+               05  XQJL0323-O-ECLUD-ASAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *===========================================================
+      *  XQJL0323   C O P Y B O O K   E N D
+      *===========================================================

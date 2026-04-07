@@ -1,0 +1,369 @@
+      *=================================================================
+      *@업무명    : KJL     (토탈익스포져)
+      *@프로그램명: BJLZR03 (분리조치　대상파일　추출- THKJLR003)
+      *@처리유형  : BATCH
+      *@처리개요  :２단계보안조치대상 파일생성 및 DELETE
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20160205: 신규작성
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJLR003                     : RD
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                   DIVISION.
+      *=================================================================
+       PROGRAM-ID.                      BJLZR03.
+       AUTHOR.                          YBH
+       DATE-WRITTEN.                    16/02/05.
+
+      *===============================================================
+       ENVIRONMENT                      DIVISION.
+      *===============================================================
+       CONFIGURATION                    SECTION.
+       SOURCE-COMPUTER.                 IBM-Z10.
+       OBJECT-COMPUTER.                 IBM-Z10.
+      *---------------------------------------------------------------
+       INPUT-OUTPUT                     SECTION.
+      *---------------------------------------------------------------
+       FILE-CONTROL.
+           SELECT IN-FILE  ASSIGN       TO INFILE
+                           ORGANIZATION IS SEQUENTIAL
+                           FILE STATUS  IS WK-IN-FILE-STAT.
+
+      *===============================================================
+       DATA                             DIVISION.
+      *===============================================================
+      *---------------------------------------------------------------
+       FILE                             SECTION.
+      *---------------------------------------------------------------
+       FD  IN-FILE          RECORDING   MODE       IS  F
+                            LABEL       RECORD     IS  STANDARD.
+
+       01  IN-REC.
+           COPY  TRJLR003.
+
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                  SECTION.
+      *-----------------------------------------------------------------
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID                PIC  X(008) VALUE 'BJLZR03'.
+           03  CO-STAT-OK               PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR            PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL         PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR         PIC  X(002) VALUE '99'.
+
+           03  CO-CY                    PIC  X(001) VALUE 'Y'.
+           03  CO-CHA-08                PIC  X(002) VALUE '08'.
+
+           03  CO-N1                    PIC  9(001) VALUE  1.
+      *-----------------------------------------------------------------
+      *    CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-EBM01001              PIC  X(008) VALUE 'EBM01001'.
+           03  CO-EBM02001              PIC  X(008) VALUE 'EBM02001'.
+           03  CO-EBM03001              PIC  X(008) VALUE 'EBM03001'.
+           03  CO-EBM04001              PIC  X(008) VALUE 'EBM04001'.
+           03  CO-EBM05001              PIC  X(008) VALUE 'EBM05001'.
+
+           03  CO-UBM01001              PIC  X(008) VALUE 'UBM01001'.
+           03  CO-UBM02001              PIC  X(008) VALUE 'UBM02001'.
+           03  CO-UBM03001              PIC  X(008) VALUE 'UBM03001'.
+           03  CO-UBM04001              PIC  X(008) VALUE 'UBM04001'.
+           03  CO-UBM05001              PIC  X(008) VALUE 'UBM05001'.
+
+      *-----------------------------------------------------------------
+      *    FILE STATUS
+      *-----------------------------------------------------------------
+       01  WK-IN-FILE-STAT              PIC  X(002).
+
+      *-----------------------------------------------------------------
+      *    WORKING AREA
+      *-----------------------------------------------------------------
+      *@   BATCH 수행기본정의
+       01  WK-SYSIN.
+      *   그룹회사구분코드
+           03  WK-SYSIN-GROUP-CD        PIC  X(003).
+           03  FILLER                   PIC  X(001).
+      *   작업실행일
+           03  WK-SYSIN-JOB-YMD         PIC  X(008).
+           03  FILLER                   PIC  X(001).
+      *   작업명(JOB NAME)
+           03  WK-SYSIN-JOB-NAME        PIC  X(008).
+           03  FILLER                   PIC  X(001).
+      *   처리회차
+           03  WK-SYSIN-JOB-SEQ         PIC  9(003).
+           03  FILLER                   PIC  X(001).
+      *   배치작업구분
+           03  WK-SYSIN-BATCH-KN        PIC  X(006).
+           03  FILLER                   PIC  X(001).
+      *   자료기준년월일
+           03  WK-SYSIN-BASE-YMD        PIC  X(008).
+           03  FILLER                   PIC  X(001).
+
+       01  WK-AREA.
+      *--  FETCH OF END
+           03  WK-FETCH-END             PIC  X(001).
+
+       01  WK-CNT.
+           03  WK-READ-CNT              PIC  9(009).
+           03  WK-WRITE-CNT             PIC  9(009).
+           03  WK-DELETE-CNT            PIC  9(009).
+
+       01  WK-DIS.
+           03  WK-EDIT-CNT1             PIC  ZZZ,ZZZ,ZZ9.
+           03  WK-EDIT-CNT2             PIC  ZZZ,ZZZ,ZZ9.
+           03  WK-EDIT-CNT3             PIC  ZZZ,ZZZ,ZZ9.
+           03  WK-EDIT-CNT4             PIC  ZZZ,ZZZ,ZZ9.
+
+      *-----------------------------------------------------------------
+      *    PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *-----------------------------------------------------------------
+      *    TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TKJLR003-KEY.
+           COPY    TKJLR003.
+
+      *-----------------------------------------------------------------
+      *   테이블(호스트변수)영역
+      *-----------------------------------------------------------------
+           EXEC SQL INCLUDE SQLCA       END-EXEC.
+
+      ******************************************************************
+      *    SQL CURSOR DECLARE                                          *
+      ******************************************************************
+
+      *-----------------------------------------------------------------
+      *    DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값 CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+           INITIALIZE        WK-AREA
+                             WK-SYSIN
+                             WK-CNT
+
+      *    JCL SYSIN ACCEPT
+           ACCEPT  WK-SYSIN  FROM    SYSIN
+
+           DISPLAY '*------------------------------------------*'
+           DISPLAY '* BJLZR03 PGM START                        *'
+           DISPLAY '*------------------------------------------*'
+           DISPLAY '* WK-SYSIN      = ' WK-SYSIN
+
+      *    FILE OPEN
+           OPEN  INPUT  IN-FILE
+
+      *    FILE CHECK OUTDATA
+           IF WK-IN-FILE-STAT   NOT = CO-STAT-OK
+              DISPLAY 'BJLZR03:S1000 IN-F OPEN ERROR.'
+                       WK-IN-FILE-STAT
+              #ERROR CO-EBM01001 CO-UBM01001 CO-STAT-ERROR
+              #OKEXIT CO-CHA-08
+           END-IF
+
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   작업일자　확인
+           IF WK-SYSIN-BASE-YMD    =  SPACE
+              DISPLAY 'BJLZR03:S2000작업기준일자　오류.'
+                       WK-SYSIN-BASE-YMD
+              #ERROR CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+              #OKEXIT CO-CHA-08
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *---------------------------------------------------------------
+      *      MAIN PROCESS
+      *---------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *    TABLE  FETCH
+           PERFORM S3100-READ-FILE-RTN
+              THRU S3100-READ-FILE-EXT
+
+      *----LOOPING START
+      *   거래종료고객여부　확인
+           PERFORM UNTIL WK-FETCH-END   = CO-CY
+      *        TABLE DELETE
+               PERFORM S3400-KJLR003-DELETE-RTN
+                  THRU S3400-KJLR003-DELETE-EXT
+
+      *        FETCH계속
+               PERFORM S3100-READ-FILE-RTN
+                  THRU S3100-READ-FILE-EXT
+
+           END-PERFORM
+      *----LOOPING END
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   READ FILE
+      *-----------------------------------------------------------------
+       S3100-READ-FILE-RTN.
+
+      *@1  READ FILE
+           READ  IN-FILE       AT  END
+           MOVE  CO-CY         TO  WK-FETCH-END
+           END-READ
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  WK-IN-FILE-STAT
+               WHEN  ZERO
+               WHEN  '04'
+                    ADD  CO-N1         TO WK-READ-CNT
+
+      *             KEY MOVE
+      *            그룹회사코드
+                    MOVE RJLR003-GROUP-CO-CD
+                      TO KJLR003-PK-GROUP-CO-CD
+      *            기준년월일
+                    MOVE RJLR003-BASE-YMD
+                      TO KJLR003-PK-BASE-YMD
+      *            심사고객식별자
+                    MOVE RJLR003-EXMTN-CUST-IDNFR
+                      TO KJLR003-PK-EXMTN-CUST-IDNFR
+      *            여신승인신청번호
+                    MOVE RJLR003-LNBZ-ATHOR-APLCN-NO
+                      TO KJLR003-PK-LNBZ-ATHOR-APLCN-NO
+      *            여신승인신청일련번호
+                    MOVE RJLR003-LNBZ-A-APLCN-SERNO
+                      TO KJLR003-PK-LNBZ-A-APLCN-SERNO
+               WHEN  '10'
+                     MOVE  CO-CY       TO  WK-FETCH-END
+               WHEN  OTHER
+                     MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+                     MOVE  WK-IN-FILE-STAT  TO  XZUGEROR-I-MSG(34:2)
+                     #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-FILE-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3100-READ-FILE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  THKJLR003 DELETE
+      *-----------------------------------------------------------------
+       S3400-KJLR003-DELETE-RTN.
+
+           EXEC SQL
+           DELETE
+             FROM DB2DBA.THKJLR003
+            WHERE 그룹회사코드        =:KJLR003-PK-GROUP-CO-CD
+              AND 기준년월일          =:KJLR003-PK-BASE-YMD
+              AND 심사고객식별자      =:KJLR003-PK-EXMTN-CUST-IDNFR
+              AND 여신승인신청번호    =:KJLR003-PK-LNBZ-ATHOR-APLCN-NO
+              AND 여신승인신청일련번호=:KJLR003-PK-LNBZ-A-APLCN-SERNO
+           END-EXEC
+
+           EVALUATE SQLCODE
+               WHEN ZERO
+                    ADD  CO-N1         TO WK-DELETE-CNT
+
+                    IF FUNCTION MOD(WK-DELETE-CNT, 500)  =  ZERO
+                        EXEC  SQL  COMMIT  END-EXEC
+                    END-IF
+                    IF FUNCTION MOD(WK-DELETE-CNT, 10000)  =  ZERO
+                        DISPLAY '$$ DELETE CNT : ' WK-DELETE-CNT
+                    END-IF
+
+               WHEN OTHER
+                    DISPLAY 'SQL DELETE오류입니다.'
+                    DISPLAY 'SQLCODE = ' SQLCODE
+                    MOVE 'KJLR003'     TO XZUGEROR-I-TBL-ID
+                    MOVE 'DELETE'      TO XZUGEROR-I-FUNC-CD
+                    MOVE SQLCODE       TO XZUGEROR-I-SQL-CD
+                    MOVE 'DELETE ERR ' TO XZUGEROR-I-MSG
+           END-EVALUATE
+           .
+
+       S3400-KJLR003-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+           MOVE  WK-READ-CNT             TO  WK-EDIT-CNT1
+           MOVE  WK-DELETE-CNT           TO  WK-EDIT-CNT4
+
+           DISPLAY '************************************'
+           DISPLAY ' BJLZR03 PGM  END                   '
+           DISPLAY '************************************'
+           DISPLAY '$$ ================================='
+           DISPLAY '$$ --  READ-CNT    : ' WK-EDIT-CNT1
+           DISPLAY '$$ ================================='
+           DISPLAY '$$ --  DELETE-CNT  : ' WK-EDIT-CNT4
+           DISPLAY '$$ ================================='
+
+           CLOSE    IN-FILE
+
+           #OKEXIT  CO-STAT-OK
+           .
+
+       S9000-FINAL-EXT.
+           EXIT.

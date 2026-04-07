@@ -1,0 +1,56 @@
+      *================================================================*
+      *@ NAME : XBJLCUS2                                               *
+      *@ DESC : SUBTE계좌고객구분및모기업번호조회(재작업)COPYB     *
+      *@        OOK                                                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-09-05 16:29:13                          *
+      *  생성일시     : 2019-09-05 16:29:14                          *
+      *  전체길이     : 00000024 BYTES                               *
+      *================================================================*
+           03  XBJLCUS2-RETURN.
+             05  XBJLCUS2-R-STAT                 PIC  X(002).
+                 88  COND-XBJLCUS2-OK            VALUE  '00'.
+                 88  COND-XBJLCUS2-KEYDUP        VALUE  '01'.
+                 88  COND-XBJLCUS2-NOTFOUND      VALUE  '02'.
+                 88  COND-XBJLCUS2-SPVSTOP       VALUE  '05'.
+                 88  COND-XBJLCUS2-ERROR         VALUE  '09'.
+                 88  COND-XBJLCUS2-ABNORMAL      VALUE  '98'.
+                 88  COND-XBJLCUS2-SYSERROR      VALUE  '99'.
+             05  XBJLCUS2-R-LINE                 PIC  9(006).
+             05  XBJLCUS2-R-ERRCD                PIC  X(008).
+             05  XBJLCUS2-R-TREAT-CD             PIC  X(008).
+             05  XBJLCUS2-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XBJLCUS2-IN.
+      *----------------------------------------------------------------*
+      *--       그룹회사코드
+             05  XBJLCUS2-I-GROUP-CO-CD          PIC  X(003).
+      *--       여신종류구분
+             05  XBJLCUS2-I-YS-GB                PIC  X(001).
+      *--       기준년월
+             05  XBJLCUS2-I-BASE-YM              PIC  X(006).
+      *--       고객식별자
+             05  XBJLCUS2-I-CUST-IDNFR           PIC  X(010).
+      *--       관리부점코드
+             05  XBJLCUS2-I-MGT-BRNCD            PIC  X(004).
+      *----------------------------------------------------------------*
+           03  XBJLCUS2-OUT.
+      *----------------------------------------------------------------*
+      *--       모기업법인고객식별자
+             05  XBJLCUS2-O-MAMA-CC-CUST-IDNFR   PIC  X(010).
+      *--       TE계좌고객구분
+             05  XBJLCUS2-O-TE-ACN-CUST-DSTCD    PIC  X(001).
+      *--       해외현지법인여부
+             05  XBJLCUS2-O-OVSES-LCAL-COPR-YN   PIC  X(001).
+      *================================================================*
+      *        X  B  J  L  C  U  S  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XBJLCUS2-I-GROUP-CO-CD        ;그룹회사코드
+      *X  XBJLCUS2-I-YS-GB              ;여신종류구분
+      *X  XBJLCUS2-I-BASE-YM            ;기준년월
+      *X  XBJLCUS2-I-CUST-IDNFR         ;고객식별자
+      *X  XBJLCUS2-I-MGT-BRNCD          ;관리부점코드
+      *X  XBJLCUS2-O-MAMA-CC-CUST-IDNFR ;모기업법인고객식별자
+      *X  XBJLCUS2-O-TE-ACN-CUST-DSTCD  ;TE계좌고객구분
+      *X  XBJLCUS2-O-OVSES-LCAL-COPR-YN ;해외현지법인여부

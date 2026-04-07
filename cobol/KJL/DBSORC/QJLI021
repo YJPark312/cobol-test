@@ -1,0 +1,453 @@
+      *=================================================================
+      *@업무명    : KLA     (프레임워크)
+      *@프로그램명: QJLI021 (SQLIO 프로그램)
+      *@처리유형  : SQLIO
+      *@처리개요  : 사용자가 정의한 SQL 처리
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 :일자  : 변　경　내　용
+      * -------:--------:-----------------------------------------------
+      *큐로컴:20080401:커스터마이징
+      *송재복:20100303:에러처리를 DBIO와 같은 방법으로 변경
+      *송재복:20111101:최적화 SQLIO MASTER 수정
+      *백재용:20120106: ERROR　수정
+      *=================================================================
+      ******************************************************************
+      **  프로그램명 :장외파생CurrentExposure조회
+      ******************************************************************
+      **  TABLE-SYNONYM    : 테이블명                           : CRUD
+      **  ----------------   ----------------------------------   ------
+      *@테이블           : THKJLR007 파생상품 차주별 Current Expo
+      **
+      ******************************************************************
+       IDENTIFICATION                       DIVISION.
+      ******************************************************************
+       PROGRAM-ID.                          QJLI021.
+       AUTHOR.                              KB.
+       INSTALLATION.                        KB.
+       DATE-WRITTEN.                        2017-02-14-10.50.52.407439.
+       SECURITY.
+      ******************************************************************
+       ENVIRONMENT                          DIVISION.
+      ******************************************************************
+      *=================================================================
+       CONFIGURATION                        SECTION.
+      *=================================================================
+       SOURCE-COMPUTER.                     IBM.
+       OBJECT-COMPUTER.                     IBM.
+      *
+      ******************************************************************
+       DATA                                 DIVISION.
+      ******************************************************************
+      *=================================================================
+       WORKING-STORAGE                      SECTION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-S9000050             PIC  X(008) VALUE 'S9000050'.
+           03  CO-S9000054             PIC  X(008) VALUE 'S9000054'.
+           03  CO-UKLA0003             PIC  X(008) VALUE 'UKLA0003'.
+           03  CO-UKLA0002             PIC  X(008) VALUE 'UKLA0002'.
+      *-----------------------------------------------------------------
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01 CO-AREA.
+         03 CO-MASTER-VER              PIC  X(007) VALUE "@Q-M01@".
+         03 CO-STAT-OK                 PIC  X(002) VALUE '00'.
+         03 CO-STAT-MRNF               PIC  X(002) VALUE '02'.
+         03 CO-STAT-ERROR              PIC  X(002) VALUE '09'.
+         03 CO-STAT-ABNORMAL           PIC  X(002) VALUE '98'.
+         03 CO-STAT-SYSERROR           PIC  X(002) VALUE '99'.
+
+       01 CO-DBSQLE-MSG.
+         03  FILLER                    PIC  X(008) VALUE "ERR-CNT=".
+         03  DI-ERR-CNT                PIC  -9(05).
+         03  FILLER                    PIC  X(009) VALUE "/SQLCODE=".
+         03  DI-SQL-CODE               PIC  -9(05).
+         03  FILLER                    PIC  X(009) VALUE "/ROW-NUM=".
+         03  DI-ROW-NUM                PIC  -9(05).
+         03  FILLER                    PIC  X(008) VALUE "/MSG-ID=".
+         03  DI-MSG-ID                 PIC  X(010).
+         03  FILLER                    PIC  X(001) VALUE SPACE.
+
+      *=================================================================
+       01  DBSQLI-AREA.
+      *    03  DBSQLI-COPYTM                PIC  X(35).
+           03  DBSQLI-SELECT-REQ            PIC S9(09)  COMP.
+           03  DBSQLI-ARRAY-CNT             PIC S9(09)  COMP.
+
+       01  DBSQLI-DIAG.
+           03  DBSQLI-DIAG-ERRORS           PIC S9(09)  COMP.
+           03  DBSQLI-ERROR-CNT             PIC S9(09)  COMP.
+           03  DBSQLI-RETURN-SQLCODE        PIC S9(09)  COMP.
+           03  DBSQLI-SERCH-SQLCODE         PIC S9(09)  COMP.
+           03  DBSQLI-ROW-NUMBER            PIC S9(09)  COMP-3.
+           03  DBSQLI-MESSAGE-ID            PIC  X(10).
+           03  DBSQLI-MESSAGE-TEXT.
+               49  DBSQLI-MSG-LEN           PIC S9(04)  COMP.
+               49  DBSQLI-MSG-TXT           PIC  X(200).
+           03  DBSQLI-EDIT-NUM              PIC -9(005).
+           03  DBSQLI-DEC                   PIC +9(18).
+           03  DBSQLI-DEC-P                 PIC 9.9(10).
+
+       77  DBSQLE-TEXT-LEN               PIC S9(009) COMP VALUE +72.
+       01  DBSQLE-MESSAGE.
+           03  DBSQLE-LEN                PIC S9(004) COMP VALUE +720.
+           03  DBSQLE-TEXT               PIC  X(072) OCCURS 10 TIMES
+                                         INDEXED BY DBSQLE-IDX.
+
+      *-----------------------------------------------------------------
+      *--  SQL CALL AREA
+      *-----------------------------------------------------------------
+           EXEC SQL INCLUDE SQLCA           END-EXEC.
+
+      *=================================================================
+       LINKAGE                              SECTION.
+      *=================================================================
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *-----------------------------------------------------------------
+      *  PCO 변수영역
+      *-----------------------------------------------------------------
+           COPY YCDBSQLA.
+
+      *-----------------------------------------------------------------
+      *  PCO 카피북
+      *-----------------------------------------------------------------
+       01  SQL-TABLE.
+           COPY  XQJLI021.
+
+           REPLACE   ==(COM)== BY ==COM==.
+       01  YCCSICOM-CA.
+           COPY    YCCSICOM.
+       01  YCCBICOM-CA.
+           COPY    YCCBICOM.
+           REPLACE   OFF.
+
+      ******************************************************************
+       PROCEDURE                           DIVISION
+                                           USING     YCCOMMON-CA
+                                                     YCDBSQLA-CA
+                                                     SQL-TABLE.
+      ******************************************************************
+      *
+       S0000-START-RTN.
+
+           SET     ADDRESS OF YCCSICOM-CA  TO  COMM-SICOM-ADDR
+           SET     ADDRESS OF YCCBICOM-CA  TO  COMM-BICOM-ADDR
+           PERFORM S0000-MAIN-RTN        THRU  S0000-MAIN-EXT
+           GOBACK.
+
+       S0000-START-EXT.
+           EXIT.
+
+      *
+       S0000-MAIN-RTN.
+      *
+           MOVE  "14"                       TO YCFCTLAR-USR-LOG-CD
+      *
+           INITIALIZE                          XZUGEROR-CA
+                                               XQJLI021-OUT
+      *    MOVE   "@QJLI021:2017-02-14-10.50.52.407439" TO DBSQLI-COPYTM
+           MOVE   00001                     TO   DBSQLI-ARRAY-CNT
+
+           PERFORM Z9900-AREA-INIT-RTN
+              THRU Z9900-AREA-INIT-EXT
+      *
+      * SQLIO-FUNCTION OF YCDBSQLA
+           EVALUATE  TRUE
+               WHEN  COND-DBSQL-SELECT
+                     PERFORM Z9900-SELECT-RTN
+                        THRU Z9900-SELECT-EXT
+      *
+
+      *
+               WHEN  OTHER
+                     MOVE
+                     "SQLIO입력항목 검증오류입니다(SQLIO-FUNCTION)"
+                                          TO   XZUGEROR-I-MSG
+                     MOVE    CO-S9000050  TO   XZUGEROR-I-ERRCD
+                     MOVE    CO-UKLA0002  TO   XZUGEROR-I-TREAT-CD
+                     PERFORM Z9900-MSG-ERROR-RTN
+                        THRU Z9900-MSG-ERROR-EXT
+           END-EVALUATE
+
+           PERFORM Z9900-NOMAL-END-RTN
+              THRU Z9900-NOMAL-END-EXT
+
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+
+
+       Z9900-SELECT-RTN.
+
+           PERFORM Z9900-PARAM-CHECK-RTN
+              THRU Z9900-PARAM-CHECK-EXT
+
+#DEBUG     IF      YCFCTLAR-DISP-YN = '1'
+#DEBUG        IF   COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+#DEBUG     STRING "XQJLI021-I-GROUP-CO-CD        = "
+#DEBUG             XQJLI021-I-GROUP-CO-CD         DELIMITED BY SIZE
+#DEBUG       INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+#DEBUG     PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+#DEBUG     STRING "XQJLI021-I-BASE-YMD           = "
+#DEBUG             XQJLI021-I-BASE-YMD            DELIMITED BY SIZE
+#DEBUG       INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+#DEBUG     PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+#DEBUG     STRING "XQJLI021-I-KB-PIN             = "
+#DEBUG             XQJLI021-I-KB-PIN              DELIMITED BY SIZE
+#DEBUG       INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+#DEBUG     PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+
+#DEBUG        END-IF
+#DEBUG     END-IF
+
+           EXEC  SQL
+       SELECT 신용거래한도
+            , 위험가중자산금액
+       INTO
+             :XQJLI021-O-CRDT-TRAN-CLAM
+            ,:XQJLI021-O-RISK-WGHTG-ASAM
+         FROM        THKJLR007
+        WHERE 그룹회사코드 = :XQJLI021-I-GROUP-CO-CD
+          AND 기준년월일   = :XQJLI021-I-BASE-YMD
+          AND 고객식별자   = :XQJLI021-I-KB-PIN
+           FETCH FIRST 1 ROWS ONLY
+           END-EXEC
+           MOVE    1                        TO   DBSQL-SELECT-CNT
+           PERFORM Z9900-SQLCODE-CHECK-RTN
+              THRU Z9900-SQLCODE-CHECK-EXT
+
+           .
+       Z9900-SELECT-EXT.
+           EXIT.
+E N D
+
+      *=================================================================
+       Z9900-AREA-INIT-RTN.
+
+           INITIALIZE                            DBSQL-OUT
+                                                 DBSQL-RESULT
+           MOVE  DBSQLI-ARRAY-CNT           TO   DBSQL-ARRAY-CNT
+           SET   COND-DBSQL-ABNORMAL        TO   TRUE
+           MOVE  ZERO                       TO   SQLCODE
+           MOVE  SPACE                      TO   SQLERRMC
+           IF    DBSQL-SELECT-REQ-X  =  SPACE OR ZERO OR LOW-VALUE
+                 MOVE  DBSQL-ARRAY-CNT      TO   DBSQLI-SELECT-REQ
+           ELSE
+                 MOVE  DBSQL-SELECT-REQ     TO   DBSQLI-SELECT-REQ
+           END-IF
+           .
+       Z9900-AREA-INIT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-SQLCODE-CHECK-RTN.
+      *
+           MOVE  SQLCODE                    TO   DBSQL-SQLCODE
+
+           EVALUATE  SQLCODE
+               WHEN  0
+                     SET   COND-DBSQL-OK    TO   TRUE
+               WHEN  +354
+                     PERFORM Z9900-DIAG-ERR-RTN THRU Z9900-DIAG-ERR-EXT
+120106               IF  SQLCODE  EQUAL  ZERO
+120106                   SET  COND-DBSQL-OK       TO TRUE
+120106               ELSE
+120106                   SET  COND-DBSQL-SQLER    TO TRUE
+120106               END-IF
+               WHEN  +100
+                     SET   COND-DBSQL-MRNF  TO   TRUE
+                     MOVE  "NO DATA FOUND"  TO   XZUGEROR-I-MSG
+               WHEN  OTHER
+                     IF DBSQL-SQLCODE(4:1) = "9" OR DBSQL-SQLCODE = -805
+                         SET  COND-DBSQL-SYSERROR TO TRUE
+                     ELSE
+                         SET  COND-DBSQL-SQLER    TO TRUE
+                     END-IF
+           END-EVALUATE
+
+           IF      NOT COND-DBSQL-OK
+                   MOVE    ZERO             TO   DBSQL-SELECT-CNT
+           END-IF
+
+#DEBUG
+#DEBUG     IF      YCFCTLAR-DISP-YN = '1'
+#DEBUG        IF   COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+#DEBUG             STRING  'SQL(' DBSQL-PROGRAM-ID ')'
+#DEBUG                      DBSQL-FUNCTION
+#DEBUG                     "검색건수=" DBSQL-SELECT-CNT
+#DEBUG                     "/SQLCODE=" DBSQL-SQLCODE
+#DEBUG                     "/결과코드=" DBSQL-STAT  DELIMITED BY SIZE
+#DEBUG               INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+#DEBUG             PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+#DEBUG        END-IF
+#DEBUG     END-IF
+
+           IF      COND-DBSQL-ABNORMAL OR
+                   COND-DBSQL-SYSERROR
+                   PERFORM Z9900-SQL-ERROR-MSG-RTN
+                      THRU Z9900-SQL-ERROR-MSG-EXT
+                   MOVE    DBSQL-SQLCODE     TO  XZUGEROR-I-SQL-CD
+                   MOVE    DBSQL-SQLCODE(2:) TO  XZUGEROR-I-ERRCD(4:)
+                   MOVE    'D99'             TO  XZUGEROR-I-ERRCD(1:3)
+                   MOVE    CO-UKLA0003       TO   XZUGEROR-I-TREAT-CD
+                   PERFORM Z9900-MSG-ERROR-RTN
+                      THRU Z9900-MSG-ERROR-EXT
+           END-IF.
+      *
+       Z9900-SQLCODE-CHECK-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-PARAM-CHECK-RTN.
+      *
+#DEBUG     IF      YCFCTLAR-DISP-YN = '1'
+#DEBUG       IF    COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+#DEBUG             STRING  "CALLER {"   DBSQL-CALL-PGM-ID
+#DEBUG                 "} SQL {"  DBSQL-PROGRAM-ID
+#DEBUG                 "} FUNC {" DBSQL-FUNCTION
+#DEBUG                 "} ARR {"  DBSQL-ARRAY-CNT
+#DEBUG                 "} REQ {"  DBSQL-SELECT-REQ
+#DEBUG                 "}"              DELIMITED BY SIZE
+#DEBUG               INTO  YCFCTLAR-LOG-CTNT POINTER YCFCTLAR-LOG-PTR
+#DEBUG             PERFORM Z9990-USER-LOG-RTN THRU Z9990-USER-LOG-EXT
+#DEBUG       END-IF
+#DEBUG     END-IF
+
+           IF      DBSQL-SELECT-REQ > DBSQL-ARRAY-CNT
+                   MOVE    CO-S9000054      TO  XZUGEROR-I-ERRCD
+                   MOVE    CO-UKLA0003      TO  XZUGEROR-I-TREAT-CD
+                   MOVE   "DBSQL-SELECT-REQ최대건수 초과"
+                                            TO  XZUGEROR-I-MSG
+                   PERFORM Z9900-MSG-ERROR-RTN
+                      THRU Z9900-MSG-ERROR-EXT
+           END-IF.
+
+       Z9900-PARAM-CHECK-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-SQL-ERROR-MSG-RTN.
+      *
+           IF      NOT (DBSQL-SQLCODE = -805 OR 0)
+           CALL    'DSNTIAR'    USING    SQLCA
+                                         DBSQLE-MESSAGE
+                                         DBSQLE-TEXT-LEN
+           END-CALL
+           PERFORM VARYING DBSQLE-IDX FROM 1 BY 1
+             UNTIL DBSQLE-IDX > 10
+                   STRING  DBSQLE-TEXT(DBSQLE-IDX)   DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-PERFORM
+           END-IF
+           .
+       Z9900-SQL-ERROR-MSG-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-DIAG-ERR-RTN.
+      *
+           MOVE  SQLERRD(3)       TO   DBSQL-SELECT-CNT
+           EXEC SQL
+                GET DIAGNOSTICS :DBSQLI-DIAG-ERRORS = NUMBER
+           END-EXEC
+      *
+           IF      DBSQLI-DIAG-ERRORS < 1
+                   MOVE    DBSQL-SELECT-CNT      TO   SQLERRD(3)
+                   MOVE    ZERO                  TO   SQLCODE
+                   GO  TO  Z9900-DIAG-ERR-EXT
+           END-IF
+           MOVE      ZEROS                     TO  DBSQLI-SERCH-SQLCODE
+           PERFORM  VARYING DBSQLI-ERROR-CNT FROM 1 BY 1
+                      UNTIL DBSQLI-ERROR-CNT > DBSQLI-DIAG-ERRORS
+             EXEC SQL
+                  GET DIAGNOSTICS CONDITION :DBSQLI-ERROR-CNT
+                      :DBSQLI-RETURN-SQLCODE = DB2_RETURNED_SQLCODE,
+                      :DBSQLI-MESSAGE-ID     = DB2_MESSAGE_ID,
+                      :DBSQLI-MESSAGE-TEXT       = MESSAGE_TEXT,
+                      :DBSQLI-ROW-NUMBER     = DB2_ROW_NUMBER
+             END-EXEC
+             IF  DBSQLI-MESSAGE-ID NOT = SPACE
+               IF  DBSQLI-ROW-NUMBER > ZERO
+                   MOVE DBSQLI-RETURN-SQLCODE TO   DBSQLI-SERCH-SQLCODE
+               END-IF
+               MOVE DBSQLI-ERROR-CNT        TO   DI-ERR-CNT
+               MOVE DBSQLI-RETURN-SQLCODE   TO   DI-SQL-CODE
+               MOVE DBSQLI-ROW-NUMBER       TO   DI-ROW-NUM
+               MOVE DBSQLI-MESSAGE-ID       TO   DI-MSG-ID
+               MOVE CO-DBSQLE-MSG           TO   YCFCTLAR-LOG-CTNT
+               MOVE LENGTH OF CO-DBSQLE-MSG TO   YCFCTLAR-LOG-PTR
+               PERFORM Z9990-USER-LOG-RTN   THRU Z9990-USER-LOG-EXT
+               MOVE "MSG-TXT="              TO   YCFCTLAR-LOG-CTNT
+               MOVE DBSQLI-MSG-TXT          TO   YCFCTLAR-LOG-CTNT(9:)
+               ADD  DBSQLI-MSG-LEN  9   GIVING   YCFCTLAR-LOG-PTR
+               PERFORM Z9990-USER-LOG-RTN  THRU Z9990-USER-LOG-EXT
+             END-IF
+      *
+           END-PERFORM
+
+      *    SQL ERROR CODE RESET
+           MOVE    DBSQL-SELECT-CNT              TO   SQLERRD(3)
+           IF      DBSQLI-SERCH-SQLCODE NOT = ZERO
+                   SET     COND-DBSQL-SQLER      TO   TRUE
+                   MOVE    DBSQL-SQLCODE         TO   SQLCODE
+           ELSE
+                   MOVE    ZERO                  TO   SQLCODE
+           END-IF
+           .
+       Z9900-DIAG-ERR-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-NOMAL-END-RTN.
+
+           IF      COMM-START-EIO-DSTCD = '9'
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END OK :'
+                           'STAT=' DBSQL-STAT    DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+           .
+       Z9900-NOMAL-END-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+       Z9900-MSG-ERROR-RTN.
+
+           MOVE    CO-STAT-SYSERROR        TO    XZUGEROR-I-STAT
+           MOVE    DBSQL-PROGRAM-ID        TO    XZUGEROR-I-PGM-ID
+           MOVE    DBSQL-CALL-PGM-ID       TO    XZUGEROR-I-TBL-ID
+           MOVE    DBSQL-FUNCTION          TO    XZUGEROR-I-FUNC-CD
+           MOVE    'ZUGEROR'               TO    YCFCTLAR-CALL-LOG
+           CALL    YCFCTLAR-CALL-LOG    USING    DFHEIBLK
+                                                 YCCOMMON-CA
+                                                 XZUGEROR-CA
+           END-CALL
+
+           IF      COMM-START-EIO-DSTCD = '9'
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END OK :'
+                           'STAT=' XZUGEROR-I-STAT    DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+           GOBACK.
+
+       Z9900-MSG-ERROR-EXT.
+           EXIT.
+      ******************************************************************
+      **      Q J L I 0 2 1       P R O G R A M   E N D
+      ******************************************************************

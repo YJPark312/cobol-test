@@ -1,0 +1,395 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020001
+      *@프로그램명: AJL4023 (AS본부부서기준값조회)                  00030001
+      *@처리유형  : AS                                                00040001
+      *@처리개요  : 자기자본 정보 및 가중치 정보를 조회   00050001
+      *@            : 하는 프로그램이다                             00060001
+      *-----------------------------------------------------------------00070001
+      *                 P R O G R A M   변　경　이　력                00080001
+      *-----------------------------------------------------------------00090001
+      *@성명 : 일자 : 변　경　내　용                              00100001
+      * ----------------------------------------------------------------00110001
+      *이동구:20090121: 신규작성                                    00120001
+      *김진태:20091102: 타팀　조치메세지　정비                      00120001
+      *김진태:20091208: PC 삭제                                     00120001
+      *김진태:20100507: 렌탈업기준한도적용배수추가                  00120001
+      * YBH    :20140718: 자기자본기준,영업활동현금흐름액기준
+      *                   한도액계산시 신용등급지원비율 기준변경
+      * YBH    :20150226: 장기자산SUB-LIMIT조회 추가
+      * YBH    :20210408: 2.장기자산SUB-LIMIT등록을 장외파생상품
+      *                     SUB-LIMIT등록으로 변경
+      *최주원:20211000:탭추가1 산업분류별적용비율
+      *                탭추가2 금융업종평균자기자본비율
+      *=================================================================00130001
+       IDENTIFICATION                  DIVISION.                        00140001
+      *=================================================================00150001
+       PROGRAM-ID.                     AJL4023.                         00160001
+       AUTHOR.                         이동구.                        00170001
+       DATE-WRITTEN.                   09/01/21.                        00180001
+      *=================================================================00190001
+       ENVIRONMENT                     DIVISION.                        00200001
+      *=================================================================00210001
+       CONFIGURATION                   SECTION.                         00220001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00230001
+       DATA                            DIVISION.                        00240001
+      *=================================================================00250001
+       WORKING-STORAGE                 SECTION.                         00260001
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4023 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------00420001
+      * WORKING AREA                                                    00430001
+      *-----------------------------------------------------------------00440001
+       01  WK-AREA.                                                     00450001
+           03  WK-I                    PIC S9(004) COMP.                00460001
+      *-----------------------------------------------------------------00470001
+      * PGM INTERFACE PARAMETER                                         00480001
+      *-----------------------------------------------------------------00490001
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE                                           00500001
+       01  XDJL4023-CA.                                                 00510001
+           COPY  XDJL4023.                                              00520001
+      *   출력영역확보　및　초기화INTERFACE                           00530001
+       01  XZUGOTMY-CA.                                                 00540001
+           COPY  XZUGOTMY.                                              00550001
+      *-----------------------------------------------------------------00560001
+       LINKAGE                         SECTION.                         00570001
+      *-----------------------------------------------------------------00580001
+      *    COMMON AREA
+       01  YCCOMMON-CA.                                                 00590001
+           COPY  YCCOMMON.                                              00600001
+      *    AS COPYBOOK
+       01  YNJL4023-CA.                                                 00610001
+           COPY  YNJL4023.                                              00620001
+      *    AS COPYBOOK
+       01  YPJL4023-CA.                                                 00630001
+           COPY  YPJL4023.                                              00640001
+      *=================================================================00650001
+       PROCEDURE                       DIVISION                         00660001
+                                       USING       YCCOMMON-CA          00680001
+                                                   YNJL4023-CA
+                                                   .
+      *=================================================================00670001
+      *-----------------------------------------------------------------00700001
+      *@  처리메인                                                    00710001
+      *-----------------------------------------------------------------00720001
+       S0000-MAIN-RTN.                                                  00730001
+                                                                        00740001
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .                                                            00860001
+       S0000-MAIN-EXT.                                                  00870001
+           EXIT.                                                        00880001
+      *-----------------------------------------------------------------00890001
+      *@  초기화                                                      00900001
+      *-----------------------------------------------------------------00910001
+       S1000-INITIALIZE-RTN.                                            00920001
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA                                        00950001
+                         XIJICOMM-IN
+                         XDJL4023-IN                                    00960001
+                         XZUGOTMY-IN                                    00970001
+                                                                        00980001
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4023-CA                                    01000001
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.                                            01020001
+           EXIT.                                                        01030001
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4023-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4023-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------01040001
+      *@  업무처리                                                    01050001
+      *-----------------------------------------------------------------01060001
+       S3000-PROCESS-RTN.                                               01070001
+      *@3 업무처리
+
+      *@3.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,기준년월1,기준년월2)
+
+           MOVE YNJL4023-PRCSS-DSTIC   TO XDJL4023-I-PRCSS-DSTIC        01110001
+           MOVE YNJL4023-BASE-YM1      TO XDJL4023-I-BASE-YM1           01120005
+           MOVE YNJL4023-BASE-YM2      TO XDJL4023-I-BASE-YM2           01130005
+                                                                        01140001
+      *@3.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4023 YCCOMMON-CA XDJL4023-CA                      01170001
+                                                                        01200001
+      *@3.3 처리결과CHECK
+      *@실행조건:COND-XDJL4023-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4023-OK                                          01240001
+              CONTINUE                                                  01250001
+           ELSE                                                         01260001
+              #ERROR XDJL4023-R-ERRCD                                   01270001
+                     XDJL4023-R-TREAT-CD                                01280001
+                     XDJL4023-R-STAT                                    01290001
+           END-IF                                                       01300001
+           .                                                            01310001
+       S3000-PROCESS-EXT.                                               01320001
+           EXIT.                                                        01330001
+      *-----------------------------------------------------------------01890001
+      *@  출력처리                                                    01900001
+      *-----------------------------------------------------------------01910001
+       S6000-OUTPUT-RTN.                                                01920001
+      *@4 출력처리
+
+      *@4.1 자기자본 조립
+
+      *    BIS기준자기자본                                            01970001
+           MOVE XDJL4023-O-BIS-BASE-ONCP                                01980001
+             TO YPJL4023-BIS-BASE-ONCP                                  01990001
+      *    기준년월                                                   02000001
+           MOVE XDJL4023-O-BASE-YM1                                     02010001
+             TO YPJL4023-BASE-YM1                                       02020001
+      *    동일인외화자기자본                                         02030001
+           MOVE XDJL4023-O-SMPSN-FC-ONCP                                02040001
+             TO YPJL4023-SMPSN-FC-ONCP                                  02050001
+      *    기준년월                                                   02060001
+           MOVE XDJL4023-O-BASE-YM2                                     02070001
+             TO YPJL4023-BASE-YM2                                       02080001
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL4023-O-OUTPT-LINE-CNT1                              02120001
+             TO YPJL4023-OUTPT-LINE-CNT1                                02130001
+           MOVE XDJL4023-O-OUTPT-LINE-CNT2                              02120001
+             TO YPJL4023-OUTPT-LINE-CNT2                                02130001
+           MOVE XDJL4023-O-OUTPT-LINE-CNT3                              02120001
+             TO YPJL4023-OUTPT-LINE-CNT3                                02130001
+           MOVE XDJL4023-O-OUTPT-LINE-CNT4                              02120001
+             TO YPJL4023-OUTPT-LINE-CNT4                                02130001
+140718     MOVE XDJL4023-O-OUTPT-LINE-CNT5                              02540001
+             TO YPJL4023-OUTPT-LINE-CNT5                                02550001
+           MOVE XDJL4023-O-OUTPT-LINE-CNT6                              02540001
+             TO YPJL4023-OUTPT-LINE-CNT6                                02550001
+211000     MOVE XDJL4023-O-OUTPT-LINE-CNT7
+             TO YPJL4023-OUTPT-LINE-CNT7
+211000     MOVE XDJL4023-O-OUTPT-LINE-CNT8
+             TO YPJL4023-OUTPT-LINE-CNT8
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJL4023-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립(개별기업（기타）)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02150001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT1                02160001
+                   MOVE XDJL4023-O-INTNL-CV-GRD-DSTCD1    (WK-I)        02180001
+                     TO YPJL4023-INTNL-CV-GRD-DSTCD1      (WK-I)        02190001
+                   MOVE XDJL4023-O-SPORT-RATO1            (WK-I)        02200001
+                     TO YPJL4023-SPORT-RATO1              (WK-I)        02210001
+                   MOVE XDJL4023-O-RPAY-ANTICI-RATO1      (WK-I)        02220001
+                     TO YPJL4023-RPAY-ANTICI-RATO1        (WK-I)        02230001
+           END-PERFORM
+
+      *@4.4 그리드2 조립
+      *@실행조건:WK-I > YPJL4023-OUTPT-LINE-CNT2
+      *@처리내용:그리드2 조립(그룹)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02150001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT2                02160001
+                    MOVE XDJL4023-O-INTNL-CV-GRD-DSTCD2    (WK-I)       02260001
+                      TO YPJL4023-INTNL-CV-GRD-DSTCD2      (WK-I)       02270001
+                    MOVE XDJL4023-O-SPORT-RATO2            (WK-I)       02280001
+                      TO YPJL4023-SPORT-RATO2              (WK-I)       02290001
+                    MOVE XDJL4023-O-RPAY-ANTICI-RATO2      (WK-I)       02300001
+                      TO YPJL4023-RPAY-ANTICI-RATO2        (WK-I)       02310001
+           END-PERFORM
+
+      *@4.5 그리드3 조립
+      *@실행조건:WK-I > YPJL4023-OUTPT-LINE-CNT3
+      *@처리내용:그리드3 조립(건설)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02150001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT3                02160001
+                   MOVE XDJL4023-O-INTNL-CV-GRD-DSTCD3    (WK-I)        02340001
+                     TO YPJL4023-INTNL-CV-GRD-DSTCD3      (WK-I)        02350001
+                   MOVE XDJL4023-O-SPORT-RATO3            (WK-I)        02360001
+                     TO YPJL4023-SPORT-RATO3              (WK-I)        02370001
+                   MOVE XDJL4023-O-RPAY-ANTICI-RATO3      (WK-I)        02380001
+                     TO YPJL4023-RPAY-ANTICI-RATO3        (WK-I)        02390001
+           END-PERFORM
+
+      *@4.6 그리드4 조립
+      *@실행조건:WK-I > YPJL4023-OUTPT-LINE-CNT4
+      *@처리내용:그리드4 조립(조선)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02150001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT4                02160001
+                   MOVE XDJL4023-O-INTNL-CV-GRD-DSTCD4    (WK-I)        02420001
+                     TO YPJL4023-INTNL-CV-GRD-DSTCD4      (WK-I)        02430001
+                   MOVE XDJL4023-O-SPORT-RATO4            (WK-I)        02440001
+                     TO YPJL4023-SPORT-RATO4              (WK-I)        02450001
+                   MOVE XDJL4023-O-RPAY-ANTICI-RATO4      (WK-I)        02460001
+                     TO YPJL4023-RPAY-ANTICI-RATO4        (WK-I)        02470001
+           END-PERFORM
+
+140718*@4.6 그리드5 조립
+      *@실행조건:WK-I > YPJL4023-OUTPT-LINE-CNT5
+      *@처리내용:그리드5 조립(포괄신용등급계산용)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02150001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT5                02160001
+                   MOVE XDJL4023-O-INTNL-CV-GRD-DSTCD5    (WK-I)        02420001
+                     TO YPJL4023-INTNL-CV-GRD-DSTCD5      (WK-I)        02430001
+                   MOVE XDJL4023-O-SPORT-RATO5            (WK-I)        02440001
+                     TO YPJL4023-SPORT-RATO5              (WK-I)        02450001
+           END-PERFORM
+
+      *@4.7 그리드6 조립
+      *@처리내용:그리드6 조립(한은업종가중치)
+           PERFORM VARYING WK-I FROM 1 BY 1                             02570001
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT6
+                   MOVE XDJL4023-O-BASE-YM6               (WK-I)        02600001
+                     TO YPJL4023-BASE-YM6                 (WK-I)        02610001
+                   MOVE XDJL4023-O-BOK-MTCN-CD6           (WK-I)        02620001
+                     TO YPJL4023-BOK-MTCN-CD6             (WK-I)        02630001
+                   MOVE XDJL4023-O-BOK-MTCN-NAME6         (WK-I)        02640001
+                     TO YPJL4023-BOK-MTCN-NAME6           (WK-I)        02650001
+                   MOVE XDJL4023-O-BZTYP-WGHTG-AVG-RT6    (WK-I)        02660001
+                     TO YPJL4023-BZTYP-WGHTG-AVG-RT6      (WK-I)        02670001
+                   MOVE XDJL4023-O-AMBR-SALEPR-RATO6      (WK-I)        02680001
+                     TO YPJL4023-AMBR-SALEPR-RATO6        (WK-I)        02690001
+                   MOVE XDJL4023-O-AMBR-ONCP-RT6          (WK-I)        02700001
+                     TO YPJL4023-AMBR-ONCP-RT6            (WK-I)        02710001
+                   MOVE XDJL4023-O-AMBR-T-ASST-RATO6      (WK-I)        02720001
+                     TO YPJL4023-AMBR-T-ASST-RATO6        (WK-I)        02730001
+           END-PERFORM                                                  02750001
+                                                                        02760001
+      *@4.8 기준한도적용배수 조립
+           MOVE XDJL4023-O-CNST-A-USAG-MLPL                             02800001
+             TO YPJL4023-CNST-A-USAG-MLPL                               02810001
+           MOVE XDJL4023-O-CREW-AA-USAG-MLPL                            02820001
+             TO YPJL4023-CREW-AA-USAG-MLPL                              02830001
+           MOVE XDJL4023-O-RENTL-O-APLY-MLPL                            02820001
+             TO YPJL4023-RENTL-O-APLY-MLPL                              02830001
+
+150226*@4.9 장외파생상품SUB-LIMIT조립
+           MOVE XDJL4023-O-SUB-CLAM
+             TO YPJL4023-SUB-CLAM
+
+211000*@4.10 그리드7 조립
+      *@처리내용:그리드7 조립(산업분류별 적용비율)
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT7
+      *--         기준년월
+                   MOVE  XDJL4023-O-BASE-YM7 (WK-I)
+                     TO  YPJL4023-BASE-YM7 (WK-I)
+      *--         TE산업분류코드
+                   MOVE  XDJL4023-O-TE-IDSTRY-CLSFI-CD (WK-I)
+                     TO  YPJL4023-TE-IDSTRY-CLSFI-CD (WK-I)
+      *--         TE산업분류코드명
+                   MOVE  XDJL4023-O-TE-I-CLSFI-CD-NAME (WK-I)
+                     TO  YPJL4023-TE-I-CLSFI-CD-NAME (WK-I)
+      *--         TE자기자본비율
+                   MOVE  XDJL4023-O-TE-ONCP-RATO (WK-I)
+                     TO  YPJL4023-TE-ONCP-RATO (WK-I)
+      *--         TE매출액비율
+                   MOVE  XDJL4023-O-TE-SALEPR-RATO (WK-I)
+                     TO  YPJL4023-TE-SALEPR-RATO (WK-I)
+      *--         TE총자산비율
+                   MOVE  XDJL4023-O-TE-TOTAL-ASST-RATO (WK-I)
+                     TO  YPJL4023-TE-TOTAL-ASST-RATO (WK-I)
+           END-PERFORM
+
+
+211000*@4.10 그리드8 조립
+      *@처리내용:그리드8 조립(금융업종평균자기자본비율조회)
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > YPJL4023-OUTPT-LINE-CNT8
+
+      *            기준년월
+                   MOVE  XDJL4023-O-BASE-YM8(WK-I)
+                     TO  YPJL4023-BASE-YM8(WK-I)
+      *            한신평재무업종구분
+                   MOVE  XDJL4023-O-KIS-FZ-BZTYP-DSTIC(WK-I)
+                     TO  YPJL4023-KIS-FZ-BZTYP-DSTIC(WK-I)
+      *            금융자기자본비율
+                   MOVE  XDJL4023-O-FINAC-ONCP-RATO(WK-I)
+                     TO  YPJL4023-FINAC-ONCP-RATO(WK-I)
+      *            등록직원번호
+                   MOVE  XDJL4023-O-REGI-EMPID(WK-I)
+                     TO  YPJL4023-REGI-EMPID(WK-I)
+      *            등록년월일
+                   MOVE  XDJL4023-O-REGI-YMD(WK-I)
+                     TO  YPJL4023-REGI-YMD(WK-I)
+
+           END-PERFORM
+
+           .                                                            02840001
+       S6000-OUTPUT-EXT.                                                02860001
+           EXIT.                                                        02870001
+      *-----------------------------------------------------------------01340001
+      *@  처리종료                                                    01350001
+      *-----------------------------------------------------------------01360001
+       S9000-FINAL-RTN.                                                 01370001
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11023000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK                                           01420001
+           .                                                            01430001
+       S9000-FINAL-EXT.                                                 01440001
+           EXIT.                                                        01450001

@@ -1,0 +1,83 @@
+      *================================================================*
+      *@ NAME : V1JL4027                                               *
+      *@ DESC : 포괄신용공여한도과목별여신현황조회                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-03-17 17:00:42                          *
+      *  생성일시     : 2022-03-17 17:00:45                          *
+      *  전체길이     : 00352257 BYTES                               *
+      *================================================================*
+      *--     채무자명
+           07  V1JL4027-DBTRZ-NAME               PIC  X(052).
+      *--     여신성최고한도
+           07  V1JL4027-LNBZ-I-HGST-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     계열기업군명
+           07  V1JL4027-AFFLT-C-GROUP-NAME       PIC  X(052).
+      *--     관리한도유효년월일
+           07  V1JL4027-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     관리한도금액
+           07  V1JL4027-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     내부신용평가등급구분코드
+           07  V1JL4027-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     표준산업코드명
+           07  V1JL4027-STND-IDSTRY-CD-NAME      PIC  X(052).
+      *--     포괄신용공여한도환산금액
+           07  V1JL4027-INLS-GRCR-LIMT-AUC       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     내부신용평가등급구분코드1
+           07  V1JL4027-INTNL-CV-GRD-DSTCD1      PIC  X(004).
+      *--     한도여유액
+           07  V1JL4027-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     최종관리한도금액
+           07  V1JL4027-LAST-INLS-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수1
+ROWCNT     07  V1JL4027-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4027-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4027-OUTPT-LINE-CNT1.
+      *--       기준년월일
+             09  V1JL4027-BASE-YMD               PIC  X(008).
+      *--       토탈익스포져항목구분1
+             09  V1JL4027-TE-ITEM-DSTIC1         PIC  X(025).
+      *--       상품코드1
+             09  V1JL4027-PRDCT-CD1              PIC  X(012).
+      *--       상품명1
+             09  V1JL4027-PRDCT-NAME1            PIC  X(252).
+      *--       토탈익스포져자산구분코드1
+             09  V1JL4027-TE-ASST-DSTCD1         PIC  X(010).
+      *--       명목액기준한도금액1
+             09  V1JL4027-TTL-AMT-BASE-CLAM1     PIC  9(015).
+      *--       명목액기준잔액1
+             09  V1JL4027-TTL-AMT-BASE-BAL1      PIC  9(015).
+      *--       토탈익스포져한도환산금액1
+             09  V1JL4027-TE-LIMT-AUC1           PIC  9(015).
+      *================================================================*
+      *        V  1  J  L  4  0  2  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4027-DBTRZ-NAME           ;채무자명
+      *S  V1JL4027-LNBZ-I-HGST-LIMT     ;여신성최고한도
+      *X  V1JL4027-AFFLT-C-GROUP-NAME   ;계열기업군명
+      *X  V1JL4027-MGT-LIMT-VALD-YMD    ;관리한도유효년월일
+      *S  V1JL4027-MGT-CLAM             ;관리한도금액
+      *X  V1JL4027-INTNL-CV-GRD-DSTCD
+      * 내부신용평가등급구분코드
+      *X  V1JL4027-STND-IDSTRY-CD-NAME  ;표준산업코드명
+      *S  V1JL4027-INLS-GRCR-LIMT-AUC
+      * 포괄신용공여한도환산금액
+      *X  V1JL4027-INTNL-CV-GRD-DSTCD1
+      * 내부신용평가등급구분코드1
+      *S  V1JL4027-LIMT-SEXTR-AMT       ;한도여유액
+      *S  V1JL4027-LAST-INLS-LIMT       ;최종관리한도금액
+      *L  V1JL4027-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4027-GRID1                ;그리드1
+      *X  V1JL4027-BASE-YMD             ;기준년월일
+      *X  V1JL4027-TE-ITEM-DSTIC1       ;토탈익스포져항목구분1
+      *X  V1JL4027-PRDCT-CD1            ;상품코드1
+      *X  V1JL4027-PRDCT-NAME1          ;상품명1
+      *X  V1JL4027-TE-ASST-DSTCD1       ;토탈익스포져자산구분코드1
+      *N  V1JL4027-TTL-AMT-BASE-CLAM1   ;명목액기준한도금액1
+      *N  V1JL4027-TTL-AMT-BASE-BAL1    ;명목액기준잔액1
+      *N  V1JL4027-TE-LIMT-AUC1         ;토탈익스포져한도환산금액1

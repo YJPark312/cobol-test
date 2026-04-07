@@ -1,0 +1,58 @@
+      *================================================================*
+      *@ NAME : XDJL4050                                               *
+      *@ DESC : DC포괄신용공여한도대상차주조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-04-16 16:15:31                          *
+      *  생성일시     : 2015-04-16 16:15:32                          *
+      *  전체길이     : 00000015 BYTES                               *
+      *================================================================*
+           03  XDJL4050-RETURN.
+             05  XDJL4050-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4050-OK            VALUE  '00'.
+                 88  COND-XDJL4050-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4050-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4050-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4050-ERROR         VALUE  '09'.
+                 88  COND-XDJL4050-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4050-SYSERROR      VALUE  '99'.
+             05  XDJL4050-R-LINE                 PIC  9(006).
+             05  XDJL4050-R-ERRCD                PIC  X(008).
+             05  XDJL4050-R-TREAT-CD             PIC  X(008).
+             05  XDJL4050-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4050-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4050-I-PRCSS-DSTIC          PIC  X(002).
+      *--       채무자번호
+             05  XDJL4050-I-BRWR-NO              PIC  X(013).
+      *----------------------------------------------------------------*
+           03  XDJL4050-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4050-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4050-O-GRID1                OCCURS 001000 TIMES.
+      *--         채무자번호
+               07  XDJL4050-O-BRWR-NO            PIC  X(013).
+      *--         KB-PIN
+               07  XDJL4050-O-KB-PIN             PIC  X(010).
+      *--         채무자명
+               07  XDJL4050-O-DBTRZ-NAME         PIC  X(052).
+      *--         관리대상구분
+               07  XDJL4050-O-MGT-TAGET-DSTIC    PIC  X(001).
+      *--         등록년월일
+               07  XDJL4050-O-REGI-YMD           PIC  X(008).
+      *================================================================*
+      *        X  D  J  L  4  0  5  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4050-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4050-I-BRWR-NO            ;채무자번호
+      *N  XDJL4050-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4050-O-GRID1              ;그리드1
+      *X  XDJL4050-O-BRWR-NO            ;채무자번호
+      *X  XDJL4050-O-KB-PIN             ;KB-PIN
+      *X  XDJL4050-O-DBTRZ-NAME         ;채무자명
+      *X  XDJL4050-O-MGT-TAGET-DSTIC    ;관리대상구분
+      *X  XDJL4050-O-REGI-YMD           ;등록년월일

@@ -1,0 +1,59 @@
+      *================================================================*
+      *@ NAME : XDJLB071                                               *
+      *@ DESC : DC국외영업점편중관리기준저장 COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-18 17:39:02                          *
+      *  생성일시     : 2020-03-18 17:39:04                          *
+      *  전체길이     : 00020017 BYTES                               *
+      *================================================================*
+           03  XDJLB071-RETURN.
+             05  XDJLB071-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB071-OK            VALUE  '00'.
+                 88  COND-XDJLB071-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB071-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB071-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB071-ERROR         VALUE  '09'.
+                 88  COND-XDJLB071-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB071-SYSERROR      VALUE  '99'.
+             05  XDJLB071-R-LINE                 PIC  9(006).
+             05  XDJLB071-R-ERRCD                PIC  X(008).
+             05  XDJLB071-R-TREAT-CD             PIC  X(008).
+             05  XDJLB071-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB071-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB071-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB071-I-BASE-YM              PIC  X(006).
+      *--       관리부점코드
+             05  XDJLB071-I-MGT-BRNCD            PIC  X(004).
+      *--       총라인수
+             05  XDJLB071-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB071-I-GRID1                OCCURS 002000 TIMES.
+      *--         대분류업종코드
+               07  XDJLB071-I-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         편중관리비율
+               07  XDJLB071-I-LNUP-MGT-CST-RT    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         합산관리여부
+               07  XDJLB071-I-SUM-MGT-YN         PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB071-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB071-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB071-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB071-I-BASE-YM            ;기준년월
+      *X  XDJLB071-I-MGT-BRNCD          ;관리부점코드
+      *N  XDJLB071-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB071-I-GRID1              ;그리드1
+      *X  XDJLB071-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *S  XDJLB071-I-LNUP-MGT-CST-RT    ;편중관리비율
+      *X  XDJLB071-I-SUM-MGT-YN         ;합산관리여부
+      *X  XDJLB071-O-PRCSS-RSULT        ;처리결과

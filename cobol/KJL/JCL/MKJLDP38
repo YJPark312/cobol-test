@@ -1,0 +1,38 @@
+//MKJLDP38 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//* 배치작업기준일 : 영업일
+//*********************************************************************
+//* 국가별　한도　및　ＴＥ현황
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD561,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.SHRKEE.BJLD561.V001,
+//            DISP=(SHR,CATLG,CATLG),UNIT=SYSDA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=200)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP38-001-ONLBAT-KB STAR-%%$ODATE-&SYSUID
+//*자료기준년월일-작업직원번호
+//*********************************************************************
+//* 관리한도설정대상차주　한도　및ＴＥ현황
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD112,OPT=&SYSUID,COND=(4,LT)
+//OTFILE   DD DSN=KJL.SD.BJLD112.V001,
+//            DISP=(SHR,CATLG,CATLG),UNIT=SYSDA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=337)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP38-001-ONLBAT-KB STAR-%%$ODATE-&SYSUID
+//*자료기준년월일-작업직원번호
+//*********************************************************************
+//* 자회사 및 대주주의 모기업 현황
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD114,OPT=&SYSUID,COND=(4,LT)
+//OTFILE   DD DSN=KJL.SD.SHRKEE.BJLD114.V001,
+//            DISP=(SHR,CATLG,CATLG),UNIT=SYSDA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=276)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP38-001-ONLBAT-KB STAR-%%$ODATE-&SYSUID
+//*자료기준년월일-작업직원번호

@@ -1,0 +1,57 @@
+      *================================================================*
+      *@ NAME : V1JL4026                                               *
+      *@ DESC : 포괄신용공여한도신청및승인결과조회                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-04-08 09:58:19                          *
+      *  생성일시     : 2015-04-08 09:58:26                          *
+      *  전체길이     : 00207107 BYTES                               *
+      *================================================================*
+      *--     부점명
+           07  V1JL4026-BRN-NAME                 PIC  X(060).
+      *--     채무자명
+           07  V1JL4026-DBTRZ-NAME               PIC  X(042).
+      *--     출력라인수1
+ROWCNT     07  V1JL4026-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4026-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4026-OUTPT-LINE-CNT1.
+      *--       부점코드
+             09  V1JL4026-BRNCD                  PIC  X(004).
+      *--       영업점명
+             09  V1JL4026-BBRN-NAME              PIC  X(060).
+      *--       차주번호
+             09  V1JL4026-BRWR-NO                PIC  X(013).
+      *--       KB-PIN
+             09  V1JL4026-KB-PIN                 PIC  X(010).
+      *--       채무자명1
+             09  V1JL4026-DBTRZ-NAME1            PIC  X(042).
+      *--       한도진행상태구분코드
+             09  V1JL4026-LIMT-P-STUS-DSTCD      PIC  X(008).
+      *--       한도승인구분코드
+             09  V1JL4026-LIMT-ATHOR-DSTCD       PIC  X(020).
+      *--       한도신청금액
+             09  V1JL4026-LIMT-APLCN-AMT         PIC  9(015).
+      *--       한도승인금액
+             09  V1JL4026-LIMT-ATHOR-AMT         PIC  9(015).
+      *--       한도신청번호
+             09  V1JL4026-LIMT-APLCN-NO          PIC  X(010).
+      *--       한도승인번호
+             09  V1JL4026-LIMT-ATHOR-NO          PIC  X(010).
+      *================================================================*
+      *        V  1  J  L  4  0  2  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4026-BRN-NAME             ;부점명
+      *X  V1JL4026-DBTRZ-NAME           ;채무자명
+      *L  V1JL4026-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4026-GRID1                ;그리드1
+      *X  V1JL4026-BRNCD                ;부점코드
+      *X  V1JL4026-BBRN-NAME            ;영업점명
+      *X  V1JL4026-BRWR-NO              ;차주번호
+      *X  V1JL4026-KB-PIN               ;KB-PIN
+      *X  V1JL4026-DBTRZ-NAME1          ;채무자명1
+      *X  V1JL4026-LIMT-P-STUS-DSTCD    ;한도진행상태구분코드
+      *X  V1JL4026-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *N  V1JL4026-LIMT-APLCN-AMT       ;한도신청금액
+      *N  V1JL4026-LIMT-ATHOR-AMT       ;한도승인금액
+      *X  V1JL4026-LIMT-APLCN-NO        ;한도신청번호
+      *X  V1JL4026-LIMT-ATHOR-NO        ;한도승인번호

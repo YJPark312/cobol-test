@@ -1,0 +1,91 @@
+//MKJLDP06 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* %%SET %%A = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 매일（휴일／영업일　무관）
+//*선행작업명     : MKJLDB05
+//*********************************************************************
+//*    토탈익스포져일일배치작업결과（진행중）
+//*********************************************************************
+//STEP00 EXEC JZBDEXEC,MBR=BJLDLG1,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.PT.CHGLOG.MKJLDLG1.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP06-001-ONLBAT-KB STAR-%%$ODATE-1-0
+//*자료기준년월일
+//*토탈익스포져업무구분（１：TE－고정）
+//*배치완료여부（１：완료，０：진행）
+//*********************************************************************
+//*   채무자고객정보생성
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLD153,OPT=&SYSUID,COND=(4,LT)
+//INFILE    DD DISP=OLD,DSN=KJL.SD.BJLD151.V001
+//          DD DISP=OLD,DSN=KJL.SD.BJLD152.V001
+//OTFILE    DD DSN=KJL.SD.BJLD153.V001.DUP,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(3000,300)),
+//             DCB=(RECFM=FB)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP06-001-NORBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   고객식별자 SORT
+//*********************************************************************
+//STEP03 EXEC PGM=SORT,REGION=0M,COND=(4,LT)
+//SORTIN   DD DSN=KJL.SD.BJLD153.V001.DUP,DISP=OLD
+//SORTOUT  DD DSN=KJL.SD.BJLD153.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(3000,300)),
+//            DCB=(RECFM=FB,DSORG=PS)
+//SORTWK01 DD SPACE=(CYL,(3000,1000),RLSE),DSORG=PS
+//SORTWK02 DD SPACE=(CYL,(3000,1000),RLSE),DSORG=PS
+//SORTWK03 DD SPACE=(CYL,(3000,1000),RLSE),DSORG=PS
+//SORTWK04 DD SPACE=(CYL,(3000,1000),RLSE),DSORG=PS
+//SORTWK05 DD SPACE=(CYL,(3000,1000),RLSE),DSORG=PS
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+    SORT FIELDS=(4,10,CH,A)
+/*
+//*********************************************************************
+//*   채무자고객정보적재
+//*********************************************************************
+//*    THKJL0015 고객정보 LOAD
+//*    - RESUME YES : 기존데이타유지
+//*    - RESUME NO REPLACE : 기존데이타삭제
+//*    - STATISTICS TABLE(ALL) INDEX(ALL)
+//*********************************************************************
+//STEP04   EXEC DSNUPROC,PARM='DAPG,THKJL0015',COND=(4,LT)
+//DSNTRACE   DD SYSOUT=*
+//SORTLIB    DD DSN=SYS1.SORTLIB,DISP=SHR
+//SORTWK01   DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SORTWK02   DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SORTWK03   DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SORTWK04   DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SORTWK05   DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SYSUT1     DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SORTOUT    DD UNIT=SYSPA,SPACE=(CYL,(3000,1000),,,ROUND)
+//SYSREC00   DD DSN=KJL.SD.BJLD153.V001,DISP=(OLD,KEEP)
+//SYSIN      DD  *
+  LOAD DATA LOG NO
+       NOCOPYPEND
+       RESUME NO REPLACE
+       STATISTICS TABLE(ALL) INDEX(ALL)
+       INDDN SYSREC00 INTO TABLE
+       DB2DBA.THKJL0015
+/*
+//*********************************************************************
+//*   변경채무자고객산업군변경
+//*********************************************************************
+//SETP04  EXEC JZBDEXEC,MBR=BJLD161,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.PT.CHGLOG.MKJLD161.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP06-001-NORBAT-KB STAR-%%$ODATE
+//*자료기준년월일

@@ -1,0 +1,255 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4068 (DC산업취급조회)
+      *@처리유형  : DC
+      *@처리개요  : 산업취급도조회하는 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@박정수:20220707: 신규작성
+      * YBH     :20221027: 확인권자 결재기능 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4068.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   22/07/07.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4068'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL6801-CA.
+           COPY  XQJL6801.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4068-CA.
+           COPY  XDJL4068.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4068-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4068-OUT
+                            XDJL4068-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   원장 조회
+           EVALUATE XDJL4068-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+               INITIALIZE                  XQJL6801-IN
+
+      *        그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL6801-I-GROUP-CO-CD
+
+      *        대분류업종코드
+               IF XDJL4068-I-LAG-CLSFI-BZTYP-CD = '999'
+                   MOVE '%%%'
+                     TO XQJL6801-I-LAG-CLSFI-BZTYP-CD
+               ELSE
+                   MOVE XDJL4068-I-LAG-CLSFI-BZTYP-CD
+                     TO XQJL6801-I-LAG-CLSFI-BZTYP-CD
+               END-IF
+
+      *        전영업일의 년월
+               MOVE XDJL4068-I-INQURY-BASE-END-YMD(1:6)
+                 TO XQJL6801-I-BASE-YM
+      *        조회기준시작년월일
+               MOVE XDJL4068-I-INQURY-B-START-YMD
+                 TO XQJL6801-I-INQURY-B-START-YMD
+      *        조회기준종료년월일
+               MOVE XDJL4068-I-INQURY-BASE-END-YMD
+                 TO XQJL6801-I-INQURY-BASE-END-YMD
+
+               #DYSQLA QJL6801 SELECT XQJL6801-CA
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 1000
+                        OR WK-I > DBSQL-SELECT-CNT
+      *       총라인수
+               MOVE WK-I
+                 TO XDJL4068-O-TOTAL-LINE-CNT
+      *       대분류업종코드
+               MOVE XQJL6801-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJL4068-O-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       대분류업종코드명
+               MOVE XQJL6801-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                 TO XDJL4068-O-LAG-C-BZTYP-CD-NAME(WK-I)
+221027*       일련번호
+               MOVE XQJL6801-O-SERNO(WK-I)
+                 TO XDJL4068-O-SERNO(WK-I)
+      *       취급중단년월일
+               MOVE XQJL6801-O-HNDLN-DSCN-YMD(WK-I)
+                 TO XDJL4068-O-HNDLN-DSCN-YMD(WK-I)
+      *       예외적용년월일
+               MOVE XQJL6801-O-ECEPT-APLY-YMD(WK-I)
+                 TO XDJL4068-O-ECEPT-APLY-YMD(WK-I)
+221027*       산업등록해제구분코드
+   |           MOVE  XQJL6801-O-LIMT-EIRR-DSTCD(WK-I)
+   |             TO  XDJL4068-O-LIMT-EIRR-DSTCD(WK-I)
+   |  *       등록직원번호
+   |           MOVE  XQJL6801-O-REGI-EMPID(WK-I)
+   |             TO  XDJL4068-O-REGI-EMPID(WK-I)
+      *       등록직원명
+               MOVE  XQJL6801-O-REGI-EMNM(WK-I)
+                 TO  XDJL4068-O-REGI-EMNM(WK-I)
+   |  *       등록년월일
+               MOVE  XQJL6801-O-REGI-YMD(WK-I)
+                 TO  XDJL4068-O-REGI-YMD(WK-I)
+   |  *       등록결재직원번호
+               MOVE  XQJL6801-O-REGI-APRVAL-EMPID(WK-I)
+                 TO  XDJL4068-O-REGI-APRVAL-EMPID(WK-I)
+      *       등록결재직원명
+               MOVE  XQJL6801-O-REGI-APRVAL-EMNM(WK-I)
+                 TO  XDJL4068-O-REGI-APRVAL-EMNM(WK-I)
+   |  *       등록결재년월일
+               MOVE  XQJL6801-O-REGI-APRVAL-YMD(WK-I)
+                 TO  XDJL4068-O-REGI-APRVAL-YMD(WK-I)
+   |  *       해제직원번호
+               MOVE  XQJL6801-O-REVOC-EMPID(WK-I)
+                 TO  XDJL4068-O-REVOC-EMPID(WK-I)
+      *       해제직원명
+               MOVE  XQJL6801-O-REVOC-EMNM(WK-I)
+                 TO  XDJL4068-O-REVOC-EMNM(WK-I)
+   |  *       해제년월일
+               MOVE  XQJL6801-O-REVOC-YMD(WK-I)
+                 TO  XDJL4068-O-REVOC-YMD(WK-I)
+   |  *       해제결재직원번호
+               MOVE  XQJL6801-O-REVOC-APRVAL-EMPID(WK-I)
+                 TO  XDJL4068-O-REVOC-APRVAL-EMPID(WK-I)
+      *       해제결재직원명
+               MOVE  XQJL6801-O-REVOC-APRVAL-EMNM(WK-I)
+                 TO  XDJL4068-O-REVOC-APRVAL-EMNM(WK-I)
+221027*       해제결재년월일
+               MOVE  XQJL6801-O-REVOC-APRVAL-YMD(WK-I)
+                 TO  XDJL4068-O-REVOC-APRVAL-YMD(WK-I)
+           END-PERFORM
+
+           .
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

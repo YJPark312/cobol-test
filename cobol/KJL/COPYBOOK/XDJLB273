@@ -1,0 +1,72 @@
+      *================================================================*
+      *@ NAME : XDJLB273                                               *
+      *@ DESC : DC포괄신용공여한도신청저장 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-05 15:42:12                          *
+      *  생성일시     : 2023-09-05 15:42:13                          *
+      *  전체길이     : 00000383 BYTES                               *
+      *================================================================*
+           03  XDJLB273-RETURN.
+             05  XDJLB273-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB273-OK            VALUE  '00'.
+                 88  COND-XDJLB273-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB273-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB273-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB273-ERROR         VALUE  '09'.
+                 88  COND-XDJLB273-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB273-SYSERROR      VALUE  '99'.
+             05  XDJLB273-R-LINE                 PIC  9(006).
+             05  XDJLB273-R-ERRCD                PIC  X(008).
+             05  XDJLB273-R-TREAT-CD             PIC  X(008).
+             05  XDJLB273-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB273-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB273-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XDJLB273-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XDJLB273-I-APLCN-NO             PIC  X(010).
+      *--       한도신청종류구분코드
+             05  XDJLB273-I-LIMT-A-KND-DSTCD     PIC  X(001).
+      *--       신청년월일
+             05  XDJLB273-I-APLCN-YMD            PIC  X(008).
+      *--       신청부점코드
+             05  XDJLB273-I-APLCN-BRNCD          PIC  X(004).
+      *--       신청직원번호
+             05  XDJLB273-I-APLCN-EMPID          PIC  X(007).
+      *--       한도설정가능금액
+             05  XDJLB273-I-LIMT-STUP-ABLAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도신청금액
+             05  XDJLB273-I-LIMT-APLCN-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신청사유내용
+             05  XDJLB273-I-APLCN-RESN-CTNT      PIC  X(302).
+      *--       산업평가등급구분
+             05  XDJLB273-I-IDSTRY-V-GRD-DSTCD   PIC  X(004).
+      *----------------------------------------------------------------*
+           03  XDJLB273-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB273-O-PRCSS-RSULT          PIC  X(002).
+      *--       신청번호
+             05  XDJLB273-O-APLCN-NO             PIC  X(010).
+      *================================================================*
+      *        X  D  J  L  B  2  7  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB273-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB273-I-BRWR-NO            ;차주번호
+      *X  XDJLB273-I-APLCN-NO           ;신청번호
+      *X  XDJLB273-I-LIMT-A-KND-DSTCD   ;한도신청종류구분코드
+      *X  XDJLB273-I-APLCN-YMD          ;신청년월일
+      *X  XDJLB273-I-APLCN-BRNCD        ;신청부점코드
+      *X  XDJLB273-I-APLCN-EMPID        ;신청직원번호
+      *S  XDJLB273-I-LIMT-STUP-ABLAMT   ;한도설정가능금액
+      *S  XDJLB273-I-LIMT-APLCN-AMT     ;한도신청금액
+      *X  XDJLB273-I-APLCN-RESN-CTNT    ;신청사유내용
+      *X  XDJLB273-I-IDSTRY-V-GRD-DSTCD ;산업평가등급구분
+      *X  XDJLB273-O-PRCSS-RSULT        ;처리결과
+      *X  XDJLB273-O-APLCN-NO           ;신청번호

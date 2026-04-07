@@ -1,0 +1,106 @@
+      *================================================================*
+      *@ NAME : XPJL4025                                               *
+      *@ DESC : PC포괄신용공여한도기업여신현황 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-07 16:11:03                          *
+      *  생성일시     : 2009-07-07 16:11:05                          *
+      *================================================================*
+           03  XPJL4025-RETURN.
+             05  XPJL4025-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4025-OK            VALUE  '00'.
+                 88  COND-XPJL4025-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4025-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4025-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4025-ERROR         VALUE  '09'.
+                 88  COND-XPJL4025-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4025-SYSERROR      VALUE  '99'.
+             05  XPJL4025-R-LINE                 PIC  9(006).
+             05  XPJL4025-R-ERRCD                PIC  X(008).
+             05  XPJL4025-R-TREAT-CD             PIC  X(008).
+             05  XPJL4025-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4025-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4025-I-PRCSS-DSTIC          PIC  X(002).
+      *--       채무자번호
+             05  XPJL4025-I-BRWR-NO              PIC  X(013).
+      *--       조회기준일자
+             05  XPJL4025-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XPJL4025-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XPJL4025-O-DBTRZ-NAME           PIC  X(052).
+      *--       포골신용공여관리한도
+             05  XPJL4025-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       계열명
+             05  XPJL4025-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       유효기일
+             05  XPJL4025-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       기사용액
+             05  XPJL4025-O-INLS-GRCR-LIMT-AUC   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       계열신용등급
+             05  XPJL4025-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       업종명
+             05  XPJL4025-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       한도여유액
+             05  XPJL4025-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업신용등급
+             05  XPJL4025-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       출력라인수1
+             05  XPJL4025-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4025-O-GRID1                OCCURS 005000 TIMES.
+      *--         계좌번호
+               07  XPJL4025-O-ACNO               PIC  X(020).
+      *--         상품코드
+               07  XPJL4025-O-PRDCT-CD           PIC  X(012).
+      *--         상품명
+               07  XPJL4025-O-PRDCT-NAME         PIC  X(262).
+      *--         명목액기준한도
+               07  XPJL4025-O-TTL-AMT-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준잔액
+               07  XPJL4025-O-TTL-AMT-BASE-BAL   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         한도환산액
+               07  XPJL4025-O-LIMT-AUC           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         잔액환산액
+               07  XPJL4025-O-BAL-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         대출일
+               07  XPJL4025-O-START-YMD          PIC  X(008).
+      *--         만기일
+               07  XPJL4025-O-EXPIR-YMD          PIC  X(008).
+      *================================================================*
+      *        X  P  J  L  4  0  2  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4025-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4025-I-BRWR-NO            ;채무자번호
+      *X  XPJL4025-I-BASE-YMD           ;조회기준일자
+      *X  XPJL4025-O-DBTRZ-NAME         ;채무자명
+      *S  XPJL4025-O-MGT-CLAM           ;포골신용공여관리한도
+      *X  XPJL4025-O-AFFLT-C-GROUP-NAME ;계열명
+      *X  XPJL4025-O-MGT-LIMT-VALD-YMD  ;유효기일
+      *S  XPJL4025-O-INLS-GRCR-LIMT-AUC ;기사용액
+      *X  XPJL4025-O-INTNL-CV-GRD-DSTCD ;계열신용등급
+      *X  XPJL4025-O-STND-IDSTRY-CD-NAME;업종명
+      *S  XPJL4025-O-LIMT-SEXTR-AMT     ;한도여유액
+      *X  XPJL4025-O-INTNL-CV-GRD-DSTCD1;기업신용등급
+      *N  XPJL4025-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4025-O-GRID1              ;그리드1
+      *X  XPJL4025-O-ACNO               ;계좌번호
+      *X  XPJL4025-O-PRDCT-CD           ;상품코드
+      *X  XPJL4025-O-PRDCT-NAME         ;상품명
+      *S  XPJL4025-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *S  XPJL4025-O-TTL-AMT-BASE-BAL   ;명목액기준잔액
+      *S  XPJL4025-O-LIMT-AUC           ;한도환산액
+      *S  XPJL4025-O-BAL-AUC            ;잔액환산액
+      *X  XPJL4025-O-START-YMD          ;대출일
+      *X  XPJL4025-O-EXPIR-YMD          ;만기일

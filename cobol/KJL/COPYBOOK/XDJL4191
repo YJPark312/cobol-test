@@ -1,0 +1,74 @@
+      *================================================================*
+      *@ NAME : XDJL4191                                               *
+      *@ DESC : DC신용공여기관정보조회COPYBOOK                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-04-15 17:06:52                          *
+      *  생성일시     : 2024-04-15 17:06:52                          *
+      *  전체길이     : 00000063 BYTES                               *
+      *================================================================*
+           03  XDJL4191-RETURN.
+             05  XDJL4191-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4191-OK            VALUE  '00'.
+                 88  COND-XDJL4191-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4191-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4191-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4191-ERROR         VALUE  '09'.
+                 88  COND-XDJL4191-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4191-SYSERROR      VALUE  '99'.
+             05  XDJL4191-R-LINE                 PIC  9(006).
+             05  XDJL4191-R-ERRCD                PIC  X(008).
+             05  XDJL4191-R-TREAT-CD             PIC  X(008).
+             05  XDJL4191-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4191-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4191-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJL4191-I-BASE-YM              PIC  X(006).
+      *--       통합계정과목코드
+             05  XDJL4191-I-INTGRA-TIACC-CD      PIC  X(013).
+      *--       조회계정과목명
+             05  XDJL4191-I-INQURY-TIACC-NAME    PIC  X(042).
+      *----------------------------------------------------------------*
+           03  XDJL4191-OUT.
+      *----------------------------------------------------------------*
+      *--       그리드
+             05  XDJL4191-O-GRID.
+      *--         총라인수
+               07  XDJL4191-O-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJL4191-O-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           통합계정과목코드
+                 09  XDJL4191-O-INTGRA-TIACC-CD  PIC  X(013).
+      *--           계정과목명
+                 09  XDJL4191-O-TIACC-NAME       PIC  X(042).
+      *--           계정과목CCF환산율
+                 09  XDJL4191-O-TIACC-CCF-UTCRT  PIC  9(003).
+      *--           신용공여계정구분
+                 09  XDJL4191-O-GRCR-ACITM-DSTCD PIC  X(002).
+      *--           신용공여대상구분
+                 09  XDJL4191-O-GRCR-TAGET-DSTCD PIC  X(001).
+      *--           신용공여중분류코드
+                 09  XDJL4191-O-GRCR-MIDL-CLSFI-CD
+                                                 PIC  X(003).
+      *--           신용공여중분류코드명
+                 09  XDJL4191-O-GRCR-MC-CD-NAME  PIC  X(042).
+      *================================================================*
+      *        X  D  J  L  4  1  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4191-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4191-I-BASE-YM            ;기준년월
+      *X  XDJL4191-I-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJL4191-I-INQURY-TIACC-NAME  ;조회계정과목명
+      *G  XDJL4191-O-GRID               ;그리드
+      *N  XDJL4191-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4191-O-DATA-BOOK          ;데이터부
+      *X  XDJL4191-O-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJL4191-O-TIACC-NAME         ;계정과목명
+      *N  XDJL4191-O-TIACC-CCF-UTCRT    ;계정과목CCF환산율
+      *X  XDJL4191-O-GRCR-ACITM-DSTCD   ;신용공여계정구분
+      *X  XDJL4191-O-GRCR-TAGET-DSTCD   ;신용공여대상구분
+      *X  XDJL4191-O-GRCR-MIDL-CLSFI-CD ;신용공여중분류코드
+      *X  XDJL4191-O-GRCR-MC-CD-NAME    ;신용공여중분류코드명

@@ -1,0 +1,183 @@
+      *================================================================*
+      *@ NAME : YPJLB009                                               *
+      *@ DESC : AS기업및그룹한도신청및승인 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-02-20 13:36:33                          *
+      *  생성일시     : 2009-02-20 13:36:42                          *
+      *================================================================*
+      *--     처리결과
+           07  YPJLB009-PRCSS-RSULT              PIC  X(002).
+      *--     fld신청번호
+           07  YPJLB009-LIMT-APLCN-NO            PIC  X(010).
+      *--     cbo수정신용등급
+           07  YPJLB009-AMND-ICV-GRD-DSTCD       PIC  X(015).
+      *--     fld수정결산년월
+           07  YPJLB009-AMND-STLACC-YM           PIC  X(006).
+      *--     fld수정업종
+           07  YPJLB009-AMND-NSI-CLSFI-CD        PIC  X(005).
+      *--     fld수정업종명
+           07  YPJLB009-AMND-SI-CD-NAME          PIC  X(040).
+      *--     fld수정기준년도
+           07  YPJLB009-AMND-B-AVG-APLY-YR       PIC  X(004).
+      *--     fld수정신용등급지원비율
+           07  YPJLB009-AMND-C-SPORT-RATO        PIC  9(003)V9(02).
+      *--     fld수정영업이익
+           07  YPJLB009-AMND-OPRFT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정수입이자
+           07  YPJLB009-AMND-INT-ERN             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정감가상각비
+           07  YPJLB009-AMND-DPRC-CST            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융비용
+           07  YPJLB009-AMND-FNCS                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정단기차입금
+           07  YPJLB009-AMND-SHTRM-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금상환예상액
+           07  YPJLB009-AMND-S-AMBR-RPAYAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정가중평균이자율
+           07  YPJLB009-AMND-B-WGHTG-AVG-RT      PIC  9(003)V9(02).
+      *--     fld수정총차입금
+           07  YPJLB009-AMND-E-TOTAL-AMBR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정매출액
+           07  YPJLB009-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정cashflow기준액
+           07  YPJLB009-AMND-CSFW-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정자기자본
+           07  YPJLB009-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금자기자본비율
+           07  YPJLB009-AMND-AMBR-ONCP-RT        PIC  9(003)V9(02).
+      *--     fld수정자기자본기준액
+           07  YPJLB009-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정상환능력기준한도
+           07  YPJLB009-AMND-S-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정전년도매출액
+           07  YPJLB009-AMND-SALEPR1             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금매출액비율
+           07  YPJLB009-AMND-A-SALEPR-RATO       PIC  9(003)V9(02).
+      *--     fld수정전년도총자산
+           07  YPJLB009-AMND-PYY-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금총자산비율
+           07  YPJLB009-AMND-AT-ASST-RATO        PIC  9(003)V9(02).
+      *--     fld수정규모기준한도
+           07  YPJLB009-AMND-SCAL-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정기준한도
+           07  YPJLB009-AMND-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     cbo수정금융신용등급
+           07  YPJLB009-AMND-FICV-GRD-DSTCD      PIC  X(006).
+      *--     fld수정금융결산년월
+           07  YPJLB009-AMND-F-STLACC-YM         PIC  X(006).
+      *--     fld수정금융업종
+           07  YPJLB009-AMND-FL-BZTYP-DSTCD      PIC  X(018).
+      *--     fld수정금융업종명
+           07  YPJLB009-AMND-FLB-DSTCD-NAME      PIC  X(042).
+      *--     fld수정금융업종평균기준년도
+           07  YPJLB009-AMND-FB-AVG-APLY-YR      PIC  X(004).
+      *--     fld수정금융신용등급별지원비율
+           07  YPJLB009-AMND-FC-SPORT-RATO       PIC  9(003)V9(02).
+      *--     fld수정금융전전기경상이익
+           07  YPJLB009-AMND-FBP-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전기경상이익
+           07  YPJLB009-AMND-FP-ODNR-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융당기경상이익
+           07  YPJLB009-AMND-FBY-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전전기자기자본
+           07  YPJLB009-AMND-FBP-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전기자기자본
+           07  YPJLB009-AMND-PYY-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융당기자기자본
+           07  YPJLB009-AMND-FB-YR-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융최근업종평균자본비율
+           07  YPJLB009-AMND-F-ONCP-RATO         PIC  9(003)V9(02).
+      *--     fld수정금융상환능력기준한도
+           07  YPJLB009-AMND-FS-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융규모기준기준한도
+           07  YPJLB009-AMND-S-BASE-CLAM1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융금융기관기준한도
+           07  YPJLB009-AMND-F-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld승인_승인일자
+           07  YPJLB009-ATHOR-YMD                PIC  X(008).
+      *================================================================*
+      *        Y  P  J  L  B  0  0  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJLB009-PRCSS-RSULT          ;처리결과
+      *X  YPJLB009-LIMT-APLCN-NO        ;fld신청번호
+      *X  YPJLB009-AMND-ICV-GRD-DSTCD   ;cbo수정신용등급
+      *X  YPJLB009-AMND-STLACC-YM       ;fld수정결산년월
+      *X  YPJLB009-AMND-NSI-CLSFI-CD    ;fld수정업종
+      *X  YPJLB009-AMND-SI-CD-NAME      ;fld수정업종명
+      *X  YPJLB009-AMND-B-AVG-APLY-YR   ;fld수정기준년도
+      *N  YPJLB009-AMND-C-SPORT-RATO    ;fld수정신용등급지원비율
+      *S  YPJLB009-AMND-OPRFT           ;fld수정영업이익
+      *S  YPJLB009-AMND-INT-ERN         ;fld수정수입이자
+      *S  YPJLB009-AMND-DPRC-CST        ;fld수정감가상각비
+      *S  YPJLB009-AMND-FNCS            ;fld수정금융비용
+      *S  YPJLB009-AMND-SHTRM-AMBR      ;fld수정단기차입금
+      *S  YPJLB009-AMND-S-AMBR-RPAYAMT
+      * fld수정차입금상환예상액
+      *N  YPJLB009-AMND-B-WGHTG-AVG-RT  ;fld수정가중평균이자율
+      *S  YPJLB009-AMND-E-TOTAL-AMBR    ;fld수정총차입금
+      *S  YPJLB009-AMND-SALEPR          ;fld수정매출액
+      *S  YPJLB009-AMND-CSFW-BSAMT      ;fld수정cashflow기준액
+      *S  YPJLB009-AMND-B-YR-ONCP-AMT   ;fld수정자기자본
+      *N  YPJLB009-AMND-AMBR-ONCP-RT
+      * fld수정차입금자기자본비율
+      *S  YPJLB009-AMND-O-CAPTL-BSAMT   ;fld수정자기자본기준액
+      *S  YPJLB009-AMND-S-BASE-CLAM     ;fld수정상환능력기준한도
+      *S  YPJLB009-AMND-SALEPR1         ;fld수정전년도매출액
+      *N  YPJLB009-AMND-A-SALEPR-RATO
+      * fld수정차입금매출액비율
+      *S  YPJLB009-AMND-PYY-TOTAL-ASST  ;fld수정전년도총자산
+      *N  YPJLB009-AMND-AT-ASST-RATO    ;fld수정차입금총자산비율
+      *S  YPJLB009-AMND-SCAL-BASE-CLAM  ;fld수정규모기준한도
+      *S  YPJLB009-AMND-BASE-CLAM       ;fld수정기준한도
+      *X  YPJLB009-AMND-FICV-GRD-DSTCD  ;cbo수정금융신용등급
+      *X  YPJLB009-AMND-F-STLACC-YM     ;fld수정금융결산년월
+      *X  YPJLB009-AMND-FL-BZTYP-DSTCD  ;fld수정금융업종
+      *X  YPJLB009-AMND-FLB-DSTCD-NAME  ;fld수정금융업종명
+      *X  YPJLB009-AMND-FB-AVG-APLY-YR
+      * fld수정금융업종평균기준년도
+      *N  YPJLB009-AMND-FC-SPORT-RATO
+      * fld수정금융신용등급별지원비율
+      *S  YPJLB009-AMND-FBP-ODNR-PRFT
+      * fld수정금융전전기경상이익
+      *S  YPJLB009-AMND-FP-ODNR-PRFT    ;fld수정금융전기경상이익
+      *S  YPJLB009-AMND-FBY-ODNR-PRFT
+      * fld수정금융당기경상이익
+      *S  YPJLB009-AMND-FBP-ONCP-AMT
+      * fld수정금융전전기자기자본
+      *S  YPJLB009-AMND-PYY-ONCP-AMT    ;fld수정금융전기자기자본
+      *S  YPJLB009-AMND-FB-YR-ONCP-AMT
+      * fld수정금융당기자기자본
+      *N  YPJLB009-AMND-F-ONCP-RATO
+      * fld수정금융최근업종평균자본비율
+      *S  YPJLB009-AMND-FS-BASE-CLAM
+      * fld수정금융상환능력기준한도
+      *S  YPJLB009-AMND-S-BASE-CLAM1
+      * fld수정금융규모기준기준한도
+      *S  YPJLB009-AMND-F-BASE-CLAM
+      * fld수정금융금융기관기준한도
+      *X  YPJLB009-ATHOR-YMD            ;fld승인_승인일자

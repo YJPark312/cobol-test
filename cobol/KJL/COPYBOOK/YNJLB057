@@ -1,0 +1,36 @@
+      *================================================================*
+      *@ NAME : YNJLB057                                               *
+      *@ DESC : AS산업별지역별SUB한도관리COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2013-04-17 14:48:26                          *
+      *  생성일시     : 2013-04-17 14:49:05                          *
+      *  전체길이     : 00002115 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB057-PRCSS-DSTIC              PIC  X(002).
+      *--     기준년월일
+           07  YNJLB057-BASE-YMD                 PIC  X(008).
+      *--     그리드
+           07  YNJLB057-GRID.
+      *--       총라인수
+             09  YNJLB057-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  YNJLB057-DATA-BOOK              OCCURS 000100 TIMES.
+      *--         대분류업종코드
+               11  YNJLB057-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--         지역구분
+               11  YNJLB057-AREA-DSTIC           PIC  X(002).
+      *--         지역별SUB한도
+               11  YNJLB057-AREA-PER-SUB-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  N  J  L  B  0  5  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB057-PRCSS-DSTIC          ;처리구분
+      *X  YNJLB057-BASE-YMD             ;기준년월일
+      *G  YNJLB057-GRID                 ;그리드
+      *N  YNJLB057-TOTAL-LINE-CNT       ;총라인수
+      *A  YNJLB057-DATA-BOOK            ;데이터부
+      *X  YNJLB057-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  YNJLB057-AREA-DSTIC           ;지역구분
+      *S  YNJLB057-AREA-PER-SUB-LIMT    ;지역별SUB한도

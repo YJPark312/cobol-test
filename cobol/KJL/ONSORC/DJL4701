@@ -1,0 +1,377 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4701 (DC지역본부별SUB한도조회)
+      *@처리유형  : DC
+      *@처리개요  : 지역본부별SUB한도조회 하는  프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20151223: 신규작성
+      * HYH    :20170710: 부점하드코딩 ==> FJL0001 변경
+      * YBH    :20180117: 해외지점및현지법인 분리(글로벌사업부)
+      * YBH    :20180627: 미기표현황 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4701.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   15/12/23.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4701'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-0000             PIC  X(004) VALUE '0000'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-NEXT-KEY.
+               05 WK-LAG-CLSFI-BZTYP        PIC  X(003).
+               05 WK-AREA-HQ-CD             PIC  X(004).
+
+           03 WK-H-I-BRNCD1             PIC  X(00004).
+           03 WK-H-I-BRNCD2             PIC  X(00004).
+           03 WK-H-I-BRNCD3             PIC  X(00004).
+           03 WK-H-I-BRNCD4             PIC  X(00004).
+           03 WK-H-I-BRNCD5             PIC  X(00004).
+           03 WK-H-I-BRNCD6             PIC  X(00004).
+           03 WK-H-I-BRNCD7             PIC  X(00004).
+180117     03 WK-H-I-BRNCD8             PIC  X(00004).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL0701-CA.
+           COPY  XQJL0701.
+
+170710* FC COPYBOOK
+       01  XFJL0001-CA.
+           COPY  XFJL0001.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4701-CA.
+           COPY  XDJL4701.
+
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4701-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4701-OUT
+                            XDJL4701-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+170710*@   조회부점확인
+           PERFORM S4000-FJL0001-CALL-RTN
+              THRU S4000-FJL0001-CALL-EXT
+
+      *   원장 조회
+           EVALUATE XDJL4701-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+               INITIALIZE       XQJL0701-IN
+
+      *       그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL0701-I-GROUP-CO-CD
+      *       기준년월일
+               MOVE XDJL4701-I-BASE-YMD
+                 TO XQJL0701-I-BASE-YMD
+      *       대분류업종코드
+               IF XDJL4701-I-LAG-CLSFI-BZTYP-CD = '999'
+                   MOVE ALL '%'
+                     TO XQJL0701-I-LAG-CLSFI-BZTYP-CD
+               ELSE
+                   MOVE XDJL4701-I-LAG-CLSFI-BZTYP-CD
+                     TO XQJL0701-I-LAG-CLSFI-BZTYP-CD
+               END-IF
+
+      *       부점코드조회
+               MOVE  WK-H-I-BRNCD1   TO   XQJL0701-I-BRNCD1
+               MOVE  WK-H-I-BRNCD2   TO   XQJL0701-I-BRNCD2
+               MOVE  WK-H-I-BRNCD3   TO   XQJL0701-I-BRNCD3
+               MOVE  WK-H-I-BRNCD4   TO   XQJL0701-I-BRNCD4
+               MOVE  WK-H-I-BRNCD5   TO   XQJL0701-I-BRNCD5
+               MOVE  WK-H-I-BRNCD6   TO   XQJL0701-I-BRNCD6
+               MOVE  WK-H-I-BRNCD7   TO   XQJL0701-I-BRNCD7
+180117         MOVE  WK-H-I-BRNCD8   TO   XQJL0701-I-BRNCD8
+
+      *       지역본부코드
+               IF XDJL4701-I-AREA-HQ-CD = '9999'
+                   MOVE ALL '%'
+                     TO XQJL0701-I-AREA-HQ-CD
+               ELSE
+                   MOVE XDJL4701-I-AREA-HQ-CD
+                     TO XQJL0701-I-AREA-HQ-CD
+               END-IF
+
+      *       중단거래여부 확인
+               IF BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-NEXT-KEY
+
+      *            N대분류업종코드
+                   MOVE WK-LAG-CLSFI-BZTYP
+                     TO XQJL0701-I-N-LAG-CLSFI-BZTYP
+      *            N지역본부코드
+                   MOVE WK-AREA-HQ-CD
+                     TO XQJL0701-I-N-AREA-HQ-CD
+               END-IF
+
+               #DYSQLA QJL0701 SELECT XQJL0701-CA
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *       총라인수
+               MOVE WK-I
+                 TO XDJL4701-O-TOTAL-LINE-CNT
+      *       대분류업종코드
+               MOVE XQJL0701-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJL4701-O-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       지역본부코드
+               MOVE XQJL0701-O-AREA-HQ-CD(WK-I)
+                 TO XDJL4701-O-AREA-HQ-CD(WK-I)
+      *       지역본부명
+               MOVE XQJL0701-O-AREA-HQ-NAME(WK-I)
+                 TO XDJL4701-O-AREA-HQ-NAME(WK-I)
+      *       전년도말익스포져금액
+               MOVE XQJL0701-O-PYY-X-END-EXPSR-AMT(WK-I)
+                 TO XDJL4701-O-PYY-X-END-EXPSR-AMT(WK-I)
+      *       지역본부SUB한도
+               MOVE XQJL0701-O-AREA-HQ-SUB-CLAM(WK-I)
+                 TO XDJL4701-O-AREA-HQ-SUB-CLAM(WK-I)
+      *       지역본부순증SUB한도
+               MOVE XQJL0701-O-AREA-HN-SUB-CLAM(WK-I)
+                 TO XDJL4701-O-AREA-HN-SUB-CLAM(WK-I)
+      *       지역본부익스포져금액
+               MOVE XQJL0701-O-AREA-HQ-EXPSR-AMT(WK-I)
+                 TO XDJL4701-O-AREA-HQ-EXPSR-AMT(WK-I)
+      *       지역본부한도여유금액
+               MOVE XQJL0701-O-AREA-HQ-LIMT-EXAN(WK-I)
+                 TO XDJL4701-O-AREA-HQ-LIMT-EXAN(WK-I)
+      *       지역본부SUB소진율
+               MOVE XQJL0701-O-AREA-HQ-SUB-EXHS-RT(WK-I)
+                 TO XDJL4701-O-AREA-HQ-SUB-EXHS-RT(WK-I)
+      *       지역본부예외승인한도
+               MOVE XQJL0701-O-AREA-HE-ATHOR-CLAM(WK-I)
+                 TO XDJL4701-O-AREA-HE-ATHOR-CLAM(WK-I)
+      *       지역본부예외승인금액
+               MOVE XQJL0701-O-AREA-HE-ATHOR-AMT(WK-I)
+                 TO XDJL4701-O-AREA-HE-ATHOR-AMT(WK-I)
+      *       지역예외승인여유금액
+               MOVE XQJL0701-O-AREA-E-ATHOR-EXAN(WK-I)
+                 TO XDJL4701-O-AREA-E-ATHOR-EXAN(WK-I)
+      *       지역예외승인소진율
+               MOVE XQJL0701-O-AREA-EA-EXHS-RT(WK-I)
+                 TO XDJL4701-O-AREA-EA-EXHS-RT(WK-I)
+      *       지역본부기준소진율
+               MOVE XQJL0701-O-AREA-HE-BASE(WK-I)
+                 TO XDJL4701-O-AREA-HE-BASE(WK-I)
+      *       월SUB한도
+               MOVE XQJL0701-O-M-AREA-HQ-SUB-CLAM(WK-I)
+                 TO XDJL4701-O-M-AREA-HQ-SUB-CLAM(WK-I)
+      *       월예외승인한도
+               MOVE XQJL0701-O-M-AREA-HE-ATHOR(WK-I)
+                 TO XDJL4701-O-M-AREA-HE-ATHOR(WK-I)
+      *       월기준소진율
+               MOVE XQJL0701-O-M-AREA-HE-BASE(WK-I)
+                 TO XDJL4701-O-M-AREA-HE-BASE(WK-I)
+180627*       대출금액
+               MOVE XQJL0701-O-LN-AMT(WK-I)
+                 TO XDJL4701-O-LN-AMT(WK-I)
+180627*       실질여유액
+               MOVE XQJL0701-O-ATUAL-SEXTR-AMT(WK-I)
+                 TO XDJL4701-O-ATUAL-SEXTR-AMT(WK-I)
+180627*       실질소진율
+               MOVE XQJL0701-O-ATUAL-EXHS-RT(WK-I)
+                 TO XDJL4701-O-ATUAL-EXHS-RT(WK-I)
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT > 100
+      *       대분류업종코드
+               MOVE XQJL0701-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO WK-LAG-CLSFI-BZTYP
+      *       지역본부코드
+               MOVE XQJL0701-O-AREA-HQ-CD(WK-I)
+                 TO WK-AREA-HQ-CD
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+           .
+
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+170710*@  부점정보 추출
+      *-----------------------------------------------------------------
+       S4000-FJL0001-CALL-RTN.
+
+      *@   지역본부(영업지원본부부점) 분류 요건
+      *  1)  1948: 투자금융부   BRNCD2
+      *      3933: 구조화금융부 BRNCD3
+      *      9636: 인프라금융부 BRNCD4
+      *    ==> 6927:   CIB기획부 BRNCD1
+      *  2)  0015: 명동영업부     BRNCD5
+      *      4004: 여의도영업부   BRNCD6
+      *      8169: 서여의도영업부 BRNCD7
+      *    ==> 해당부점을 영업지원본부부점으로 분류
+      *  3)  부점구분 06:해외영업점 07:해외현지법인
+      *    ==> 5106: 글로벌사업부 BRNCD8
+
+      *@   변수초기화
+           INITIALIZE                      XFJL0001-IN
+
+      *@   조회구분
+           MOVE  CO-CHA-03             TO  XFJL0001-I-INQURY-DSTCD
+
+      *@   FC CALL
+           #DYCALL  FJL0001  YCCOMMON-CA  XFJL0001-CA
+
+      *@   처리결과확인
+           IF  XFJL0001-R-STAT  =  CO-STAT-OK
+               CONTINUE
+           ELSE
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(1)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(2)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(3)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(4)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(5)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(6)
+               MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(7)
+180117         MOVE  CO-CHA-0000       TO  XFJL0001-O-BRNCD(8)
+           END-IF
+
+           MOVE  XFJL0001-O-BRNCD(1)   TO   WK-H-I-BRNCD1
+           MOVE  XFJL0001-O-BRNCD(2)   TO   WK-H-I-BRNCD2
+           MOVE  XFJL0001-O-BRNCD(3)   TO   WK-H-I-BRNCD3
+           MOVE  XFJL0001-O-BRNCD(4)   TO   WK-H-I-BRNCD4
+           MOVE  XFJL0001-O-BRNCD(5)   TO   WK-H-I-BRNCD5
+           MOVE  XFJL0001-O-BRNCD(6)   TO   WK-H-I-BRNCD6
+           MOVE  XFJL0001-O-BRNCD(7)   TO   WK-H-I-BRNCD7
+180117     MOVE  XFJL0001-O-BRNCD(8)   TO   WK-H-I-BRNCD8
+           .
+
+       S4000-FJL0001-CALL-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

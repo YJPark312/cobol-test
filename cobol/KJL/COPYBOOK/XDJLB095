@@ -1,0 +1,73 @@
+      *================================================================*
+      *@ NAME : XDJLB095                                               *
+      *@ DESC : DC기업및그룹한도신청및승인(결의록관리)COPYBOOK     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-06-11 18:39:27                          *
+      *  생성일시     : 2020-06-11 18:39:29                          *
+      *  전체길이     : 00031182 BYTES                               *
+      *================================================================*
+           03  XDJLB095-RETURN.
+             05  XDJLB095-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB095-OK            VALUE  '00'.
+                 88  COND-XDJLB095-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB095-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB095-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB095-ERROR         VALUE  '09'.
+                 88  COND-XDJLB095-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB095-SYSERROR      VALUE  '99'.
+             05  XDJLB095-R-LINE                 PIC  9(006).
+             05  XDJLB095-R-ERRCD                PIC  X(008).
+             05  XDJLB095-R-TREAT-CD             PIC  X(008).
+             05  XDJLB095-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB095-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB095-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJLB095-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJLB095-I-KB-PIN               PIC  X(010).
+      *--       고객명
+             05  XDJLB095-I-CUSTNM               PIC  X(052).
+      *--       한도신청번호
+             05  XDJLB095-I-LIMT-APLCN-NO        PIC  X(010).
+      *--       한도승인권자구분
+             05  XDJLB095-I-LIMT-ATRZ-DSTCD      PIC  X(001).
+      *--       종합승인구분
+             05  XDJLB095-I-CMPRE-ATHOR-DSTIC    PIC  X(001).
+      *--       총라인수
+             05  XDJLB095-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB095-I-GRID1                OCCURS 000100 TIMES.
+      *--         승인위원직원번호
+               07  XDJLB095-I-ATHOR-CMMB-EMPID   PIC  X(007).
+      *--         승인위원구분
+               07  XDJLB095-I-ATHOR-CMMB-DSTIC   PIC  X(001).
+      *--         한도승인구분코드
+               07  XDJLB095-I-LIMT-ATHOR-DSTCD   PIC  X(001).
+      *--         승인의견내용
+               07  XDJLB095-I-ATHOR-OPIN-CTNT    PIC  X(302).
+      *----------------------------------------------------------------*
+           03  XDJLB095-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB095-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  9  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB095-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB095-I-CUST-DSTIC         ;고객구분
+      *X  XDJLB095-I-KB-PIN             ;KB-PIN
+      *X  XDJLB095-I-CUSTNM             ;고객명
+      *X  XDJLB095-I-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJLB095-I-LIMT-ATRZ-DSTCD    ;한도승인권자구분
+      *X  XDJLB095-I-CMPRE-ATHOR-DSTIC  ;종합승인구분
+      *N  XDJLB095-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB095-I-GRID1              ;그리드1
+      *X  XDJLB095-I-ATHOR-CMMB-EMPID   ;승인위원직원번호
+      *X  XDJLB095-I-ATHOR-CMMB-DSTIC   ;승인위원구분
+      *X  XDJLB095-I-LIMT-ATHOR-DSTCD   ;한도승인구분코드
+      *X  XDJLB095-I-ATHOR-OPIN-CTNT    ;승인의견내용
+      *X  XDJLB095-O-PRCSS-RSULT        ;처리결과

@@ -1,0 +1,37 @@
+      *================================================================*
+      *@ NAME : V1JLB071                                               *
+      *@ DESC : 국외영업점편중관리기준조회                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-18 17:38:07                          *
+      *  생성일시     : 2020-03-18 17:38:16                          *
+      *  전체길이     : 00068007 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JLB071-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JLB071-GRID1                    OCCURS 0 TO 002000
+               DEPENDING ON V1JLB071-OUTPT-LINE-CNT1.
+      *--       부점한글명
+             09  V1JLB071-BRN-HANGL-NAME         PIC  X(020).
+      *--       관리부점코드
+             09  V1JLB071-MGT-BRNCD              PIC  X(004).
+      *--       대분류업종코드
+             09  V1JLB071-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       편중관리비율
+             09  V1JLB071-LNUP-MGT-CST-RT        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       합산관리여부
+             09  V1JLB071-SUM-MGT-YN             PIC  X(001).
+      *--     처리결과
+           07  V1JLB071-PRCSS-RSULT              PIC  X(002).
+      *================================================================*
+      *        V  1  J  L  B  0  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JLB071-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JLB071-GRID1                ;그리드1
+      *X  V1JLB071-BRN-HANGL-NAME       ;부점한글명
+      *X  V1JLB071-MGT-BRNCD            ;관리부점코드
+      *X  V1JLB071-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *S  V1JLB071-LNUP-MGT-CST-RT      ;편중관리비율
+      *X  V1JLB071-SUM-MGT-YN           ;합산관리여부
+      *X  V1JLB071-PRCSS-RSULT          ;처리결과

@@ -1,0 +1,24 @@
+//MKJLDP42 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  MKJLDP18/mkeedms1.sh
+//*********************************************************************
+//*   유가증명매입약정 CMBS로부터 수보(THKJLR009)
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLDR09,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KEE.SD.SHRKJL.KEETR08
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SD.MKJLDP42.DATA
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP42-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   장기자산 SUB-LIMIT 산출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD642,OPT=&SYSUID,COND=(4,LT)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP42-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//

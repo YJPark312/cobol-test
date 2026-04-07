@@ -1,0 +1,161 @@
+      *================================================================*
+      *@ NAME : V1JL409D                                               *
+      *@ DESC : 기업및그룹한도신청및승인조회(승인서출력)           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-07-07 16:40:09                          *
+      *  생성일시     : 2017-07-07 16:40:16                          *
+      *  전체길이     : 00001017 BYTES                               *
+      *================================================================*
+      *--     승인년월일
+           07  V1JL409D-ATHOR-YMD                PIC  X(008).
+      *--     영업점명1
+           07  V1JL409D-BBRN-NAME1               PIC  X(022).
+      *--     영업점명2
+           07  V1JL409D-BBRN-NAME2               PIC  X(022).
+      *--     차주명
+           07  V1JL409D-BRWR-NAME                PIC  X(052).
+      *--     차주번호
+           07  V1JL409D-BRWR-NO                  PIC  X(013).
+      *--     기업신용등급
+           07  V1JL409D-CORP-CRDRAT              PIC  X(004).
+      *--     그룹명
+           07  V1JL409D-GROUP-NAME               PIC  X(052).
+      *--     그룹등급
+           07  V1JL409D-GROUP-GRD                PIC  X(004).
+      *--     표준산업분류코드
+           07  V1JL409D-STND-I-CLSFI-CD          PIC  X(005).
+      *--     PEER코드
+           07  V1JL409D-PEER-CD                  PIC  X(005).
+      *--     IR등급
+           07  V1JL409D-INRT-GRD                 PIC  X(004).
+      *--     승인번호
+           07  V1JL409D-ATHOR-NO                 PIC  X(010).
+      *--     직원번호
+           07  V1JL409D-EMPID                    PIC  X(007).
+      *--     직원명
+           07  V1JL409D-EMNM                     PIC  X(042).
+      *--     신청구분
+           07  V1JL409D-APLCN-DSTIC              PIC  X(020).
+      *--     승인권자
+           07  V1JL409D-ATRZ                     PIC  X(020).
+      *--     승인구분
+           07  V1JL409D-ATHOR-DSTIC              PIC  X(020).
+      *--     조건부승인조건
+           07  V1JL409D-CNDT-ATHOR-CNDN          PIC  X(020).
+      *--     기준한도
+           07  V1JL409D-BASE-LIMT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도설정유효일
+           07  V1JL409D-LIMT-STUP-VALD-DD        PIC  X(008).
+      *--     여신성관리한도
+           07  V1JL409D-LNBZ-I-MGT-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도
+           07  V1JL409D-MRKTY-MGT-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도
+           07  V1JL409D-MGT-LIMT                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     익스포져
+           07  V1JL409D-EXPSR                    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성관리한도(그룹)
+           07  V1JL409D-LNBZ-I-MGT-LIMT1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도(그룹)
+           07  V1JL409D-MRKTY-MGT-LIMT1          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도(그룹)
+           07  V1JL409D-MGT-LIMT1                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     익스포져(그룹)
+           07  V1JL409D-EXPSR1                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     산업군명
+           07  V1JL409D-IDSTRY-GROUP-NAME        PIC  X(042).
+      *--     산업별관리한도
+           07  V1JL409D-IDSTRY-PER-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     산업별익스포져
+           07  V1JL409D-IDSTRY-PER-EXPSR         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     상환능력기준한도
+           07  V1JL409D-SOLVN-BASE-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     규모기준한도
+           07  V1JL409D-SCAL-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도
+           07  V1JL409D-BASE-LIMT2               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     TE관리한도
+           07  V1JL409D-MGT-LIMT2                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도초과여부
+           07  V1JL409D-BASE-LIMT-EXCS-YN        PIC  X(001).
+      *--     재무적용연수
+           07  V1JL409D-FNAF-APLY-NOY            PIC  X(001).
+      *--     한도승인사유구분
+           07  V1JL409D-LIMT-A-RESN-DSTCD        PIC  X(003).
+      *--     변경전여신성관리한도
+           07  V1JL409D-MODFI-BLI-MGT-LIMT       PIC  9(015).
+      *--     변경전시장성관리한도
+           07  V1JL409D-MODFI-BM-MGT-LIMT        PIC  9(015).
+      *--     합계1
+           07  V1JL409D-SUM1                     PIC  9(015).
+      *--     변경후여신성관리한도
+           07  V1JL409D-MODFI-ALI-MGT-LIMT       PIC  9(015).
+      *--     변경후시장성관리한도
+           07  V1JL409D-MODFI-AM-MGT-LIMT        PIC  9(015).
+      *--     합계2
+           07  V1JL409D-SUM2                     PIC  9(015).
+      *--     승인사유
+           07  V1JL409D-ATHOR-RESN               PIC  X(302).
+      *================================================================*
+      *        V  1  J  L  4  0  9  D    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL409D-ATHOR-YMD            ;승인년월일
+      *X  V1JL409D-BBRN-NAME1           ;영업점명1
+      *X  V1JL409D-BBRN-NAME2           ;영업점명2
+      *X  V1JL409D-BRWR-NAME            ;차주명
+      *X  V1JL409D-BRWR-NO              ;차주번호
+      *X  V1JL409D-CORP-CRDRAT          ;기업신용등급
+      *X  V1JL409D-GROUP-NAME           ;그룹명
+      *X  V1JL409D-GROUP-GRD            ;그룹등급
+      *X  V1JL409D-STND-I-CLSFI-CD      ;표준산업분류코드
+      *X  V1JL409D-PEER-CD              ;PEER코드
+      *X  V1JL409D-INRT-GRD             ;IR등급
+      *X  V1JL409D-ATHOR-NO             ;승인번호
+      *X  V1JL409D-EMPID                ;직원번호
+      *X  V1JL409D-EMNM                 ;직원명
+      *X  V1JL409D-APLCN-DSTIC          ;신청구분
+      *X  V1JL409D-ATRZ                 ;승인권자
+      *X  V1JL409D-ATHOR-DSTIC          ;승인구분
+      *X  V1JL409D-CNDT-ATHOR-CNDN      ;조건부승인조건
+      *S  V1JL409D-BASE-LIMT            ;기준한도
+      *X  V1JL409D-LIMT-STUP-VALD-DD    ;한도설정유효일
+      *S  V1JL409D-LNBZ-I-MGT-LIMT      ;여신성관리한도
+      *S  V1JL409D-MRKTY-MGT-LIMT       ;시장성관리한도
+      *S  V1JL409D-MGT-LIMT             ;관리한도
+      *S  V1JL409D-EXPSR                ;익스포져
+      *S  V1JL409D-LNBZ-I-MGT-LIMT1     ;여신성관리한도(그룹)
+      *S  V1JL409D-MRKTY-MGT-LIMT1      ;시장성관리한도(그룹)
+      *S  V1JL409D-MGT-LIMT1            ;관리한도(그룹)
+      *S  V1JL409D-EXPSR1               ;익스포져(그룹)
+      *X  V1JL409D-IDSTRY-GROUP-NAME    ;산업군명
+      *S  V1JL409D-IDSTRY-PER-MGT-LIMT  ;산업별관리한도
+      *S  V1JL409D-IDSTRY-PER-EXPSR     ;산업별익스포져
+      *S  V1JL409D-SOLVN-BASE-CLAM      ;상환능력기준한도
+      *S  V1JL409D-SCAL-BASE-CLAM       ;규모기준한도
+      *S  V1JL409D-BASE-LIMT2           ;기준한도
+      *S  V1JL409D-MGT-LIMT2            ;TE관리한도
+      *X  V1JL409D-BASE-LIMT-EXCS-YN    ;기준한도초과여부
+      *X  V1JL409D-FNAF-APLY-NOY        ;재무적용연수
+      *X  V1JL409D-LIMT-A-RESN-DSTCD    ;한도승인사유구분
+      *N  V1JL409D-MODFI-BLI-MGT-LIMT   ;변경전여신성관리한도
+      *N  V1JL409D-MODFI-BM-MGT-LIMT    ;변경전시장성관리한도
+      *N  V1JL409D-SUM1                 ;합계1
+      *N  V1JL409D-MODFI-ALI-MGT-LIMT   ;변경후여신성관리한도
+      *N  V1JL409D-MODFI-AM-MGT-LIMT    ;변경후시장성관리한도
+      *N  V1JL409D-SUM2                 ;합계2
+      *X  V1JL409D-ATHOR-RESN           ;승인사유

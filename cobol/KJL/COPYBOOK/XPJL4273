@@ -1,0 +1,109 @@
+      *================================================================*
+      *@ NAME : XPJL4273                                               *
+      *@ DESC : PC포괄신용공여한도승인조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-24 15:31:50                          *
+      *  생성일시     : 2009-06-24 15:31:52                          *
+      *================================================================*
+           03  XPJL4273-RETURN.
+             05  XPJL4273-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4273-OK            VALUE  '00'.
+                 88  COND-XPJL4273-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4273-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4273-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4273-ERROR         VALUE  '09'.
+                 88  COND-XPJL4273-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4273-SYSERROR      VALUE  '99'.
+             05  XPJL4273-R-LINE                 PIC  9(006).
+             05  XPJL4273-R-ERRCD                PIC  X(008).
+             05  XPJL4273-R-TREAT-CD             PIC  X(008).
+             05  XPJL4273-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4273-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4273-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XPJL4273-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJL4273-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XPJL4273-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XPJL4273-O-DBTRZ-NAME           PIC  X(052).
+      *--       관리한도금액
+             05  XPJL4273-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기사용금액
+             05  XPJL4273-O-PRVIUS-AMUS          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             05  XPJL4273-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       계열기업군명
+             05  XPJL4273-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       내부신용평가등급구분코드
+             05  XPJL4273-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       내부신용평가등급구분코드1
+             05  XPJL4273-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       관리한도유효년월일
+             05  XPJL4273-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       표준산업코드명
+             05  XPJL4273-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       관리한도금액1
+             05  XPJL4273-O-MGT-CLAM1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       승인한도신청번호
+             05  XPJL4273-O-ATHOR-LIMT-APLCN-NO  PIC  X(010).
+      *--       승인신청년월일
+             05  XPJL4273-O-ATHOR-APLCN-YMD      PIC  X(008).
+      *--       승인년월일
+             05  XPJL4273-O-ATHOR-YMD            PIC  X(008).
+      *--       한도승인금액
+             05  XPJL4273-O-LIMT-ATHOR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도신청종류구분명
+             05  XPJL4273-O-LIMT-AK-DSTIC-NAME   PIC  X(052).
+      *--       한도설정유효년월일
+             05  XPJL4273-O-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       승인신청직원번호
+             05  XPJL4273-O-ATHOR-APLCN-EMPID    PIC  X(007).
+      *--       승인신청직원명
+             05  XPJL4273-O-ATHOR-APLCN-EMNM     PIC  X(052).
+      *--       한도승인구분코드
+             05  XPJL4273-O-LIMT-ATHOR-DSTCD     PIC  X(001).
+      *--       승인사유내용
+             05  XPJL4273-O-ATHOR-RESN-CTNT      PIC  X(302).
+      *--       부점한글명
+             05  XPJL4273-O-BRN-HANGL-NAME       PIC  X(052).
+      *================================================================*
+      *        X  P  J  L  4  2  7  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4273-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4273-I-BRWR-NO            ;차주번호
+      *X  XPJL4273-I-APLCN-NO           ;신청번호
+      *X  XPJL4273-O-DBTRZ-NAME         ;채무자명
+      *S  XPJL4273-O-MGT-CLAM           ;관리한도금액
+      *S  XPJL4273-O-PRVIUS-AMUS        ;기사용금액
+      *S  XPJL4273-O-LIMT-SEXTR-AMT     ;한도여유액
+      *X  XPJL4273-O-AFFLT-C-GROUP-NAME ;계열기업군명
+      *X  XPJL4273-O-INTNL-CV-GRD-DSTCD
+      * 내부신용평가등급구분코드
+      *X  XPJL4273-O-INTNL-CV-GRD-DSTCD1
+      * 내부신용평가등급구분코드1
+      *X  XPJL4273-O-MGT-LIMT-VALD-YMD  ;관리한도유효년월일
+      *X  XPJL4273-O-STND-IDSTRY-CD-NAME;표준산업코드명
+      *S  XPJL4273-O-MGT-CLAM1          ;관리한도금액1
+      *X  XPJL4273-O-ATHOR-LIMT-APLCN-NO;승인한도신청번호
+      *X  XPJL4273-O-ATHOR-APLCN-YMD    ;승인신청년월일
+      *X  XPJL4273-O-ATHOR-YMD          ;승인년월일
+      *S  XPJL4273-O-LIMT-ATHOR-AMT     ;한도승인금액
+      *X  XPJL4273-O-LIMT-AK-DSTIC-NAME ;한도신청종류구분명
+      *X  XPJL4273-O-LIMT-STUP-VALD-YMD ;한도설정유효년월일
+      *X  XPJL4273-O-ATHOR-APLCN-EMPID  ;승인신청직원번호
+      *X  XPJL4273-O-ATHOR-APLCN-EMNM   ;승인신청직원명
+      *X  XPJL4273-O-LIMT-ATHOR-DSTCD   ;한도승인구분코드
+      *X  XPJL4273-O-ATHOR-RESN-CTNT    ;승인사유내용
+      *X  XPJL4273-O-BRN-HANGL-NAME     ;부점한글명

@@ -1,0 +1,208 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB271 (포괄신용공여한도설정가능액산출)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도설정가능액산출
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081216: 신규작성
+      *김진태:20080624: 프로그램수정
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB271.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/16.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B2400323             PIC  X(008) VALUE 'B2400323'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB271'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-TEMP                 PIC  9(05)V9(4).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *공통 AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *DC COPYBOOK AREA
+       01  XDJLB271-CA.
+           COPY  XDJLB271.
+      *=================================================================
+       PROCEDURE                       DIVISION
+      *=================================================================
+                                       USING       YCCOMMON-CA
+                                                   XDJLB271-CA.
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *    WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE       WK-AREA
+           .
+      *   출력영역　및　결과코드　초기화
+           INITIALIZE       XDJLB271-OUT
+                            XDJLB271-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+           IF XDJLB271-I-PRCSS-DSTIC = CO-CHA-01
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  포괄기준한도산출
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *여신성자산기준한도
+           MOVE XDJLB271-I-AMND-LI-ASST-CLAM
+             TO XDJLB271-O-AMND-LI-ASST-CLAM
+
+           COMPUTE WK-TEMP
+                 = XDJLB271-I-CRDRAT-SPORT-RATO / 100
+
+      *자기자본기준한도액
+           COMPUTE XDJLB271-O-AMND-O-CAPTL-BSAMT
+                 = ((XDJLB271-I-AMND-B-YR-ONCP-AMT * 2)
+                 - (XDJLB271-I-AMND-FNCS-AMBR
+                 -  XDJLB271-I-AMND-OWBNK-AMBR)) * WK-TEMP
+
+      *영업활동현금흐름액기준한도액
+      *평균이자율이 0일경우 여신성자산기준한도를
+      *영업활동현금흐름액기준한도로 설정
+           IF XDJLB271-I-AMND-ENTP-AVG-IRT = ZERO
+              MOVE XDJLB271-I-AMND-LI-ASST-CLAM
+                TO XDJLB271-O-AMND-BA-BASE-CLAM
+           ELSE
+              COMPUTE XDJLB271-O-AMND-BA-BASE-CLAM
+                    = ((XDJLB271-I-AMND-BZOPR-ACF / 1.5
+                    / XDJLB271-I-AMND-ENTP-AVG-IRT)
+                    - (XDJLB271-I-AMND-FNCS-AMBR
+                    - XDJLB271-I-AMND-OWBNK-AMBR)) * WK-TEMP
+           END-IF
+
+      *포괄신용공여한도설정가능액
+           COMPUTE  XDJLB271-O-AMND-I-STUP-ABLAMT =
+           FUNCTION MIN(
+                        (FUNCTION MAX(XDJLB271-O-AMND-O-CAPTL-BSAMT
+                           XDJLB271-O-AMND-BA-BASE-CLAM) * 0.8)
+                        XDJLB271-O-AMND-LI-ASST-CLAM)
+
+      *수정값 PUT -  설정가능액 산출
+           IF XDJLB271-O-AMND-LI-ASST-CLAM < ZERO
+              MOVE ZERO
+                TO XDJLB271-O-AMND-LI-ASST-CLAM
+           END-IF
+
+           IF XDJLB271-O-AMND-O-CAPTL-BSAMT < ZERO
+              MOVE ZERO
+                TO XDJLB271-O-AMND-O-CAPTL-BSAMT
+           END-IF
+
+           IF XDJLB271-O-AMND-BA-BASE-CLAM < ZERO
+              MOVE ZERO
+                TO XDJLB271-O-AMND-BA-BASE-CLAM
+           END-IF
+
+           IF XDJLB271-O-AMND-I-STUP-ABLAMT < ZERO
+              MOVE ZERO
+                TO XDJLB271-O-AMND-I-STUP-ABLAMT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

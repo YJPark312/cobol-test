@@ -1,0 +1,112 @@
+//TKJLFAUD JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=T,MSGCLASS=X
+//*------------------------------------------------------------------*/
+//* TOTAL EXPOSURE 이행 - 항목CLEAR
+//*------------------------------------------------------------------*/
+//DSNTEP2  EXEC PGM=IKJEFT01,DYNAMNBR=20
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTEP2) PLAN(DSNTEP13) -
+  LIB('DB2APS.DSND10.RUNLIB.LOAD') PARMS('/ALIGN(MID)')
+  END
+//SYSIN    DD *
+UPDATE DB2DBA.THKJL0003 A
+   SET 고객식별자 = 차주번호
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND LENGTH(TRIM(A.차주번호)) <= 6
+   AND A.차주번호               != ''
+      ;
+UPDATE DB2DBA.THKJL0003 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.차주번호
+              ),'')
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND LENGTH(TRIM(A.차주번호))  > 6
+      ;
+UPDATE DB2DBA.THKJL0004 A
+   SET 고객식별자 = 차주번호
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND LENGTH(TRIM(A.차주번호)) <= 6
+   AND A.차주번호               != ''
+      ;
+UPDATE DB2DBA.THKJL0004 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.차주번호
+              ),'')
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND LENGTH(TRIM(A.차주번호))  > 6
+      ;
+UPDATE DB2DBA.THKJL0007 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.차주번호
+              ),'')
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+      ;
+UPDATE DB2DBA.THKJL0009 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.차주번호
+              ),'')
+      ,차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+      ;
+UPDATE DB2DBA.THKJL0020 A
+   SET 차주번호   = ''
+ WHERE A.그룹회사코드            = 'KB0'
+      ;
+UPDATE DB2DBA.THKJLR011 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.법인등록번호
+              ),'')
+      ,고객고유번호 = ''
+      ,법인등록번호 = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND A.고객식별자              = ''
+      ;
+UPDATE DB2DBA.THKJLR011 A
+   SET 고객고유번호 = ''
+      ,법인등록번호 = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND A.고객식별자             != ''
+      ;
+UPDATE DB2DBA.THKJLR012 A
+   SET 고객식별자 =
+       VALUE((SELECT 고객식별자
+                FROM DB2DBA.THKJL0015
+               WHERE 그룹회사코드 = A.그룹회사코드
+                 AND 차주번호     = A.발행법인등록번호
+              ),'')
+      ,고객고유번호     = ''
+      ,발행법인등록번호 = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND A.고객식별자              = ''
+      ;
+UPDATE DB2DBA.THKJLR012 A
+   SET 고객고유번호     = ''
+      ,발행법인등록번호 = ''
+ WHERE A.그룹회사코드            = 'KB0'
+   AND A.고객식별자             != ''
+      ;
+/*
+//

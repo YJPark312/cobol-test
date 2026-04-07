@@ -1,0 +1,538 @@
+//MKJLTPDW JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 1 6
+//*  %%SET %%C = %%SUBSTR %%A 7 2
+//********************************************************************/
+//********************************************************************/
+//*  데이터셋 삭제
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.SHRTAA.SKJL0039.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0126.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0127.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0129.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0136.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0130.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0128.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0076.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0077.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0078.P00002'
+
+  SET MAXCC=00
+/*
+//*********************************************************************
+//*  THKJL0039 -
+//*********************************************************************
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0039.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0100,0050),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월일
+         ,산업평가등급구분
+         ,대분류업종코드
+         ,"TEPEER구분"
+         ,대상업체건수
+         ,산업관리한도
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"TE한도환산금액"
+         ,"TE잔액환산금액"
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+         ,전년도말익스포져금액
+         ,국외대상업체건수
+         ,국외산업관리한도금액
+         ,국외명목기준한도금액
+         ,국외명목액기준잔액
+         ,"국외TE한도환산금액"
+         ,"국외TE잔액환산금액"
+         ,"국외전년말TE금액"
+         ,전체대상업체건수
+    FROM   DB2DBA.THKJL0039
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월일   = '%%A'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0126 -
+//*********************************************************************
+//STEP04 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0126.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0100,0050),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,계좌번호
+         ,계좌중복일련번호
+         ,기준년월
+         ,고객식별자
+         ,고객관리번호
+         ,해외현지법인여부
+         ,차주번호
+         ,관리부점코드
+         ,"TE계좌고객구분"
+         ,한도계좌여부
+         ,"TE계좌구분"
+         ,상품대분류코드
+         ,상품중분류코드
+         ,상품템플릿코드
+         ,상품번호
+         ,대출자격구분
+         ,시작년월일
+         ,만기년월일
+         ,종료년월일
+         ,상품계약상태구분
+         ,통화코드
+         ,통화한도
+         ,통화잔액
+         ,"BS기준잔액"
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"CCF명목잔액환산금액"
+         ,배분내부회복가치
+         ,"CA담보제외금액"
+         ,"CA담보환산금액"
+         ,한도계좌번호
+         ,한도상품대분류코드
+         ,한도상품중분류코드
+         ,한도상품템플릿코드
+         ,한도상품번호
+         ,관련테이블명
+         ,과목코드
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+         ,"BS기준한도"
+         ,차주고객식별자
+         ,지급보증신용장번호
+    FROM   DB2DBA.THKJL0126
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0127 -
+//*********************************************************************
+//STEP05 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0127.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준일
+         ,기준년월
+         ,차주고객식별자
+         ,한도계좌번호
+         ,한도상품대분류코드
+         ,한도상품중분류코드
+         ,한도상품템플릿코드
+         ,한도상품번호
+         ,차주번호
+         ,"BS기준잔액"
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"EAD한도"
+         ,"명목잔액CCF환산금액"
+         ,"EAD한도CCF환산금액"
+         ,"한도기준TE금액"
+         ,"잔액기준TE금액"
+         ,"CA담보제외금액"
+         ,"CA담보환산금액"
+         ,신용공여한도
+         ,외화신용공여한도
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+         ,"BS기준한도"
+    FROM   DB2DBA.THKJL0127
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준일       = '%%C'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0129 -
+//*********************************************************************
+//STEP06 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0129.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준일
+         ,기준년월
+         ,차주고객식별자
+         ,상품대분류코드
+         ,상품중분류코드
+         ,상품템플릿코드
+         ,상품번호
+         ,차주번호
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"한도기준TE금액"
+         ,"잔액기준TE금액"
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0129
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준일       = '%%C'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0136 -
+//*********************************************************************
+//STEP07 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0136.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월
+         ,계열기업군코드
+         ,상품대분류코드
+         ,상품중분류코드
+         ,상품템플릿코드
+         ,상품번호
+         ,"TE직접간접구분"
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"한도기준TE금액"
+         ,"잔액기준TE금액"
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0136
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0130 - TE차주익스포저월집계 20120105 추가
+//*********************************************************************
+//STEP09 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0130.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월
+         ,차주고객식별자
+         ,상품대분류코드
+         ,상품중분류코드
+         ,상품템플릿코드
+         ,상품번호
+         ,차주번호
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"한도기준TE금액"
+         ,"잔액기준TE금액"
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0130
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0128 - TE차주익스포저중간월집계 20120105 추가
+//*********************************************************************
+//STEP10 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0128.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월
+         ,차주고객식별자
+         ,한도계좌번호
+         ,한도상품대분류코드
+         ,한도상품중분류코드
+         ,한도상품템플릿코드
+         ,한도상품번호
+         ,차주번호
+         ,"BS기준잔액"
+         ,명목액기준한도
+         ,명목액기준잔액
+         ,"EAD한도"
+         ,"명목잔액CCF환산금액"
+         ,"EAD한도CCF환산금액"
+         ,"한도기준TE금액"
+         ,"잔액기준TE금액"
+         ,"CA담보제외금액"
+         ,"CA담보환산금액"
+         ,신용공여한도
+         ,외화신용공여한도
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+         ,"BS기준한도"
+    FROM   DB2DBA.THKJL0128
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0076 - 거액익스포져일계좌명세 20240201 추가
+//*********************************************************************
+//STEP11 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0076.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준일
+         ,기준년월
+         ,차주고객식별자
+         ,한도계좌번호
+         ,한도상품대분류코드
+         ,한도상품중분류코드
+         ,한도상품템플릿코드
+         ,한도상품번호
+         ,"BS기준한도"
+         ,"BS기준잔액"
+         ,"거액CCF환산금액"
+         ,신용공여익스포져금액
+         ,한도계좌여부
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0076
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준일       = '%%C'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0077 - 거액익스포져월계좌명세 20240201 추가
+//*********************************************************************
+//STEP12 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0077.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월
+         ,차주고객식별자
+         ,한도계좌번호
+         ,한도상품대분류코드
+         ,한도상품중분류코드
+         ,한도상품템플릿코드
+         ,한도상품번호
+         ,"BS기준한도"
+         ,"BS기준잔액"
+         ,"거액CCF환산금액"
+         ,신용공여익스포져금액
+         ,한도계좌여부
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0077
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%B'
+    WITH   UR;
+/*
+//*********************************************************************
+//*  THKJL0078 - 거액익스포져차주그룹명세 20240201 추가
+//*********************************************************************
+//STEP13 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0078.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  그룹회사코드
+         ,기준년월일
+         ,차주고객식별자
+         ,"거액CCF환산금액"
+         ,신용공여익스포져금액
+         ,순위
+         ,거액거래상대방구분
+         ,시스템최종처리일시
+         ,시스템최종사용자번호
+    FROM   DB2DBA.THKJL0078
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월일   = '%%A'
+    WITH   UR;
+/*
+//

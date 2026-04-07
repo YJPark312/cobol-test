@@ -1,0 +1,21 @@
+//TKJLTP13 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*           배치실행JCL
+//*********************************************************************
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*********************************************************************
+//*   국외점포거래정보적재           (THKJLR005)
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLDR51,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KJL.SM.SHRKFI.BJLDR51.V001
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=OLD,DSN=KJL.SM.MKJLTP13.DATA
+//CHGLOG    DD DSN=KJL.SY.CHGLOG.MKJLTP13.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN     DD *
+KB0-%%A-TKJLTP13-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일

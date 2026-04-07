@@ -1,0 +1,340 @@
+      *=================================================================00010003
+      *@업무명    : KJL     (Total Exposure)                          00020003
+      *@프로그램명: AJLB120 (EAD-상품정보원장　등록／수정／삭제)    00030003
+      *@처리유형  : AS                                                00040003
+      *@처리개요  : 상품정보원장                                    00050003
+      *-----------------------------------------------------------------00060003
+      *                 P R O G R A M   변　경　이　력                00070003
+      *-----------------------------------------------------------------00080003
+      *@성명 : 일자 : 변　경　내　용                              00090003
+      * ----------------------------------------------------------------00100003
+      *김진태:20101101: 신규작성
+      *정윤섭:20200330: 국외영업점편중관리대상여부 추가
+      * YBH    :20231130: 거액/신용공여CCF환산률 추가
+      *=================================================================00120003
+       IDENTIFICATION                  DIVISION.                        00130003
+      *=================================================================00140003
+       PROGRAM-ID.                     AJLB120.                         00150003
+       AUTHOR.                         김진태.                        00160003
+       DATE-WRITTEN.                   10/11/01.                        00170003
+      *=================================================================00180003
+       ENVIRONMENT                     DIVISION.                        00190003
+      *=================================================================00200003
+       CONFIGURATION                   SECTION.                         00210003
+       SOURCE-COMPUTER.                IBM-3090.                        00220003
+       OBJECT-COMPUTER.                IBM-3090.                        00230003
+      *=================================================================00240003
+       DATA                            DIVISION.                        00250003
+      *=================================================================00260003
+       WORKING-STORAGE                 SECTION.                         00270003
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB120 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+      *-----------------------------------------------------------------00370003
+      * WORKING AREA                                                    00380003
+      *-----------------------------------------------------------------00390003
+       01  WK-AREA.                                                     00400003
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------00420003
+      * PGM INTERFACE PARAMETER                                         00430003
+      *-----------------------------------------------------------------00440003
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리PC  INTERFACE                                           00450003
+       01  XDJLB120-CA.                                                 00460003
+           COPY  XDJLB120.                                              00470003
+      *   출력영역확보　및　초기화INTERFACE                           00480003
+       01  XZUGOTMY-CA.                                                 00490003
+           COPY  XZUGOTMY.                                              00500003
+      *-----------------------------------------------------------------00510003
+       LINKAGE                         SECTION.                         00520003
+      *-----------------------------------------------------------------00530003
+      *    COMMON AREA
+       01  YCCOMMON-CA.                                                 00540003
+           COPY  YCCOMMON.                                              00550003
+      *    AS COPYBOOK
+       01  YNJLB120-CA.                                                 00560003
+           COPY  YNJLB120.                                              00570003
+      *    AS COPYBOOK
+       01  YPJLB120-CA.                                                 00580003
+           COPY  YPJLB120.                                              00590004
+      *=================================================================00600003
+       PROCEDURE                       DIVISION                         00610003
+                                       USING       YCCOMMON-CA          00630003
+                                                   YNJLB120-CA
+                                                   .
+      *=================================================================00620004
+      *-----------------------------------------------------------------00650003
+      *@  처리메인                                                    00660003
+      *-----------------------------------------------------------------00670003
+       S0000-MAIN-RTN.                                                  00680003
+                                                                        00690003
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .                                                            00810003
+       S0000-MAIN-EXT.                                                  00820003
+           EXIT.                                                        00830003
+      *-----------------------------------------------------------------00840003
+      *@  초기화                                                      00850003
+      *-----------------------------------------------------------------00860003
+       S1000-INITIALIZE-RTN.                                            00870003
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJLB120-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJLB120-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.                                            00960003
+           EXIT.                                                        00970003
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJLB120-PRCSS-DSTIC NOT = CO-CHA-02 AND
+      *@ CO-CHA-04
+      *@처리내용:처리구분 01,02 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJLB120-PRCSS-DSTIC NOT = CO-CHA-02 AND
+                                         CO-CHA-04
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJLB120-CALL-RTN                               01040003
+              THRU S3100-DJLB120-CALL-EXT                               01050003
+           .                                                            01060003
+       S3000-PROCESS-EXT.                                               01070003
+           EXIT.                                                        01080003
+      *-----------------------------------------------------------------01090004
+      *@   DC호출
+      *-----------------------------------------------------------------01110004
+       S3100-DJLB120-CALL-RTN.                                          01120003
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,기준년월,
+      *@회계구분,상품대분로코드,상품중분류코드,
+      *@상품템플릿코드,상품번호,상품명,통합계정과목코드,
+      *@자산구분,잔액CCF환산율,EAD한도CCF환산율,
+      *@EAD한도NCCF환산율,한도기준TE환산율,포괄대상계정여부,
+      *@CA대상계정여부,신용공여한도환산율,EAD중분류코드,
+      *@EAD중분류명,TE중분류코드,TE중분류명,CA중분류코드,
+      *@CA중분류명,국외영업점편중관리대상여부
+
+      *    처리구분                                                   01170003
+           MOVE YNJLB120-PRCSS-DSTIC                                    01180003
+             TO XDJLB120-I-PRCSS-DSTIC                                  01190003
+                                                                        01200003
+      *    조회기준년월                                               01210003
+           MOVE YNJLB120-BASE-YM                                        01220003
+             TO XDJLB120-I-BASE-YM                                      01230003
+                                                                        01280003
+      *    회계구분                                                   01290003
+           MOVE YNJLB120-ACCTG-DSTIC                                    01300003
+             TO XDJLB120-I-ACCTG-DSTIC                                  01310003
+                                                                        01320003
+      *    상품대분류코드                                             01330003
+           MOVE YNJLB120-PRDCT-LAG-CLSFI-CD                             01340003
+             TO XDJLB120-I-PRDCT-LAG-CLSFI-CD                           01350003
+                                                                        01360003
+      *    상품중분류코드                                             01370003
+           MOVE YNJLB120-PRDCT-MEDM-CLSFI-CD                            01380003
+             TO XDJLB120-I-PRDCT-MEDM-CLSFI-CD                          01390003
+
+      *    상품템플릿코드                                             01370003
+           MOVE YNJLB120-PRDCT-TMPLT-CD                                 01380003
+             TO XDJLB120-I-PRDCT-TMPLT-CD                               01390003
+
+      *    상품번호                                                   01370003
+           MOVE YNJLB120-PRDCT-NO                                       01380003
+             TO XDJLB120-I-PRDCT-NO                                     01390003
+                                                                        01400003
+      *    상품명                                                     01410003
+           MOVE YNJLB120-PRDCT-NAME                                     01420003
+             TO XDJLB120-I-PRDCT-NAME                                   01430003
+                                                                        01440003
+      *    통합계정과목코드                                           01850003
+           MOVE YNJLB120-INTGRA-TIACC-CD                                01860003
+             TO XDJLB120-I-INTGRA-TIACC-CD                              01870003
+
+      *    자산구분                                                   01450003
+           MOVE YNJLB120-ASST-DSTIC                                     01460003
+             TO XDJLB120-I-ASST-DSTIC                                   01470003
+                                                                        01480003
+      *    잔액CCF환산율                                            01490003
+           MOVE YNJLB120-BAL-CCF-UTCRT                                  01500003
+             TO XDJLB120-I-BAL-CCF-UTCRT                                01510003
+                                                                        01520003
+      *    EAD한도CCF환산율                                         01490003
+           MOVE YNJLB120-EAD-LIMT-CCF-UTCRT                             01500003
+             TO XDJLB120-I-EAD-LIMT-CCF-UTCRT                           01510003
+                                                                        01520003
+      *    EAD한도NCCF환산율                                        01490003
+           MOVE YNJLB120-EAD-LIMT-NCCF-UTCRT                            01500003
+             TO XDJLB120-I-EAD-LIMT-NCCF-UTCRT                          01510003
+                                                                        01520003
+      *    한도기준TE환산율                                         01530003
+           MOVE YNJLB120-LIMT-BASE-TE-UTCRT                             01540003
+             TO XDJLB120-I-LIMT-BASE-TE-UTCRT                           01550003
+                                                                        01560003
+      *    CP대상계정여부                                             01730003
+           MOVE YNJLB120-INLS-GT-ACITM-YN                               01740003
+             TO XDJLB120-I-INLS-GT-ACITM-YN                             01750003
+                                                                        01760003
+      *    CA대상계정여부                                             01650003
+           MOVE YNJLB120-CA-TAGET-ACITM-YN                              01660003
+             TO XDJLB120-I-CA-TAGET-ACITM-YN                            01670003
+                                                                        01680003
+      *    신용공여한도환산율                                         01770003
+           MOVE YNJLB120-GRCR-LIMT-UTCRT                                01780003
+             TO XDJLB120-I-GRCR-LIMT-UTCRT                              01790003
+                                                                        01800003
+      *    EAD중분류코드                                              01570003
+           MOVE YNJLB120-EAD-MEDM-CLSFI-CD                              01580003
+             TO XDJLB120-I-EAD-MEDM-CLSFI-CD                            01590003
+                                                                        01600003
+      *    EAD중분류코드명                                            01610003
+           MOVE YNJLB120-EAD-MEDM-CLSFI-NAME                            01620003
+             TO XDJLB120-I-EAD-MEDM-CLSFI-NAME                          01630003
+                                                                        01640003
+      *    TE중분류코드                                               01570003
+           MOVE YNJLB120-TE-MEDM-CLSFI-CD                               01580003
+             TO XDJLB120-I-TE-MEDM-CLSFI-CD                             01590003
+                                                                        01600003
+      *    TE중분류코드명                                             01610003
+           MOVE YNJLB120-TE-MEDM-CLSFI-NAME                             01620003
+             TO XDJLB120-I-TE-MEDM-CLSFI-NAME                           01630003
+                                                                        01640003
+      *    CA중분류코드                                               01690003
+           MOVE YNJLB120-CA-MEDM-CLSFI-CD                               01700003
+             TO XDJLB120-I-CA-MEDM-CLSFI-CD                             01710003
+                                                                        01720003
+      *    CA중분류명                                                 01810003
+           MOVE YNJLB120-CA-MEDM-CLSFI-NAME                             01820003
+             TO XDJLB120-I-CA-MEDM-CLSFI-NAME                           01830003
+
+200330*@  국외영업점편중관리대상여부
+           MOVE YNJLB120-ABRD-L-MGT-TAGET-YN
+             TO XDJLB120-I-ABRD-L-MGT-TAGET-YN
+
+231130*@  바젤기준신용환산률
+           MOVE YNJLB120-BSL-B-CRDT-UTCNG-RT
+             TO XDJLB120-I-BSL-B-CRDT-UTCNG-RT
+
+231130*@  거액익스포져대상여부
+           MOVE YNJLB120-BSM-EXPSR-TAGET-YN
+             TO XDJLB120-I-BSM-EXPSR-TAGET-YN
+
+231130*@  신용익스포져대상여부
+           MOVE YNJLB120-CRDT-EXPSR-TAGET-YN
+             TO XDJLB120-I-CRDT-EXPSR-TAGET-YN
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJLB120 YCCOMMON-CA XDJLB120-CA                      01910003
+                                                                        01920003
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJLB120-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJLB120-OK                                          01960003
+              CONTINUE                                                  01970003
+           ELSE                                                         01980003
+              #ERROR XDJLB120-R-ERRCD                                   01990004
+                     XDJLB120-R-TREAT-CD                                02000004
+                     XDJLB120-R-STAT                                    02010004
+           END-IF                                                       02020003
+           .                                                            02030003
+       S3100-DJLB120-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+      *-----------------------------------------------------------------01930001
+      *@  출력처리                                                    019400
+      *-----------------------------------------------------------------01950001
+       S6000-OUTPUT-RTN.                                                01960001
+      *@4 출력처리
+
+      *@4.1 출력항목 조립
+           MOVE XDJLB120-O-PRCSS-RSULT                                  01980001
+             TO YPJLB120-PRCSS-RSULT
+           .                                                            02090001
+       S6000-OUTPUT-EXT.                                                02100001
+           EXIT.                                                        02110001
+      *-----------------------------------------------------------------02060003
+      *@  처리종료                                                    02070003
+      *-----------------------------------------------------------------02080003
+       S9000-FINAL-RTN.                                                 02090003
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11120000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.                                                 02150003
+           EXIT.                                                        02160003

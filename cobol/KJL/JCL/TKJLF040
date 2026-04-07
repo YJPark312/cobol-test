@@ -1,0 +1,79 @@
+//TKJLF040 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0040 CA한도초과명세 TABLE UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0040.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0040.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0040
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0040'
+  SET MAXCC=0
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0040,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT A.그룹회사코드
+      ,A.기준년월일
+      ,A.한도구분
+      ,CHAR(SUBSTR(A.차주번호,1,10)) AS 고객식별자
+      ,CHAR('             ') AS 차주번호
+      ,A."KB신용공여금액"
+      ,A."FS신용공여금액"
+      ,A.제외대상금액
+      ,A.시스템최종처리일시
+      ,A.시스템최종사용자번호
+  FROM DB2DBA.THKJL0040 A
+ WHERE A.그룹회사코드 = 'KB0'
+   AND LENGTH(TRIM(A.차주번호)) <= 6
+   AND A.차주번호               != ''
+UNION ALL
+SELECT A.그룹회사코드
+      ,A.기준년월일
+      ,A.한도구분
+      ,B.고객식별자
+      ,CHAR('             ') AS 차주번호
+      ,A."KB신용공여금액"
+      ,A."FS신용공여금액"
+      ,A.제외대상금액
+      ,A.시스템최종처리일시
+      ,A.시스템최종사용자번호
+  FROM DB2DBA.THKJL0040 A
+      ,DB2DBA.THKJL0015 B
+ WHERE A.그룹회사코드 = B.그룹회사코드
+   AND A.차주번호     = B.차주번호
+   AND LENGTH(TRIM(A.차주번호)) > 6
+  WITH UR;
+/*
+//
+//

@@ -1,0 +1,88 @@
+//TKJLPR05 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR005 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJLR005',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJLR005,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJLR005
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "관리부점코드"                       POSITION(      12         )
+   CHAR(                      4)                ,
+   "계좌번호"                           POSITION(      16         )
+   CHAR(                     20)                ,
+   "통합CRM번호"                      POSITION(      36         )
+   CHAR(                     13)                ,
+   "고객고유번호"                       POSITION(      49         )
+   CHAR(                     20)                ,
+   "법인등록번호"                       POSITION(      69         )
+   CHAR(                     13)                ,
+   "ISO국가코드"                        POSITION(      82         )
+   CHAR(                      2)                ,
+   "신규년월일"                         POSITION(      84         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(      92         )
+   CHAR(                      8)                ,
+   "현지취급통화코드"                   POSITION(     100         )
+   CHAR(                      3)                ,
+   "현지한도약정금액"                   POSITION(     103:     112)
+   DECIMAL                                      ,
+   "현지통화대출잔액"                   POSITION(     113:     122)
+   DECIMAL                                      ,
+   "계정과목코드"                       POSITION(     123         )
+   CHAR(                      5)                ,
+   "계정세과목코드"                     POSITION(     128         )
+   CHAR(                      3)                ,
+   "통합계정과목코드"                   POSITION(     131         )
+   CHAR(                     13)                ,
+   "해외점포영업년월일"                 POSITION(     144         )
+   CHAR(                      8)                ,
+   "원화환산잔액"                       POSITION(     152:     161)
+   DECIMAL                                      ,
+   "해외점포계좌구분"                   POSITION(     162         )
+   CHAR(                      1)                ,
+   "국제한도구분"                       POSITION(     163         )
+   CHAR(                      1)                ,
+   "USD한도약정금액"                    POSITION(     164:     173)
+   DECIMAL                                      ,
+   "USD대출잔액"                        POSITION(     174:     183)
+   DECIMAL                                      ,
+   "고객식별자"                         POSITION(     184         )
+   CHAR(                     10)                ,
+   "고객관리번호"                       POSITION(     194         )
+   CHAR(                      5)                ,
+   "고객식별자1"                        POSITION(     199         )
+   CHAR(                     10)                ,
+   "고객관리번호1"                      POSITION(     209         )
+   CHAR(                      5)                ,
+   "고객식별자2"                        POSITION(     214         )
+   CHAR(                     10)                ,
+   "고객관리번호2"                      POSITION(     224         )
+   CHAR(                      5)                ,
+   "시스템최종처리일시"                 POSITION(     229         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     249         )
+   CHAR(                      7)                ,
+   "한도계좌번호"                       POSITION(     256         )
+   CHAR(                     20)
+   )
+//

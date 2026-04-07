@@ -1,0 +1,357 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL409B (AS기업및그룹한도신청및승인조회)
+      *@처리유형  : AS
+      *@처리개요  : 설정승인조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090514: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091210: PC 삭제
+      * HYH    :20161019: 신용평가유효년월일 추가
+      * YBH    :20161216: 기준한도초과여부,한도승인사유구분 추가
+      * YBH    :20170706:  3개년 재무제표실적에 의한
+      *                   기준한도 산출
+      * YBH    :20200625: 한도진행상태구분 추가
+      * YBH    :20201231: 근기자료 파일첨부 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL409B.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/05/18.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL409B '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-J                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE
+       01  XDJL409B-CA.
+           COPY  XDJL409B.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL409B-CA.
+           COPY  YNJL409B.
+      *    AS COPYBOOK
+       01  YPJL409B-CA.
+           COPY  YPJL409B.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL409B-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL409B-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL409B-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+170706*    고객번호(KB-PIN)
+           MOVE YNJL409B-KB-PIN        TO AACOM-CUST-IDNFR
+
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL409B-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL409B-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL409B-CALL-RTN
+              THRU S3100-DJL409B-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL409B-CALL-RTN.
+
+      *@3.1.1 입력파라미터 조립
+      *    처리구분
+           MOVE YNJL409B-PRCSS-DSTIC
+             TO XDJL409B-I-PRCSS-DSTIC
+
+      *    고객구분
+           MOVE YNJL409B-CUST-DSTIC
+             TO XDJL409B-I-CUST-DSTIC
+
+      *    KB-PIN
+           MOVE YNJL409B-KB-PIN
+             TO XDJL409B-I-KB-PIN
+
+      *    신청번호
+           MOVE YNJL409B-APLCN-NO
+             TO XDJL409B-I-APLCN-NO
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL409B YCCOMMON-CA XDJL409B-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL409B-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL409B-OK
+              CONTINUE
+           ELSE
+              #ERROR XDJL409B-R-ERRCD
+                     XDJL409B-R-TREAT-CD
+                     XDJL409B-R-STAT
+           END-IF
+           .
+       S3100-DJL409B-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력항목 조립
+
+      *    신청일자
+           MOVE XDJL409B-O-APLCN-DTE
+             TO YPJL409B-APLCN-DTE
+
+      *    신청직원번호
+           MOVE XDJL409B-O-APLCN-EMPID
+             TO YPJL409B-APLCN-EMPID
+
+      *    신청직원명
+           MOVE XDJL409B-O-APLCN-EMNM
+             TO YPJL409B-APLCN-EMNM
+
+      *    신청영업점코드
+           MOVE XDJL409B-O-APLCNZ-BRNCD
+             TO YPJL409B-APLCNZ-BRNCD
+
+      *    신청영업점명
+           MOVE XDJL409B-O-APLCN-BBRN-NAME
+             TO YPJL409B-APLCN-BBRN-NAME
+
+      *    신청구분
+           MOVE XDJL409B-O-APLCN-DSTIC
+             TO YPJL409B-APLCN-DSTIC
+
+      *    승인일자
+           MOVE XDJL409B-O-ATHOR-DTE
+             TO YPJL409B-ATHOR-DTE
+
+      *    기준한도산출액
+           MOVE XDJL409B-O-BASE-LIMT-CMPTN-AMT
+             TO YPJL409B-BASE-LIMT-CMPTN-AMT
+
+      *    관리한도설정액
+           MOVE XDJL409B-O-MGT-LIMT-STUP-AMT
+             TO YPJL409B-MGT-LIMT-STUP-AMT
+
+      *    여신성관리한도
+           MOVE XDJL409B-O-LNBZ-I-MGT-LIMT
+             TO YPJL409B-LNBZ-I-MGT-LIMT
+
+      *    시장성관리한도
+           MOVE XDJL409B-O-MRKTY-MGT-LIMT
+             TO YPJL409B-MRKTY-MGT-LIMT
+
+      *    한도설정유효일
+           MOVE XDJL409B-O-LIMT-STUP-VALD-DD
+             TO YPJL409B-LIMT-STUP-VALD-DD
+
+      *    승인권자
+           MOVE XDJL409B-O-ATRZ
+             TO YPJL409B-ATRZ
+
+      *    조건부승인조건
+           MOVE XDJL409B-O-CNDT-ATHOR-CNDN
+             TO YPJL409B-CNDT-ATHOR-CNDN
+
+      *    승인구분
+           MOVE XDJL409B-O-ATHOR-DSTIC
+             TO YPJL409B-ATHOR-DSTIC
+
+161216*    기준한도초과여부
+           MOVE XDJL409B-O-BASE-LIMT-EXCS-YN
+             TO YPJL409B-BASE-LIMT-EXCS-YN
+161216*    한도승인사유구분
+           MOVE XDJL409B-O-LIMT-A-RESN-DSTCD
+             TO YPJL409B-LIMT-A-RESN-DSTCD
+
+      *    승인사유
+           MOVE XDJL409B-O-ATHOR-RESN
+             TO YPJL409B-ATHOR-RESN
+
+161019*    신용평가유효일
+           MOVE XDJL409B-O-CRDT-VALUA-VALD-YMD
+             TO YPJL409B-CRDT-VALUA-VALD-YMD
+161019*    후신용평가유효년월일
+           MOVE XDJL409B-O-AF-C-VALUA-VALD-YMD
+             TO YPJL409B-AF-C-VALUA-VALD-YMD
+170706*@  재무적용연수
+           MOVE XDJL409B-O-FNAF-APLY-NOY
+             TO YPJL409B-FNAF-APLY-NOY
+200625*   한도진행상태구분
+           MOVE XDJL409B-O-LIMT-P-STUS-DSTCD
+             TO YPJL409B-LIMT-P-STUS-DSTCD
+
+201231*   현재건수1
+           MOVE  XDJL409B-O-PRSNT-NOITM1
+             TO  YPJL409B-PRSNT-NOITM1
+
+201231     PERFORM VARYING  WK-J  FROM  1  BY  1
+                     UNTIL  WK-J  > XDJL409B-O-PRSNT-NOITM1
+                        OR  WK-J  > 100
+      *       첨부파일일련번호
+               MOVE  XDJL409B-O-APNDX-FILE-SERNO(WK-J)
+                 TO  YPJL409B-APNDX-FILE-SERNO(WK-J)
+      *       첨부파일식별자
+               MOVE  XDJL409B-O-APNDX-FILE-IDNFR(WK-J)
+                 TO  YPJL409B-APNDX-FILE-IDNFR(WK-J)
+      *       등록년월일
+               MOVE  XDJL409B-O-REGI-YMD(WK-J)
+                 TO  YPJL409B-REGI-YMD(WK-J)
+      *       등록직원번호
+               MOVE  XDJL409B-O-REGI-EMPID(WK-J)
+                 TO  YPJL409B-REGI-EMPID(WK-J)
+      *       등록직원명
+               MOVE  XDJL409B-O-REGI-EMNM(WK-J)
+                 TO  YPJL409B-REGI-EMNM(WK-J)
+      *       첨부파일내용
+               MOVE  XDJL409B-O-APNDX-FILE-CTNT(WK-J)
+                 TO  YPJL409B-APNDX-FILE-CTNT(WK-J)
+      *       첨부파일명
+               MOVE  XDJL409B-O-APNDX-FILE-NAME(WK-J)
+                 TO  YPJL409B-APNDX-FILE-NAME(WK-J)
+           END-PERFORM
+           .
+
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11009000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

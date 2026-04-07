@@ -1,0 +1,115 @@
+      *===========================================================
+      *  프로그램명    : QJL0701
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0701
+      *  사용예        : 01  XQJL0701-CA.
+      *                      COPY  XQJL0701.
+      *  최종변경일시  : 2018년06월18일09시37분42초
+      *===========================================================
+           03  XQJL0701-IN.
+      *            그룹회사코드
+               05  XQJL0701-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0701-I-BASE-YMD
+                                          PIC  X(00008).
+      *            부점코드2
+               05  XQJL0701-I-BRNCD2
+                                          PIC  X(00004).
+      *            부점코드3
+               05  XQJL0701-I-BRNCD3
+                                          PIC  X(00004).
+      *            부점코드4
+               05  XQJL0701-I-BRNCD4
+                                          PIC  X(00004).
+      *            부점코드1
+               05  XQJL0701-I-BRNCD1
+                                          PIC  X(00004).
+      *            부점코드8
+               05  XQJL0701-I-BRNCD8
+                                          PIC  X(00004).
+      *            부점코드5
+               05  XQJL0701-I-BRNCD5
+                                          PIC  X(00004).
+      *            부점코드6
+               05  XQJL0701-I-BRNCD6
+                                          PIC  X(00004).
+      *            부점코드7
+               05  XQJL0701-I-BRNCD7
+                                          PIC  X(00004).
+      *            대분류업종코드
+               05  XQJL0701-I-LAG-CLSFI-BZTYP-CD
+                                          PIC  X(00003).
+      *            지역본부코드
+               05  XQJL0701-I-AREA-HQ-CD
+                                          PIC  X(00004).
+      *            N대분류업종코드
+               05  XQJL0701-I-N-LAG-CLSFI-BZTYP
+                                          PIC  X(00003).
+      *            N지역본부코드
+               05  XQJL0701-I-N-AREA-HQ-CD
+                                          PIC  X(00004).
+           03  XQJL0701-OUT.
+      *            대분류업종코드
+               05  XQJL0701-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00101  PIC  X(00003).
+      *            지역본부코드
+               05  XQJL0701-O-AREA-HQ-CD
+                           OCCURS  00101  PIC  X(00004).
+      *            지역본부명
+               05  XQJL0701-O-AREA-HQ-NAME
+                           OCCURS  00101  PIC  X(00022).
+      *            전년도말익스포져금액
+               05  XQJL0701-O-PYY-X-END-EXPSR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부SUB한도
+               05  XQJL0701-O-AREA-HQ-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부순증SUB한도
+               05  XQJL0701-O-AREA-HN-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부익스포져금액
+               05  XQJL0701-O-AREA-HQ-EXPSR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부한도여유금액
+               05  XQJL0701-O-AREA-HQ-LIMT-EXAN
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부SUB소진율
+               05  XQJL0701-O-AREA-HQ-SUB-EXHS-RT
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            지역본부예외승인한도
+               05  XQJL0701-O-AREA-HE-ATHOR-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역본부예외승인금액
+               05  XQJL0701-O-AREA-HE-ATHOR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역예외승인여유금액
+               05  XQJL0701-O-AREA-E-ATHOR-EXAN
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역예외승인소진율
+               05  XQJL0701-O-AREA-EA-EXHS-RT
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            지역본부기준소진율
+               05  XQJL0701-O-AREA-HE-BASE
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            월SUB한도
+               05  XQJL0701-O-M-AREA-HQ-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            월예외승인한도
+               05  XQJL0701-O-M-AREA-HE-ATHOR
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            월기준소진율
+               05  XQJL0701-O-M-AREA-HE-BASE
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            대출금액
+               05  XQJL0701-O-LN-AMT
+                           OCCURS  00101  PIC S9(00018) COMP-3.
+      *            실질여유액
+               05  XQJL0701-O-ATUAL-SEXTR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            실질소진율
+               05  XQJL0701-O-ATUAL-EXHS-RT
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *===========================================================
+      *  XQJL0701   C O P Y B O O K   E N D
+      *===========================================================

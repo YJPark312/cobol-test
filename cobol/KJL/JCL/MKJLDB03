@@ -1,0 +1,31 @@
+//MKJLDB03 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 매일（휴일／영업일　무관）
+//*선행작업명     : MKJLDP02
+//*********************************************************************
+//*   토탈익스포져기준한도산출（개별기업）
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD011,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD011.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=345)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB03-001-ONLBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*   토탈익스포져기준한도산출(그룹)
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD012,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.KJL0013.V001
+//OTFILE   DD DSN=KJL.SD.BJLD012.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=236)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB03-001-ONLBAT-KB STAR-%%$DATE
+//*자료기준년월일

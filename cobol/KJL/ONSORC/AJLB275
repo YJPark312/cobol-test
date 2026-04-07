@@ -1,0 +1,580 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB275 (AS포괄신용공여한도적정성점검대상관리)
+      *@처리유형  : AS
+      *@처리개요  :포괄신용공여한도적정성점검대상관리
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *최주원:20210726: 신규작성
+      * YBH    :20220324: 부실회계기업 등급 추가
+      *박정수:20240530: 적정성점검구분 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB275.
+       AUTHOR.                         최주원.
+       DATE-WRITTEN.                   21/07/26.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *@에러메시지
+      *처리구분 오류입니다
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+      *조회조건값 오류입니다.
+           03  CO-B0100505             PIC  X(008) VALUE 'B0100505'.
+      *@조치메시지
+      *전산업무담당자에게　문의바랍니다.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB275'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-B                PIC  X(001) VALUE 'B'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *        DJL0418
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-J                    PIC S9(004) COMP.
+      *        DJL0B18
+           03  WK-K                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   조회처리DC  INTERFACE
+       01  XDJL0418-CA.
+           COPY  XDJL0418.
+
+      *   등록처리DC  INTERFACE
+       01  XDJL0B18-CA.
+           COPY  XDJL0B18.
+
+      *    IC고객번호검색
+       01  XIAA0019-CA.
+           COPY  XIAA0019.
+
+220324*    부실회계등급　조회
+       01  XIJL4009-CA.
+           COPY  XIJL4009.
+
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *    AS COPYBOOK
+       01  YNJLB275-CA.
+           COPY  YNJLB275.
+
+      *    AS COPYBOOK
+       01  YPJLB275-CA.
+           COPY  YPJLB275.
+      *=================================================================
+       PROCEDURE                       DIVISION
+
+                                       USING       YCCOMMON-CA
+                                                   YNJLB275-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJLB275-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+      *    고객번호
+           MOVE YNJLB275-CUST-IDNFR    TO AACOM-CUST-IDNFR
+
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *     01:PIN조회/02:한도신청번호 조회
+      *     03:정보등록(변경)/04:파일등록/05:파일삭제
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJLB275-PRCSS-DSTIC     = ( CO-CHA-01 OR
+                                           CO-CHA-02 OR
+                                           CO-CHA-03 OR
+                                           CO-CHA-04 OR
+                                           CO-CHA-05 )
+               CONTINUE
+           ELSE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*           INPUT AJLB275 DATA                   *"
+           #USRLOG  "=================================================="
+           #USRLOG  " PRCSS-DSTIC    : " YNJLB275-PRCSS-DSTIC
+           #USRLOG  "=================================================="
+           #USRLOG  " CUST-IDNFR     : " YNJLB275-CUST-IDNFR
+           #USRLOG  " LIMT-APLCN-NO  : " YNJLB275-LIMT-APLCN-NO
+           #USRLOG  "=================================================="
+
+      *    YNJLB275-PRCSS-DSTIC : 처리구분
+      *     01:PIN조회/02:한도신청번호 조회
+      *     03:정보등록(변경)/04:파일등록/05:파일삭제
+
+           IF YNJLB275-PRCSS-DSTIC     = ( CO-CHA-01 OR CO-CHA-02)
+
+      *@3.1   조회DC호출
+               PERFORM S3100-DJL0418-CALL-RTN
+                  THRU S3100-DJL0418-CALL-EXT
+           ELSE
+
+      *@3.2   관리DC호출
+               PERFORM S3200-DJL0B18-CALL-RTN
+                  THRU S3200-DJL0B18-CALL-EXT
+           END-IF
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   포괄신용공여한도적정성점검대상조회 DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL0418-CALL-RTN.
+
+           INITIALIZE    XDJL0418-IN
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리PC입력파라미터=
+      *@SET(처리구분, 고객식별자, 담당심사역)
+
+           MOVE YNJLB275-PRCSS-DSTIC
+             TO XDJL0418-I-PRCSS-DSTIC
+
+           MOVE YNJLB275-CUST-IDNFR
+             TO XDJL0418-I-CUST-IDNFR
+
+           MOVE YNJLB275-RSPBL-EXMTN-DTY
+             TO XDJL0418-I-RSPBL-EXMTN-DTY
+
+           MOVE YNJLB275-LIMT-APLCN-NO
+             TO XDJL0418-I-LIMT-APLCN-NO
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL0418 YCCOMMON-CA XDJL0418-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL0418-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL0418-OK
+      *@      출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           ELSE
+              #ERROR XDJL0418-R-ERRCD
+                     XDJL0418-R-TREAT-CD
+                     XDJL0418-R-STAT
+           END-IF
+
+           .
+       S3100-DJL0418-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  포괄신용공여한도적정성점검대상관리 DC호출
+      *-----------------------------------------------------------------
+       S3200-DJL0B18-CALL-RTN.
+
+      *    초기화
+           INITIALIZE                  XDJL0B18-IN
+
+      *--     처리구분
+           MOVE  YNJLB275-PRCSS-DSTIC
+             TO  XDJL0B18-I-PRCSS-DSTIC
+      *--     고객식별자
+           MOVE  YNJLB275-CUST-IDNFR
+             TO  XDJL0B18-I-CUST-IDNFR
+      *--     담당심사역
+           MOVE  YNJLB275-RSPBL-EXMTN-DTY
+             TO  XDJL0B18-I-RSPBL-EXMTN-DTY
+      *--     한도신청번호
+           MOVE  YNJLB275-LIMT-APLCN-NO
+             TO  XDJL0B18-I-LIMT-APLCN-NO
+      *--     한도점검진행상태구분
+           MOVE  YNJLB275-LIMT-CP-STUS-DSTIC
+             TO  XDJL0B18-I-LIMT-CP-STUS-DSTIC
+      *--     최종한도승인구분
+           MOVE  YNJLB275-LAST-L-ATHOR-DSTIC
+             TO  XDJL0B18-I-LAST-L-ATHOR-DSTIC
+      *--     적정성여부
+           MOVE  YNJLB275-PRTY-YN
+             TO  XDJL0B18-I-PRTY-YN
+      *--     보고서첨부
+           MOVE  YNJLB275-RPTDOC-APNDX
+             TO  XDJL0B18-I-RPTDOC-APNDX
+240530*--     적정성점검구분
+           MOVE  YNJLB275-PRTY-CHKUP-DSTCD
+             TO  XDJL0B18-I-PRTY-CHKUP-DSTCD
+
+      *   총라인수
+           MOVE YNJLB275-TOTAL-LINE-CNT1
+             TO XDJL0B18-I-TOTAL-LINE-CNT1
+
+           PERFORM VARYING WK-K FROM 1 BY 1 UNTIL WK-K > 10
+                        OR WK-K > YNJLB275-TOTAL-LINE-CNT1
+      *--         직원번호
+                  MOVE  YNJLB275-EMPID (WK-K)
+                    TO  XDJL0B18-I-EMPID (WK-K)
+
+           END-PERFORM
+
+      *--         첨부파일일련번호
+           MOVE  YNJLB275-APNDX-FILE-SERNO
+             TO  XDJL0B18-I-APNDX-FILE-SERNO
+      *--         첨부파일식별자
+           MOVE  YNJLB275-APNDX-FILE-IDNFR
+             TO  XDJL0B18-I-APNDX-FILE-IDNFR
+      *--         첨부파일내용
+           MOVE  YNJLB275-APNDX-FILE-CTNT
+             TO  XDJL0B18-I-APNDX-FILE-CTNT
+      *--         첨부파일명
+           MOVE  YNJLB275-APNDX-FILE-NAME
+             TO  XDJL0B18-I-APNDX-FILE-NAME
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL0B18 YCCOMMON-CA XDJL0B18-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL0B18-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL0B18-OK
+               MOVE XDJL0B18-O-PRCSS-RSULT
+                 TO YPJLB275-PRCSS-RSULT
+           ELSE
+              #ERROR XDJL0B18-R-ERRCD
+                     XDJL0B18-R-TREAT-CD
+                     XDJL0B18-R-STAT
+           END-IF
+           .
+
+       S3200-DJL0B18-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*           DJL0418 OUTPUT DATA                  *"
+           #USRLOG  "=================================================="
+           #USRLOG  " OUTPT-LINE-CNT1    : " XDJL0418-O-OUTPT-LINE-CNT1
+           #USRLOG  " OUTPT-LINE-CNT2    : " XDJL0418-O-OUTPT-LINE-CNT2
+           #USRLOG  "=================================================="
+
+      *@4.1 출력항목 조립
+           MOVE CO-STAT-OK
+             TO YPJLB275-PRCSS-RSULT
+
+      *--       조회결과
+           MOVE  XDJL0418-O-INQURY-RSULT
+             TO  YPJLB275-INQURY-RSULT
+      *--       한도신청번호
+           MOVE  XDJL0418-O-LIMT-APLCN-NO
+             TO  YPJLB275-LIMT-APLCN-NO
+      *--       한도점검진행상태구분
+           MOVE  XDJL0418-O-LIMT-CP-STUS-DSTIC
+             TO  YPJLB275-LIMT-CP-STUS-DSTIC
+      *--       최종한도승인구분
+           MOVE  XDJL0418-O-LAST-L-ATHOR-DSTIC
+             TO  YPJLB275-LAST-L-ATHOR-DSTIC
+      *--       기준년월일
+           MOVE  XDJL0418-O-BASE-YMD
+             TO  YPJLB275-BASE-YMD
+      *--       신청신용등급
+           MOVE  XDJL0418-O-APLCN-CRDRAT
+             TO  YPJLB275-APLCN-CRDRAT
+      *--       신용등급
+           MOVE  XDJL0418-O-CRDRAT
+             TO  YPJLB275-CRDRAT
+      *--       관리한도설정년월일
+           MOVE  XDJL0418-O-MGT-LIMT-STUP-YMD
+             TO  YPJLB275-MGT-LIMT-STUP-YMD
+      *--       유효기일
+           MOVE  XDJL0418-O-VALD-FXDT
+             TO  YPJLB275-VALD-FXDT
+      *--       여신성한도
+           MOVE  XDJL0418-O-LNBZ-INCLIN-LIMT
+             TO  YPJLB275-LNBZ-INCLIN-LIMT
+      *--       포괄한도
+           MOVE  XDJL0418-O-INLS-LIMT
+             TO  YPJLB275-INLS-LIMT
+      *--       사용액
+           MOVE  XDJL0418-O-USE-AMT
+             TO  YPJLB275-USE-AMT
+      *--       적정성여부
+           MOVE  XDJL0418-O-PRTY-YN
+             TO  YPJLB275-PRTY-YN
+      *--       보고서첨부
+           MOVE  XDJL0418-O-RPTDOC-APNDX
+             TO  YPJLB275-RPTDOC-APNDX
+240530*--       적정성점검구분
+           MOVE  XDJL0418-O-PRTY-CHKUP-DSTCD
+             TO  YPJLB275-PRTY-CHKUP-DSTCD
+      *----------------------------------------------------------------*
+      *--       영업점코드
+           MOVE  XDJL0418-O-BBRN-CD
+             TO  YPJLB275-BBRN-CD
+      *--       부점명
+           MOVE  XDJL0418-O-BRN-NAME
+             TO  YPJLB275-BRN-NAME
+      *--       고객식별자
+           MOVE  XDJL0418-O-CUST-IDNFR
+             TO  YPJLB275-CUST-IDNFR
+      *--       차주명
+           IF    XDJL0418-O-BRWR-NAME  = SPACE
+      *          CALL - IC고객번호검색
+                 PERFORM S7000-IAA0019-CALL-RTN
+                    THRU S7000-IAA0019-CALL-EXT
+
+                 MOVE  XIAA0019-O-CUSTNM1
+                   TO  YPJLB275-BRWR-NAME
+           ELSE
+                 MOVE  XDJL0418-O-BRWR-NAME
+                   TO  YPJLB275-BRWR-NAME
+           END-IF
+
+      *--       그룹명
+           MOVE  XDJL0418-O-GROUP-NAME
+             TO  YPJLB275-GROUP-NAME
+      *--       신청그룹등급
+           MOVE  XDJL0418-O-APLCN-GROUP-GRD
+             TO  YPJLB275-APLCN-GROUP-GRD
+      *--       그룹등급
+           MOVE  XDJL0418-O-GROUP-GRD
+             TO  YPJLB275-GROUP-GRD
+      *--       설정상태
+           MOVE  XDJL0418-O-STUP-STUS
+             TO  YPJLB275-STUP-STUS
+      *--       간접익스포져
+           MOVE  XDJL0418-O-INDR-EXPSR
+             TO  YPJLB275-INDR-EXPSR
+      *----------------------------------------------------------------*
+      *--       소진율
+           MOVE  XDJL0418-O-EXHS-RT
+             TO  YPJLB275-EXHS-RT
+      *--       조기경보사후관리구분
+           MOVE  XDJL0418-O-ELY-AA-MGT-DSTIC
+             TO  YPJLB275-ELY-AA-MGT-DSTIC
+
+220324*   부실회계기업등급
+           PERFORM  S6100-IJL4009-CALL-RTN
+              THRU  S6100-IJL4009-CALL-EXT
+
+      *--       기업여신정책내용
+           MOVE  XDJL0418-O-CORP-L-PLICY-CTNT
+             TO  YPJLB275-CORP-L-PLICY-CTNT
+      *----------------------------------------------------------------*
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL0418-O-OUTPT-LINE-CNT1
+             TO YPJLB275-OUTPT-LINE-CNT1
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJLB275-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJLB275-OUTPT-LINE-CNT1
+      *            그리드１
+                   MOVE XDJL0418-O-GRID1(WK-I)
+                     TO YPJLB275-GRID1  (WK-I)
+           END-PERFORM
+
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL0418-O-OUTPT-LINE-CNT2
+             TO YPJLB275-OUTPT-LINE-CNT2
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-J > YPJLB275-OUTPT-LINE-CNT2
+      *@처리내용:그리드1 조립
+           PERFORM VARYING WK-J FROM 1 BY 1
+                   UNTIL   WK-J > YPJLB275-OUTPT-LINE-CNT2
+      *            그리드2
+                   MOVE XDJL0418-O-GRID2(WK-J)
+                     TO YPJLB275-GRID2  (WK-J)
+           END-PERFORM
+
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@ 부실회계등급　조회
+      *-----------------------------------------------------------------
+       S6100-IJL4009-CALL-RTN.
+
+           INITIALIZE                  XIJL4009-IN
+
+      *@1  입력파라미터 조립
+      *    KB-PIN
+           MOVE  YNJLB275-CUST-IDNFR
+             TO  XIJL4009-I-KB-PIN
+
+      *@1  IC부실회계기업 등급조회 프로그램 호출
+           #DYCALL  IJL4009  YCCOMMON-CA  XIJL4009-CA
+
+           IF  COND-XIJL4009-OK
+      *       부실회계기업등급
+               MOVE XIJL4009-O-INSL-A-GRD-DSTCD
+                 TO YPJLB275-INSL-ACCTG-CORP-GRD
+           ELSE
+      *       부실회계기업등급
+               MOVE '0'
+                 TO YPJLB275-INSL-ACCTG-CORP-GRD
+           END-IF
+           .
+
+       S6100-IJL4009-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ 고객정보 원장 READ
+      *-----------------------------------------------------------------
+       S7000-IAA0019-CALL-RTN.
+
+           INITIALIZE                  XIAA0019-IN
+
+      *@ 고객정보 원장   READ
+      *@-- 영역구분
+           MOVE CO-CHA-B               TO XIAA0019-I-SCOP-DSTIC.
+      *@-- 고객식별자
+           MOVE XDJL0418-I-CUST-IDNFR  TO XIAA0019-I-CUST-IDNFR.
+      *@-- 고객번호 검색  IC CALL
+           #DYCALL   IAA0019  YCCOMMON-CA  XIAA0019-CA.
+
+           IF  COND-XIAA0019-OK            OR
+               COND-XIAA0019-NOTFOUND
+               CONTINUE
+           ELSE
+              #ERROR   XIAA0019-R-ERRCD
+                       XIAA0019-R-TREAT-CD
+                       XIAA0019-R-STAT
+           END-IF
+
+      *    마침표
+           .
+       S7000-IAA0019-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11275000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

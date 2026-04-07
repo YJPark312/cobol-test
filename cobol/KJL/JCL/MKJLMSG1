@@ -1,0 +1,244 @@
+//MKJLMSG1 JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=B
+//********************************************************************/
+//* 작업개요 : SMS SEND  (작업기준일 불일치 통지전송)        */
+//* ZABA NDM SEND                                                    */
+//*------------------------------------------------------------------*/
+//NDMPROC2  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA01              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_002_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_002_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC3  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA02              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_003_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_003_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC4  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA03              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_004_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_004_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC5  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA04              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_005_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_005_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC6  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA05              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_006_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_006_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC7  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA06              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_007_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_007_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC8  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA07              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_008_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_008_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROC9  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA08              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_009_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_009_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCA  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA09              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_010_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_010_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCB  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP12.DATA10              -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_011_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_011_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCC  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP42.DATA                -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_012_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_012_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCD  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP37.DATA                -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_013_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_013_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCE  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP41.DATA                -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_014_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_014_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//NDMPROCG  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDP45.DATA                -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_016_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_016_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//

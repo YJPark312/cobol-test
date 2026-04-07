@@ -1,0 +1,567 @@
+      *================================================================*
+      *@ NAME : YPJL4009                                               *
+      *@ DESC : AS기업및그룹한도신청및승인조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-02-19 21:41:29                          *
+      *  생성일시     : 2009-02-19 21:41:41                          *
+      *================================================================*
+      *--     fld기업구분_hdn
+           07  YPJL4009-MNFC-FINAC-DSTIC         PIC  X(001).
+      *--     fld채무자명,fld그룹사명
+           07  YPJL4009-DBTRZ-NAME               PIC  X(042).
+      *--     fld당행자기자본
+           07  YPJL4009-ONCP-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld최종설정일
+           07  YPJL4009-MGT-LIMT-STUP-YMD        PIC  X(008).
+      *--     fld한도설정유효일
+           07  YPJL4009-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     fld현TE관리한도
+           07  YPJL4009-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld여신성
+           07  YPJL4009-LNBZ-I-MGT-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld시장성
+           07  YPJL4009-MRKTY-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld개별기업최고한
+           07  YPJL4009-CORP-HGST-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld그룹별최고한도
+           07  YPJL4009-GROUP-HGST-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fldSinalID_hdn
+           07  YPJL4009-ATHOR-EMPID              PIC  X(007).
+      *--     fldSinalNM_hdn
+           07  YPJL4009-ATHOR-EMNM               PIC  X(042).
+      *--     fldSinalIP_hdn
+           07  YPJL4009-ATHOR-EMP-TERML-IP       PIC  X(015).
+      *--     fld그룹별최고한도2
+           07  YPJL4009-ONCP-BASE-APLY-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld신용등급
+           07  YPJL4009-INTNL-CV-GRD-DSTCD       PIC  X(015).
+      *--     cbo수정신용등급
+           07  YPJL4009-AMND-ICV-GRD-DSTCD       PIC  X(015).
+      *--     fld결산년월
+           07  YPJL4009-STLACC-YM                PIC  X(006).
+      *--     fld수정결산년월
+           07  YPJL4009-AMND-STLACC-YM           PIC  X(006).
+      *--     fld업종
+           07  YPJL4009-NEW-SI-CLSFI-CD          PIC  X(005).
+      *--     fld업종명
+           07  YPJL4009-STND-IDSTRY-CD-NAME      PIC  X(042).
+      *--     fld수정업종
+           07  YPJL4009-AMND-NSI-CLSFI-CD        PIC  X(005).
+      *--     fld수정업종명
+           07  YPJL4009-AMND-SI-CD-NAME          PIC  X(040).
+      *--     fld기준년도
+           07  YPJL4009-BZTYP-AVG-APLY-YR        PIC  X(004).
+      *--     fld수정기준년도
+           07  YPJL4009-AMND-B-AVG-APLY-YR       PIC  X(004).
+      *--     fld신용등급지원비율
+           07  YPJL4009-CRDRAT-SPORT-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정신용등급지원비율
+           07  YPJL4009-AMND-C-SPORT-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld영업이익
+           07  YPJL4009-OPRFT                    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정영업이익
+           07  YPJL4009-AMND-OPRFT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수입이자
+           07  YPJL4009-INT-ERN                  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정수입이자
+           07  YPJL4009-AMND-INT-ERN             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld감가상각비
+           07  YPJL4009-DPRC-CST                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정감가상각비
+           07  YPJL4009-AMND-DPRC-CST            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융비용
+           07  YPJL4009-FNCS                     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융비용
+           07  YPJL4009-AMND-FNCS                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld단기차입금
+           07  YPJL4009-SHTRM-AMBR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정단기차입금
+           07  YPJL4009-AMND-SHTRM-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld차입금상환예상액
+           07  YPJL4009-SHTRM-AMBR-RPAYAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금상환예상액
+           07  YPJL4009-AMND-S-AMBR-RPAYAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld가중평균이자율
+           07  YPJL4009-BZTYP-WGHTG-AVG-RT       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정가중평균이자율
+           07  YPJL4009-AMND-B-WGHTG-AVG-RT      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld총차입금
+           07  YPJL4009-ENTP-TOTAL-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정총차입금
+           07  YPJL4009-AMND-E-TOTAL-AMBR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld매출액
+           07  YPJL4009-SALEPR                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정매출액
+           07  YPJL4009-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fldcashflow기준액
+           07  YPJL4009-CSFW-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정cashflow기준액
+           07  YPJL4009-AMND-CSFW-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld자기자본
+           07  YPJL4009-BASE-YR-ONCP-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정자기자본
+           07  YPJL4009-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld차입금자기자본비율
+           07  YPJL4009-AMBR-ONCP-RT             PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금자기자본비율
+           07  YPJL4009-AMND-AMBR-ONCP-RT        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld자기자본기준액
+           07  YPJL4009-ONCP-BSAMT1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정자기자본기준액
+           07  YPJL4009-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld상환능력기준한도
+           07  YPJL4009-SOLVN-BASE-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정상환능력기준한도
+           07  YPJL4009-AMND-S-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld전년도매출액
+           07  YPJL4009-SALEPR1                  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정전년도매출액
+           07  YPJL4009-AMND-SALEPR1             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld차입금매출액비율
+           07  YPJL4009-AMBR-SALEPR-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금매출액비율
+           07  YPJL4009-AMND-A-SALEPR-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld전년도총자산
+           07  YPJL4009-PYY-TOTAL-ASST           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정전년도총자산
+           07  YPJL4009-AMND-PYY-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld차입금총자산비율
+           07  YPJL4009-AMBR-T-ASST-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정차입금총자산비율
+           07  YPJL4009-AMND-AT-ASST-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld규모기준한도
+           07  YPJL4009-SCAL-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정규모기준한도
+           07  YPJL4009-AMND-SCAL-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld기준한도
+           07  YPJL4009-BASE-CLAM                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정기준한도
+           07  YPJL4009-AMND-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융신용등급
+           07  YPJL4009-FINAC-ICV-GRD-DSTCD      PIC  X(006).
+      *--     cbo수정금융신용등급
+           07  YPJL4009-AMND-FICV-GRD-DSTCD      PIC  X(006).
+      *--     fld금융결산년월
+           07  YPJL4009-FINAC-STLACC-YM          PIC  X(006).
+      *--     fld수정금융결산년월
+           07  YPJL4009-AMND-F-STLACC-YM         PIC  X(006).
+      *--     fld금융업종
+           07  YPJL4009-FINAC-L-BZTYP-DSTCD      PIC  X(018).
+      *--     fld금융업종명
+           07  YPJL4009-FINAC-LB-DSTCD-NAME      PIC  X(042).
+      *--     fld수정금융업종
+           07  YPJL4009-AMND-FL-BZTYP-DSTCD      PIC  X(018).
+      *--     cbo수정금융업종명
+           07  YPJL4009-AMND-FLB-DSTCD-NAME      PIC  X(042).
+      *--     fld금융업종평균기준년도
+           07  YPJL4009-FINAC-B-AVG-APLY-YR      PIC  X(004).
+      *--     fld수정금융업종평균기준년도
+           07  YPJL4009-AMND-FB-AVG-APLY-YR      PIC  X(004).
+      *--     fld금융신용등급별지원비율
+           07  YPJL4009-FINAC-C-SPORT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융신용등급별지원비율
+           07  YPJL4009-AMND-FC-SPORT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld금융전전기경상이익
+           07  YPJL4009-FINAC-BP-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전기 법인세비용차감전계속사업이익
+           07  YPJL4009-AMND-FBP-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융전기경상이익
+           07  YPJL4009-FINAC-PYY-ODNR-PRFT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전기경상이익
+           07  YPJL4009-AMND-FP-ODNR-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융당기경상이익
+           07  YPJL4009-FINAC-BY-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융당기경상이익
+           07  YPJL4009-AMND-FBY-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융전전기자기자본
+           07  YPJL4009-FINAC-BP-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전전기자기자본
+           07  YPJL4009-AMND-FBP-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융전기자기자본
+           07  YPJL4009-FINAC-PYY-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융전기자기자본
+           07  YPJL4009-AMND-PYY-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융당기자기자본
+           07  YPJL4009-FINAC-B-YR-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융당기자기자본
+           07  YPJL4009-AMND-FB-YR-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융최근업종평균자기자본
+           07  YPJL4009-FINAC-ONCP-RATO          PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융최근업종평균자본비율
+           07  YPJL4009-AMND-F-ONCP-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     fld금융상환능력기준한도
+           07  YPJL4009-FINAC-SZ-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융상환능력기준한도
+           07  YPJL4009-AMND-FS-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융규모기준기준한도
+           07  YPJL4009-FINAC-S-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융규모기준기준한도
+           07  YPJL4009-AMND-S-BASE-CLAM1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld금융금융기관기준한도
+           07  YPJL4009-FINAC-BASE-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld수정금융금융기관기준한도
+           07  YPJL4009-AMND-F-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld설정신청구분_hdn
+           07  YPJL4009-LIMT-A-KND-DSTCD         PIC  X(001).
+      *--     fld신청1_대표자
+           07  YPJL4009-RPRS-NAME                PIC  X(042).
+      *--     fld신청1_기업신용등급
+           07  YPJL4009-INTNL-CV-GRD-DSTCD1      PIC  X(006).
+      *--     fld신청1_표준산업분류코드
+           07  YPJL4009-NEW-SI-CLSFI-CD1         PIC  X(005).
+      *--     fld신청1_그룹명
+           07  YPJL4009-HANGL-GROUP-NAME         PIC  X(042).
+      *--     fld신청1_그룹등급
+           07  YPJL4009-CMGR-CRTDSCD             PIC  X(004).
+      *--     fld신청1_영업점코드
+           07  YPJL4009-BRNCD                    PIC  X(004).
+      *--     fld신청1_영업점명
+           07  YPJL4009-BRN-HANGL-NAME           PIC  X(042).
+      *--     fld신청1_신청자ID
+           07  YPJL4009-APLCN-EMPID              PIC  X(008).
+      *--     fld신청1_신청자명
+           07  YPJL4009-APLCN-EMNM               PIC  X(042).
+      *--     출력라인수1
+           07  YPJL4009-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     grd조회내용1
+           07  YPJL4009-GRID1                    OCCURS 0030 TIMES.
+      *--       통화코드
+             09  YPJL4009-CNCYCD                 PIC  X(003).
+      *--       본건신청금액
+             09  YPJL4009-MAIN-CAS-APLCN-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       본건여신종류
+             09  YPJL4009-TIACC-NAME             PIC  X(072).
+      *--       원화환산액
+             09  YPJL4009-WONC-AUC               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       원화 Exposure
+             09  YPJL4009-MAIN-CAS-EXPSR-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수2
+           07  YPJL4009-OUTPT-LINE-CNT2          PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *--     grd조회내용2
+           07  YPJL4009-GRID2                    OCCURS 0030 TIMES.
+      *--       관리한도
+             09  YPJL4009-MGT-CLAM2              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             09  YPJL4009-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       본건명목액
+             09  YPJL4009-WONC-AUC1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       본건익스포져
+             09  YPJL4009-MAIN-CAS-EXPSR-AMT1    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수3
+           07  YPJL4009-OUTPT-LINE-CNT3          PIC  9(005).
+      *--     grd조회내용3
+           07  YPJL4009-GRID3                    OCCURS 0030 TIMES.
+      *--       산업군명
+             09  YPJL4009-LAG-C-BZTYP-CD-NAME    PIC  X(072).
+      *--       산업별관리한도
+             09  YPJL4009-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별Exposure
+             09  YPJL4009-TE-LIMT-AUC1           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수4
+           07  YPJL4009-OUTPT-LINE-CNT4          PIC  9(005).
+      *--     grd조회내용4
+           07  YPJL4009-GRID4                    OCCURS 0030 TIMES.
+      *--       여신성TE관리한도
+             09  YPJL4009-BF-LNBZ-INCLIN-ASST    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성TE관리한도
+             09  YPJL4009-BF-MRKTY-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성TE관리한도
+             09  YPJL4009-AF-LNBZ-INCLIN-ASST    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성TE관리한도
+             09  YPJL4009-AF-MRKTY-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     mln신청1_신청사유
+           07  YPJL4009-APLCN-RESN-CTNT          PIC  X(252).
+      *--     fld승인_신청일자
+           07  YPJL4009-ATHOR-APLCN-YMD          PIC  X(008).
+      *--     fld승인_신청자ID
+           07  YPJL4009-ATHOR-APLCN-EMPID        PIC  X(007).
+      *--     fld승인_신청자명
+           07  YPJL4009-ATHOR-APLCN-EMNM         PIC  X(052).
+      *--     fld승인_영업점코드
+           07  YPJL4009-ATHOR-BRNCD              PIC  X(004).
+      *--     fld승인_영업점명
+           07  YPJL4009-ATHOR-B-HANGL-NAME       PIC  X(042).
+      *--     cbo승인_신청구분
+           07  YPJL4009-ATHOR-L-APLCN-DSTCD      PIC  X(001).
+      *--     fld승인_승인일자
+           07  YPJL4009-ATHOR-YMD                PIC  X(008).
+      *--     fld승인_기준한도산출액
+           07  YPJL4009-ATHOR-BASE-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld승인_TE관리한도설정액
+           07  YPJL4009-ATHOR-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld한도유효일
+           07  YPJL4009-LIMT-STUP-VALD-YMD       PIC  X(008).
+      *--     fld승인_여신성TE관리한도
+           07  YPJL4009-ATHOR-LI-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     fld승인_시장성TE관리한도
+           07  YPJL4009-ATHOR-M-MGT-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     cbo승인권자
+           07  YPJL4009-ATHOR-EMPID1             PIC  X(007).
+      *--     cbo조건부승인조건
+           07  YPJL4009-LIMT-A-CNDN-DSTCD        PIC  X(001).
+      *--     cbo승인구분
+           07  YPJL4009-LIMT-ATHOR-DSTCD         PIC  X(001).
+      *--     mln승인사유
+           07  YPJL4009-ATHOR-RESN-CTNT          PIC  X(252).
+      *================================================================*
+      *        Y  P  J  L  4  0  0  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4009-MNFC-FINAC-DSTIC     ;fld기업구분_hdn
+      *X  YPJL4009-DBTRZ-NAME           ;fld채무자명,fld그룹사명
+      *S  YPJL4009-ONCP-BSAMT           ;fld당행자기자본
+      *X  YPJL4009-MGT-LIMT-STUP-YMD    ;fld최종설정일
+      *X  YPJL4009-MGT-LIMT-VALD-YMD    ;fld한도설정유효일
+      *S  YPJL4009-MGT-CLAM             ;fld현TE관리한도
+      *S  YPJL4009-LNBZ-I-MGT-CLAM      ;fld여신성
+      *S  YPJL4009-MRKTY-MGT-CLAM       ;fld시장성
+      *S  YPJL4009-CORP-HGST-LIMT       ;fld개별기업최고한
+      *S  YPJL4009-GROUP-HGST-LIMT      ;fld그룹별최고한도
+      *X  YPJL4009-ATHOR-EMPID          ;fldSinalID_hdn
+      *X  YPJL4009-ATHOR-EMNM           ;fldSinalNM_hdn
+      *X  YPJL4009-ATHOR-EMP-TERML-IP   ;fldSinalIP_hdn
+      *S  YPJL4009-ONCP-BASE-APLY-CLAM  ;fld그룹별최고한도2
+      *X  YPJL4009-INTNL-CV-GRD-DSTCD   ;fld신용등급
+      *X  YPJL4009-AMND-ICV-GRD-DSTCD   ;cbo수정신용등급
+      *X  YPJL4009-STLACC-YM            ;fld결산년월
+      *X  YPJL4009-AMND-STLACC-YM       ;fld수정결산년월
+      *X  YPJL4009-NEW-SI-CLSFI-CD      ;fld업종
+      *X  YPJL4009-STND-IDSTRY-CD-NAME  ;fld업종명
+      *X  YPJL4009-AMND-NSI-CLSFI-CD    ;fld수정업종
+      *X  YPJL4009-AMND-SI-CD-NAME      ;fld수정업종명
+      *X  YPJL4009-BZTYP-AVG-APLY-YR    ;fld기준년도
+      *X  YPJL4009-AMND-B-AVG-APLY-YR   ;fld수정기준년도
+      *S  YPJL4009-CRDRAT-SPORT-RATO    ;fld신용등급지원비율
+      *S  YPJL4009-AMND-C-SPORT-RATO    ;fld수정신용등급지원비율
+      *S  YPJL4009-OPRFT                ;fld영업이익
+      *S  YPJL4009-AMND-OPRFT           ;fld수정영업이익
+      *S  YPJL4009-INT-ERN              ;fld수입이자
+      *S  YPJL4009-AMND-INT-ERN         ;fld수정수입이자
+      *S  YPJL4009-DPRC-CST             ;fld감가상각비
+      *S  YPJL4009-AMND-DPRC-CST        ;fld수정감가상각비
+      *S  YPJL4009-FNCS                 ;fld금융비용
+      *S  YPJL4009-AMND-FNCS            ;fld수정금융비용
+      *S  YPJL4009-SHTRM-AMBR           ;fld단기차입금
+      *S  YPJL4009-AMND-SHTRM-AMBR      ;fld수정단기차입금
+      *S  YPJL4009-SHTRM-AMBR-RPAYAMT   ;fld차입금상환예상액
+      *S  YPJL4009-AMND-S-AMBR-RPAYAMT
+      * fld수정차입금상환예상액
+      *S  YPJL4009-BZTYP-WGHTG-AVG-RT   ;fld가중평균이자율
+      *S  YPJL4009-AMND-B-WGHTG-AVG-RT  ;fld수정가중평균이자율
+      *S  YPJL4009-ENTP-TOTAL-AMBR      ;fld총차입금
+      *S  YPJL4009-AMND-E-TOTAL-AMBR    ;fld수정총차입금
+      *S  YPJL4009-SALEPR               ;fld매출액
+      *S  YPJL4009-AMND-SALEPR          ;fld수정매출액
+      *S  YPJL4009-CSFW-BSAMT           ;fldcashflow기준액
+      *S  YPJL4009-AMND-CSFW-BSAMT      ;fld수정cashflow기준액
+      *S  YPJL4009-BASE-YR-ONCP-AMT     ;fld자기자본
+      *S  YPJL4009-AMND-B-YR-ONCP-AMT   ;fld수정자기자본
+      *S  YPJL4009-AMBR-ONCP-RT         ;fld차입금자기자본비율
+      *S  YPJL4009-AMND-AMBR-ONCP-RT
+      * fld수정차입금자기자본비율
+      *S  YPJL4009-ONCP-BSAMT1          ;fld자기자본기준액
+      *S  YPJL4009-AMND-O-CAPTL-BSAMT   ;fld수정자기자본기준액
+      *S  YPJL4009-SOLVN-BASE-CLAM      ;fld상환능력기준한도
+      *S  YPJL4009-AMND-S-BASE-CLAM     ;fld수정상환능력기준한도
+      *S  YPJL4009-SALEPR1              ;fld전년도매출액
+      *S  YPJL4009-AMND-SALEPR1         ;fld수정전년도매출액
+      *S  YPJL4009-AMBR-SALEPR-RATO     ;fld차입금매출액비율
+      *S  YPJL4009-AMND-A-SALEPR-RATO
+      * fld수정차입금매출액비율
+      *S  YPJL4009-PYY-TOTAL-ASST       ;fld전년도총자산
+      *S  YPJL4009-AMND-PYY-TOTAL-ASST  ;fld수정전년도총자산
+      *S  YPJL4009-AMBR-T-ASST-RATO     ;fld차입금총자산비율
+      *S  YPJL4009-AMND-AT-ASST-RATO    ;fld수정차입금총자산비율
+      *S  YPJL4009-SCAL-BASE-CLAM       ;fld규모기준한도
+      *S  YPJL4009-AMND-SCAL-BASE-CLAM  ;fld수정규모기준한도
+      *S  YPJL4009-BASE-CLAM            ;fld기준한도
+      *S  YPJL4009-AMND-BASE-CLAM       ;fld수정기준한도
+      *X  YPJL4009-FINAC-ICV-GRD-DSTCD  ;fld금융신용등급
+      *X  YPJL4009-AMND-FICV-GRD-DSTCD  ;cbo수정금융신용등급
+      *X  YPJL4009-FINAC-STLACC-YM      ;fld금융결산년월
+      *X  YPJL4009-AMND-F-STLACC-YM     ;fld수정금융결산년월
+      *X  YPJL4009-FINAC-L-BZTYP-DSTCD  ;fld금융업종
+      *X  YPJL4009-FINAC-LB-DSTCD-NAME  ;fld금융업종명
+      *X  YPJL4009-AMND-FL-BZTYP-DSTCD  ;fld수정금융업종
+      *X  YPJL4009-AMND-FLB-DSTCD-NAME  ;cbo수정금융업종명
+      *X  YPJL4009-FINAC-B-AVG-APLY-YR
+      * fld금융업종평균기준년도
+      *X  YPJL4009-AMND-FB-AVG-APLY-YR
+      * fld수정금융업종평균기준년도
+      *S  YPJL4009-FINAC-C-SPORT-RATO
+      * fld금융신용등급별지원비율
+      *S  YPJL4009-AMND-FC-SPORT-RATO
+      * fld수정금융신용등급별지원비율
+      *S  YPJL4009-FINAC-BP-ODNR-PRFT   ;fld금융전전기경상이익
+      *S  YPJL4009-AMND-FBP-ODNR-PRFT
+      * 수정전전기 법인세비용차감전계속사업이익
+      *S  YPJL4009-FINAC-PYY-ODNR-PRFT  ;fld금융전기경상이익
+      *S  YPJL4009-AMND-FP-ODNR-PRFT    ;fld수정금융전기경상이익
+      *S  YPJL4009-FINAC-BY-ODNR-PRFT   ;fld금융당기경상이익
+      *S  YPJL4009-AMND-FBY-ODNR-PRFT
+      * fld수정금융당기경상이익
+      *S  YPJL4009-FINAC-BP-ONCP-AMT    ;fld금융전전기자기자본
+      *S  YPJL4009-AMND-FBP-ONCP-AMT
+      * fld수정금융전전기자기자본
+      *S  YPJL4009-FINAC-PYY-ONCP-AMT   ;fld금융전기자기자본
+      *S  YPJL4009-AMND-PYY-ONCP-AMT    ;fld수정금융전기자기자본
+      *S  YPJL4009-FINAC-B-YR-ONCP-AMT  ;fld금융당기자기자본
+      *S  YPJL4009-AMND-FB-YR-ONCP-AMT
+      * fld수정금융당기자기자본
+      *S  YPJL4009-FINAC-ONCP-RATO
+      * fld금융최근업종평균자기자본
+      *S  YPJL4009-AMND-F-ONCP-RATO
+      * fld수정금융최근업종평균자본비율
+      *S  YPJL4009-FINAC-SZ-BASE-CLAM
+      * fld금융상환능력기준한도
+      *S  YPJL4009-AMND-FS-BASE-CLAM
+      * fld수정금융상환능력기준한도
+      *S  YPJL4009-FINAC-S-BASE-CLAM    ;fld금융규모기준기준한도
+      *S  YPJL4009-AMND-S-BASE-CLAM1
+      * fld수정금융규모기준기준한도
+      *S  YPJL4009-FINAC-BASE-CLAM      ;fld금융금융기관기준한도
+      *S  YPJL4009-AMND-F-BASE-CLAM
+      * fld수정금융금융기관기준한도
+      *X  YPJL4009-LIMT-A-KND-DSTCD     ;fld설정신청구분_hdn
+      *X  YPJL4009-RPRS-NAME            ;fld신청1_대표자
+      *X  YPJL4009-INTNL-CV-GRD-DSTCD1
+      * fld신청1_기업신용등급
+      *X  YPJL4009-NEW-SI-CLSFI-CD1
+      * fld신청1_표준산업분류코드
+      *X  YPJL4009-HANGL-GROUP-NAME     ;fld신청1_그룹명
+      *X  YPJL4009-CMGR-CRTDSCD         ;fld신청1_그룹등급
+      *X  YPJL4009-BRNCD                ;fld신청1_영업점코드
+      *X  YPJL4009-BRN-HANGL-NAME       ;fld신청1_영업점명
+      *X  YPJL4009-APLCN-EMPID          ;fld신청1_신청자ID
+      *X  YPJL4009-APLCN-EMNM           ;fld신청1_신청자명
+      *N  YPJL4009-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4009-GRID1                ;grd조회내용1
+      *X  YPJL4009-CNCYCD               ;통화코드
+      *S  YPJL4009-MAIN-CAS-APLCN-AMT   ;본건신청금액
+      *X  YPJL4009-TIACC-NAME           ;본건여신종류
+      *S  YPJL4009-WONC-AUC             ;원화환산액
+      *S  YPJL4009-MAIN-CAS-EXPSR-AMT   ;원화 Exposure
+      *S  YPJL4009-OUTPT-LINE-CNT2      ;출력라인수2
+      *A  YPJL4009-GRID2                ;grd조회내용2
+      *S  YPJL4009-MGT-CLAM2            ;관리한도
+      *S  YPJL4009-TE-LIMT-AUC          ;익스포져
+      *S  YPJL4009-WONC-AUC1            ;본건명목액
+      *S  YPJL4009-MAIN-CAS-EXPSR-AMT1  ;본건익스포져
+      *N  YPJL4009-OUTPT-LINE-CNT3      ;출력라인수3
+      *A  YPJL4009-GRID3                ;grd조회내용3
+      *X  YPJL4009-LAG-C-BZTYP-CD-NAME  ;산업군명
+      *S  YPJL4009-IDSTRY-MGT-CLAM      ;산업별관리한도
+      *S  YPJL4009-TE-LIMT-AUC1         ;산업별Exposure
+      *N  YPJL4009-OUTPT-LINE-CNT4      ;출력라인수4
+      *A  YPJL4009-GRID4                ;grd조회내용4
+      *S  YPJL4009-BF-LNBZ-INCLIN-ASST  ;여신성TE관리한도
+      *S  YPJL4009-BF-MRKTY-ASST        ;시장성TE관리한도
+      *S  YPJL4009-AF-LNBZ-INCLIN-ASST  ;여신성TE관리한도
+      *S  YPJL4009-AF-MRKTY-ASST        ;시장성TE관리한도
+      *X  YPJL4009-APLCN-RESN-CTNT      ;mln신청1_신청사유
+      *X  YPJL4009-ATHOR-APLCN-YMD      ;fld승인_신청일자
+      *X  YPJL4009-ATHOR-APLCN-EMPID    ;fld승인_신청자ID
+      *X  YPJL4009-ATHOR-APLCN-EMNM     ;fld승인_신청자명
+      *X  YPJL4009-ATHOR-BRNCD          ;fld승인_영업점코드
+      *X  YPJL4009-ATHOR-B-HANGL-NAME   ;fld승인_영업점명
+      *X  YPJL4009-ATHOR-L-APLCN-DSTCD  ;cbo승인_신청구분
+      *X  YPJL4009-ATHOR-YMD            ;fld승인_승인일자
+      *S  YPJL4009-ATHOR-BASE-CLAM      ;fld승인_기준한도산출액
+      *S  YPJL4009-ATHOR-MGT-CLAM       ;fld승인_TE관리한도설정액
+      *X  YPJL4009-LIMT-STUP-VALD-YMD   ;fld한도유효일
+      *S  YPJL4009-ATHOR-LI-MGT-CLAM
+      * fld승인_여신성TE관리한도
+      *S  YPJL4009-ATHOR-M-MGT-CLAM
+      * fld승인_시장성TE관리한도
+      *X  YPJL4009-ATHOR-EMPID1         ;cbo승인권자
+      *X  YPJL4009-LIMT-A-CNDN-DSTCD    ;cbo조건부승인조건
+      *X  YPJL4009-LIMT-ATHOR-DSTCD     ;cbo승인구분
+      *X  YPJL4009-ATHOR-RESN-CTNT      ;mln승인사유

@@ -1,0 +1,67 @@
+      *===========================================================
+      *  프로그램명    : QJL0821
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0821
+      *  사용예        : 01  XQJL0821-CA.
+      *                      COPY  XQJL0821.
+      *  최종변경일시  : 2019년12월20일22시45분09초
+      *===========================================================
+           03  XQJL0821-IN.
+      *            그룹회사코드
+               05  XQJL0821-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0821-I-BASE-YMD
+                                          PIC  X(00008).
+      *            국내외구분
+               05  XQJL0821-I-HMAB-DSTCD
+                                          PIC  X(00001).
+           03  XQJL0821-OUT.
+      *            대분류업종코드
+               05  XQJL0821-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00100  PIC  X(00003).
+      *            SUB업종코드명
+               05  XQJL0821-O-SUB-BZTYP-CD-NAME
+                           OCCURS  00100  PIC  X(00042).
+      *            산업TE기업규모구분
+               05  XQJL0821-O-IDSTRY-TCS-DSTCD
+                           OCCURS  00100  PIC  X(00001).
+      *            전년도말익스포져금액
+               05  XQJL0821-O-PYY-X-END-EXPSR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            산업별규모별SUB한도
+               05  XQJL0821-O-IDSTRY-PSP-SUB-CLAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            산업별규모별TE금액
+               05  XQJL0821-O-IDSTRY-PSP-TE-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            여유액
+               05  XQJL0821-O-SEXTR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            소진율1
+               05  XQJL0821-O-EXHS-RT1
+                           OCCURS  00100  PIC S9(00003)V9(2) COMP-3.
+      *            순증한도
+               05  XQJL0821-O-NTIC-LIMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            순증TE
+               05  XQJL0821-O-NTIC-TE
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            순증여유액
+               05  XQJL0821-O-NTIC-SEXTR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            소진율2
+               05  XQJL0821-O-EXHS-RT2
+                           OCCURS  00100  PIC S9(00003)V9(2) COMP-3.
+      *            대출금액
+               05  XQJL0821-O-LN-AMT
+                           OCCURS  00100  PIC S9(00018) COMP-3.
+      *            실질여유액
+               05  XQJL0821-O-ATUAL-SEXTR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            실질소진율
+               05  XQJL0821-O-ATUAL-EXHS-RT
+                           OCCURS  00100  PIC S9(00003)V9(2) COMP-3.
+      *===========================================================
+      *  XQJL0821   C O P Y B O O K   E N D
+      *===========================================================

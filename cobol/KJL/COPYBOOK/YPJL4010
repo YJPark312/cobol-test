@@ -1,0 +1,52 @@
+      *================================================================*
+      *@ NAME : YPJL4010                                               *
+      *@ DESC : AS산업별TE한도설정조회COPYBOOK                     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-12 16:05:00                          *
+      *  생성일시     : 2020-03-12 16:05:06                          *
+      *  전체길이     : 00196007 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4010-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4010-GRID1                    OCCURS 001000 TIMES.
+      *--       피어코드
+             09  YPJL4010-PEER-DSTCD             PIC  X(005).
+      *--       피어명
+             09  YPJL4010-PEER-CD-NAME           PIC  X(102).
+      *--       산업등급
+             09  YPJL4010-IDSTRY-V-GRD-DSTCD     PIC  X(004).
+      *--       산업별
+             09  YPJL4010-IDSTRY-PER-EAD-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       가용
+             09  YPJL4010-AVL-EAD-AMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별조정율
+             09  YPJL4010-IDSTRY-P-ADJS-RATO     PIC  9(003)V9(02).
+      *--       산업별T/E금액
+             09  YPJL4010-IDSTRY-TE-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별T/E관리금액
+             09  YPJL4010-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국외산업관리한도금액
+             09  YPJL4010-ABRD-I-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     처리결과
+           07  YPJL4010-PRCSS-RSULT              PIC  X(002).
+      *================================================================*
+      *        Y  P  J  L  4  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4010-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4010-GRID1                ;그리드1
+      *X  YPJL4010-PEER-DSTCD           ;피어코드
+      *X  YPJL4010-PEER-CD-NAME         ;피어명
+      *X  YPJL4010-IDSTRY-V-GRD-DSTCD   ;산업등급
+      *S  YPJL4010-IDSTRY-PER-EAD-AMT   ;산업별 EAD
+      *S  YPJL4010-AVL-EAD-AMT          ;가용 EAD
+      *N  YPJL4010-IDSTRY-P-ADJS-RATO   ;산업별조정율
+      *S  YPJL4010-IDSTRY-TE-AMT        ;산업별T/E금액
+      *S  YPJL4010-IDSTRY-MGT-CLAM      ;산업별T/E관리금액
+      *S  YPJL4010-ABRD-I-MGT-CLAM      ;국외산업관리한도금액
+      *X  YPJL4010-PRCSS-RSULT          ;처리결과

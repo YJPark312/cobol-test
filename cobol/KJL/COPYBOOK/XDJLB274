@@ -1,0 +1,68 @@
+      *================================================================*
+      *@ NAME : XDJLB274                                               *
+      *@ DESC : DC포괄신용공여한도승인저장 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-19 15:27:28                          *
+      *  생성일시     : 2023-09-19 15:27:28                          *
+      *  전체길이     : 00000366 BYTES                               *
+      *================================================================*
+           03  XDJLB274-RETURN.
+             05  XDJLB274-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB274-OK            VALUE  '00'.
+                 88  COND-XDJLB274-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB274-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB274-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB274-ERROR         VALUE  '09'.
+                 88  COND-XDJLB274-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB274-SYSERROR      VALUE  '99'.
+             05  XDJLB274-R-LINE                 PIC  9(006).
+             05  XDJLB274-R-ERRCD                PIC  X(008).
+             05  XDJLB274-R-TREAT-CD             PIC  X(008).
+             05  XDJLB274-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB274-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB274-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJLB274-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJLB274-I-APLCN-NO             PIC  X(010).
+      *--       신청직원번호
+             05  XDJLB274-I-APLCN-EMPID          PIC  X(007).
+      *--       승인년월일
+             05  XDJLB274-I-ATHOR-YMD            PIC  X(008).
+      *--       한도승인금액
+             05  XDJLB274-I-LIMT-ATHOR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도승인권자구분
+             05  XDJLB274-I-LIMT-ATRZ-DSTCD      PIC  X(001).
+      *--       한도설정유효년월일
+             05  XDJLB274-I-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       한도승인구분코드
+             05  XDJLB274-I-LIMT-ATHOR-DSTCD     PIC  X(001).
+      *--       승인사유내용
+             05  XDJLB274-I-ATHOR-RESN-CTNT      PIC  X(302).
+      *--       한도신청종류구분
+             05  XDJLB274-I-LIMT-A-KND-DSTCD     PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB274-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB274-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  2  7  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB274-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB274-I-KB-PIN             ;KB-PIN
+      *X  XDJLB274-I-APLCN-NO           ;신청번호
+      *X  XDJLB274-I-APLCN-EMPID        ;신청직원번호
+      *X  XDJLB274-I-ATHOR-YMD          ;승인년월일
+      *S  XDJLB274-I-LIMT-ATHOR-AMT     ;한도승인금액
+      *X  XDJLB274-I-LIMT-ATRZ-DSTCD    ;한도승인권자구분
+      *X  XDJLB274-I-LIMT-STUP-VALD-YMD ;한도설정유효년월일
+      *X  XDJLB274-I-LIMT-ATHOR-DSTCD   ;한도승인구분코드
+      *X  XDJLB274-I-ATHOR-RESN-CTNT    ;승인사유내용
+      *X  XDJLB274-I-LIMT-A-KND-DSTCD   ;한도신청종류구분
+      *X  XDJLB274-O-PRCSS-RSULT        ;처리결과

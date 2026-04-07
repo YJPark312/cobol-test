@@ -1,0 +1,145 @@
+//TKJLTP12 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*           수시　배치실행JCL
+//*********************************************************************
+//* 기준일에 따라 A를
+//* 전월말영업일이나 전영업일로 수정하여 사용
+//*
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*  %%SET %%C = %%SUBSTR %%A 7 2
+//*********************************************************************
+//*   외화채권상품정보적재           (THKJLR012)
+//*********************************************************************
+//STEP08  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.TKJLTP12.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR012 ')
+        ,CHAR('THKJLR012DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,외화상품유형구분
+        ,통합트레이드번호
+        ,계정과목코드
+        ,계정세과목코드
+        ,통합계정과목코드
+        ,고객식별자
+        ,고객관리번호
+        ,고객고유번호
+        ,발행법인등록번호
+        ,매입년월일
+        ,통화코드
+        ,외화장부금액
+        ,만기년월일
+        ,관리부점코드
+        ,총외환여신금액
+        ,"ISO국가코드"
+        ,계약한도구분
+        ,국제한도구분
+        ,대미환산장부금액
+        ,대미환산한도
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJLR012
+   WHERE 그룹회사코드           = 'KB0'
+     AND SUBSTR(기준년월일,7,2) = '%%C'
+    WITH UR;
+/*
+//STEP09  EXEC JZBDEXEC,MBR=BJLDR06,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SM.SHRKJL.TAATR72
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SM.MKJLTP12.DATA
+//SYSIN     DD *
+KB0-%%A-TKJLTP12-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//
+//*전월말영업일:%%MEND%%$OYEAR.%%OMONTH
+//*전영업일    :%%$WCALC %%$ODATE -1 WORKDAYS
+
+
+//*********************************************************************
+//*   외화유가증권장외파생차주별익스포져(THKJLR007)
+//*********************************************************************
+//*STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.TKJLTP12.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR007 ')
+        ,CHAR('THKJLR007DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,고객식별자
+        ,고객관리번호
+        ,차주번호
+        ,차주명
+        ,네팅여부
+        ,총거래한도
+        ,담보거래한도
+        ,신용거래한도
+        ,한도유효년월일
+        ,면제여부
+        ,거래건수
+        ,위험가중자산금액
+        ,담보평가금액
+        ,외환총한도소진율
+        ,신용한도소진율
+        ,담보소진율
+        ,최근신규년월일
+        ,최근한도년월일
+        ,"초과신규여부1"
+        ,"초과신규여부2"
+        ,"초과신규여부3"
+        ,관련부점코드
+        ,"ISO국가코드"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJLR007
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//STEP02  EXEC JZBDEXEC,MBR=BJLDR07,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SD.SHRKJL.TAATR77
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SM.MKJLTP12.DATA
+//SYSIN     DD *
+KB0-%%A-TKJLTP12-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일

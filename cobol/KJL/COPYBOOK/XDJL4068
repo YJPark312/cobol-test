@@ -1,0 +1,104 @@
+      *================================================================*
+      *@ NAME : XDJL4068                                               *
+      *@ DESC : DC산업취급관리COPYBOOK                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-10-21 13:38:35                          *
+      *  생성일시     : 2022-10-21 13:38:35                          *
+      *  전체길이     : 00000021 BYTES                               *
+      *================================================================*
+           03  XDJL4068-RETURN.
+             05  XDJL4068-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4068-OK            VALUE  '00'.
+                 88  COND-XDJL4068-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4068-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4068-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4068-ERROR         VALUE  '09'.
+                 88  COND-XDJL4068-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4068-SYSERROR      VALUE  '99'.
+             05  XDJL4068-R-LINE                 PIC  9(006).
+             05  XDJL4068-R-ERRCD                PIC  X(008).
+             05  XDJL4068-R-TREAT-CD             PIC  X(008).
+             05  XDJL4068-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4068-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4068-I-PRCSS-DSTIC          PIC  X(002).
+      *--       대분류업종코드
+             05  XDJL4068-I-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--       조회기준시작년월일
+             05  XDJL4068-I-INQURY-B-START-YMD   PIC  X(008).
+      *--       조회기준종료년월일
+             05  XDJL4068-I-INQURY-BASE-END-YMD  PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4068-OUT.
+      *----------------------------------------------------------------*
+      *--       총라인수
+             05  XDJL4068-O-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJL4068-O-GRID                 OCCURS 001000 TIMES.
+      *--         대분류업종코드
+               07  XDJL4068-O-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         대분류업종코드명
+               07  XDJL4068-O-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(032).
+      *--         일련번호
+               07  XDJL4068-O-SERNO              PIC S9(007)    COMP-3.
+      *--         취급중단년월일
+               07  XDJL4068-O-HNDLN-DSCN-YMD     PIC  X(008).
+      *--         예외적용년월일
+               07  XDJL4068-O-ECEPT-APLY-YMD     PIC  X(008).
+      *--         산업등록해제구분코드
+               07  XDJL4068-O-LIMT-EIRR-DSTCD    PIC  X(001).
+      *--         등록직원번호
+               07  XDJL4068-O-REGI-EMPID         PIC  X(007).
+      *--         등록직원명
+               07  XDJL4068-O-REGI-EMNM          PIC  X(042).
+      *--         등록년월일
+               07  XDJL4068-O-REGI-YMD           PIC  X(008).
+      *--         등록결재직원번호
+               07  XDJL4068-O-REGI-APRVAL-EMPID  PIC  X(007).
+      *--         등록결재직원명
+               07  XDJL4068-O-REGI-APRVAL-EMNM   PIC  X(042).
+      *--         등록결재년월일
+               07  XDJL4068-O-REGI-APRVAL-YMD    PIC  X(008).
+      *--         해제직원번호
+               07  XDJL4068-O-REVOC-EMPID        PIC  X(007).
+      *--         해제직원명
+               07  XDJL4068-O-REVOC-EMNM         PIC  X(042).
+      *--         해제년월일
+               07  XDJL4068-O-REVOC-YMD          PIC  X(008).
+      *--         해제결재직원번호
+               07  XDJL4068-O-REVOC-APRVAL-EMPID PIC  X(007).
+      *--         해제결재직원명
+               07  XDJL4068-O-REVOC-APRVAL-EMNM  PIC  X(042).
+      *--         해제결재년월일
+               07  XDJL4068-O-REVOC-APRVAL-YMD   PIC  X(008).
+      *================================================================*
+      *        X  D  J  L  4  0  6  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4068-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4068-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4068-I-INQURY-B-START-YMD ;조회기준시작년월일
+      *X  XDJL4068-I-INQURY-BASE-END-YMD;조회기준종료년월일
+      *N  XDJL4068-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4068-O-GRID               ;그리드
+      *X  XDJL4068-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4068-O-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *S3 XDJL4068-O-SERNO              ;일련번호
+      *X  XDJL4068-O-HNDLN-DSCN-YMD     ;취급중단년월일
+      *X  XDJL4068-O-ECEPT-APLY-YMD     ;예외적용년월일
+      *X  XDJL4068-O-LIMT-EIRR-DSTCD    ;산업등록해제구분코드
+      *X  XDJL4068-O-REGI-EMPID         ;등록직원번호
+      *X  XDJL4068-O-REGI-EMNM          ;등록직원명
+      *X  XDJL4068-O-REGI-YMD           ;등록년월일
+      *X  XDJL4068-O-REGI-APRVAL-EMPID  ;등록결재직원번호
+      *X  XDJL4068-O-REGI-APRVAL-EMNM   ;등록결재직원명
+      *X  XDJL4068-O-REGI-APRVAL-YMD    ;등록결재년월일
+      *X  XDJL4068-O-REVOC-EMPID        ;해제직원번호
+      *X  XDJL4068-O-REVOC-EMNM         ;해제직원명
+      *X  XDJL4068-O-REVOC-YMD          ;해제년월일
+      *X  XDJL4068-O-REVOC-APRVAL-EMPID ;해제결재직원번호
+      *X  XDJL4068-O-REVOC-APRVAL-EMNM  ;해제결재직원명
+      *X  XDJL4068-O-REVOC-APRVAL-YMD   ;해제결재년월일

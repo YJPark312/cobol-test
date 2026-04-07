@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : XFJL0001                                               *
+      *@ DESC : FC토탈익스포져부점정보조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-03-09 14:16:19                          *
+      *  생성일시     : 2017-03-09 14:16:20                          *
+      *  전체길이     : 00000056 BYTES                               *
+      *================================================================*
+           03  XFJL0001-RETURN.
+             05  XFJL0001-R-STAT                 PIC  X(002).
+                 88  COND-XFJL0001-OK            VALUE  '00'.
+                 88  COND-XFJL0001-KEYDUP        VALUE  '01'.
+                 88  COND-XFJL0001-NOTFOUND      VALUE  '02'.
+                 88  COND-XFJL0001-SPVSTOP       VALUE  '05'.
+                 88  COND-XFJL0001-ERROR         VALUE  '09'.
+                 88  COND-XFJL0001-ABNORMAL      VALUE  '98'.
+                 88  COND-XFJL0001-SYSERROR      VALUE  '99'.
+             05  XFJL0001-R-LINE                 PIC  9(006).
+             05  XFJL0001-R-ERRCD                PIC  X(008).
+             05  XFJL0001-R-TREAT-CD             PIC  X(008).
+             05  XFJL0001-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XFJL0001-IN.
+      *----------------------------------------------------------------*
+      *--       조회구분
+             05  XFJL0001-I-INQURY-DSTCD         PIC  X(002).
+      *--       부점코드
+             05  XFJL0001-I-BRNCD                PIC  X(004).
+      *--       예비
+             05  XFJL0001-I-FILLER               PIC  X(050).
+      *----------------------------------------------------------------*
+           03  XFJL0001-OUT.
+      *----------------------------------------------------------------*
+      *--       부점코드검증여부
+             05  XFJL0001-O-BRNCD-VALDN-YN       PIC  X(001).
+      *--       부점코드건수
+             05  XFJL0001-O-BRN-NOITM            PIC  9(003).
+      *--       부점코드배열
+             05  XFJL0001-O-BRNCD-ARAY           OCCURS 000050 TIMES.
+      *--         부점코드
+               07  XFJL0001-O-BRNCD              PIC  X(004).
+      *--       예비
+             05  XFJL0001-O-FILLER               PIC  X(050).
+      *================================================================*
+      *        X  F  J  L  0  0  0  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XFJL0001-I-INQURY-DSTCD       ;조회구분
+      *X  XFJL0001-I-BRNCD              ;부점코드
+      *X  XFJL0001-I-FILLER             ;예비
+      *X  XFJL0001-O-BRNCD-VALDN-YN     ;부점코드검증여부
+      *N  XFJL0001-O-BRN-NOITM          ;부점코드건수
+      *A  XFJL0001-O-BRNCD-ARAY         ;부점코드배열
+      *X  XFJL0001-O-BRNCD              ;부점코드
+      *X  XFJL0001-O-FILLER             ;예비

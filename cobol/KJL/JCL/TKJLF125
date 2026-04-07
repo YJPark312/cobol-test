@@ -1,0 +1,98 @@
+//TKJLF125 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0125 TABLE UNLOAD & LOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0125.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0125.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0125
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0125'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0125,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT
+ A.그룹회사코드
+,A.계좌번호
+,A.계좌중복일련번호
+,A.기준일
+,A.기준년월
+,A.고객식별자
+,A.고객관리번호
+,A.해외현지법인여부
+,CHAR('             ') AS 차주번호
+,A.관리부점코드
+,A."TE계좌고객구분"
+,A.한도계좌여부
+,A."TE계좌구분"
+,A.상품대분류코드
+,A.상품중분류코드
+,A.상품템플릿코드
+,A.상품번호
+,A.대출자격구분
+,A.시작년월일
+,A.만기년월일
+,A.종료년월일
+,A.상품계약상태구분
+,A.통화코드
+,A.통화한도
+,A.통화잔액
+,A."BS기준잔액"
+,A.명목액기준한도
+,A.명목액기준잔액
+,A."CCF명목잔액환산금액"
+,A.배분내부회복가치
+,A."CA담보제외금액"
+,A."CA담보환산금액"
+,A.한도계좌번호
+,A.한도상품대분류코드
+,A.한도상품중분류코드
+,A.한도상품템플릿코드
+,A.한도상품번호
+,A.관련테이블명
+,A.과목코드
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+,DEC(0,15) AS "BS기준한도"
+,CHAR(VALUE(B.고객식별자,'          ')) AS 차주고객식별자
+ FROM  DB2DBA.THKJL0125 A  LEFT OUTER JOIN
+       DB2DBA.THKJL0015 B
+   ON  A.그룹회사코드       = B.그룹회사코드
+  AND  A.차주번호           = B.차주번호
+WITH UR;
+/*
+//
+//

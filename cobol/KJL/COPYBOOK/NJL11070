@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : NJL11070                                               *
+      *@ DESC : 지역본부별SUB한도관리                              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-12-11 14:22:56                          *
+      *  생성일시     : 2015-12-11 14:22:59                          *
+      *  전체길이     : 00004522 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  NJL11070-PRCSS-DSTIC              PIC  X(002).
+      *--     기준년월일
+           07  NJL11070-BASE-YMD                 PIC  X(008).
+      *--     대분류업종코드
+           07  NJL11070-I-LAG-CLSFI-BZTYP        PIC  X(003).
+      *--     지역본부코드
+           07  NJL11070-I-AREA-HQ-CD             PIC  X(004).
+      *--     그리드
+           07  NJL11070-GRID.
+      *--       총라인수
+ROWCNT       09  NJL11070-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  NJL11070-DATA-BOOK              OCCURS 0 TO 000100
+                 DEPENDING ON NJL11070-TOTAL-LINE-CNT.
+      *--         대분류업종코드
+               11  NJL11070-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--         지역본부코드
+               11  NJL11070-AREA-HQ-CD           PIC  X(004).
+      *--         월SUB한도금액
+               11  NJL11070-M-AREA-HQ-SUB-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         월예외승인한도금액
+               11  NJL11070-M-AREA-HE-ATHOR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         월기준소진율
+               11  NJL11070-M-AREA-HE-BASE       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        N  J  L  1  1  0  7  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL11070-PRCSS-DSTIC          ;처리구분
+      *X  NJL11070-BASE-YMD             ;기준년월일
+      *X  NJL11070-I-LAG-CLSFI-BZTYP    ;대분류업종코드
+      *X  NJL11070-I-AREA-HQ-CD         ;지역본부코드
+      *G  NJL11070-GRID                 ;그리드
+      *L  NJL11070-TOTAL-LINE-CNT       ;총라인수
+      *A  NJL11070-DATA-BOOK            ;데이터부
+      *X  NJL11070-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  NJL11070-AREA-HQ-CD           ;지역본부코드
+      *S  NJL11070-M-AREA-HQ-SUB-CLAM   ;월SUB한도금액
+      *S  NJL11070-M-AREA-HE-ATHOR      ;월예외승인한도금액
+      *S  NJL11070-M-AREA-HE-BASE       ;월기준소진율

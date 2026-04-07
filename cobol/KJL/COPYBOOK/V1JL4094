@@ -1,0 +1,173 @@
+      *================================================================*
+      *@ NAME : V1JL4094                                               *
+      *@ DESC : 기업및그룹한도신청및승인(개별그룹기준한도조회)     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-30 16:33:19                          *
+      *  생성일시     : 2021-11-30 16:33:24                          *
+      *  전체길이     : 00000412 BYTES                               *
+      *================================================================*
+      *--     신용등급
+           07  V1JL4094-CRDRAT                   PIC  X(004).
+      *--     결산년월
+           07  V1JL4094-STLACC-YM                PIC  X(006).
+      *--     한신평재무업종구분
+           07  V1JL4094-KIS-FZ-BZTYP-DSTIC       PIC  X(002).
+      *--     한신평재무업종구분명
+           07  V1JL4094-KIS-FB-DSTIC-NAME        PIC  X(010).
+      *--     업종평균기준년
+           07  V1JL4094-BZTYP-AVG-BASE-YR        PIC  X(004).
+      *--     신용등급별지원비율
+           07  V1JL4094-CRDRAT-P-SPORT-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전기법인세비율차감전계속사업이익
+           07  V1JL4094-BF-PCRSBC-BIZ-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전기법인세비율차감전계속사업이익
+           07  V1JL4094-PRPRID-CRSBCB-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     당기법인세비율차감전계속사업이익
+           07  V1JL4094-CRTM-CRSBC-BIZ-PRFT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3평균사업이익비율
+           07  V1JL4094-Y-3A-BIZ-PRFT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     이익가중치값
+           07  V1JL4094-PRFT-WGHT-VAL            PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     최근업종평균자기자본비율
+           07  V1JL4094-LA-B-AVG-ONCP-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     상환능력기준한도
+           07  V1JL4094-SOLVN-BASE-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전기자기자본
+           07  V1JL4094-BF-PRPRID-ONCP           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전기자기자본
+           07  V1JL4094-PRPRID-ONCP              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     당기자기자본
+           07  V1JL4094-CRTM-ONCP                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3평균자기자본비율
+           07  V1JL4094-Y-3-AVG-ONCP-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     자본가중치값
+           07  V1JL4094-CAPTL-WGHT-VAL           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     규모기준한도
+           07  V1JL4094-SCAL-BASE-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도
+           07  V1JL4094-BASE-LIMT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정신용등급
+           07  V1JL4094-AMND-CRDRAT              PIC  X(004).
+      *--     수정결산년월
+           07  V1JL4094-AMND-STLACC-YM           PIC  X(006).
+      *--     수정한신평재무업종구분
+           07  V1JL4094-AMND-KF-BZTYP-DSTIC      PIC  X(002).
+      *--     수정한신평재무업종구분명
+           07  V1JL4094-AMND-KFB-DSTIC-NAME      PIC  X(010).
+      *--     수정업종평균기준년
+           07  V1JL4094-AMND-B-AVG-BASE-YR       PIC  X(004).
+      *--     수정신용등급별지원비율
+           07  V1JL4094-AMND-CP-SPORT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전기법인세비율차감전계속사업이익
+           07  V1JL4094-AMND-BPCRSBCB-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전기법인세비율차감전계속사업이익
+           07  V1JL4094-AMND-PCRSBCB-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당기법인세비율차감전계속사업이익
+           07  V1JL4094-AMND-CCRSBCB-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3평균사업이익비율
+           07  V1JL4094-AMND-Y3AB-PRFT-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정이익가중치값
+           07  V1JL4094-AMND-PRFT-WGHT-VAL       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정최근업종평균자기자본비율
+           07  V1JL4094-AMND-LBA-ONCP-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정상환능력기준한도
+           07  V1JL4094-AMND-S-BASE-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전기자기자본
+           07  V1JL4094-AMND-BF-PRPRID-ONCP      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전기자기자본
+           07  V1JL4094-AMND-PRPRID-ONCP         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당기자기자본
+           07  V1JL4094-AMND-CRTM-ONCP           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3평균자기자본비율
+           07  V1JL4094-AMND-Y3A-ONCP-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정자본가중치값
+           07  V1JL4094-AMND-CAPTL-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정규모기준한도
+           07  V1JL4094-AMND-SCAL-BASE-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준한도
+           07  V1JL4094-AMND-BASE-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  9  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4094-CRDRAT               ;신용등급
+      *X  V1JL4094-STLACC-YM            ;결산년월
+      *X  V1JL4094-KIS-FZ-BZTYP-DSTIC   ;한신평재무업종구분
+      *X  V1JL4094-KIS-FB-DSTIC-NAME    ;한신평재무업종구분명
+      *X  V1JL4094-BZTYP-AVG-BASE-YR    ;업종평균기준년
+      *S  V1JL4094-CRDRAT-P-SPORT-RATO  ;신용등급별지원비율
+      *S  V1JL4094-BF-PCRSBC-BIZ-PRFT
+      * 전전기법인세비율차감전계속사업이익
+      *S  V1JL4094-PRPRID-CRSBCB-PRFT
+      * 전기법인세비율차감전계속사업이익
+      *S  V1JL4094-CRTM-CRSBC-BIZ-PRFT
+      * 당기법인세비율차감전계속사업이익
+      *S  V1JL4094-Y-3A-BIZ-PRFT-RATO   ;Y3평균사업이익비율
+      *S  V1JL4094-PRFT-WGHT-VAL        ;이익가중치값
+      *S  V1JL4094-LA-B-AVG-ONCP-RATO
+      * 최근업종평균자기자본비율
+      *S  V1JL4094-SOLVN-BASE-LIMT      ;상환능력기준한도
+      *S  V1JL4094-BF-PRPRID-ONCP       ;전전기자기자본
+      *S  V1JL4094-PRPRID-ONCP          ;전기자기자본
+      *S  V1JL4094-CRTM-ONCP            ;당기자기자본
+      *S  V1JL4094-Y-3-AVG-ONCP-RATO    ;Y3평균자기자본비율
+      *S  V1JL4094-CAPTL-WGHT-VAL       ;자본가중치값
+      *S  V1JL4094-SCAL-BASE-LIMT       ;규모기준한도
+      *S  V1JL4094-BASE-LIMT            ;기준한도
+      *X  V1JL4094-AMND-CRDRAT          ;수정신용등급
+      *X  V1JL4094-AMND-STLACC-YM       ;수정결산년월
+      *X  V1JL4094-AMND-KF-BZTYP-DSTIC
+      * 수정한신평재무업종구분
+      *X  V1JL4094-AMND-KFB-DSTIC-NAME
+      * 수정한신평재무업종구분명
+      *X  V1JL4094-AMND-B-AVG-BASE-YR   ;수정업종평균기준년
+      *S  V1JL4094-AMND-CP-SPORT-RATO   ;수정신용등급별지원비율
+      *S  V1JL4094-AMND-BPCRSBCB-PRFT
+      * 수정전전기법인세비율차감전계속사업이익
+      *S  V1JL4094-AMND-PCRSBCB-PRFT
+      * 수정전기법인세비율차감전계속사업이익
+      *S  V1JL4094-AMND-CCRSBCB-PRFT
+      * 수정당기법인세비율차감전계속사업이익
+      *S  V1JL4094-AMND-Y3AB-PRFT-RATO
+      * 수정Y3평균사업이익비율
+      *S  V1JL4094-AMND-PRFT-WGHT-VAL   ;수정이익가중치값
+      *S  V1JL4094-AMND-LBA-ONCP-RATO
+      * 수정최근업종평균자기자본비율
+      *S  V1JL4094-AMND-S-BASE-LIMT     ;수정상환능력기준한도
+      *S  V1JL4094-AMND-BF-PRPRID-ONCP  ;수정전전기자기자본
+      *S  V1JL4094-AMND-PRPRID-ONCP     ;수정전기자기자본
+      *S  V1JL4094-AMND-CRTM-ONCP       ;수정당기자기자본
+      *S  V1JL4094-AMND-Y3A-ONCP-RATO
+      * 수정Y3평균자기자본비율
+      *S  V1JL4094-AMND-CAPTL-WGHT-VAL  ;수정자본가중치값
+      *S  V1JL4094-AMND-SCAL-BASE-LIMT  ;수정규모기준한도
+      *S  V1JL4094-AMND-BASE-LIMT       ;수정기준한도

@@ -1,0 +1,93 @@
+      *================================================================*
+      *@ NAME : YNJLB120                                               *
+      *@ DESC : AS(EAD)상품정보원장 COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-12-27 10:10:24                          *
+      *  생성일시     : 2023-12-27 10:10:32                          *
+      *  전체길이     : 00000245 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB120-PRCSS-DSTIC              PIC  X(002).
+      *--     조회기준년월
+           07  YNJLB120-BASE-YM                  PIC  X(006).
+      *--     회계구분
+           07  YNJLB120-ACCTG-DSTIC              PIC  X(001).
+      *--     상품대분류코드
+           07  YNJLB120-PRDCT-LAG-CLSFI-CD       PIC  X(002).
+      *--     상품중분류코드
+           07  YNJLB120-PRDCT-MEDM-CLSFI-CD      PIC  X(002).
+      *--     상품템플릿코드
+           07  YNJLB120-PRDCT-TMPLT-CD           PIC  X(003).
+      *--     상품번호
+           07  YNJLB120-PRDCT-NO                 PIC  X(005).
+      *--     상품명
+           07  YNJLB120-PRDCT-NAME               PIC  X(052).
+      *--     통합계정과목코드
+           07  YNJLB120-INTGRA-TIACC-CD          PIC  X(013).
+      *--     자산구분
+           07  YNJLB120-ASST-DSTIC               PIC  X(001).
+      *--     잔액NCCF환산율
+           07  YNJLB120-BAL-CCF-UTCRT            PIC  9(003).
+      *--     EAD한도CCF환산율
+           07  YNJLB120-EAD-LIMT-CCF-UTCRT       PIC  9(003).
+      *--     EAD한도NCCF환산율
+           07  YNJLB120-EAD-LIMT-NCCF-UTCRT      PIC  9(003).
+      *--     한도기준TE환산율
+           07  YNJLB120-LIMT-BASE-TE-UTCRT       PIC  9(003).
+      *--     포괄신용공여대상계정여부
+           07  YNJLB120-INLS-GT-ACITM-YN         PIC  X(001).
+      *--     CA대상계정여부
+           07  YNJLB120-CA-TAGET-ACITM-YN        PIC  X(001).
+      *--     신용공여한도환산율
+           07  YNJLB120-GRCR-LIMT-UTCRT          PIC  9(003).
+      *--     EAD중분류코드
+           07  YNJLB120-EAD-MEDM-CLSFI-CD        PIC  X(003).
+      *--     EAD중분류명
+           07  YNJLB120-EAD-MEDM-CLSFI-NAME      PIC  X(042).
+      *--     토탈익스포져중분류코드
+           07  YNJLB120-TE-MEDM-CLSFI-CD         PIC  X(003).
+      *--     토탈익스포져중분류명
+           07  YNJLB120-TE-MEDM-CLSFI-NAME       PIC  X(042).
+      *--     CA중분류코드
+           07  YNJLB120-CA-MEDM-CLSFI-CD         PIC  X(003).
+      *--     CA중분류명
+           07  YNJLB120-CA-MEDM-CLSFI-NAME       PIC  X(042).
+      *--     국외영업점편중관리대상여부
+           07  YNJLB120-ABRD-L-MGT-TAGET-YN      PIC  X(001).
+      *--     바젤기준신용환산률
+           07  YNJLB120-BSL-B-CRDT-UTCNG-RT      PIC  9(003).
+      *--     거액익스포져대상여부
+           07  YNJLB120-BSM-EXPSR-TAGET-YN       PIC  X(001).
+      *--     신용익스포져대상여부
+           07  YNJLB120-CRDT-EXPSR-TAGET-YN      PIC  X(001).
+      *================================================================*
+      *        Y  N  J  L  B  1  2  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB120-PRCSS-DSTIC          ;처리구분
+      *X  YNJLB120-BASE-YM              ;조회기준년월
+      *X  YNJLB120-ACCTG-DSTIC          ;회계구분
+      *X  YNJLB120-PRDCT-LAG-CLSFI-CD   ;상품대분류코드
+      *X  YNJLB120-PRDCT-MEDM-CLSFI-CD  ;상품중분류코드
+      *X  YNJLB120-PRDCT-TMPLT-CD       ;상품템플릿코드
+      *X  YNJLB120-PRDCT-NO             ;상품번호
+      *X  YNJLB120-PRDCT-NAME           ;상품명
+      *X  YNJLB120-INTGRA-TIACC-CD      ;통합계정과목코드
+      *X  YNJLB120-ASST-DSTIC           ;자산구분
+      *N  YNJLB120-BAL-CCF-UTCRT        ;잔액NCCF환산율
+      *N  YNJLB120-EAD-LIMT-CCF-UTCRT   ;EAD한도CCF환산율
+      *N  YNJLB120-EAD-LIMT-NCCF-UTCRT  ;EAD한도NCCF환산율
+      *N  YNJLB120-LIMT-BASE-TE-UTCRT   ;한도기준TE환산율
+      *X  YNJLB120-INLS-GT-ACITM-YN     ;포괄신용공여대상계정여부
+      *X  YNJLB120-CA-TAGET-ACITM-YN    ;CA대상계정여부
+      *N  YNJLB120-GRCR-LIMT-UTCRT      ;신용공여한도환산율
+      *X  YNJLB120-EAD-MEDM-CLSFI-CD    ;EAD중분류코드
+      *X  YNJLB120-EAD-MEDM-CLSFI-NAME  ;EAD중분류명
+      *X  YNJLB120-TE-MEDM-CLSFI-CD     ;토탈익스포져중분류코드
+      *X  YNJLB120-TE-MEDM-CLSFI-NAME   ;토탈익스포져중분류명
+      *X  YNJLB120-CA-MEDM-CLSFI-CD     ;CA중분류코드
+      *X  YNJLB120-CA-MEDM-CLSFI-NAME   ;CA중분류명
+      *X  YNJLB120-ABRD-L-MGT-TAGET-YN
+      * 국외영업점편중관리대상여부
+      *N  YNJLB120-BSL-B-CRDT-UTCNG-RT  ;바젤기준신용환산률
+      *X  YNJLB120-BSM-EXPSR-TAGET-YN   ;거액익스포져대상여부
+      *X  YNJLB120-CRDT-EXPSR-TAGET-YN  ;신용익스포져대상여부

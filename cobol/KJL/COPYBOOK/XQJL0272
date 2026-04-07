@@ -1,0 +1,52 @@
+      *===========================================================
+      *  프로그램명    : QJL0272
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0272
+      *  사용예        : 01  XQJL0272-CA.
+      *                      COPY  XQJL0272.
+      *  최종변경일시  : 2022년03월07일13시20분59초
+      *===========================================================
+           03  XQJL0272-IN.
+      *            그룹회사코드
+               05  XQJL0272-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0272-I-BASE-YMD
+                                          PIC  X(00008).
+      *            KB-PIN
+               05  XQJL0272-I-KB-PIN
+                                          PIC  X(00010).
+      *            월말구분
+               05  XQJL0272-I-ENMN-DSTIC
+                                          PIC  X(00001).
+           03  XQJL0272-OUT.
+      *            기준년월일
+               05  XQJL0272-O-BASE-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            구분
+               05  XQJL0272-O-GUBUN
+                           OCCURS  00500  PIC  X(00002).
+      *            회계구분
+               05  XQJL0272-O-ACCTG-DSTCD
+                           OCCURS  00500  PIC  X(00020).
+      *            상품코드
+               05  XQJL0272-O-PRDCT-CD
+                           OCCURS  00500  PIC  X(00012).
+      *            상품명
+               05  XQJL0272-O-PRDCT-NAME
+                           OCCURS  00500  PIC  X(00252).
+      *            자산구분
+               05  XQJL0272-O-TE-ASST-DSTCD
+                           OCCURS  00500  PIC  X(00010).
+      *            한도금액
+               05  XQJL0272-O-TTL-AMT-BASE-CLAM
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            잔액금액
+               05  XQJL0272-O-TTL-AMT-BASE-BAL
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            한도환산금액
+               05  XQJL0272-O-TE-LIMT-AUC
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *===========================================================
+      *  XQJL0272   C O P Y B O O K   E N D
+      *===========================================================

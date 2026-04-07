@@ -1,0 +1,44 @@
+//MKJLDP47 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : mkipda50.sh
+//*********************************************************************
+//*   기업집단평가기본수보 적재(THKJLR018)
+//*********************************************************************
+//DELETE1  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.SHRKIP.TKIPB110.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//STEP01   EXEC PGM=SORT,COND=(4,LT)
+//SORTIN   DD DSN=KJL.SY.SHRKIP.TKIPB110,DISP=SHR
+//SORTOUT  DD DSN=KJL.SY.SHRKIP.TKIPB110.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(10,1),RLSE),
+//            DCB=(RECFM=FB,BLKSIZE=0)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT     FIELDS=COPY
+/*
+//*********************************************************************
+//*   BJLDR18
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLDR18,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SY.SHRKIP.TKIPB110
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLDR18.D%%ODATE.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP47-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+/*
+//

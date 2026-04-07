@@ -1,0 +1,49 @@
+      *================================================================*
+      *@ NAME : XDJLB150                                               *
+      *@ DESC : DC국별수기국적등록COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2025-04-28 14:30:47                          *
+      *  생성일시     : 2025-04-28 14:30:47                          *
+      *  전체길이     : 00022007 BYTES                               *
+      *================================================================*
+           03  XDJLB150-RETURN.
+             05  XDJLB150-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB150-OK            VALUE  '00'.
+                 88  COND-XDJLB150-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB150-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB150-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB150-ERROR         VALUE  '09'.
+                 88  COND-XDJLB150-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB150-SYSERROR      VALUE  '99'.
+             05  XDJLB150-R-LINE                 PIC  9(006).
+             05  XDJLB150-R-ERRCD                PIC  X(008).
+             05  XDJLB150-R-TREAT-CD             PIC  X(008).
+             05  XDJLB150-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB150-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB150-I-PRCSS-DSTIC          PIC  X(002).
+      *--       총라인수
+             05  XDJLB150-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB150-I-GRID1                OCCURS 001000 TIMES.
+      *--         계좌번호
+               07  XDJLB150-I-ACNO               PIC  X(020).
+      *--         ISO국가코드2
+               07  XDJLB150-I-ISO-NATNL-CD2      PIC  X(002).
+      *----------------------------------------------------------------*
+           03  XDJLB150-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB150-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  1  5  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB150-I-PRCSS-DSTIC        ;처리구분
+      *N  XDJLB150-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB150-I-GRID1              ;그리드1
+      *X  XDJLB150-I-ACNO               ;계좌번호
+      *X  XDJLB150-I-ISO-NATNL-CD2      ;ISO국가코드2
+      *X  XDJLB150-O-PRCSS-RSULT        ;처리결과

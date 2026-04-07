@@ -1,0 +1,66 @@
+//MKJLDB12 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : 일자전환
+//*********************************************************************
+//*   여신계좌(외환계정제외)추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD251,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLD251.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSBA,
+//             SPACE=(CYL,(0100,0050),RLSE),
+//             DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   여신계좌(외환계정만)추출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD253,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLD253.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSBA,
+//             SPACE=(CYL,(0100,0050),RLSE),
+//             DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   한도계좌추출
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD254,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD254.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   매출채권계좌추출
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLD255,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD255.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   가지급금,미수금계정추출
+//*********************************************************************
+//STEP05 EXEC JZBDEXEC,MBR=BJLD256,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD256.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDB11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

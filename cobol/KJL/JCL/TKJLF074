@@ -1,0 +1,105 @@
+//TKJLF074 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0074 TABLE UNLOAD & LOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0074.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0074.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0074
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0074'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0074,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT
+ A.그룹회사코드
+,A.기준일
+,A.기준년월
+,B.고객식별자  AS 차주고객식별자
+,A.한도계좌번호
+,A.한도상품대분류코드
+,A.한도상품중분류코드
+,A.한도상품템플릿코드
+,A.한도상품번호
+,CHAR('             ') AS 차주번호
+,A.시작년월일
+,A.만기년월일
+,A.종료년월일
+,A.통화코드
+,A.통화한도
+,A.통화잔액
+,A.통합계정과목코드
+,A.신용공여대상구분
+,A.원만기구분
+,A.잔존만기구분
+,A."BS기준한도"
+,A.기준환율
+,A.신용공여보증비율
+,A.신용공여담보비율
+,A.미사용한도
+,A."미사용한도CCF환산율"
+,A."미사용한도CA금액"
+,A."미사용한도CA제외금액"
+,A.미사용보증담보합산액
+,A."미사용보증담보금액1"
+,A."미사용보증담보금액2"
+,A."미사용보증담보금액3"
+,A."미사용보증담보금액4"
+,A."미사용보증담보금액5"
+,A."미사용보증담보금액6"
+,A."미사용보증담보금액7"
+,A."미사용보증담보금액8"
+,A."미사용보증담보금액9"
+,A."미사용보증담보환산1"
+,A."미사용보증담보환산2"
+,A."미사용보증담보환산3"
+,A."미사용보증담보환산4"
+,A."미사용보증담보환산5"
+,A."미사용보증담보환산6"
+,A."미사용보증담보환산7"
+,A."미사용보증담보환산8"
+,A."미사용보증담보환산9"
+,A.신용공여기관구분
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+ FROM  DB2DBA.THKJL0074 A
+      ,DB2DBA.THKJL0015 B
+WHERE  A.그룹회사코드       = B.그룹회사코드
+  AND  A.차주번호           = B.차주번호
+WITH UR;
+/*
+//
+//

@@ -1,0 +1,86 @@
+      *================================================================*
+      *@ NAME : XPJLB094                                               *
+      *@ DESC : PC기업및그룹한도신청및승인(설정승인저장) COPYB     *
+      *@        OOK                                                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-08-27 18:46:03                          *
+      *  생성일시     : 2009-08-27 18:46:05                          *
+      *================================================================*
+           03  XPJLB094-RETURN.
+             05  XPJLB094-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB094-OK            VALUE  '00'.
+                 88  COND-XPJLB094-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB094-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB094-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB094-ERROR         VALUE  '09'.
+                 88  COND-XPJLB094-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB094-SYSERROR      VALUE  '99'.
+             05  XPJLB094-R-LINE                 PIC  9(006).
+             05  XPJLB094-R-ERRCD                PIC  X(008).
+             05  XPJLB094-R-TREAT-CD             PIC  X(008).
+             05  XPJLB094-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB094-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB094-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJLB094-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJLB094-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJLB094-I-APLCN-NO             PIC  X(010).
+      *--       신청직원번호
+             05  XPJLB094-I-APLCN-EMPID          PIC  X(007).
+      *--       신청구분
+             05  XPJLB094-I-APLCN-DSTIC          PIC  X(001).
+      *--       승인일자
+             05  XPJLB094-I-ATHOR-DTE            PIC  X(008).
+      *--       기준한도산출액
+             05  XPJLB094-I-BASE-LIMT-CMPTN-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도설정액
+             05  XPJLB094-I-MGT-LIMT-STUP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성관리한도
+             05  XPJLB094-I-LNBZ-I-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XPJLB094-I-MRKTY-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도설정유효일
+             05  XPJLB094-I-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       승인권자
+             05  XPJLB094-I-ATRZ                 PIC  X(001).
+      *--       조건부승인조건
+             05  XPJLB094-I-CNDT-ATHOR-CNDN      PIC  X(001).
+      *--       승인구분
+             05  XPJLB094-I-ATHOR-DSTIC          PIC  X(001).
+      *--       승인사유
+             05  XPJLB094-I-ATHOR-RESN           PIC  X(302).
+      *----------------------------------------------------------------*
+           03  XPJLB094-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB094-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  9  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB094-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB094-I-CUST-DSTIC         ;고객구분
+      *X  XPJLB094-I-BRWR-NO            ;차주번호
+      *X  XPJLB094-I-APLCN-NO           ;신청번호
+      *X  XPJLB094-I-APLCN-EMPID        ;신청직원번호
+      *X  XPJLB094-I-APLCN-DSTIC        ;신청구분
+      *X  XPJLB094-I-ATHOR-DTE          ;승인일자
+      *S  XPJLB094-I-BASE-LIMT-CMPTN-AMT;기준한도산출액
+      *S  XPJLB094-I-MGT-LIMT-STUP-AMT  ;관리한도설정액
+      *S  XPJLB094-I-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *S  XPJLB094-I-MRKTY-MGT-LIMT     ;시장성관리한도
+      *X  XPJLB094-I-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *X  XPJLB094-I-ATRZ               ;승인권자
+      *X  XPJLB094-I-CNDT-ATHOR-CNDN    ;조건부승인조건
+      *X  XPJLB094-I-ATHOR-DSTIC        ;승인구분
+      *X  XPJLB094-I-ATHOR-RESN         ;승인사유
+      *X  XPJLB094-O-PRCSS-RSULT        ;처리결과

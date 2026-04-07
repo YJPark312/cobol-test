@@ -1,0 +1,17 @@
+//TKJLTPSQ JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************
+//* ------------------------------------*
+//*        RUN SQL PROGRAM
+//* ------------------------------------*
+//SQL      EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSPRT DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//SYSUDUMP DD  SYSOUT=*
+//SYSTSIN  DD  *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTEP2) PLAN(DSNTEP13) -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD') PARMS('/ALIGN(MID)')
+ END
+//SYSIN  DD DSN=KJL.SY.SQL,DISP=SHR
+/*
+//

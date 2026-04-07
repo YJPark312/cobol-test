@@ -1,0 +1,40 @@
+//MKJLRMS2 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMS1                                       */
+//*********************************************************************
+//*   그룹사기본원장UNLOAD -지주사　제공자료                     */
+//********************************************************************/
+//STEP01   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0013'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0013.P00001,DISP=OLD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT  그룹회사코드
+           ,  기준년월
+           ,  계열적용구분
+           ,  계열기업군코드
+           ,   SUBSTR(CHAR(계열기업순위),2,3)
+           ,  주채권은행코드
+           ,  계열기업군명
+           ,  그룹사신용등급구분
+           ,  등록직원번호
+           ,  등록년월일
+           ,  시스템최종처리일시
+           ,  시스템최종사용자번호
+        FROM  DB2DBA.THKJL0013
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '%%$OYEAR.%%OMONTH'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*

@@ -1,0 +1,54 @@
+//MKJLDP28 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*거거액익스포져계좌명세(THKJL0076/THKJL0078) 생성
+//*월말THKJL0077 추가 생성
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0074
+//* %%GLOBAL  PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//* %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//STEP01   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0076'
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0076
+                   PART %%A INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*거액익스포져계좌명세(THKJL0076) 생성
+//*********************************************************************
+//STEP02   EXEC JZBDEXEC,MBR=BJLD761,OPT=&SYSUID,COND=(4,LT)
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD761.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP28-001-ONLBAT-KB STAR-%%$ODATE-Y
+//*자료기준년월일-원장삭제구분
+/*
+//*********************************************************************
+//*거액익스포져차주그룹명세(THKJL0078) 생성
+//*********************************************************************
+//STEP03   EXEC JZBDEXEC,MBR=BJLD781,OPT=&SYSUID,COND=(4,LT)
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD781.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP28-001-ONLBAT-KB STAR-%%$ODATE-Y
+//*자료기준년월일-원장삭제구분
+

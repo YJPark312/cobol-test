@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : YPJL4091                                               *
+      *@ DESC : AS기업및그룹한도신청및승인조회(최종설정현황조회    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-23 11:21:01                          *
+      *  생성일시     : 2009-04-23 11:21:07                          *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4091-DBTRZ-NAME               PIC  X(052).
+      *--     당행자기자본
+           07  YPJL4091-OWBNK-ONCP               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     최종설정일
+           07  YPJL4091-LAST-STUP-DD             PIC  X(008).
+      *--     한도설정유효일
+           07  YPJL4091-LIMT-STUP-VALD-DD        PIC  X(008).
+      *--     관리한도
+           07  YPJL4091-MGT-LIMT                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성관리한도
+           07  YPJL4091-LNBZ-I-MGT-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도
+           07  YPJL4091-MRKTY-MGT-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     개별기업최고한도
+           07  YPJL4091-IDIVI-C-HGST-LIMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹별최고한도
+           07  YPJL4091-GROUP-PER-HGST-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     개별기업최고한도2
+           07  YPJL4091-IDIVI-C-HGST-LIMT2       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     제조금융구분
+           07  YPJL4091-MNFC-FINAC-DSTIC         PIC  X(001).
+      *================================================================*
+      *        Y  P  J  L  4  0  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4091-DBTRZ-NAME           ;채무자명
+      *S  YPJL4091-OWBNK-ONCP           ;당행자기자본
+      *X  YPJL4091-LAST-STUP-DD         ;최종설정일
+      *X  YPJL4091-LIMT-STUP-VALD-DD    ;한도설정유효일
+      *S  YPJL4091-MGT-LIMT             ;관리한도
+      *S  YPJL4091-LNBZ-I-MGT-LIMT      ;여신성관리한도
+      *S  YPJL4091-MRKTY-MGT-LIMT       ;시장성관리한도
+      *S  YPJL4091-IDIVI-C-HGST-LIMT    ;개별기업최고한도
+      *S  YPJL4091-GROUP-PER-HGST-LIMT  ;그룹별최고한도
+      *S  YPJL4091-IDIVI-C-HGST-LIMT2   ;개별기업최고한도2
+      *X  YPJL4091-MNFC-FINAC-DSTIC     ;제조금융구분

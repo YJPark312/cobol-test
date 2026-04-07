@@ -1,0 +1,49 @@
+      *===========================================================
+      *  프로그램명    : QJL0691
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0691
+      *  사용예        : 01  XQJL0691-CA.
+      *                      COPY  XQJL0691.
+      *  최종변경일시  : 2013년04월17일14시41분05초
+      *===========================================================
+           03  XQJL0691-IN.
+      *            그룹회사코드
+               05  XQJL0691-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0691-I-BASE-YMD
+                                          PIC  X(00008).
+      *            대분류업종코드
+               05  XQJL0691-I-LAG-CLSFI-BZTYP-CD
+                                          PIC  X(00003).
+      *            지역구분
+               05  XQJL0691-I-AREA-DSTCD
+                                          PIC  X(00002).
+           03  XQJL0691-OUT.
+      *            대분류업종코드
+               05  XQJL0691-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00101  PIC  X(00003).
+      *            지역구분
+               05  XQJL0691-O-AREA-DSTCD
+                           OCCURS  00101  PIC  X(00002).
+      *            지역별SUB한도
+               05  XQJL0691-O-AREA-PER-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            지역별익스포져금액
+               05  XQJL0691-O-AREA-PER-EXPSR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            전년도말익스포져금액
+               05  XQJL0691-O-PYY-X-END-EXPSR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            증가익스포져금액
+               05  XQJL0691-O-INCRSE-EXPSR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            한도초과년월일
+               05  XQJL0691-O-LIMT-EXCS-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            예외적용년월일
+               05  XQJL0691-O-ECEPT-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *===========================================================
+      *  XQJL0691   C O P Y B O O K   E N D
+      *===========================================================

@@ -1,0 +1,106 @@
+//TKJLFR06 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR006 TABLE UNLOAD & LOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJLR006.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJLR006.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJLR006
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJLR006'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJLR006,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT
+ A.그룹회사코드
+,A.기준년월일
+,A.유가증권상품구분
+,A.종목코드번호
+,A.펀드번호
+,A.일련번호
+,CHAR(VALUE(B.고객식별자,'          ')) AS 고객식별자
+,A.고객관리번호
+,CHAR('                    ')       AS 고객고유번호
+,CHAR('             ')              AS 발행법인등록번호
+,A.관리부점코드
+,A.계정과목코드
+,A.계정세과목코드
+,A.통합계정과목코드
+,A.회계구분
+,A.신탁합동구분
+,A.매입년월일
+,A.만기년월일
+,A.계리장부금액
+,A.평가금액
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+ FROM DB2DBA.THKJLR006 A   LEFT OUTER JOIN
+      DB2DBA.THKJL0015 B
+   ON  A.그룹회사코드       = B.그룹회사코드
+  AND  A.발행법인등록번호   = B.차주번호
+WHERE  A.그룹회사코드       = 'KB0'
+  AND  A.고객식별자         = ''
+UNION ALL
+SELECT
+ A.그룹회사코드
+,A.기준년월일
+,A.유가증권상품구분
+,A.종목코드번호
+,A.펀드번호
+,A.일련번호
+,A.고객식별자
+,A.고객관리번호
+,CHAR('                    ')       AS 고객고유번호
+,CHAR('             ')              AS 발행법인등록번호
+,A.관리부점코드
+,A.계정과목코드
+,A.계정세과목코드
+,A.통합계정과목코드
+,A.회계구분
+,A.신탁합동구분
+,A.매입년월일
+,A.만기년월일
+,A.계리장부금액
+,A.평가금액
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+ FROM DB2DBA.THKJLR006 A
+WHERE  A.그룹회사코드       = 'KB0'
+  AND  A.고객식별자        <> ''
+WITH UR;
+/*
+//
+//

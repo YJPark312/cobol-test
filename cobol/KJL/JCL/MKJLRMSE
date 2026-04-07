@@ -1,0 +1,58 @@
+//MKJLRMSE JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMSD                                       */
+//********************************************************************/
+//*   국별익스포져일집계원장UNLOAD -지주사　제공자료             */
+//********************************************************************/
+//STEP01   EXEC PGM=IKJEFT01,DYNAMNBR=20
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SD.SHRRMS.SKJL0055.P00001,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+  SELECT 그룹회사코드
+       , 기준년월일
+       , 계좌번호
+       ,  SUBSTR(CHAR(계좌중복일련번호),2,7)
+       , 고객식별자
+       , 고객관리번호
+       , 차주번호
+       , 계약한도구분
+       , 상품대분류코드
+       , 상품중분류코드
+       , 상품템플릿코드
+       , 상품번호
+       , 대출자격구분
+       , "ISO국가코드"
+       , 관리부점코드
+       , 시작년월일
+       , 만기년월일
+       , 종료년월일
+       , 과목코드
+       , 통화코드
+       ,  SUBSTR(CHAR(통화한도),2,19)
+       ,  SUBSTR(CHAR(통화금일잔액),2,19)
+       ,  SUBSTR(CHAR("USD한도"),2,19)
+       ,  SUBSTR(CHAR("USD금일잔액"),2,19)
+       , 시스템최종처리일시
+       , 시스템최종사용자번호
+    FROM  DB2DBA.THKJL0055  A
+   WHERE 그룹회사코드= 'KB0'
+     AND 기준년월일  = '%%$ODATE'
+     AND NOT EXISTS (SELECT 1
+                       FROM DB2DBA.THKJL0015
+                      WHERE 그룹회사코드 = A.그룹회사코드
+                        AND 차주번호     = A.차주번호
+                        AND 차주번호구분 = '1'
+                    )
+    WITH UR;
+/*

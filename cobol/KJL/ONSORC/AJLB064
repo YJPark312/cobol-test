@@ -1,0 +1,324 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB064 (AST/E변경고객정보관리)
+      *@처리유형  : AS
+      *@처리개요  : T/E변경고객정보관리하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20180416: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB064.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   18/04/16.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB064'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B0900037             PIC  X(008) VALUE 'B0900037'.
+           03  CO-B3600485             PIC  X(008) VALUE 'B3600485'.
+           03  CO-B3001450             PIC  X(008) VALUE 'B3001450'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   T/E변경고객정보관리
+       01  XDJLB153-CA.
+           COPY  XDJLB153.
+      *   T/E변경고객정보조회
+       01  XDJL4153-CA.
+           COPY  XDJL4153.
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJLB064-CA.
+           COPY  YNJLB064.
+
+       01  YPJLB064-CA.
+           COPY  YPJLB064.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJLB064-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@1 출력영역 확보
+           #GETOUT YPJLB064-CA
+           .
+      * COMMON AREA SETTING 파라미터 조립
+150611*   고객식별자만 조립하는 경우 AACOM에 SET.
+      *   고객번호(KB-PIN)
+           MOVE YNJLB064-KB-PIN        TO AACOM-CUST-IDNFR
+
+      *@1  COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   처리구분에 따른 입력값 검증
+           EVALUATE YNJLB064-PRCSS-DSTIC
+           WHEN CO-CHA-01
+               CONTINUE
+           WHEN CO-CHA-02
+      *        KB-PIN
+               IF YNJLB064-KB-PIN = SPACE
+                   #ERROR CO-B0900037 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+      *       신표준산업분류코드,한신평재무업종구분
+               IF YNJLB064-NEW-SI-CLSFI-CD   = SPACE AND
+                  YNJLB064-KIS-F-BZTYP-DSTCD = SPACE
+                   #ERROR CO-B3600485 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN CO-CHA-04
+      *        KB-PIN
+               IF YNJLB064-KB-PIN = SPACE
+                   #ERROR CO-B0900037 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN OTHER
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           EVALUATE YNJLB064-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *#1     조회처리시
+      *@1      T/E변경고객정보조회 프로그램호출
+               PERFORM S3200-DJL4153-CALL-RTN                           01040003
+                  THRU S3200-DJL4153-CALL-EXT                           01050003
+           WHEN CO-CHA-02
+           WHEN CO-CHA-04
+      *#1     등록/삭제처리시
+      *@1      T/E변경고객정보관리 프로그램호출
+               PERFORM S3100-DJLB153-CALL-RTN                           01040003
+                  THRU S3100-DJLB153-CALL-EXT                           01050003
+           END-EVALUATE
+
+      *@1 폼ID SET
+           #BOFMID 'V1KJL11064000'
+           .                                                            01060003
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------01090004
+      *@   T/E변경고객정보관리 DC호출
+      *-----------------------------------------------------------------01110004
+       S3100-DJLB153-CALL-RTN.                                          01120003
+
+      *@1 입력파라미터 조립
+      *   처리구분                                                    01170003
+           MOVE YNJLB064-PRCSS-DSTIC                                    01180003
+             TO XDJLB153-I-PRCSS-DSTIC                                  01190003
+                                                                        01200003
+      *    KB-PIN
+           MOVE YNJLB064-KB-PIN
+             TO XDJLB153-I-KB-PIN
+                                                                        01360003
+      *   신표준산업분류코드
+           MOVE YNJLB064-NEW-SI-CLSFI-CD
+             TO XDJLB153-I-NEW-SI-CLSFI-CD
+
+      *   한신평재무업종구분
+           MOVE YNJLB064-KIS-F-BZTYP-DSTCD
+             TO XDJLB153-I-KIS-F-BZTYP-DSTCD
+
+      *@1  T/E변경고객정보관리 프로그램 호출
+           #DYCALL DJLB153 YCCOMMON-CA XDJLB153-CA                      01910003
+                                                                        01920003
+      *   처리결과CHECK
+           IF COND-XDJLB153-OK                                          01960003
+               MOVE XDJLB153-O-PRCSS-RSULT                              01980001
+                 TO YPJLB064-PRCSS-RSULT
+           ELSE                                                         01980003
+              #ERROR XDJLB153-R-ERRCD                                   01990004
+                     XDJLB153-R-TREAT-CD                                02000004
+                     XDJLB153-R-STAT                                    02010004
+           END-IF                                                       02020003
+           .                                                            02030003
+
+       S3100-DJLB153-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+
+      *-----------------------------------------------------------------01090004
+      *@   T/E변경고객정보조회 DC호출
+      *-----------------------------------------------------------------01110004
+       S3200-DJL4153-CALL-RTN.                                          01120003
+
+      *@1 입력파라미터 조립
+      *   처리구분                                                    01170003
+           MOVE YNJLB064-PRCSS-DSTIC                                    01180003
+             TO XDJL4153-I-PRCSS-DSTIC                                  01190003
+                                                                        01200003
+      *    KB-PIN
+           MOVE YNJLB064-KB-PIN
+             TO XDJL4153-I-KB-PIN
+                                                                        01280003
+      *@1  T/E변경고객정보조회 프로그램 호출
+           #DYCALL DJL4153 YCCOMMON-CA XDJL4153-CA                      01910003
+                                                                        01920003
+      *   처리결과CHECK
+           EVALUATE TRUE
+           WHEN COND-XDJL4153-OK
+      *       출력라인수 조립
+               MOVE XDJL4153-O-TOTAL-LINE-CNT
+                 TO YPJLB064-TOTAL-LINE-CNT
+
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR WK-I > XDJL4153-O-TOTAL-LINE-CNT
+      *            KB-PIN
+                   MOVE XDJL4153-O-KB-PIN(WK-I)
+                     TO YPJLB064-KB-PIN(WK-I)
+      *           채무자명
+                   MOVE XDJL4153-O-DBTRZ-NAME(WK-I)
+                     TO YPJLB064-DBTRZ-NAME(WK-I)
+      *           신표준산업분류코드
+                   MOVE XDJL4153-O-NEW-SI-CLSFI-CD(WK-I)
+                     TO YPJLB064-NEW-SI-CLSFI-CD(WK-I)
+      *           표준산업코드명
+                   MOVE XDJL4153-O-STND-IDSTRY-CD-NAME(WK-I)
+                     TO YPJLB064-STND-IDSTRY-CD-NAME(WK-I)
+      *            TEPEER구분코드
+                   MOVE XDJL4153-O-TE-PEER-DSTCD(WK-I)
+                     TO YPJLB064-TE-PEER-DSTCD(WK-I)
+      *            PEER코드명
+                   MOVE XDJL4153-O-PEER-CD-NAME(WK-I)
+                     TO YPJLB064-PEER-CD-NAME(WK-I)
+      *           대분류업종코드
+                   MOVE XDJL4153-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                     TO YPJLB064-LAG-CLSFI-BZTYP-CD(WK-I)
+      *           대분류업종코드명
+                   MOVE XDJL4153-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                     TO YPJLB064-LAG-C-BZTYP-CD-NAME(WK-I)
+      *           한신평재무업종구분
+                   MOVE XDJL4153-O-KIS-F-BZTYP-DSTCD(WK-I)
+                     TO YPJLB064-KIS-F-BZTYP-DSTCD(WK-I)
+      *           등록년월일
+                   MOVE XDJL4153-O-REGI-YMD(WK-I)
+                     TO YPJLB064-REGI-YMD(WK-I)
+               END-PERFORM
+           WHEN COND-XDJL4153-NOTFOUND
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJL4153-R-ERRCD
+                      XDJL4153-R-TREAT-CD
+                      XDJL4153-R-STAT
+           END-EVALUATE
+           .                                                            02030003
+
+       S3200-DJL4153-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK WK-MESSAGE.
+       S9000-FINAL-EXT.
+           EXIT.

@@ -1,0 +1,822 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB068 (DC산업취급등록)
+      *@처리유형  : DC
+      *@처리개요  : 산업취급등록 처리하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@박정수:20220707: 신규작성
+      * YBH     :20221027: 확인권자 결재기능 추가
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJL0061                     : CRUD
+      **
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB068.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   22/07/07.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB068'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+101015     03  CO-CHAR-LF              PIC  X(001) VALUE X'25'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+150806     03  WK-LEN                  PIC  9(003).
+           03  WK-SQL-SELECT-CNT       PIC  9(003).
+           03  WK-MSNM-IN-BODY         PIC  X(500).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    MAX일련번호조회
+       01  XQJL6101-CA.
+           COPY  XQJL6101.
+
+      *   TE본부책임자 조회
+       01  XQJLHR01-CA.
+           COPY XQJLHR01.
+
+      *   대분류업종코드명 조회
+       01  XQJL6801-CA.
+           COPY  XQJL6801.
+
+      *MESSENGER COPYBOOK
+       01  XZUGMSNM-CA.
+           COPY XZUGMSNM.
+
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0061-REC.
+           COPY  TRJL0061.
+
+       01  TKJL0061-KEY.
+           COPY  TKJL0061.
+
+       01  TRJL0068-REC.
+           COPY  TRJL0068.
+
+       01  TKJL0068-KEY.
+           COPY  TKJL0068.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJLB068-CA.
+           COPY  XDJLB068.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB068-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJLB068-OUT
+                            XDJLB068-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   처리구분(02:등록요청/03:등록결재/04:해제요청/05:해제결재)
+           EVALUATE XDJLB068-I-PRCSS-DSTIC
+           WHEN CO-CHA-02
+      *#1     처리구분이 ０２등록인 경우
+      *@1     산업취급이력등록
+               PERFORM S3100-INSERT-PROC-RTN
+                  THRU S3100-INSERT-PROC-EXT
+
+      *@5     메신저처리
+               PERFORM S3500-MESSENGER-SEND-RTN
+                  THRU S3500-MESSENGER-SEND-EXT
+           WHEN CO-CHA-03
+           WHEN CO-CHA-05
+      *@1     산업취급이력등록(해제)결재
+               PERFORM S3200-UPDATE-PROC-RTN
+                  THRU S3200-UPDATE-PROC-EXT
+           WHEN CO-CHA-04
+      *@1     산업취급이력등록(해제)결재
+               PERFORM S3200-UPDATE-PROC-RTN
+                  THRU S3200-UPDATE-PROC-EXT
+
+      *@5     메신저처리
+               PERFORM S3500-MESSENGER-SEND-RTN
+                  THRU S3500-MESSENGER-SEND-EXT
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업취급관리검색
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *@1 MAX일련번호 조회
+           PERFORM S3110-QJL6101-CALL-RTN
+              THRU S3110-QJL6101-CALL-EXT
+
+      *  카피북초기화
+           INITIALIZE TKJL0061-KEY
+                      TRJL0061-REC
+
+      *@1 입력파라미터　조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0061-PK-GROUP-CO-CD
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD1
+             TO KJL0061-PK-LAG-CLSFI-BZTYP-CD
+      *   일련번호
+           MOVE XQJL6101-O-SERNO
+             TO KJL0061-PK-SERNO
+
+      *@1  DBIO프로그램　호출
+           #DYDBIO SELECT-CMD-Y TKJL0061-PK TRJL0061-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *#1     원장에 존재할 경우
+               EVALUATE RJL0061-LIMT-EIRR-DSTCD
+      *       등록해제구분코드(1:등록요청)
+               WHEN CO-CHA-1
+      *@1         산업취급수정
+                   PERFORM S3140-THKJL0061-UPDATE-RTN
+                      THRU S3140-THKJL0061-UPDATE-EXT
+               WHEN CO-CHA-4
+      *       등록해제구분코드(4:해제결재)
+      *@1         산업취급등록
+                   PERFORM S3130-THKJL0061-INSERT-RTN
+                      THRU S3130-THKJL0061-INSERT-EXT
+               END-EVALUATE
+           WHEN COND-DBIO-MRNF
+      *#1     원장에존재하지않을경우
+      *@1     산업취급등록
+               PERFORM S3130-THKJL0061-INSERT-RTN
+                  THRU S3130-THKJL0061-INSERT-EXT
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  MAX일련번호 조회
+      *-----------------------------------------------------------------
+       S3110-QJL6101-CALL-RTN.
+
+           INITIALIZE       XQJL6101-IN
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL6101-I-GROUP-CO-CD
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD1
+             TO XQJL6101-I-LAG-CLSFI-BZTYP-CD
+
+      *@1 MAX일련번호 취득 READ SQLIO호출
+           #DYSQLA QJL6101 SELECT XQJL6101-CA
+
+      * 1.1 조회결과확인
+      * 처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+           WHEN COND-DBSQL-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장상태 오류입니다.
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3110-QJL6101-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별규모별SUB한도관리등록
+      *-----------------------------------------------------------------
+       S3130-THKJL0061-INSERT-RTN.
+
+           INITIALIZE                  TRJL0061-REC
+
+      *@1 입력값조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0061-GROUP-CO-CD
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD1
+             TO RJL0061-LAG-CLSFI-BZTYP-CD
+      *   일련번호
+           COMPUTE RJL0061-SERNO =
+                   XQJL6101-O-SERNO + 1
+      *   취급중단년월일
+           MOVE XDJLB068-I-HNDLN-DSCN-YMD
+             TO RJL0061-HNDLN-DSCN-YMD
+      *   예외적용년월일
+           MOVE XDJLB068-I-ECEPT-APLY-YMD
+             TO RJL0061-ECEPT-APLY-YMD
+      *   산업등록해제구분
+           MOVE CO-CHA-1
+             TO RJL0061-LIMT-EIRR-DSTCD
+      *   등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0061-REGI-EMPID
+      *   등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0061-REGI-YMD
+
+      *@1 산업취급등록 프로그램호출
+           #DYDBIO INSERT-CMD-Y TKJL0061-PK TRJL0061-REC
+
+      *    DBIO호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3130-THKJL0061-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별TE한도초과기준일이력관리수정
+      *-----------------------------------------------------------------
+       S3140-THKJL0061-UPDATE-RTN.
+
+           EVALUATE XDJLB068-I-PRCSS-DSTIC
+      *#1 처리구분이 ０２등록인 경우
+           WHEN CO-CHA-02
+      *       취급중단년월일
+               MOVE XDJLB068-I-HNDLN-DSCN-YMD
+                 TO RJL0061-HNDLN-DSCN-YMD
+      *       예외적용년월일
+               MOVE XDJLB068-I-ECEPT-APLY-YMD
+                 TO RJL0061-ECEPT-APLY-YMD
+      *       산업등록해제구분
+               MOVE CO-CHA-1
+                 TO RJL0061-LIMT-EIRR-DSTCD
+      *       등록직원번호
+               MOVE BICOM-USER-EMPID
+                 TO RJL0061-REGI-EMPID
+      *       등록년월일
+               MOVE BICOM-TRAN-BASE-YMD
+                 TO RJL0061-REGI-YMD
+      *#1 처리구분이 03등록결재인 경우
+           WHEN CO-CHA-03
+      *       산업등록해제구분
+               MOVE CO-CHA-2
+                 TO RJL0061-LIMT-EIRR-DSTCD
+      *       등록결재직원번호
+               MOVE BICOM-USER-EMPID
+                 TO RJL0061-REGI-APRVAL-EMPID
+      *       등록결재년월일
+               MOVE BICOM-TRAN-BASE-YMD
+                 TO RJL0061-REGI-APRVAL-YMD
+      *#1 처리구분이 04해제요청인 경우
+           WHEN CO-CHA-04
+      *       산업등록해제구분
+               MOVE CO-CHA-3
+                 TO RJL0061-LIMT-EIRR-DSTCD
+      *       해제직원번호
+               MOVE BICOM-USER-EMPID
+                 TO RJL0061-REVOC-EMPID
+      *       해제년월일
+               MOVE BICOM-TRAN-BASE-YMD
+                 TO RJL0061-REVOC-YMD
+      *#1 처리구분이 05해제결재인 경우
+           WHEN CO-CHA-05
+      *       산업등록해제구분
+               MOVE CO-CHA-4
+                 TO RJL0061-LIMT-EIRR-DSTCD
+      *       해제결재직원번호
+               MOVE BICOM-USER-EMPID
+                 TO RJL0061-REVOC-APRVAL-EMPID
+      *       해제결재년월일
+               MOVE BICOM-TRAN-BASE-YMD
+                 TO RJL0061-REVOC-APRVAL-YMD
+           END-EVALUATE
+
+      *@1 산업취급수정 프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0061-PK TRJL0061-REC
+
+      *   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3140-THKJL0061-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  등록/해제/결재 처리
+      *-----------------------------------------------------------------
+       S3200-UPDATE-PROC-RTN.
+
+      *@1  결재대상 다건처리
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 1000
+                        OR WK-I > XDJLB068-I-TOTAL-LINE-CNT
+
+      *       카피북초기화
+               INITIALIZE TKJL0061-KEY
+                          TRJL0061-REC
+
+      *@1     입력파라미터　조립
+      *       그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO KJL0061-PK-GROUP-CO-CD
+      *       대분류업종코드
+               MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD2(WK-I)
+                 TO KJL0061-PK-LAG-CLSFI-BZTYP-CD
+      *       일련번호
+               MOVE XDJLB068-I-SERNO2(WK-I)
+                 TO KJL0061-PK-SERNO
+
+      *@1      DBIO프로그램　호출
+               #DYDBIO SELECT-CMD-Y  TKJL0061-PK TRJL0061-REC
+
+      *       호출결과확인
+               EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *#1         원장에 존재할 경우
+      *@1         산업취급이력수정
+                   PERFORM S3140-THKJL0061-UPDATE-RTN
+                      THRU S3140-THKJL0061-UPDATE-EXT
+
+                   EVALUATE RJL0061-LIMT-EIRR-DSTCD
+      *           등록해제구분코드(2:등록결재/3:해제요청/4:해제결재)
+                   WHEN CO-CHA-2
+      *@1             산업취급등록
+                       PERFORM S4100-INSERT-PROC-RTN
+                          THRU S4100-INSERT-PROC-EXT
+                   WHEN CO-CHA-3
+                       IF WK-I = 1
+                           MOVE XDJLB068-I-LAG-C-BZTYP-CD-NM2(WK-I)
+                             TO WK-MSNM-IN-BODY
+                       ELSE
+                           INITIALIZE  WK-LEN
+
+      *                   업종명 공백을 카운트한다
+                           INSPECT FUNCTION
+                                   REVERSE(WK-MSNM-IN-BODY)
+                           TALLYING WK-LEN FOR LEADING SPACE
+
+                           MOVE CO-CHAR-LF
+                             TO WK-MSNM-IN-BODY(500 - WK-LEN + 1:)
+                           MOVE XDJLB068-I-LAG-C-BZTYP-CD-NM2(WK-I)
+                             TO WK-MSNM-IN-BODY(500 - WK-LEN + 2:)
+                       END-IF
+                       #USRLOG %T WK-MSNM-IN-BODY
+                   WHEN CO-CHA-4
+      *@1             산업취급삭제
+                       PERFORM S4200-DELETE-PROC-RTN
+                          THRU S4200-DELETE-PROC-EXT
+                   END-EVALUATE
+               WHEN COND-DBIO-MRNF
+      *#1         원장에존재하지않을경우
+                   #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-PERFORM
+           .
+
+       S3200-UPDATE-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  메신저처리 수신대상조회
+      *-----------------------------------------------------------------
+       S3500-MESSENGER-SEND-RTN.
+
+      *@  수신자직원번호를　조회한다
+      *@   SQLIO COPYBOOK 초기화
+           INITIALIZE XQJLHR01-IN
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLHR01-I-GROUP-CO-CD
+
+      *@   SQLIO CALL
+           #DYSQLA QJLHR01 XQJLHR01-CA
+
+      *@   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *@1      메신저처리
+               PERFORM S3510-MESSENGER-SEND-RTN
+                  THRU S3510-MESSENGER-SEND-EXT
+           WHEN COND-DBSQL-MRNF
+               CONTINUE
+           WHEN OTHER
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3500-MESSENGER-SEND-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  메신저처리 수신대상조회
+      *-----------------------------------------------------------------
+       S3510-MESSENGER-SEND-RTN.
+
+           MOVE DBSQL-SELECT-CNT
+             TO WK-SQL-SELECT-CNT
+
+      *    등록요청시는 업종명을 읽어오고
+      *    해제요청시는 화면에서 가져온다.
+           IF XDJLB068-I-PRCSS-DSTIC = CO-CHA-02
+      *@1     대분류업종명조회
+               PERFORM S3511-QJL6801-CALL-RTN
+                  THRU S3511-QJL6801-CALL-EXT
+           END-IF
+
+      *@  메신저 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > WK-SQL-SELECT-CNT
+      *@       메신저처리
+      *@       COPYBOOK 초기화
+               INITIALIZE XZUGMSNM-IN
+
+      *        유틸리티　파라미터 MOVE
+      *@       서비스유형
+               MOVE CO-CHA-0
+                 TO XZUGMSNM-IN-SERVTYPE
+
+      *@       수신직원번호
+               MOVE XQJLHR01-O-EMPID(WK-I)
+                 TO XZUGMSNM-IN-REMPNO
+
+      *@       발신직원번호
+               MOVE BICOM-USER-EMPID
+                 TO XZUGMSNM-IN-SENDNO
+
+               IF XDJLB068-I-PRCSS-DSTIC = CO-CHA-02
+      *@          쪽지제목
+                   MOVE '한도초과산업등록 신청'
+                     TO XZUGMSNM-IN-TITLE
+
+      *@          쪽지본문
+                   STRING XQJL6801-O-LAG-C-BZTYP-CD-NAME(1)
+                                                    DELIMITED BY ' '
+                          ' 산업'                 DELIMITED BY SIZE
+                          ' 한도초과산업등록 신청되었습니다.'
+                                                    DELIMITED BY SIZE
+                          CO-CHAR-LF                DELIMITED BY SIZE
+                          '화면번호 : 11-3H-043'
+                                                    DELIMITED BY SIZE
+                     INTO XZUGMSNM-IN-BODY
+               ELSE
+      *@          쪽지제목
+                   MOVE '한도초과산업해제 신청'
+                     TO XZUGMSNM-IN-TITLE
+
+      *@          쪽지본문
+                   STRING WK-MSNM-IN-BODY
+                                                    DELIMITED BY ' '
+                          ' 산업'                 DELIMITED BY SIZE
+                          ' 한도초과산업해제 신청되었습니다.'
+                                                    DELIMITED BY SIZE
+                          CO-CHAR-LF                DELIMITED BY SIZE
+                          '화면번호 : 11-3H-043'
+                                                    DELIMITED BY SIZE
+                     INTO XZUGMSNM-IN-BODY
+               END-IF
+
+      *@       긴급여부
+               MOVE CO-CHA-1
+                 TO XZUGMSNM-IN-URGENTYN
+
+      *@       발신함저장여부
+               MOVE CO-CHA-1
+                 TO XZUGMSNM-IN-SAVEOPTION
+
+      *@       UTILITY CALL
+               #DYCALL ZUGMSNM YCCOMMON-CA XZUGMSNM-CA
+
+      *@       유틸리티　처리결과　확인
+               IF NOT COND-XZUGMSNM-OK
+                  #USRLOG '결과:' XZUGMSNM-R-STAT
+               END-IF
+           END-PERFORM
+           .
+
+       S3510-MESSENGER-SEND-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------02860001
+      *@  대분류업종명조회
+      *-----------------------------------------------------------------02880001
+       S3511-QJL6801-CALL-RTN.
+
+           INITIALIZE                  XQJL6801-IN
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL6801-I-GROUP-CO-CD
+
+      *    대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD1
+             TO XQJL6801-I-LAG-CLSFI-BZTYP-CD
+      *    전영업일의 년월
+           MOVE JICOM-BF-BZOPR-YMD(1:6)
+             TO XQJL6801-I-BASE-YM
+      *    조회기준시작년월일
+           MOVE LOW-VALUE
+             TO XQJL6801-I-INQURY-B-START-YMD
+      *    조회기준종료년월일
+           MOVE HIGH-VALUE
+             TO XQJL6801-I-INQURY-BASE-END-YMD
+
+           #DYSQLA QJL6801 SELECT XQJL6801-CA
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3511-QJL6801-CALL-EXT.
+           EXIT.                                                        03260001
+
+      *-----------------------------------------------------------------
+      *@  산업취급관리검색
+      *-----------------------------------------------------------------
+       S4100-INSERT-PROC-RTN.
+
+      *  카피북초기화
+           INITIALIZE TKJL0068-KEY
+                      TRJL0068-REC
+
+      *@1 입력파라미터　조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0068-PK-GROUP-CO-CD
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD2(WK-I)
+             TO KJL0068-PK-LAG-CLSFI-BZTYP-CD
+
+      *@1  DBIO프로그램　호출
+           #DYDBIO SELECT-CMD-Y  TKJL0068-PK TRJL0068-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *#1     원장에 존재할 경우
+      *@1     산업취급수정
+               PERFORM S4140-THKJL0068-UPDATE-RTN
+                  THRU S4140-THKJL0068-UPDATE-EXT
+           WHEN COND-DBIO-MRNF
+      *#1     원장에존재하지않을경우
+      *@1     산업취급등록
+               PERFORM S4130-THKJL0068-INSERT-RTN
+                  THRU S4130-THKJL0068-INSERT-EXT
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S4100-INSERT-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별규모별SUB한도관리등록
+      *-----------------------------------------------------------------
+       S4130-THKJL0068-INSERT-RTN.
+
+      *@1 입력값조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0068-GROUP-CO-CD
+
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD2(WK-I)
+             TO RJL0068-LAG-CLSFI-BZTYP-CD
+
+      *   취급중단년월일
+           MOVE RJL0061-HNDLN-DSCN-YMD
+             TO RJL0068-HNDLN-DSCN-YMD
+
+      *   예외적용년월일
+           MOVE RJL0061-ECEPT-APLY-YMD
+             TO RJL0068-ECEPT-APLY-YMD
+
+      *@1 산업취급등록 프로그램호출
+           #DYDBIO INSERT-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *    DBIO호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S4130-THKJL0068-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별규모별SUB한도관리수정
+      *-----------------------------------------------------------------
+       S4140-THKJL0068-UPDATE-RTN.
+
+      *   취급중단년월일
+           MOVE RJL0061-HNDLN-DSCN-YMD
+             TO RJL0068-HNDLN-DSCN-YMD
+
+      *   예외적용년월일
+           MOVE RJL0061-ECEPT-APLY-YMD
+             TO RJL0068-ECEPT-APLY-YMD
+
+      *@1 산업취급수정 프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S4140-THKJL0068-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업취급관리 삭제처리
+      *-----------------------------------------------------------------
+       S4200-DELETE-PROC-RTN.
+
+      *  카피북초기화
+           INITIALIZE TKJL0068-KEY
+                      TRJL0068-REC
+
+      *@1 입력값조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0068-PK-GROUP-CO-CD
+      *   대분류업종코드
+           MOVE XDJLB068-I-LAG-CLSFI-BZTYP-CD2(WK-I)
+             TO KJL0068-PK-LAG-CLSFI-BZTYP-CD
+
+      *@1  DBIO프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1 원장삭제를위한DBIO프로그램호출
+           #DYDBIO DELETE-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S4200-DELETE-PROC-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

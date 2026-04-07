@@ -1,0 +1,313 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4125 (AS EAD포괄신용공여한도기업여신현황)
+      *@처리유형  : AS
+      *@처리개요  : 포괄신용공여한도 설정대상 기업의 기업여
+      *@            : 신 현황을 계좌별로 조회하는 프로그램이
+      *@            : 다(EAD)
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *이동구:20090114: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091204: PC 삭제
+      *백현정:20101120: EAD신규작성
+      *백현정:20110603: TE여신성최고한도，최종적용포괄한도　추가
+      *박정수:20220221: 사용액 산출방법 변경,
+      *                과거 데이터 조회 개선
+      * YBH    :20220324: 부실회계기업 등급 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4125.
+       AUTHOR.                         이동구.
+       DATE-WRITTEN.                   09/01/14.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4125 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE
+       01  XDJL4125-CA.
+           COPY  XDJL4125.
+220324*    부실회계등급　조회
+       01  XIJL4009-CA.
+           COPY  XIJL4009.
+
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4125-CA.
+           COPY  YNJL4125.
+      *    AS COPYBOOK
+       01  YPJL4125-CA.
+           COPY  YPJL4125.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4125-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL4125-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4125-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+      *    고객번호
+           MOVE YNJL4125-KB-PIN        TO AACOM-CUST-IDNFR
+
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4125-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4125-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,차주번호,기준년월일)
+
+           MOVE YNJL4125-PRCSS-DSTIC   TO XDJL4125-I-PRCSS-DSTIC
+           MOVE YNJL4125-KB-PIN        TO XDJL4125-I-KB-PIN
+           MOVE YNJL4125-BASE-YMD      TO XDJL4125-I-BASE-YMD
+
+      *@3.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4125 YCCOMMON-CA XDJL4125-CA
+
+      *@3.3 처리결과CHECK
+      *@실행조건:COND-XDJL4125-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4125-OK
+              CONTINUE
+           ELSE
+              #ERROR XDJL4125-R-ERRCD
+                     XDJL4125-R-TREAT-CD
+                     XDJL4125-R-STAT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력항목 조립
+      *   채무자명
+           MOVE XDJL4125-O-DBTRZ-NAME
+             TO YPJL4125-DBTRZ-NAME
+      * 2011.06.03 TE여신성최고한도　추가
+           MOVE XDJL4125-O-LNBZ-I-HGST-LIMT
+             TO YPJL4125-LNBZ-I-HGST-LIMT
+      *   그룹명
+           MOVE XDJL4125-O-AFFLT-C-GROUP-NAME
+             TO YPJL4125-AFFLT-C-GROUP-NAME
+      *   유효기일
+           MOVE XDJL4125-O-MGT-LIMT-VALD-YMD
+             TO YPJL4125-MGT-LIMT-VALD-YMD
+      *   포괄신용공여관리한도
+           MOVE XDJL4125-O-MGT-CLAM
+             TO YPJL4125-MGT-CLAM
+      *   그룹신용등급
+           MOVE XDJL4125-O-INTNL-CV-GRD-DSTCD
+             TO YPJL4125-INTNL-CV-GRD-DSTCD
+      *   업종명
+           MOVE XDJL4125-O-STND-IDSTRY-CD-NAME
+             TO YPJL4125-STND-IDSTRY-CD-NAME
+      * 2011.06.03최종적용포괄한도　추가
+           MOVE XDJL4125-O-LAST-INLS-LIMT
+             TO YPJL4125-LAST-INLS-LIMT
+      *   기업신용등급
+           MOVE XDJL4125-O-INTNL-CV-GRD-DSTCD1
+             TO YPJL4125-INTNL-CV-GRD-DSTCD1
+
+220324*   부실회계기업등급
+           PERFORM  S6100-IJL4009-CALL-RTN
+              THRU  S6100-IJL4009-CALL-EXT
+
+      *   기사용액
+           MOVE XDJL4125-O-INLS-GRCR-LIMT-AUC
+             TO YPJL4125-INLS-GRCR-LIMT-AUC
+      *   한도여유액
+           MOVE XDJL4125-O-LIMT-SEXTR-AMT
+             TO YPJL4125-LIMT-SEXTR-AMT
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL4125-O-OUTPT-LINE-CNT1
+             TO YPJL4125-OUTPT-LINE-CNT1
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJL4125-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4125-OUTPT-LINE-CNT1
+
+                   MOVE XDJL4125-O-GRID1(WK-I)
+                     TO YPJL4125-GRID1(WK-I)
+           END-PERFORM
+
+220324*   별도전결권적용금액
+           MOVE XDJL4125-O-SEPA-DAR-APLY-AMT
+             TO YPJL4125-SEPA-DAR-APLY-AMT
+           .
+
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@ 부실회계등급　조회
+      *-----------------------------------------------------------------
+       S6100-IJL4009-CALL-RTN.
+
+           INITIALIZE                  XIJL4009-IN
+
+      *@1  입력파라미터 조립
+      *    KB-PIN
+           MOVE  YNJL4125-KB-PIN
+             TO  XIJL4009-I-KB-PIN
+
+      *@1  IC부실회계기업 등급조회 프로그램 호출
+           #DYCALL  IJL4009  YCCOMMON-CA  XIJL4009-CA
+
+           IF  COND-XIJL4009-OK
+      *       부실회계기업등급
+               MOVE XIJL4009-O-INSL-A-GRD-DSTCD
+                 TO YPJL4125-INSL-ACCTG-CORP-GRD
+           ELSE
+      *       부실회계기업등급
+               MOVE '0'
+                 TO YPJL4125-INSL-ACCTG-CORP-GRD
+           END-IF
+           .
+
+       S6100-IJL4009-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL04125000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

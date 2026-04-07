@@ -1,0 +1,33 @@
+//MKJLDP11 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  MKJLDP06
+//*  %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*   국외점포거래정보적재           (THKJLR005)
+//*********************************************************************
+//*INFO FILE 삭제방지를 위한COPY
+//*--------------------------------------------------------------------
+//SORT01  EXEC PGM=SORT
+//SORTIN    DD DSN=KJL.SY.MKJLMSG1.INFO,DISP=SHR
+//SORTOUT   DD DSN=KJL.SY.MKJLMSG1.INFO,DISP=SHR
+//SORTWK01  DD SPACE=(CYL,(30,20),RLSE),UNIT=SYSDA
+//SYSPRINT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSIN     DD *
+  SORT   FIELDS=COPY
+/*
+//STEP02  EXEC JZBDEXEC,MBR=BJLDR51,OPT=&SYSUID,COND=(4,LT)
+//INFILE    DD DISP=SHR,DSN=KJL.SD.SHRKFI.BJLDR51.V001
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=OLD,DSN=KJL.SD.MKJLDP11.DATA
+//CHGLOG    DD DSN=KJL.SY.CHGLOG.BJLDR51.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//

@@ -1,0 +1,125 @@
+      *================================================================*
+      *@ NAME : YPJL4273                                               *
+      *@ DESC : AS포괄신용공여한도승인조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-19 15:04:54                          *
+      *  생성일시     : 2023-09-19 15:04:56                          *
+      *  전체길이     : 00045171 BYTES                               *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4273-DBTRZ-NAME               PIC  X(052).
+      *--     여신성최고한도
+           07  YPJL4273-LNBZ-I-HGST-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     포괄신용공여관리한도
+           07  YPJL4273-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     최종포괄신용공여관리한도
+           07  YPJL4273-LAST-INLS-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹명
+           07  YPJL4273-AFFLT-C-GROUP-NAME       PIC  X(052).
+      *--     유효기일
+           07  YPJL4273-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     그룹신용등급
+           07  YPJL4273-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     업종명
+           07  YPJL4273-STND-IDSTRY-CD-NAME      PIC  X(052).
+      *--     기업신용등급
+           07  YPJL4273-INTNL-CV-GRD-DSTCD1      PIC  X(004).
+      *--     부실회계기업등급
+           07  YPJL4273-INSL-ACCTG-CORP-GRD      PIC  X(001).
+      *--     기사용액
+           07  YPJL4273-INLS-GRCR-LIMT-AUC       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4273-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     산업평가등급구분
+           07  YPJL4273-IDSTRY-V-GRD-DSTCD       PIC  X(004).
+      *--     승인한도신청번호
+           07  YPJL4273-ATHOR-LIMT-APLCN-NO      PIC  X(010).
+      *--     승인신청년월일
+           07  YPJL4273-ATHOR-APLCN-YMD          PIC  X(008).
+      *--     승인년월일
+           07  YPJL4273-ATHOR-YMD                PIC  X(008).
+      *--     한도승인금액
+           07  YPJL4273-LIMT-ATHOR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도신청종류구분
+           07  YPJL4273-LIMT-A-KND-DSTCD         PIC  X(001).
+      *--     한도신청종류구분명
+           07  YPJL4273-LIMT-AK-DSTIC-NAME       PIC  X(052).
+      *--     한도승인권자구분
+           07  YPJL4273-LIMT-ATRZ-DSTCD          PIC  X(001).
+      *--     한도설정유효년월일
+           07  YPJL4273-LIMT-STUP-VALD-YMD       PIC  X(008).
+      *--     승인신청직원번호
+           07  YPJL4273-ATHOR-APLCN-EMPID        PIC  X(007).
+      *--     승인신청직원명
+           07  YPJL4273-ATHOR-APLCN-EMNM         PIC  X(042).
+      *--     한도승인구분코드
+           07  YPJL4273-LIMT-ATHOR-DSTCD         PIC  X(001).
+      *--     승인사유내용
+           07  YPJL4273-ATHOR-RESN-CTNT          PIC  X(302).
+      *--     부점한글명
+           07  YPJL4273-BRN-HANGL-NAME           PIC  X(052).
+      *--     관리여부
+           07  YPJL4273-MGT-YN                   PIC  X(001).
+      *--     현재건수1
+           07  YPJL4273-PRSNT-NOITM1             PIC  9(005).
+      *--     그리드1
+           07  YPJL4273-GRID1                    OCCURS 000100 TIMES.
+      *--       첨부파일일련번호
+             09  YPJL4273-APNDX-FILE-SERNO       PIC  9(003).
+      *--       첨부파일식별자
+             09  YPJL4273-APNDX-FILE-IDNFR       PIC  X(040).
+      *--       등록년월일
+             09  YPJL4273-REGI-YMD               PIC  X(008).
+      *--       등록직원번호
+             09  YPJL4273-REGI-EMPID             PIC  X(007).
+      *--       등록직원명
+             09  YPJL4273-REGI-EMNM              PIC  X(042).
+      *--       첨부파일내용
+             09  YPJL4273-APNDX-FILE-CTNT        PIC  X(172).
+      *--       첨부파일명
+             09  YPJL4273-APNDX-FILE-NAME        PIC  X(172).
+      *================================================================*
+      *        Y  P  J  L  4  2  7  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4273-DBTRZ-NAME           ;채무자명
+      *S  YPJL4273-LNBZ-I-HGST-LIMT     ;여신성최고한도
+      *S  YPJL4273-MGT-CLAM             ;포괄신용공여관리한도
+      *S  YPJL4273-LAST-INLS-LIMT       ;최종포괄신용공여관리한도
+      *X  YPJL4273-AFFLT-C-GROUP-NAME   ;그룹명
+      *X  YPJL4273-MGT-LIMT-VALD-YMD    ;유효기일
+      *X  YPJL4273-INTNL-CV-GRD-DSTCD   ;그룹신용등급
+      *X  YPJL4273-STND-IDSTRY-CD-NAME  ;업종명
+      *X  YPJL4273-INTNL-CV-GRD-DSTCD1  ;기업신용등급
+      *X  YPJL4273-INSL-ACCTG-CORP-GRD  ;부실회계기업등급
+      *S  YPJL4273-INLS-GRCR-LIMT-AUC   ;기사용액
+      *S  YPJL4273-LIMT-SEXTR-AMT       ;한도여유액
+      *X  YPJL4273-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분
+      *X  YPJL4273-ATHOR-LIMT-APLCN-NO  ;승인한도신청번호
+      *X  YPJL4273-ATHOR-APLCN-YMD      ;승인신청년월일
+      *X  YPJL4273-ATHOR-YMD            ;승인년월일
+      *S  YPJL4273-LIMT-ATHOR-AMT       ;한도승인금액
+      *X  YPJL4273-LIMT-A-KND-DSTCD     ;한도신청종류구분
+      *X  YPJL4273-LIMT-AK-DSTIC-NAME   ;한도신청종류구분명
+      *X  YPJL4273-LIMT-ATRZ-DSTCD      ;한도승인권자구분
+      *X  YPJL4273-LIMT-STUP-VALD-YMD   ;한도설정유효년월일
+      *X  YPJL4273-ATHOR-APLCN-EMPID    ;승인신청직원번호
+      *X  YPJL4273-ATHOR-APLCN-EMNM     ;승인신청직원명
+      *X  YPJL4273-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *X  YPJL4273-ATHOR-RESN-CTNT      ;승인사유내용
+      *X  YPJL4273-BRN-HANGL-NAME       ;부점한글명
+      *X  YPJL4273-MGT-YN               ;관리여부
+      *N  YPJL4273-PRSNT-NOITM1         ;현재건수1
+      *A  YPJL4273-GRID1                ;그리드1
+      *N  YPJL4273-APNDX-FILE-SERNO     ;첨부파일일련번호
+      *X  YPJL4273-APNDX-FILE-IDNFR     ;첨부파일식별자
+      *X  YPJL4273-REGI-YMD             ;등록년월일
+      *X  YPJL4273-REGI-EMPID           ;등록직원번호
+      *X  YPJL4273-REGI-EMNM            ;등록직원명
+      *X  YPJL4273-APNDX-FILE-CTNT      ;첨부파일내용
+      *X  YPJL4273-APNDX-FILE-NAME      ;첨부파일명

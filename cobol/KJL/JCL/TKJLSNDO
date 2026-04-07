@@ -1,0 +1,160 @@
+//TKJLSNDO JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLSND1
+//*********************************************************************
+//*신용공여일집계THKJL0072 UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0072.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT 그룹회사코드
+          ,계좌번호
+          ,계좌중복일련번호
+          ,기준일
+          ,기준년월
+          ,통합계정과목코드
+          ,신용공여대상구분
+          ,원만기구분
+          ,잔존만기구분
+          ,"BS기준한도"
+          ,기준환율
+          ,신용공여보증비율
+          ,신용공여담보비율
+          ,"계정과목CCF환산율"
+          ,신용공여금액
+          ,신용공여제외금액
+          ,"CA보증담보합산액"
+          ,"CA보증담보금액1"
+          ,"CA보증담보금액2"
+          ,"CA보증담보금액3"
+          ,"CA보증담보금액4"
+          ,"CA보증담보금액5"
+          ,"CA보증담보금액6"
+          ,"CA보증담보금액7"
+          ,"CA보증담보금액8"
+          ,"CA보증담보금액9"
+          ,"CA보증담보환산금액1"
+          ,"CA보증담보환산금액2"
+          ,"CA보증담보환산금액3"
+          ,"CA보증담보환산금액4"
+          ,"CA보증담보환산금액5"
+          ,"CA보증담보환산금액6"
+          ,"CA보증담보환산금액7"
+          ,"CA보증담보환산금액8"
+          ,"CA보증담보환산금액9"
+          ,신용공여기관구분
+          ,시스템최종처리일시
+          ,시스템최종사용자번호
+      FROM  DB2DBA.THKJL0072
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준일    = '18'
+       AND 기준년월  = '%%$OYEAR.%%OMONTH'
+    WITH  UR;
+/*
+//*********************************************************************
+//*미사용신용공여일집계THKJL0074 UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0074.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT 그룹회사코드
+          ,기준일
+          ,기준년월
+          ,차주번호
+          ,한도계좌번호
+          ,한도상품대분류코드
+          ,한도상품중분류코드
+          ,한도상품템플릿코드
+          ,한도상품번호
+          ,시작년월일
+          ,만기년월일
+          ,종료년월일
+          ,통화코드
+          ,통화한도
+          ,통화잔액
+          ,통합계정과목코드
+          ,신용공여대상구분
+          ,원만기구분
+          ,잔존만기구분
+          ,"BS기준한도"
+          ,기준환율
+          ,신용공여보증비율
+          ,신용공여담보비율
+          ,미사용한도
+          ,"미사용한도CCF환산율"
+          ,"미사용한도CA금액"
+          ,"미사용한도CA제외금액"
+          ,미사용보증담보합산액
+          ,"미사용보증담보금액1"
+          ,"미사용보증담보금액2"
+          ,"미사용보증담보금액3"
+          ,"미사용보증담보금액4"
+          ,"미사용보증담보금액5"
+          ,"미사용보증담보금액6"
+          ,"미사용보증담보금액7"
+          ,"미사용보증담보금액8"
+          ,"미사용보증담보금액9"
+          ,"미사용보증담보환산1"
+          ,"미사용보증담보환산2"
+          ,"미사용보증담보환산3"
+          ,"미사용보증담보환산4"
+          ,"미사용보증담보환산5"
+          ,"미사용보증담보환산6"
+          ,"미사용보증담보환산7"
+          ,"미사용보증담보환산8"
+          ,"미사용보증담보환산9"
+          ,신용공여기관구분
+          ,시스템최종처리일시
+          ,시스템최종사용자번호
+      FROM  DB2DBA.THKJL0074
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준일    = '18'
+       AND 기준년월  = '%%$OYEAR.%%OMONTH'
+    WITH  UR;
+//

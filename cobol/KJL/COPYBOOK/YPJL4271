@@ -1,0 +1,148 @@
+      *================================================================*
+      *@ NAME : YPJL4271                                               *
+      *@ DESC : AS포괄신용공여한도기준한도조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-05 14:32:22                          *
+      *  생성일시     : 2023-09-05 14:32:25                          *
+      *  전체길이     : 00000591 BYTES                               *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4271-DBTRZ-NAME               PIC  X(052).
+      *--     여신성최고한도
+           07  YPJL4271-LNBZ-I-HGST-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹명
+           07  YPJL4271-AFFLT-C-GROUP-NAME       PIC  X(052).
+      *--     유효기일
+           07  YPJL4271-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     포괄신용공여관리한도
+           07  YPJL4271-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹신용등급
+           07  YPJL4271-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     업종명
+           07  YPJL4271-STND-IDSTRY-CD-NAME      PIC  X(052).
+      *--     최종포괄신용공여관리한도
+           07  YPJL4271-LAST-INLS-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기업신용등급
+           07  YPJL4271-INTNL-CV-GRD-DSTCD1      PIC  X(004).
+      *--     부실회계기업등급
+           07  YPJL4271-INSL-ACCTG-CORP-GRD      PIC  X(001).
+      *--     기사용액
+           07  YPJL4271-INLS-GRCR-LIMT-AUC       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4271-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     산업평가등급구분
+           07  YPJL4271-IDSTRY-V-GRD-DSTCD       PIC  X(004).
+      *--     총자산
+           07  YPJL4271-TOTAL-ASST               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정총자산
+           07  YPJL4271-AMND-TOTAL-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     매출액
+           07  YPJL4271-SALEPR                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액
+           07  YPJL4271-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준년자기자본금
+           07  YPJL4271-BASE-YR-ONCP-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준년자기자본금
+           07  YPJL4271-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     금융비용차입금
+           07  YPJL4271-FNCS-AMBR                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용차입금
+           07  YPJL4271-AMND-FNCS-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     당행차입금
+           07  YPJL4271-OWBNK-AMBR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당행차입금
+           07  YPJL4271-AMND-OWBNK-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     영업현금흐름액
+           07  YPJL4271-BZOPR-ACF                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정영업현금흐름액
+           07  YPJL4271-AMND-BZOPR-ACF           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     업체평균이자율
+           07  YPJL4271-ENTP-AVG-INT-RT          PIC  9(003)V9(02).
+      *--     수정업체평균이자율
+           07  YPJL4271-AMND-ENTP-AVG-IRT        PIC  9(003)V9(02).
+      *--     여신성자산한도금액
+           07  YPJL4271-LNBZ-I-ASST-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정여신성자산한도금액
+           07  YPJL4271-AMND-LI-ASST-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본기준금액
+           07  YPJL4271-ONCP-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정자기자본기준금액
+           07  YPJL4271-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     영업활동기준한도금액
+           07  YPJL4271-BZOPR-A-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정영업활동기준한도금액
+           07  YPJL4271-AMND-BA-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     포괄설정가능금액
+           07  YPJL4271-INLS-STUP-ABLAMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정포괄설정가능금액
+           07  YPJL4271-AMND-I-STUP-ABLAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신용등급지원비율
+           07  YPJL4271-CRDRAT-SPORT-RATO        PIC  9(003).
+      *--     관리여부
+           07  YPJL4271-MGT-YN                   PIC  X(001).
+      *================================================================*
+      *        Y  P  J  L  4  2  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4271-DBTRZ-NAME           ;채무자명
+      *S  YPJL4271-LNBZ-I-HGST-LIMT     ;여신성최고한도
+      *X  YPJL4271-AFFLT-C-GROUP-NAME   ;그룹명
+      *X  YPJL4271-MGT-LIMT-VALD-YMD    ;유효기일
+      *S  YPJL4271-MGT-CLAM             ;포괄신용공여관리한도
+      *X  YPJL4271-INTNL-CV-GRD-DSTCD   ;그룹신용등급
+      *X  YPJL4271-STND-IDSTRY-CD-NAME  ;업종명
+      *S  YPJL4271-LAST-INLS-LIMT       ;최종포괄신용공여관리한도
+      *X  YPJL4271-INTNL-CV-GRD-DSTCD1  ;기업신용등급
+      *X  YPJL4271-INSL-ACCTG-CORP-GRD  ;부실회계기업등급
+      *S  YPJL4271-INLS-GRCR-LIMT-AUC   ;기사용액
+      *S  YPJL4271-LIMT-SEXTR-AMT       ;한도여유액
+      *X  YPJL4271-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분
+      *S  YPJL4271-TOTAL-ASST           ;총자산
+      *S  YPJL4271-AMND-TOTAL-ASST      ;수정총자산
+      *S  YPJL4271-SALEPR               ;매출액
+      *S  YPJL4271-AMND-SALEPR          ;수정매출액
+      *S  YPJL4271-BASE-YR-ONCP-AMT     ;기준년자기자본금
+      *S  YPJL4271-AMND-B-YR-ONCP-AMT   ;수정기준년자기자본금
+      *S  YPJL4271-FNCS-AMBR            ;금융비용차입금
+      *S  YPJL4271-AMND-FNCS-AMBR       ;수정금융비용차입금
+      *S  YPJL4271-OWBNK-AMBR           ;당행차입금
+      *S  YPJL4271-AMND-OWBNK-AMBR      ;수정당행차입금
+      *S  YPJL4271-BZOPR-ACF            ;영업현금흐름액
+      *S  YPJL4271-AMND-BZOPR-ACF       ;수정영업현금흐름액
+      *N  YPJL4271-ENTP-AVG-INT-RT      ;업체평균이자율
+      *N  YPJL4271-AMND-ENTP-AVG-IRT    ;수정업체평균이자율
+      *S  YPJL4271-LNBZ-I-ASST-CLAM     ;여신성자산한도금액
+      *S  YPJL4271-AMND-LI-ASST-CLAM    ;수정여신성자산한도금액
+      *S  YPJL4271-ONCP-BSAMT           ;자기자본기준금액
+      *S  YPJL4271-AMND-O-CAPTL-BSAMT   ;수정자기자본기준금액
+      *S  YPJL4271-BZOPR-A-BASE-CLAM    ;영업활동기준한도금액
+      *S  YPJL4271-AMND-BA-BASE-CLAM
+      * 수정영업활동기준한도금액
+      *S  YPJL4271-INLS-STUP-ABLAMT     ;포괄설정가능금액
+      *S  YPJL4271-AMND-I-STUP-ABLAMT   ;수정포괄설정가능금액
+      *N  YPJL4271-CRDRAT-SPORT-RATO    ;신용등급지원비율
+      *X  YPJL4271-MGT-YN               ;관리여부

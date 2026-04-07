@@ -1,0 +1,80 @@
+      *================================================================*
+      *@ NAME : XDJL4060                                               *
+      *@ DESC : DCCRM섭외정보현황조회COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-10-24 11:00:29                          *
+      *  생성일시     : 2017-10-24 11:00:29                          *
+      *  전체길이     : 00000010 BYTES                               *
+      *================================================================*
+           03  XDJL4060-RETURN.
+             05  XDJL4060-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4060-OK            VALUE  '00'.
+                 88  COND-XDJL4060-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4060-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4060-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4060-ERROR         VALUE  '09'.
+                 88  COND-XDJL4060-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4060-SYSERROR      VALUE  '99'.
+             05  XDJL4060-R-LINE                 PIC  9(006).
+             05  XDJL4060-R-ERRCD                PIC  X(008).
+             05  XDJL4060-R-TREAT-CD             PIC  X(008).
+             05  XDJL4060-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4060-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4060-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월일
+             05  XDJL4060-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4060-OUT.
+      *----------------------------------------------------------------*
+      *--       총라인수
+             05  XDJL4060-O-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJL4060-O-GRID                 OCCURS 000500 TIMES.
+      *--         대분류업종코드
+               07  XDJL4060-O-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         대분류업종코드명
+               07  XDJL4060-O-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(032).
+      *--         협상유치계획건수
+               07  XDJL4060-O-ATRC-PLAN-NOITM1   PIC  9(005).
+      *--         협상유치계획금액
+               07  XDJL4060-O-ATRC-PLAN-AMT1     PIC  9(015).
+      *--         상품제안유치계획건수
+               07  XDJL4060-O-ATRC-PLAN-NOITM2   PIC  9(005).
+      *--         상품제안유치계획금액
+               07  XDJL4060-O-ATRC-PLAN-AMT2     PIC  9(015).
+      *--         의사결정중유치계획건
+               07  XDJL4060-O-ATRC-PLAN-NOITM3   PIC  9(005).
+      *--         의사결정중유치계획금
+               07  XDJL4060-O-ATRC-PLAN-AMT3     PIC  9(015).
+      *--         계약체결중유치계획건
+               07  XDJL4060-O-ATRC-PLAN-NOITM4   PIC  9(005).
+      *--         계약체결중유치계획금
+               07  XDJL4060-O-ATRC-PLAN-AMT4     PIC  9(015).
+      *--         유치계획건수
+               07  XDJL4060-O-ATRC-PLAN-NOITM    PIC  9(005).
+      *--         유치계획금액
+               07  XDJL4060-O-ATRC-PLAN-AMT      PIC  9(015).
+      *================================================================*
+      *        X  D  J  L  4  0  6  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4060-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4060-I-BASE-YMD           ;기준년월일
+      *N  XDJL4060-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4060-O-GRID               ;그리드
+      *X  XDJL4060-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4060-O-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *N  XDJL4060-O-ATRC-PLAN-NOITM1   ;협상유치계획건수
+      *N  XDJL4060-O-ATRC-PLAN-AMT1     ;협상유치계획금액
+      *N  XDJL4060-O-ATRC-PLAN-NOITM2   ;상품제안유치계획건수
+      *N  XDJL4060-O-ATRC-PLAN-AMT2     ;상품제안유치계획금액
+      *N  XDJL4060-O-ATRC-PLAN-NOITM3   ;의사결정중유치계획건
+      *N  XDJL4060-O-ATRC-PLAN-AMT3     ;의사결정중유치계획금
+      *N  XDJL4060-O-ATRC-PLAN-NOITM4   ;계약체결중유치계획건
+      *N  XDJL4060-O-ATRC-PLAN-AMT4     ;계약체결중유치계획금
+      *N  XDJL4060-O-ATRC-PLAN-NOITM    ;유치계획건수
+      *N  XDJL4060-O-ATRC-PLAN-AMT      ;유치계획금액

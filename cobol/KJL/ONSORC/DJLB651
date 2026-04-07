@@ -1,0 +1,379 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB651 (DC산업별규모별SUB한도등록)
+      *@처리유형  : DC
+      *@처리개요  : 산업별규모별SUB한도등록 처리하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20120515: 신규작성
+      * YBH    :20171130: 조회여부 추가
+      * PJH    :20191220: 국외산업규모한도　추가
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJL0065                     : CRUD
+      **
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB651.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   12/05/15.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB651'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0065-REC.
+           COPY  TRJL0065.
+
+       01  TKJL0065-KEY.
+           COPY  TKJL0065.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJLB651-CA.
+           COPY  XDJLB651.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB651-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJLB651-OUT
+                            XDJLB651-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   처리구분
+           EVALUATE XDJLB651-I-PRCSS-DSTIC
+           WHEN CO-CHA-02
+      *#1     처리구분이 ０２등록인 경우
+      *@1     산업별규모별SUB한도등록
+               PERFORM S3100-INSERT-PROC-RTN
+                  THRU S3100-INSERT-PROC-EXT
+           WHEN CO-CHA-04
+      *#1     처리구분이 ０４삭제인 인경우
+      *@1     상품정보원장　삭제
+               PERFORM S3200-DELETE-PROC-RTN
+                  THRU S3200-DELETE-PROC-EXT
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------02860001
+      *@  산업별규모별SUB한도관리검색                               02870001
+      *-----------------------------------------------------------------02880001
+       S3100-INSERT-PROC-RTN.                                           02890001
+
+      *  카피북초기화
+           INITIALIZE TKJL0065-KEY                                      02910001
+                      TRJL0065-REC                                      02920001
+
+      *@1 입력파라미터　조립
+      *   그룹회사코드                                                02930001
+           MOVE BICOM-GROUP-CO-CD                                       02940001
+             TO KJL0065-PK-GROUP-CO-CD                                  02940001
+      *   기준년월                                                    02950001
+           MOVE XDJLB651-I-BASE-YM                                      02960001
+             TO KJL0065-PK-BASE-YM                                      02960001
+      *   대분류업종코드                                              02970001
+           MOVE XDJLB651-I-LAG-CLSFI-BZTYP-CD                           02980001
+             TO KJL0065-PK-LAG-CLSFI-BZTYP-CD                           02990001
+      *   산업TE기업규모구분                                        03000001
+           MOVE XDJLB651-I-IDSTRY-TCS-DSTCD                             03010001
+             TO KJL0065-PK-IDSTRY-TCS-DSTCD                             03020001
+
+      *@1  DBIO프로그램　호출                                         03030001
+           #DYDBIO SELECT-CMD-Y  TKJL0065-PK TRJL0065-REC               03040007
+
+      *   호출결과확인
+           EVALUATE TRUE                                                03051006
+           WHEN COND-DBIO-OK                                            03052006
+      *#1     원장에 존재할 경우
+      *@1     산업별규모별SUB한도수정
+               PERFORM S3140-THKJL0065-UPDATE-RTN                       03053006
+                  THRU S3140-THKJL0065-UPDATE-EXT                       03054006
+           WHEN COND-DBIO-MRNF                                          03070006
+      *#1     원장에존재하지않을경우
+      *@1     산업별규모별SUB한도등록
+               PERFORM S3130-THKJL0065-INSERT-RTN                       03071006
+                  THRU S3130-THKJL0065-INSERT-EXT                       03072006
+           WHEN OTHER                                                   03073006
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR             03076006
+           END-EVALUATE                                                 03076106
+           .                                                            03230001
+
+       S3100-INSERT-PROC-EXT.                                           03250002
+           EXIT.                                                        03260001
+
+      *-----------------------------------------------------------------
+      *@  산업별규모별SUB한도관리등록
+      *-----------------------------------------------------------------
+       S3130-THKJL0065-INSERT-RTN.
+
+      *@1 입력값조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0065-GROUP-CO-CD
+
+      *   기준년월
+           MOVE XDJLB651-I-BASE-YM
+             TO RJL0065-BASE-YM
+
+      *   대분류업종코드
+           MOVE XDJLB651-I-LAG-CLSFI-BZTYP-CD
+             TO RJL0065-LAG-CLSFI-BZTYP-CD
+
+      *   산업TE기업규모구분
+           MOVE XDJLB651-I-IDSTRY-TCS-DSTCD
+             TO RJL0065-IDSTRY-TCS-DSTCD
+
+      *@1 산업별규모별SUB한도
+           COMPUTE RJL0065-IDSTRY-PSP-SUB-CLAM
+                 = XDJLB651-I-IDSTRY-PSP-SUB-LIMT * 1000000
+
+191220*   국외산업규모한도
+           COMPUTE RJL0065-ABRD-IS-SUB-CLAM
+                 = XDJLB651-I-ABRD-I-SCAL-LIMT    * 1000000
+
+      *   취급중단년월일
+           MOVE XDJLB651-I-HNDLN-DSCN-YMD
+             TO RJL0065-HNDLN-DSCN-YMD
+
+      *   취급기준1적용년월일
+           MOVE XDJLB651-I-HNDLN-B-1-APLY-YMD
+             TO RJL0065-HNDLN-B-1-APLY-YMD
+
+      *   취급기준2적용년월일
+           MOVE XDJLB651-I-HNDLN-B-2-APLY-YMD
+             TO RJL0065-HNDLN-B-2-APLY-YMD
+
+171130*   조회여부
+           MOVE XDJLB651-I-INQURY-YN
+             TO RJL0065-INQURY-YN
+
+      *@1 산업별규모별SUB한도등록 프로그램호출
+           #DYDBIO INSERT-CMD-Y TKJL0065-PK TRJL0065-REC
+
+      *    DBIO호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3130-THKJL0065-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별규모별SUB한도관리수정
+      *-----------------------------------------------------------------
+       S3140-THKJL0065-UPDATE-RTN.
+
+      *@1 입력값조립
+      *   산업별규모별SUB한도
+           COMPUTE RJL0065-IDSTRY-PSP-SUB-CLAM
+                 = XDJLB651-I-IDSTRY-PSP-SUB-LIMT * 1000000
+
+191220*   국외산업규모한도
+           COMPUTE RJL0065-ABRD-IS-SUB-CLAM
+                 = XDJLB651-I-ABRD-I-SCAL-LIMT    * 1000000
+
+      *   취급중단년월일
+           MOVE XDJLB651-I-HNDLN-DSCN-YMD
+             TO RJL0065-HNDLN-DSCN-YMD
+
+      *   취급기준1적용년월일
+           MOVE XDJLB651-I-HNDLN-B-1-APLY-YMD
+             TO RJL0065-HNDLN-B-1-APLY-YMD
+
+      *   취급기준2적용년월일
+           MOVE XDJLB651-I-HNDLN-B-2-APLY-YMD
+             TO RJL0065-HNDLN-B-2-APLY-YMD
+
+171130*   조회여부
+           MOVE XDJLB651-I-INQURY-YN
+             TO RJL0065-INQURY-YN
+
+      *@1 산업별규모별SUB한도수정 프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0065-PK TRJL0065-REC
+
+      *   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3140-THKJL0065-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------04480001
+      *@  산업별규모별SUB한도관리 삭제처리                        04490001
+      *-----------------------------------------------------------------04500001
+       S3200-DELETE-PROC-RTN.
+
+      *  카피북초기화
+           INITIALIZE TKJL0065-KEY                                      02910001
+                      TRJL0065-REC                                      02920001
+
+      *@1 입력값조립
+      *   그룹회사코드                                                02930001
+           MOVE BICOM-GROUP-CO-CD                                       02940001
+             TO KJL0065-PK-GROUP-CO-CD                                  02940001
+      *   기준년월                                                    02950001
+           MOVE XDJLB651-I-BASE-YM                                      02960001
+             TO KJL0065-PK-BASE-YM                                      02960001
+      *   대분류업종코드                                              02970001
+           MOVE XDJLB651-I-LAG-CLSFI-BZTYP-CD                           02980001
+             TO KJL0065-PK-LAG-CLSFI-BZTYP-CD                           02990001
+      *   산업TE기업규모구분                                        03000001
+           MOVE XDJLB651-I-IDSTRY-TCS-DSTCD                             03010001
+             TO KJL0065-PK-IDSTRY-TCS-DSTCD                             03020001
+
+      *@1  DBIO프로그램호출                                           03030001
+           #DYDBIO SELECT-CMD-Y TKJL0065-PK TRJL0065-REC                03040007
+                                                                        03050001
+      *   호출결과확인
+           EVALUATE TRUE                                                03051006
+           WHEN COND-DBIO-OK                                            03052006
+               CONTINUE                                                 03053006
+           WHEN COND-DBIO-MRNF                                          03052006
+               #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER                                                   03073006
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR             03076006
+           END-EVALUATE                                                 03076106
+
+      *@1 원장삭제를위한DBIO프로그램호출                            04650001
+           #DYDBIO DELETE-CMD-Y TKJL0065-PK TRJL0065-REC                04660001
+                                                                        04670001
+      *   호출결과확인
+           EVALUATE TRUE                                                04671007
+           WHEN COND-DBIO-OK                                            04672007
+               CONTINUE                                                 04673007
+           WHEN OTHER                                                   04674007
+               #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR             04677007
+           END-EVALUATE                                                 04678007
+           .                                                            04770001
+
+       S3200-DELETE-PROC-EXT.                                           04790001
+           EXIT.                                                        04800001
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

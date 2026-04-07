@@ -1,0 +1,346 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: IJL4001 (ICExposure총괄조회)-CMBS
+      *@처리유형  : IC
+      *@처리개요  : 관리한도와익스포져를추출하기위한IC프로그램
+      *@호출업무  : CMBS
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *김진태:20091110: NEW
+      * YBH    :20170825: 암호화 적용
+      * YBH    :20180627: 업종대분류 추가/관리대상산업 문구변경
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     IJL4001.
+       AUTHOR.                         김진태.
+       DATE-WRITTEN.                   09/11/10.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKBA0915             PIC  X(008) VALUE 'UKBA0915'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'IJL4001'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DC COPYBOOK
+170825 01  XDJL4106-CA.
+           COPY    XDJL4106.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    IC COPYBOOK
+       01  XIJL4001-CA.
+           COPY  XIJL4001.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XIJL4001-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 초기화
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1.2 출력영역　및　결과코드　초기화
+           INITIALIZE    XIJL4001-OUT
+                         XIJL4001-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XIJL4001-I-PRCSS-DSTIC = SPACE
+      *@처리내용:처리구분미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4001-I-PRCSS-DSTIC = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@2.2 기준년월일미입력CHECK
+      *@실행조건:XIJL4001-I-BASE-YMD = SPACE
+      *@처리내용:기준년월일미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4001-I-BASE-YMD = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@2.3 채무자번호미입력CHECK
+      *@처리내용:채무자번호미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4001-I-KB-PIN = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@3 업무처리
+
+      *@2.1 입력파라미터 조립
+      *@처리내용:조회DC입력파라메타=
+      *@SET(처리구분,KB-PIN,조회기준일자)
+           INITIALIZE    XDJL4106-IN
+
+           MOVE XIJL4001-I-PRCSS-DSTIC
+             TO XDJL4106-I-PRCSS-DSTIC
+
+           MOVE XIJL4001-I-BASE-YMD
+             TO XDJL4106-I-BASE-YMD
+
+170825     MOVE XIJL4001-I-KB-PIN
+             TO XDJL4106-I-BRWR-NO
+
+      *@2.2 프로그램 호출
+      *@처리내용:DC프로그램을 호출한다
+           #DYCALL DJL4106 YCCOMMON-CA XDJL4106-CA
+
+      *@2.3 호출결과 확인
+      *@처리내용 : IF 공통영역.리턴코드가 정상이 아니면
+      *@에러처리한다.
+
+      *@3.1.3 호출결과 확인
+      *@실행조건:NOT COND-XIJL4001-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF NOT COND-XDJL4106-OK
+              #ERROR XDJL4106-R-ERRCD
+                     XDJL4106-R-TREAT-CD
+                     XDJL4106-R-STAT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력 조립
+
+      *    채무자명
+           MOVE XDJL4106-O-BRWR-NAME
+             TO XIJL4001-O-DBTRZ-NAME
+      *    대표사업자번호
+           MOVE XDJL4106-O-RPSNT-BZNO
+             TO XIJL4001-O-RPSNT-BZNO
+      *    매출액
+           MOVE XDJL4106-O-SALEPR
+             TO XIJL4001-O-SALEPR
+      *    내부신용평가등급구분
+           MOVE XDJL4106-O-CRDRAT
+             TO XIJL4001-O-INTNL-CV-GRD-DSTCD
+      *    기업규모
+           MOVE XDJL4106-O-CORP-SCAL
+             TO XIJL4001-O-CORP-SCAL
+      *    총자산
+           MOVE XDJL4106-O-TOTAL-ASST
+             TO XIJL4001-O-TOTAL-ASST
+      *    신용평가년월일
+           MOVE XDJL4106-O-CRDRAT-VALUA-DD
+             TO XIJL4001-O-CRDT-VALUA-YMD
+      *    TE기준한도
+           MOVE XDJL4106-O-TE-BASE-LIMT
+             TO XIJL4001-O-BASE-CLAM
+      *    관리대상여부
+           MOVE XDJL4106-O-MGT-TAGET-YN
+             TO XIJL4001-O-MGT-TAGET-YN
+      *    한도설정유효일
+           MOVE XDJL4106-O-LIMT-STUP-VALD-DD
+             TO XIJL4001-O-TE-M-LIMT-VALD-YMD
+      *    TE관리한도
+           MOVE XDJL4106-O-MGT-LIMT
+             TO XIJL4001-O-TE-MGT-CLAM
+      *    여신성TE한도
+           MOVE XDJL4106-O-LNBZ-I-MGT-LIMT
+             TO XIJL4001-O-LNBZ-I-MGT-CLAM
+      *    시장성TE한도
+           MOVE XDJL4106-O-MRKTY-MGT-LIMT
+             TO XIJL4001-O-MRKTY-MGT-CLAM
+      *    관리한도설정일
+           MOVE XDJL4106-O-MGT-LIMT-STUP-DD
+             TO XIJL4001-O-MGT-LIMT-STUP-YMD
+      *    토탈익스포져
+           MOVE XDJL4106-O-LIMT-BASE-TE
+             TO XIJL4001-O-TE-AMT
+      *    여신성익스포져
+           MOVE XDJL4106-O-LNBZ-I-LIMT-BASE-TE
+             TO XIJL4001-O-TE-LNBZ-INCLIN-AMT
+      *    시장성익스포져
+           MOVE XDJL4106-O-MRKTY-LIMT-BASE-TE
+             TO XIJL4001-O-TE-MRKTY-AMT
+      *    한도여유액
+           MOVE XDJL4106-O-LIMT-SEXTR-AMT
+             TO XIJL4001-O-TE-LIMT-SEXTR-AMT
+      *    여신성여유액
+           MOVE XDJL4106-O-LNBZ-IL-SEXTR-AMT
+             TO XIJL4001-O-LNBZ-SEXTR-AMT
+      *    시장성여유액
+           MOVE XDJL4106-O-MRKTY-L-SEXTR-AMT
+             TO XIJL4001-O-MRKTY-SEXTR-AMT
+      *    외화신용공여한도
+           MOVE XDJL4106-O-FC-GRCR-CLAM
+             TO XIJL4001-O-FC-GRCR-CLAM
+      *    외화한도소진액
+           MOVE XDJL4106-O-FC-LIMT-AUC
+             TO XIJL4001-O-FC-LIMT-AUC
+      *    외화한도여유액
+           MOVE XDJL4106-O-FC-LIMT-SEXTR-AMT
+             TO XIJL4001-O-FC-LIMT-SEXTR-AMT
+      *    신용평가기관
+           MOVE XDJL4106-O-CRA
+             TO XIJL4001-O-CRA
+      *    신용등급(업체개요 신용등급(당행)과 동일)
+           MOVE XDJL4106-O-CRDRAT
+             TO XIJL4001-O-SMPSN-ICV-GRD-DSTCD
+      *    그룹코드
+           MOVE XDJL4106-O-GROUP-CD
+             TO XIJL4001-O-AFFLT-CORP-GROUP-CD
+      *    그룹명
+           MOVE XDJL4106-O-GROUP-NAME
+             TO XIJL4001-O-AFFLT-C-GROUP-NAME
+      *    그룹등급
+           MOVE XDJL4106-O-GROUP-GRD
+             TO XIJL4001-O-GROUP-ICV-GRD-DSTCD
+      *    그룹순위
+           MOVE XDJL4106-O-GROUP-RANKG
+             TO XIJL4001-O-AFFLT-CORP-RANKG
+      *    주채무계열여부
+           MOVE XDJL4106-O-MAIN-DEBT-AFFLT-YN
+             TO XIJL4001-O-MAIN-DEBT-AFFLT-YN
+      *    그룹한도설정유효일
+           MOVE XDJL4106-O-GROUP-LS-VALD-DD
+             TO XIJL4001-O-MGT-LIMT-VALD-YMD
+      *    그룹한도
+           MOVE XDJL4106-O-GROUP-MGT-LIMT
+             TO XIJL4001-O-MGT-CLAM
+      *    그룹익스포져
+           MOVE XDJL4106-O-GROUP-LIMT-BASE-TE
+             TO XIJL4001-O-GROUP-TE-AMT
+      *    그룹한도여유액
+           MOVE XDJL4106-O-LIMT-SEXTR-AMT
+             TO XIJL4001-O-LIMT-SEXTR-AMT
+      *    표준산업분류코드
+           MOVE XDJL4106-O-STND-I-CLSFI-CD
+             TO XIJL4001-O-NEW-SI-CLSFI-CD
+      *    표준산업분류명
+           MOVE XDJL4106-O-STND-IDSTRY-CD-NAME
+             TO XIJL4001-O-STND-IDSTRY-CD-NAME
+      *    업종명
+           MOVE XDJL4106-O-PEER-BZTYP
+             TO XIJL4001-O-PEER-CD-NAME
+      *    산업등급
+           MOVE XDJL4106-O-IDSTRY-GRD
+             TO XIJL4001-O-IDSTRY-V-GRD-DSTCD
+      *    관리대상산업여부
+           MOVE XDJL4106-O-MGT-TAGET-IDSTRY-YN
+             TO XIJL4001-O-MGT-TAGET-IDSTRY-YN
+180627*@  업종대분류코드
+           MOVE XDJL4106-O-BZTYP-LAG-CLSFI-CD
+             TO XIJL4001-O-BZTYP-LAG-CLSFI-CD
+180627*@  업종대분류명
+           MOVE XDJL4106-O-BZTYP-E-CLSFI-NAME
+             TO XIJL4001-O-BZTYP-E-CLSFI-NAME
+      *    업종대분류한도
+           MOVE XDJL4106-O-BZTYP-EC-TE-LIMT
+             TO XIJL4001-O-BZTYP-EC-TE-CLAM
+      *    업종대분류익스포져
+           MOVE XDJL4106-O-BZTYP-ERA-CLSFI-TE
+             TO XIJL4001-O-BZTYP-EC-TE-AMT
+      *    업종대분류한도여유액
+           MOVE XDJL4106-O-BZTYP-L-SEXTR-AMT
+             TO XIJL4001-O-BZTYP-L-SEXTR-AMT
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상종료함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

@@ -1,0 +1,86 @@
+      *================================================================*
+      *@ NAME : YPJL409E                                               *
+      *@ DESC : AS기업및그룹한도신청및승인조회(결의록조회)COPY     *
+      *@        BOOK                                                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-06-18 21:21:32                          *
+      *  생성일시     : 2020-06-18 21:21:56                          *
+      *  전체길이     : 00035532 BYTES                               *
+      *================================================================*
+      *--     한도승인권자구분
+           07  YPJL409E-LIMT-ATRZ-DSTCD          PIC  X(001).
+      *--     승인년월일
+           07  YPJL409E-ATHOR-YMD                PIC  X(008).
+      *--     한도설정유효년월일
+           07  YPJL409E-LIMT-STUP-VALD-YMD       PIC  X(008).
+      *--     승인부점명
+           07  YPJL409E-ATHOR-BRN-NAME           PIC  X(022).
+      *--     총라인수
+           07  YPJL409E-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드
+           07  YPJL409E-GRID                     OCCURS 000100 TIMES.
+      *--       승인위원구분
+             09  YPJL409E-ATHOR-CMMB-DSTIC       PIC  X(001).
+      *--       승인위원직원번호
+             09  YPJL409E-ATHOR-CMMB-EMPID       PIC  X(007).
+      *--       승인위원직원명
+             09  YPJL409E-ATHOR-CMMB-EMNM        PIC  X(042).
+      *--       한도승인구분
+             09  YPJL409E-LIMT-ATHOR-DSTCD       PIC  X(001).
+      *--       승인의견내용
+             09  YPJL409E-ATHOR-OPIN-CTNT        PIC  X(302).
+      *--     승인직원번호
+           07  YPJL409E-ATHOR-EMPID              PIC  X(007).
+      *--     승인직원명
+           07  YPJL409E-ATHOR-EMNM               PIC  X(042).
+      *--     기업신용등급
+           07  YPJL409E-CORP-CRDRAT              PIC  X(004).
+      *--     표준산업분류코드
+           07  YPJL409E-STND-I-CLSFI-CD          PIC  X(005).
+      *--     그룹명
+           07  YPJL409E-GROUP-NAME               PIC  X(042).
+      *--     그룹등급
+           07  YPJL409E-GROUP-GRD                PIC  X(004).
+      *--     신청직원번호
+           07  YPJL409E-APLCN-EMPID              PIC  X(007).
+      *--     신청직원명
+           07  YPJL409E-APLCN-EMNM               PIC  X(042).
+      *--     신청구분
+           07  YPJL409E-APLCN-DSTIC              PIC  X(001).
+      *--     승인구분
+           07  YPJL409E-ATHOR-DSTIC              PIC  X(001).
+      *--     조건부승인조건
+           07  YPJL409E-CNDT-ATHOR-CNDN          PIC  X(001).
+      *--     기준한도산출액
+           07  YPJL409E-BASE-LIMT-CMPTN-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도설정액
+           07  YPJL409E-MGT-LIMT-STUP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  9  E    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL409E-LIMT-ATRZ-DSTCD      ;한도승인권자구분
+      *X  YPJL409E-ATHOR-YMD            ;승인년월일
+      *X  YPJL409E-LIMT-STUP-VALD-YMD   ;한도설정유효년월일
+      *X  YPJL409E-ATHOR-BRN-NAME       ;승인부점명
+      *N  YPJL409E-TOTAL-LINE-CNT       ;총라인수
+      *A  YPJL409E-GRID                 ;그리드
+      *X  YPJL409E-ATHOR-CMMB-DSTIC     ;승인위원구분
+      *X  YPJL409E-ATHOR-CMMB-EMPID     ;승인위원직원번호
+      *X  YPJL409E-ATHOR-CMMB-EMNM      ;승인위원직원명
+      *X  YPJL409E-LIMT-ATHOR-DSTCD     ;한도승인구분
+      *X  YPJL409E-ATHOR-OPIN-CTNT      ;승인의견내용
+      *X  YPJL409E-ATHOR-EMPID          ;승인직원번호
+      *X  YPJL409E-ATHOR-EMNM           ;승인직원명
+      *X  YPJL409E-CORP-CRDRAT          ;기업신용등급
+      *X  YPJL409E-STND-I-CLSFI-CD      ;표준산업분류코드
+      *X  YPJL409E-GROUP-NAME           ;그룹명
+      *X  YPJL409E-GROUP-GRD            ;그룹등급
+      *X  YPJL409E-APLCN-EMPID          ;신청직원번호
+      *X  YPJL409E-APLCN-EMNM           ;신청직원명
+      *X  YPJL409E-APLCN-DSTIC          ;신청구분
+      *X  YPJL409E-ATHOR-DSTIC          ;승인구분
+      *X  YPJL409E-CNDT-ATHOR-CNDN      ;조건부승인조건
+      *S  YPJL409E-BASE-LIMT-CMPTN-AMT  ;기준한도산출액
+      *S  YPJL409E-MGT-LIMT-STUP-AMT    ;관리한도설정액

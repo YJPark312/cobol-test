@@ -1,0 +1,47 @@
+      *================================================================*
+      *@ NAME : XBJLCUST                                               *
+      *@ DESC : 고객번호　추출
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-29 14:53:55                          *
+      *  생성일시     : 2009-04-29 14:53:57                          *
+      *================================================================*
+           03  XBJLCUST-RETURN.
+             05  XBJLCUST-R-STAT                 PIC  X(002).
+                 88  COND-XBJLCUST-OK            VALUE  '00'.
+                 88  COND-XBJLCUST-KEYDUP        VALUE  '01'.
+                 88  COND-XBJLCUST-NOTFOUND      VALUE  '02'.
+                 88  COND-XBJLCUST-ERROR         VALUE  '09'.
+                 88  COND-XBJLCUST-ABNORMAL      VALUE  '98'.
+                 88  COND-XBJLCUST-SYSERROR      VALUE  '99'.
+             05  XBJLCUST-R-LINE                 PIC  9(006).
+             05  XBJLCUST-R-ERRCD                PIC  X(008).
+             05  XBJLCUST-R-TREAT-CD             PIC  X(008).
+             05  XBJLCUST-R-SQL-CD               PIC S9(005) COMP-3.
+
+      *----------------------------------------------------------------*
+           03  XBJLCUST-IN.
+      *----------------------------------------------------------------*
+      *--       그룹회사코드
+             05  XBJLCUST-I-GROUP-CO-CD      PIC  X(003).
+      *--       여신종류구분　
+             05  XBJLCUST-I-YSGB             PIC  X(001).
+      *--       관리부실점코드
+             05  XBJLCUST-I-BRCD             PIC  X(004).
+      *--       주민번호및법인등록번호
+             05  XBJLCUST-I-BRWR-NO          PIC  X(013).
+
+      *----------------------------------------------------------------*
+           03  XBJLCUST-OUT.
+      *----------------------------------------------------------------*
+      *--       고객고유번호（법인등록번호）
+             05  XBJLCUST-O-BINO             PIC  X(013).
+      *--       법인등록번호（모기업법인등록번호）
+             05  XBJLCUST-O-MAMA-CORPNO      PIC  X(013).
+      *--       계좌적용구분
+             05  XBJLCUST-O-GJGB             PIC  X(001).
+      *--       해외현지법인여부
+             05  XBJLCUST-O-HWGB             PIC  X(001).
+
+      *================================================================*
+      *        X  B  J  L  C  U  S  T    C  O  P  Y  B  O  O  K        *
+      *================================================================*

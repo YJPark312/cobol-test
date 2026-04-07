@@ -1,0 +1,61 @@
+//TKJLF162 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0162 한도초과업체관리예외대상명세 TABLE UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0162.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0162.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0162
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0162'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0162,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT D.그룹회사코드
+      ,B.고객식별자
+      ,CHAR('             ') AS  차주번호
+      ,D.한도초과관리예외구분
+      ,D.한도초과관리예외내용
+      ,D.시스템최종처리일시
+      ,D.시스템최종사용자번호
+ FROM  DB2DBA.THKJL0162 D
+      ,DB2DBA.THKJL0015 B
+WHERE  D.그룹회사코드 = B.그룹회사코드
+  AND  D.차주번호     = B.차주번호
+ WITH UR;
+/*
+//
+//

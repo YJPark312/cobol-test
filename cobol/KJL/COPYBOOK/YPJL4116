@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : YPJL4116                                               *
+      *@ DESC : AS(EAD)그룹등급별TE현황조회 COPYBOOK               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2010-10-25 14:27:38                          *
+      *  생성일시     : 2010-10-25 14:27:45                          *
+      *  전체길이     : 00003185 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4116-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4116-GRID1                    OCCURS 000030 TIMES.
+      *--       그룹신용등급
+             09  YPJL4116-INTNL-CV-GRD-DSTCD     PIC  X(006).
+      *--       대상그룹수
+             09  YPJL4116-TAGET-GROUP-CNT        PIC  9(015).
+      *--       그룹관리한도(A)
+             09  YPJL4116-MGT-CLAM               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준한도
+             09  YPJL4116-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  YPJL4116-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도기준TE(B)
+             09  YPJL4116-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       잔액기준TE
+             09  YPJL4116-TE-BAL-AUC             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율(B/A)
+             09  YPJL4116-EXHS-RT                PIC  9(003)V9(02).
+      *================================================================*
+      *        Y  P  J  L  4  1  1  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4116-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4116-GRID1                ;그리드1
+      *X  YPJL4116-INTNL-CV-GRD-DSTCD   ;그룹신용등급
+      *N  YPJL4116-TAGET-GROUP-CNT      ;대상그룹수
+      *S  YPJL4116-MGT-CLAM             ;그룹관리한도(A)
+      *S  YPJL4116-TTL-AMT-BASE-CLAM    ;명목액기준한도
+      *S  YPJL4116-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *S  YPJL4116-TE-LIMT-AUC          ;한도기준TE(B)
+      *S  YPJL4116-TE-BAL-AUC           ;잔액기준TE
+      *N  YPJL4116-EXHS-RT              ;소진율(B/A)

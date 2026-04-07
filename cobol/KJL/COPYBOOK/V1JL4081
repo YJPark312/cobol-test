@@ -1,0 +1,58 @@
+      *================================================================*
+      *@ NAME : V1JL4081                                               *
+      *@ DESC : AS신용공여이사회승인내역조회                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-04-16 14:30:31                          *
+      *  생성일시     : 2024-04-16 14:30:35                          *
+      *  전체길이     : 00032005 BYTES                               *
+      *================================================================*
+      *--     현재건수1
+ROWCNT     07  V1JL4081-PRSNT-NOITM1             PIC  9(005).
+      *--     그리드1
+           07  V1JL4081-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4081-PRSNT-NOITM1.
+      *--       고객식별자
+             09  V1JL4081-CUST-IDNFR             PIC  X(010).
+      *--       고객명
+             09  V1JL4081-CUSTNM                 PIC  X(052).
+      *--       신용공여중분류코드
+             09  V1JL4081-GRCR-MIDL-CLSFI-CD     PIC  X(003).
+      *--       통화코드
+             09  V1JL4081-CNCYCD                 PIC  X(003).
+      *--       이사회승인금액
+             09  V1JL4081-BRDC-ATHOR-AMT         PIC  9(018).
+      *--       이사회승인원화환산금액
+             09  V1JL4081-BRDC-ATHOR-WONC-AUC    PIC  9(018).
+      *--       이사회승인년월일
+             09  V1JL4081-BRDC-ATHOR-YMD         PIC  X(008).
+      *--       이사회승인유효년월일
+             09  V1JL4081-BRDC-ATHOR-VALD-YMD    PIC  X(008).
+      *--       소관부점코드
+             09  V1JL4081-JRSDZ-BRNCD            PIC  X(004).
+      *--       소관부점명
+             09  V1JL4081-JRSD-BRNZ-NAME         PIC  X(040).
+      *--       비고
+             09  V1JL4081-RMARK                  PIC  X(102).
+      *--       이사회승인번호
+             09  V1JL4081-BRDC-ATHOR-NO          PIC  X(010).
+      *--       이사회승인금리내용
+             09  V1JL4081-BRDC-ATHOR-IRT-CTNT    PIC  X(044).
+      *================================================================*
+      *        V  1  J  L  4  0  8  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4081-PRSNT-NOITM1         ;현재건수1
+      *A  V1JL4081-GRID1                ;그리드1
+      *X  V1JL4081-CUST-IDNFR           ;고객식별자
+      *X  V1JL4081-CUSTNM               ;고객명
+      *X  V1JL4081-GRCR-MIDL-CLSFI-CD   ;신용공여중분류코드
+      *X  V1JL4081-CNCYCD               ;통화코드
+      *N  V1JL4081-BRDC-ATHOR-AMT       ;이사회승인금액
+      *N  V1JL4081-BRDC-ATHOR-WONC-AUC
+      * 이사회승인원화환산금액
+      *X  V1JL4081-BRDC-ATHOR-YMD       ;이사회승인년월일
+      *X  V1JL4081-BRDC-ATHOR-VALD-YMD  ;이사회승인유효년월일
+      *X  V1JL4081-JRSDZ-BRNCD          ;소관부점코드
+      *X  V1JL4081-JRSD-BRNZ-NAME       ;소관부점명
+      *X  V1JL4081-RMARK                ;비고
+      *X  V1JL4081-BRDC-ATHOR-NO        ;이사회승인번호
+      *X  V1JL4081-BRDC-ATHOR-IRT-CTNT  ;이사회승인금리내용

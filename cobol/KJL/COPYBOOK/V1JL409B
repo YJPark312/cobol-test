@@ -1,0 +1,109 @@
+      *================================================================*
+      *@ NAME : V1JL409B                                               *
+      *@ DESC : 기업및그룹한도신청및승인조회(설정승인조회)         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-17 17:35:20                          *
+      *  생성일시     : 2020-12-17 17:35:25                          *
+      *  전체길이     : 00044916 BYTES                               *
+      *================================================================*
+      *--     신청일자
+           07  V1JL409B-APLCN-DTE                PIC  X(008).
+      *--     신청직원번호
+           07  V1JL409B-APLCN-EMPID              PIC  X(007).
+      *--     신청직원명
+           07  V1JL409B-APLCN-EMNM               PIC  X(042).
+      *--     신청영업점코드
+           07  V1JL409B-APLCNZ-BRNCD             PIC  X(004).
+      *--     신청영업점명
+           07  V1JL409B-APLCN-BBRN-NAME          PIC  X(042).
+      *--     신청구분
+           07  V1JL409B-APLCN-DSTIC              PIC  X(001).
+      *--     승인일자
+           07  V1JL409B-ATHOR-DTE                PIC  X(008).
+      *--     기준한도산출액
+           07  V1JL409B-BASE-LIMT-CMPTN-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도설정액
+           07  V1JL409B-MGT-LIMT-STUP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성관리한도
+           07  V1JL409B-LNBZ-I-MGT-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도
+           07  V1JL409B-MRKTY-MGT-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도설정유효일
+           07  V1JL409B-LIMT-STUP-VALD-DD        PIC  X(008).
+      *--     승인권자
+           07  V1JL409B-ATRZ                     PIC  X(001).
+      *--     조건부승인조건
+           07  V1JL409B-CNDT-ATHOR-CNDN          PIC  X(001).
+      *--     승인구분
+           07  V1JL409B-ATHOR-DSTIC              PIC  X(001).
+      *--     기준한도초과여부
+           07  V1JL409B-BASE-LIMT-EXCS-YN        PIC  X(001).
+      *--     한도승인사유구분
+           07  V1JL409B-LIMT-A-RESN-DSTCD        PIC  X(003).
+      *--     승인사유
+           07  V1JL409B-ATHOR-RESN               PIC  X(302).
+      *--     신용평가유효일
+           07  V1JL409B-CRDT-VALUA-VALD-YMD      PIC  X(008).
+      *--     후신용평가유효년월일
+           07  V1JL409B-AF-C-VALUA-VALD-YMD      PIC  X(008).
+      *--     재무적용연수
+           07  V1JL409B-FNAF-APLY-NOY            PIC  X(001).
+      *--     한도진행상태구분
+           07  V1JL409B-LIMT-P-STUS-DSTCD        PIC  X(001).
+      *--     현재건수1
+ROWCNT     07  V1JL409B-PRSNT-NOITM1             PIC  9(005).
+      *--     그리드1
+           07  V1JL409B-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL409B-PRSNT-NOITM1.
+      *--       첨부파일일련번호
+             09  V1JL409B-APNDX-FILE-SERNO       PIC  9(003).
+      *--       첨부파일식별자
+             09  V1JL409B-APNDX-FILE-IDNFR       PIC  X(040).
+      *--       등록년월일
+             09  V1JL409B-REGI-YMD               PIC  X(008).
+      *--       등록직원번호
+             09  V1JL409B-REGI-EMPID             PIC  X(007).
+      *--       등록직원명
+             09  V1JL409B-REGI-EMNM              PIC  X(042).
+      *--       첨부파일내용
+             09  V1JL409B-APNDX-FILE-CTNT        PIC  X(172).
+      *--       첨부파일명
+             09  V1JL409B-APNDX-FILE-NAME        PIC  X(172).
+      *================================================================*
+      *        V  1  J  L  4  0  9  B    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL409B-APLCN-DTE            ;신청일자
+      *X  V1JL409B-APLCN-EMPID          ;신청직원번호
+      *X  V1JL409B-APLCN-EMNM           ;신청직원명
+      *X  V1JL409B-APLCNZ-BRNCD         ;신청영업점코드
+      *X  V1JL409B-APLCN-BBRN-NAME      ;신청영업점명
+      *X  V1JL409B-APLCN-DSTIC          ;신청구분
+      *X  V1JL409B-ATHOR-DTE            ;승인일자
+      *S  V1JL409B-BASE-LIMT-CMPTN-AMT  ;기준한도산출액
+      *S  V1JL409B-MGT-LIMT-STUP-AMT    ;관리한도설정액
+      *S  V1JL409B-LNBZ-I-MGT-LIMT      ;여신성관리한도
+      *S  V1JL409B-MRKTY-MGT-LIMT       ;시장성관리한도
+      *X  V1JL409B-LIMT-STUP-VALD-DD    ;한도설정유효일
+      *X  V1JL409B-ATRZ                 ;승인권자
+      *X  V1JL409B-CNDT-ATHOR-CNDN      ;조건부승인조건
+      *X  V1JL409B-ATHOR-DSTIC          ;승인구분
+      *X  V1JL409B-BASE-LIMT-EXCS-YN    ;기준한도초과여부
+      *X  V1JL409B-LIMT-A-RESN-DSTCD    ;한도승인사유구분
+      *X  V1JL409B-ATHOR-RESN           ;승인사유
+      *X  V1JL409B-CRDT-VALUA-VALD-YMD  ;신용평가유효일
+      *X  V1JL409B-AF-C-VALUA-VALD-YMD  ;후신용평가유효년월일
+      *X  V1JL409B-FNAF-APLY-NOY        ;재무적용연수
+      *X  V1JL409B-LIMT-P-STUS-DSTCD    ;한도진행상태구분
+      *L  V1JL409B-PRSNT-NOITM1         ;현재건수1
+      *A  V1JL409B-GRID1                ;그리드1
+      *N  V1JL409B-APNDX-FILE-SERNO     ;첨부파일일련번호
+      *X  V1JL409B-APNDX-FILE-IDNFR     ;첨부파일식별자
+      *X  V1JL409B-REGI-YMD             ;등록년월일
+      *X  V1JL409B-REGI-EMPID           ;등록직원번호
+      *X  V1JL409B-REGI-EMNM            ;등록직원명
+      *X  V1JL409B-APNDX-FILE-CTNT      ;첨부파일내용
+      *X  V1JL409B-APNDX-FILE-NAME      ;첨부파일명

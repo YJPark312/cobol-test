@@ -1,0 +1,86 @@
+//TKJLDP12 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : 일자전환
+//*  %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*  %%SET %%C = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLDR01.D250707.T1400,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR006 ')
+        ,CHAR('THKJLR006DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,유가증권상품구분
+        ,종목코드번호
+        ,펀드번호
+        ,일련번호
+        ,고객식별자
+        ,고객관리번호
+        ,고객고유번호
+        ,발행법인등록번호
+        ,관리부점코드
+        ,계정과목코드
+        ,계정세과목코드
+        ,통합계정과목코드
+        ,회계구분
+        ,신탁합동구분
+        ,매입년월일
+        ,만기년월일
+        ,계리장부금액
+        ,평가금액
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJLR006
+   WHERE 그룹회사코드           = 'KB0'
+     AND SUBSTR(기준년월일,7,2) = '07'
+     AND 유가증권상품구분      IN ('15' , '12')
+    WITH UR;
+/*
+//*********************************************************************
+//*   원화유가증권정보적재-수익증권(THKJLR006-15)
+//*********************************************************************
+//STEP03  EXEC JZBDEXEC,MBR=BJLDR02,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KEE.SD.SHRKJL.TABDP83
+//          DD DISP=SHR,DSN=KJR.SD.SHRKJL.TABDP83
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=OLD,DSN=KJL.SD.MKJLDP12.DATA03
+//SYSIN     DD *
+KB0-20250707-TKJLDP12-001-ONLBAT-KB STAR-20250707
+//*자료기준년월일
+//*********************************************************************
+//*   원화유가증권정보적재-주식    (THKJLR006-12)
+//*********************************************************************
+//STEP04  EXEC JZBDEXEC,MBR=BJLDR03,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KEE.SD.SHRKJL.TABDP84
+//          DD DISP=SHR,DSN=KJR.SD.SHRKJL.TABDP84
+//INFILE2   DD DISP=SHR,DSN=KJL.SD.SHRCTK.TABDP67
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=OLD,DSN=KJL.SD.MKJLDP12.DATA04
+//OUTF3     DD DISP=OLD,DSN=KJL.SD.MKJLDP12.DATA05
+//SYSIN     DD *
+KB0-20250707-TKJLDP12-001-ONLBAT-KB STAR-20250707
+//*자료기준년월일
+//

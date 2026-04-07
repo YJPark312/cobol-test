@@ -1,0 +1,81 @@
+//TKJLF152 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0152 년도말 채무자고객기본 TABLE UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0152.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0152.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,1000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0152
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0152'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0152,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2000,500),RLSE)
+//SYSIN    DD *
+SELECT A.그룹회사코드
+      ,A.기준년월
+      ,A.고객식별자
+      ,CHAR('             ') AS 차주번호
+      ,A.차주번호구분
+      ,A.신표준산업분류코드
+      ,A.내부신용평가등급구분
+      ,A.신용평가년월일
+      ,A.신용평가유효년월일
+      ,A.고객관리부점코드
+      ,A."TE기업규모구분"
+      ,A."TEPEER구분"
+      ,A.대분류업종코드
+      ,A.산업평가등급구분
+      ,A.채무자명
+      ,A.계열기업군코드
+      ,A.계열기업군명
+      ,A.대표사업자번호
+      ,A.매출액
+      ,A.총자산
+      ,A.한도고객구분
+      ,CHAR('             ') AS 모기업법인등록번호
+      ,A."모기업ISO국가코드"
+      ,CHAR('      ') AS 연합회차주번호
+      ,A."고객ID구분"
+      ,A.한도그룹번호
+      ,A.그룹사신용등급구분
+      ,A.차주대표자명
+      ,A.시스템최종처리일시
+      ,A.시스템최종사용자번호
+      ,CHAR('          ') AS 모기업법인고객식별자
+  FROM DB2DBA.THKJL0152 A
+  WITH UR;
+/*
+//

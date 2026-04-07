@@ -1,0 +1,116 @@
+//TKJLT25K JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*               수시　배치실행JCL
+//*********************************************************************
+//* 기준일에 따라 A를
+//* 전월말영업일이나 전영업일로 수정하여 사용
+//*
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*  %%SET %%C = %%SUBSTR %%A 7 2
+//*  %%SET %%D = %%SUBSTR %%A 1 6
+//*********************************************************************
+//*    토탈익스포져일일배치작업결과（진행중）
+//*********************************************************************
+//STEP00  EXEC JZBDEXEC,MBR=BJLDLG1,OPT=&SYSUID
+//CHGLOG    DD DSN=KJL.SY.CHGLOG.BJLDLG1.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN     DD *
+KB0-%%A-TKJLT25K-001-NORBAT-KB STAR-%%A-1-0
+//*자료기준년월일
+//*토탈익스포져업무구분（１：TE－고정）
+//*배치완료여부（１：완료，０：진행）
+/*
+//STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.TKJLT25K.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0125 ')
+        ,CHAR('THKJL0125DB:')
+        ,그룹회사코드
+        ,계좌번호
+        ,계좌중복일련번호
+        ,기준일
+        ,기준년월
+        ,고객식별자
+        ,고객관리번호
+        ,해외현지법인여부
+        ,차주번호
+        ,관리부점코드
+        ,"TE계좌고객구분"
+        ,한도계좌여부
+        ,"TE계좌구분"
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,대출자격구분
+        ,시작년월일
+        ,만기년월일
+        ,종료년월일
+        ,상품계약상태구분
+        ,통화코드
+        ,통화한도
+        ,통화잔액
+        ,"BS기준잔액"
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"CCF명목잔액환산금액"
+        ,배분내부회복가치
+        ,"CA담보제외금액"
+        ,"CA담보환산금액"
+        ,한도계좌번호
+        ,한도상품대분류코드
+        ,한도상품중분류코드
+        ,한도상품템플릿코드
+        ,한도상품번호
+        ,관련테이블명
+        ,과목코드
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,"BS기준한도"
+        ,차주고객식별자
+        ,지급보증신용장번호
+    FROM DB2DBA.THKJL0125
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준일       = '%%C'
+     AND 기준년월     = '%%D'
+     AND 과목코드    IN ('FHD','FW#')
+    WITH UR;
+/*
+//*********************************************************************
+//*  EAD 한도관리계좌삭제작업（업무코드별삭제）－　국외FHD
+//*********************************************************************
+//STEP12  EXEC JZBDEXEC,MBR=BJLT25L,OPT=&SYSUID
+//SYSIN     DD *
+KB0-%%A-MKJLT25K-001-NORBAT-KB STAR-%%A-FHD
+//*********************************************************************
+//*  EAD 한도관리계좌삭제작업（업무코드별삭제）－　국외FW#
+//*********************************************************************
+//STEP13  EXEC JZBDEXEC,MBR=BJLT25L,OPT=&SYSUID
+//SYSIN     DD *
+KB0-%%A-MKJLT25K-001-NORBAT-KB STAR-%%A-FW#
+//
+//*전월말영업일:%%MEND%%$OYEAR.%%OMONTH
+//*전영업일    :%%$WCALC %%$ODATE -1 WORKDAYS

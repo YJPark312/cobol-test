@@ -1,0 +1,353 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020030
+      *@프로그램명: DJL4095 (기업및그룹한도신청및승인조회)          00030030
+      *@처리유형  : DC                                                00040030
+      *@처리개요  : 기준한도산출（금융기관）                        00050030
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   변　경　이　력                00070030
+      *-----------------------------------------------------------------00080001
+      *@성명 : 일자 : 변　경　내　용                              00090030
+      * ----------------------------------------------------------------00100001
+      *김진태:20090428: 신규작성                                    00110030
+      *김진태:20091015: CJIDT03 => JICOM-BF-BZOPR-YMD                 00110030
+      *김진태:20091210: 에러메세지정비                              00110030
+      * YBH    :20211029: 프로세스 개선
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00150030
+      **  ------------------------- ------------------------------------00160001
+      **  TE자기자본정보          : THKJL0049            : R          00170030
+      ******************************************************************00240001
+       IDENTIFICATION                  DIVISION.                        00250001
+      *=================================================================00260001
+       PROGRAM-ID.                     DJL4095.                         00270001
+       AUTHOR.                         김진태.                        00280030
+       DATE-WRITTEN.                   09/04/23.                        00290001
+      *=================================================================00300001
+       ENVIRONMENT                     DIVISION.                        00310001
+      *=================================================================00320001
+       CONFIGURATION                   SECTION.                         00330001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00340001
+       DATA                            DIVISION.                        00350001
+      *=================================================================00360001
+       WORKING-STORAGE                 SECTION.                         00370001
+      *-----------------------------------------------------------------00380001
+      *CONSTANT ERROR AREA                                              00390001
+      *-----------------------------------------------------------------00400001
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00460001
+      * CONSTANT AREA                                                   00470001
+      *-----------------------------------------------------------------00480001
+       01  CO-AREA.                                                     00490001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4095'.     00500001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00510001
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00520001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00530001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00540001
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00550001
+                                                                        00560001
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00650069
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.           00650069
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+211029     03  CO-NUM-100              PIC  9(003) VALUE 100.
+      *-----------------------------------------------------------------00740001
+      * WORKING AREA                                                    00750001
+      *-----------------------------------------------------------------00760001
+       01  WK-AREA.                                                     00770001
+      *    자기자본기준금액
+           03  WK-ONCP-BSAMT           PIC  9(015).                     00780001
+211029*    3년평균계속사업이익
+           03  WK-Y-3A-CTNN-BIZ-PRFT   PIC S9(015).
+211029*    3년평균자기자본
+           03  WK-Y-3-AVG-ONCP         PIC S9(015).
+      *    임시변수
+           03  WK-TEMP1                PIC S9(05)V9(4).
+      *    임시변수
+           03  WK-TEMP2                PIC S9(05)V9(4).
+
+      *-----------------------------------------------------------------00850001
+      * PGM INTERFACE PARAMETER                                         00860001
+      *-----------------------------------------------------------------00870001
+      *-----------------------------------------------------------------01860001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01870001
+      *-----------------------------------------------------------------01880001
+      * DBIO  INTERFACE COPYBOOK
+           COPY    YCDBIOCA.                                            01900001
+      *-----------------------------------------------------------------01910001
+      * TABLE ACCESS INTERFACE PARAMETER                                01920001
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01930001
+      *-----------------------------------------------------------------01940001
+      * DBIO ACCESS KEY관리                                           01950030
+      *-----------------------------------------------------------------01960001
+      * DBIO COPYBOOK
+       01  TKJL0049-KEY.                                                02050001
+           COPY    TKJL0049.                                            02060001
+      * DBIO COPYBOOK
+       01  TRJL0049-REC.                                                02070001
+           COPY    TRJL0049.                                            02080001
+      *-----------------------------------------------------------------02210001
+       LINKAGE                         SECTION.                         02220001
+      *-----------------------------------------------------------------02230001
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.                                                 02240001
+           COPY    YCCOMMON.                                            02250001
+      * DC COPYBOOK
+       01  XDJL4095-CA.                                                 02260001
+           COPY    XDJL4095.                                            02270001
+      *=================================================================02280001
+       PROCEDURE                       DIVISION                         02290001
+                                       USING       YCCOMMON-CA          02300001
+                                                   XDJL4095-CA          02310001
+                                                   .                    02320001
+      *=================================================================02330001
+      *-----------------------------------------------------------------02340001
+      *@  처리메인                                                    02350030
+      *-----------------------------------------------------------------02360001
+       S0000-MAIN-RTN.                                                  02370001
+                                                                        02380001
+      *@   초기화                                                     02390030
+           PERFORM S1000-INITIALIZE-RTN                                 02400001
+              THRU S1000-INITIALIZE-EXT                                 02410001
+                                                                        02420001
+      *@   입력값　CHECK                                              02430030
+           PERFORM S2000-VALIDATION-RTN                                 02440001
+              THRU S2000-VALIDATION-EXT                                 02450001
+                                                                        02460001
+      *@   업무처리                                                   02470030
+           PERFORM S3000-PROCESS-RTN                                    02480001
+              THRU S3000-PROCESS-EXT                                    02490001
+                                                                        02500001
+      *@   처리종료                                                   02510030
+           PERFORM S9000-FINAL-RTN                                      02520001
+              THRU S9000-FINAL-EXT                                      02530001
+           .                                                            02540001
+       S0000-MAIN-EXT.                                                  02550001
+           EXIT.                                                        02560001
+      *-----------------------------------------------------------------02570001
+      *@  초기화                                                      02580030
+      *-----------------------------------------------------------------02590001
+       S1000-INITIALIZE-RTN.                                            02600001
+                                                                        02610001
+      *@   WK-AREA 및　프로그램파라미터　초기화                       02620030
+           INITIALIZE WK-AREA                                           02630001
+      *               DBIO                                              02640001
+                      YCDBIOCA-CA                                       02650001
+                                                                        02660001
+      *@  출력영역　및　결과코드　초기화                              02670030
+           INITIALIZE XDJL4095-OUT                                      02680001
+                      XDJL4095-RETURN                                   02690001
+           .                                                            02700001
+       S1000-INITIALIZE-EXT.                                            02710001
+           EXIT.                                                        02720001
+      *-----------------------------------------------------------------02730001
+      *@  입력값검증                                                  02740030
+      *-----------------------------------------------------------------02750001
+       S2000-VALIDATION-RTN.                                            02760001
+                                                                        02770001
+      *@처리구분체크
+           IF XDJL4095-I-PRCSS-DSTIC = CO-CHA-01
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .                                                            02880001
+       S2000-VALIDATION-EXT.                                            02890001
+           EXIT.                                                        02900001
+      *-----------------------------------------------------------------03120001
+      *@  업무처리                                                    03130030
+      *-----------------------------------------------------------------03140001
+       S3000-PROCESS-RTN.                                               03150001
+                                                                        03160001
+      *@2  기준한도산출
+
+      *@2.1자기자본기준금액구하기
+           PERFORM S3110-THKJL0049-SELECT-RTN
+              THRU S3110-THKJL0049-SELECT-EXT
+
+      *@2.2금융기관기준한도구하기
+           PERFORM S3200-LIMIT-CALCULATE-RTN
+              THRU S3200-LIMIT-CALCULATE-EXT
+           .                                                            03380001
+       S3000-PROCESS-EXT.                                               03390001
+           EXIT.                                                        03400001
+      *-----------------------------------------------------------------04840013
+      *@  자기자본기준금액구하기                                      04850015
+      *-----------------------------------------------------------------04860013
+       S3110-THKJL0049-SELECT-RTN.                                      04870013
+                                                                        04880015
+      *@   초기화
+           INITIALIZE TKJL0049-KEY                                      04890037
+                      TRJL0049-REC                                      04900015
+                                                                        04910037
+      *@   그룹회사코드                                               04920015
+           MOVE BICOM-GROUP-CO-CD                                       04930015
+             TO KJL0049-PK-GROUP-CO-CD                                  04940015
+      *@   기준년월                                                   04960015
+           MOVE JICOM-BF-BZOPR-YMD(1:6)                                 04970015
+             TO KJL0049-PK-BASE-YM                                      04980015
+      *@   자기자본구분                                               05000015
+           MOVE CO-CHA-1                                                05010015
+             TO KJL0049-PK-ONCP-DSTCD                                   05020015
+                                                                        05030015
+      *@   CALL DBIO
+           #DYDBIO SELECT-CMD-N TKJL0049-PK TRJL0049-REC                05040015
+                                                                        05050015
+      *@조회결과확인(비정상)                                        05060015
+           IF COND-DBIO-OK                                              05070015
+              MOVE RJL0049-ONCP-BSAMT                                   05080015
+                TO WK-ONCP-BSAMT                                        05090015
+           ELSE                                                         05100015
+              MOVE ZERO                                                 05110015
+                TO WK-ONCP-BSAMT                                        05120015
+           END-IF                                                       05130015
+           .                                                            05140037
+       S3110-THKJL0049-SELECT-EXT.                                      05150013
+           EXIT.                                                        05160013
+      *-----------------------------------------------------------------
+      *@  금융기관기준한도추출
+      *-----------------------------------------------------------------
+       S3200-LIMIT-CALCULATE-RTN.
+
+211029*    3년평균계속사업이익
+           COMPUTE WK-Y-3A-CTNN-BIZ-PRFT
+                 = FUNCTION MEAN(XDJL4095-I-AMND-BPCRSBCB-PRFT,
+                                 XDJL4095-I-AMND-PCRSBCB-PRFT,
+                                 XDJL4095-I-AMND-CCRSBCB-PRFT)
+
+211029*   수정Y3평균사업이익비율
+           IF WK-Y-3A-CTNN-BIZ-PRFT = ZERO
+               MOVE ZERO
+                 TO XDJL4095-O-AMND-Y3AB-PRFT-RATO
+           ELSE
+               COMPUTE XDJL4095-O-AMND-Y3AB-PRFT-RATO
+                     = FUNCTION MAX(
+                       FUNCTION MIN(
+                       XDJL4095-I-AMND-CCRSBCB-PRFT
+                     / WK-Y-3A-CTNN-BIZ-PRFT * 100.0000,
+                       999.99), -999.99)
+           END-IF
+
+211029*   수정이익가중치값
+           EVALUATE TRUE
+           WHEN WK-Y-3A-CTNN-BIZ-PRFT        <= ZERO
+               MOVE ZERO
+                 TO XDJL4095-O-AMND-PRFT-WGHT-VAL
+           WHEN WK-Y-3A-CTNN-BIZ-PRFT         > ZERO
+            AND XDJL4095-I-AMND-CCRSBCB-PRFT <= ZERO
+               COMPUTE XDJL4095-O-AMND-PRFT-WGHT-VAL
+                     = 0.7 * CO-NUM-100
+           WHEN WK-Y-3A-CTNN-BIZ-PRFT         > ZERO
+            AND XDJL4095-I-AMND-CCRSBCB-PRFT  > ZERO
+            AND XDJL4095-I-AMND-PCRSBCB-PRFT <= ZERO
+            AND XDJL4095-I-AMND-BPCRSBCB-PRFT<= ZERO
+               COMPUTE XDJL4095-O-AMND-PRFT-WGHT-VAL
+                     = 0.8 * CO-NUM-100
+           WHEN WK-Y-3A-CTNN-BIZ-PRFT         > ZERO
+            AND XDJL4095-I-AMND-CCRSBCB-PRFT  > ZERO
+            AND XDJL4095-I-AMND-PCRSBCB-PRFT  > ZERO
+            AND XDJL4095-I-AMND-BPCRSBCB-PRFT<= ZERO
+               COMPUTE XDJL4095-O-AMND-PRFT-WGHT-VAL
+                     = 0.9 * CO-NUM-100
+           WHEN WK-Y-3A-CTNN-BIZ-PRFT         > ZERO
+            AND XDJL4095-I-AMND-CCRSBCB-PRFT  > ZERO
+            AND XDJL4095-I-AMND-PCRSBCB-PRFT <= ZERO
+            AND XDJL4095-I-AMND-BPCRSBCB-PRFT > ZERO
+               COMPUTE XDJL4095-O-AMND-PRFT-WGHT-VAL
+                     = 0.9 * CO-NUM-100
+           WHEN OTHER
+               COMPUTE XDJL4095-O-AMND-PRFT-WGHT-VAL
+                     = FUNCTION MIN(
+                       FUNCTION MAX(
+                       XDJL4095-I-AMND-CCRSBCB-PRFT
+                     / WK-Y-3A-CTNN-BIZ-PRFT,
+                       0.7000), 1.3000) * 100.0000
+           END-EVALUATE
+
+      *   최근업종평균자기자본비율(금융자기자본비율)
+           COMPUTE WK-TEMP1
+                 = XDJL4095-I-AMND-LBA-ONCP-RATO / 100
+      *   신용등급지원비율
+           COMPUTE WK-TEMP2
+                 = XDJL4095-I-AMND-CP-SPORT-RATO / 100
+      *@  개별기업최고한도 = 자기자본 * 0.1                         03890015
+           COMPUTE WK-ONCP-BSAMT                                        03900015
+                 = (WK-ONCP-BSAMT * 0.10) / 1000000                     03910015
+
+      *@  상환능력기준한도
+211029     COMPUTE XDJL4095-O-AMND-S-BASE-LIMT
+                 = FUNCTION MIN(
+                   FUNCTION MAX(
+                   (WK-Y-3A-CTNN-BIZ-PRFT
+                 /  FUNCTION MAX(WK-TEMP1, 0.0800))
+                 * (XDJL4095-O-AMND-PRFT-WGHT-VAL / 100) * 0.7
+                 * WK-TEMP2, 0), WK-ONCP-BSAMT)
+
+211029*    3년평균자기자본
+           COMPUTE WK-Y-3-AVG-ONCP
+                 = FUNCTION MEAN(XDJL4095-I-AMND-BF-PRPRID-ONCP,
+                                 XDJL4095-I-AMND-PRPRID-ONCP,
+                                 XDJL4095-I-AMND-CRTM-ONCP)
+
+211029*   수정Y3평균자기자본비율
+           IF WK-Y-3-AVG-ONCP = ZERO
+               MOVE ZERO
+                 TO XDJL4095-O-AMND-Y3A-ONCP-RATO
+           ELSE
+               COMPUTE XDJL4095-O-AMND-Y3A-ONCP-RATO
+                     = FUNCTION MAX(
+                       FUNCTION MIN(
+                       XDJL4095-I-AMND-CRTM-ONCP
+                     / WK-Y-3-AVG-ONCP * 100.0000, 999.99), -999.99)
+           END-IF
+
+211029*   수정자본가중치값
+           IF WK-Y-3-AVG-ONCP = ZERO
+               COMPUTE XDJL4095-O-AMND-CAPTL-WGHT-VAL
+                     = 1 * CO-NUM-100
+           ELSE
+               COMPUTE XDJL4095-O-AMND-CAPTL-WGHT-VAL
+                     = FUNCTION MIN(
+                       FUNCTION MAX(
+                       XDJL4095-I-AMND-CRTM-ONCP
+                     / WK-Y-3-AVG-ONCP, 0.7000), 1.3000) * 100.0000
+           END-IF
+
+      *@규모기준한도
+           COMPUTE XDJL4095-O-AMND-SCAL-BASE-LIMT
+                 = FUNCTION MIN(
+                   FUNCTION MAX(
+                   XDJL4095-I-AMND-CRTM-ONCP
+                 * (XDJL4095-O-AMND-CAPTL-WGHT-VAL / 100)
+                 * WK-TEMP2, 0), WK-ONCP-BSAMT)
+
+      *@기준한도
+           COMPUTE XDJL4095-O-AMND-BASE-LIMT
+                 = (XDJL4095-O-AMND-S-BASE-LIMT    * 0.60)
+                 + (XDJL4095-O-AMND-SCAL-BASE-LIMT * 0.40)
+           .
+       S3200-LIMIT-CALCULATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------32250001
+      *@  처리종료                                                    32260030
+      *-----------------------------------------------------------------32270001
+       S9000-FINAL-RTN.                                                 32280001
+      *@3 종료처리                                                    32290030
+                                                                        32300001
+      *@3.1 프로그램 종료                                           32310030
+      *@처리내용 : 프로그램을 정상 종료 함                    32320030
+                                                                        32330001
+           #OKEXIT  CO-STAT-OK                                          32340001
+           .                                                            32350001
+       S9000-FINAL-EXT.                                                 32360001
+           EXIT.                                                        32370001

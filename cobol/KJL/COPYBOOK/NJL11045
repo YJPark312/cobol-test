@@ -1,0 +1,48 @@
+      *================================================================*
+      *@ NAME : NJL11045                                               *
+      *@ DESC : TE한도초과산업등록해제                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-10-21 13:54:06                          *
+      *  생성일시     : 2022-10-21 13:54:09                          *
+      *  전체길이     : 00042049 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  NJL11045-PRCSS-DSTIC              PIC  X(002).
+      *--     대분류업종코드1
+           07  NJL11045-LAG-CLSFI-BZTYP-CD1      PIC  X(003).
+      *--     조회기준시작년월일
+           07  NJL11045-INQURY-B-START-YMD       PIC  X(008).
+      *--     조회기준종료년월일
+           07  NJL11045-INQURY-BASE-END-YMD      PIC  X(008).
+      *--     일련번호
+           07  NJL11045-SERNO1                   PIC  9(007).
+      *--     취급중단년월일
+           07  NJL11045-HNDLN-DSCN-YMD           PIC  X(008).
+      *--     예외적용년월일
+           07  NJL11045-ECEPT-APLY-YMD           PIC  X(008).
+      *--     총라인수
+ROWCNT     07  NJL11045-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드
+           07  NJL11045-GRID                     OCCURS 0 TO 001000
+               DEPENDING ON NJL11045-TOTAL-LINE-CNT.
+      *--       대분류업종코드2
+             09  NJL11045-LAG-CLSFI-BZTYP-CD2    PIC  X(003).
+      *--       대분류업종코드명2
+             09  NJL11045-LAG-C-BZTYP-CD-NM2     PIC  X(032).
+      *--       일련번호
+             09  NJL11045-SERNO2                 PIC  9(007).
+      *================================================================*
+      *        N  J  L  1  1  0  4  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL11045-PRCSS-DSTIC          ;처리구분
+      *X  NJL11045-LAG-CLSFI-BZTYP-CD1  ;대분류업종코드1
+      *X  NJL11045-INQURY-B-START-YMD   ;조회기준시작년월일
+      *X  NJL11045-INQURY-BASE-END-YMD  ;조회기준종료년월일
+      *N  NJL11045-SERNO1               ;일련번호
+      *X  NJL11045-HNDLN-DSCN-YMD       ;취급중단년월일
+      *X  NJL11045-ECEPT-APLY-YMD       ;예외적용년월일
+      *L  NJL11045-TOTAL-LINE-CNT       ;총라인수
+      *A  NJL11045-GRID                 ;그리드
+      *X  NJL11045-LAG-CLSFI-BZTYP-CD2  ;대분류업종코드2
+      *X  NJL11045-LAG-C-BZTYP-CD-NM2   ;대분류업종코드명2
+      *N  NJL11045-SERNO2               ;일련번호

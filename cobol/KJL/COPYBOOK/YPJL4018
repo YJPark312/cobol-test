@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : YPJL4018                                               *
+      *@ DESC : AS업종(대분류)별TE현황 COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-19 17:18:27                          *
+      *  생성일시     : 2009-06-19 17:18:41                          *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4018-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4018-GRID1                    OCCURS 000100 TIMES.
+      *--       대분류업종코드
+             09  YPJL4018-LAG-CLSFI-BZTYP-CD     PIC  X(006).
+      *--       대분류업종코드명
+             09  YPJL4018-LAG-C-BZTYP-CD-NAME    PIC  X(052).
+      *--       PEER그룹수
+             09  YPJL4018-PEER-GROUP-CNT         PIC  9(015).
+      *--       대상업체건수
+             09  YPJL4018-TAGET-ENTP-NOITM       PIC  9(015).
+      *--       산업관리한도금액
+             09  YPJL4018-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준한도금액
+             09  YPJL4018-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  YPJL4018-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액
+             09  YPJL4018-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져잔액환산금액
+             09  YPJL4018-TE-BAL-AUC             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             09  YPJL4018-LIMT-SEXTR-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율
+             09  YPJL4018-EXHS-RT                PIC  9(003)V9(02).
+      *================================================================*
+      *        Y  P  J  L  4  0  1  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4018-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4018-GRID1                ;그리드1
+      *X  YPJL4018-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  YPJL4018-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *N  YPJL4018-PEER-GROUP-CNT       ;PEER그룹수
+      *N  YPJL4018-TAGET-ENTP-NOITM     ;대상업체건수
+      *S  YPJL4018-IDSTRY-MGT-CLAM      ;산업관리한도금액
+      *S  YPJL4018-TTL-AMT-BASE-CLAM    ;명목액기준한도금액
+      *S  YPJL4018-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *S  YPJL4018-TE-LIMT-AUC          ;토탈익스포져한도환산금액
+      *S  YPJL4018-TE-BAL-AUC           ;토탈익스포져잔액환산금액
+      *S  YPJL4018-LIMT-SEXTR-AMT       ;한도여유액
+      *N  YPJL4018-EXHS-RT              ;소진율

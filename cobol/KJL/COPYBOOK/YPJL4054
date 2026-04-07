@@ -1,0 +1,59 @@
+      *================================================================*
+      *@ NAME : YPJL4054                                               *
+      *@ DESC : AS거액익스포져(LEX)총액조회 COPYBOOK               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-01-24 16:10:28                          *
+      *  생성일시     : 2024-01-24 16:10:30                          *
+      *  전체길이     : 00090558 BYTES                               *
+      *================================================================*
+      *--     기본자본기준년월
+           07  YPJL4054-BASC-CAPTL-BASE-YM       PIC  X(006).
+      *--     은행기본자본
+           07  YPJL4054-BNK-BASC-CAPTL           PIC  9(015).
+      *--     한도규제1
+           07  YPJL4054-LIMT-REGUL1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도규제2
+           07  YPJL4054-LIMT-REGUL2              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     현재건수1
+           07  YPJL4054-PRSNT-NOITM1             PIC  9(005).
+      *--     그리드
+           07  YPJL4054-GRID                     OCCURS 000500 TIMES.
+      *--       순위
+             09  YPJL4054-RANKG                  PIC  9(003).
+      *--       차주고객식별자
+             09  YPJL4054-BRWR-CUST-IDNFR        PIC  X(010).
+      *--       단일거래상대방
+             09  YPJL4054-UNY-TRAN-CNPRT         PIC  X(052).
+      *--       총익스포져
+             09  YPJL4054-TOTAL-EXPSR            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       거액익스포져비율
+             09  YPJL4054-BSM-EXPSR-RATO         PIC S9(013)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       총익스포져변동
+             09  YPJL4054-TOTAL-EXPSR-FLXBL      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       거액익스포져비율변동
+             09  YPJL4054-BSM-E-RATO-FLXBL       PIC S9(013)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       거액거래상대방구분
+             09  YPJL4054-BSM-T-CNPRT-DSTCD      PIC  X(052).
+      *================================================================*
+      *        Y  P  J  L  4  0  5  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4054-BASC-CAPTL-BASE-YM   ;기본자본기준년월
+      *N  YPJL4054-BNK-BASC-CAPTL       ;은행기본자본
+      *S  YPJL4054-LIMT-REGUL1          ;한도규제1
+      *S  YPJL4054-LIMT-REGUL2          ;한도규제2
+      *N  YPJL4054-PRSNT-NOITM1         ;현재건수1
+      *A  YPJL4054-GRID                 ;그리드
+      *N  YPJL4054-RANKG                ;순위
+      *X  YPJL4054-BRWR-CUST-IDNFR      ;차주고객식별자
+      *X  YPJL4054-UNY-TRAN-CNPRT       ;단일거래상대방
+      *S  YPJL4054-TOTAL-EXPSR          ;총익스포져
+      *S  YPJL4054-BSM-EXPSR-RATO       ;거액익스포져비율
+      *S  YPJL4054-TOTAL-EXPSR-FLXBL    ;총익스포져변동
+      *S  YPJL4054-BSM-E-RATO-FLXBL     ;거액익스포져비율변동
+      *X  YPJL4054-BSM-T-CNPRT-DSTCD    ;거액거래상대방구분

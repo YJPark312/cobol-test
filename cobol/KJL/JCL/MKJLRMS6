@@ -1,0 +1,40 @@
+//MKJLRMS6 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMS5                                       */
+//*********************************************************************
+//*   간접상품코드목록원장UNLOAD -지주사　제공자료               */
+//********************************************************************/
+//STEP01   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0019'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0019.P00001,DISP=OLD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+       SELECT 그룹회사코드
+            , 기준년월
+            , 상품대분류코드
+            , 상품중분류코드
+            , 상품템플릿코드
+            , 상품번호
+            , 간접중분류구분
+            , 간접중분류구분명
+            , 간접상품명
+            ,  SUBSTR(CHAR("간접TE환산율"),2,3)
+            , 시스템최종처리일시
+            , 시스템최종사용자번호
+         FROM  DB2DBA.THKJL0019
+        WHERE 그룹회사코드= 'KB0'
+          AND 기준년월    = '%%$OYEAR.%%OMONTH'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*

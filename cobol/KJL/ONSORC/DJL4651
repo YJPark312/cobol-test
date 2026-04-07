@@ -1,0 +1,239 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4651 (DC산업별규모별SUB한도조회)
+      *@처리유형  : DC
+      *@처리개요  : 산업별규모별SUB한도조회 처리하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20120515: 신규작성
+      * YBH    :20171130: 조회여부 추가
+      * PJH    :20191220: 국외산업규모한도　추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4651.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   12/05/15.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4651'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-NEXT-KEY.
+               05 WK-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+               05 WK-IDSTRY-TCS-DSTCD       PIC  X(001).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL0651-CA.
+           COPY  XQJL0651.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4651-CA.
+           COPY  XDJL4651.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4651-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4651-OUT
+                            XDJL4651-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   원장 조회
+           EVALUATE XDJL4651-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+               INITIALIZE       XQJL0651-IN
+
+      *       그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL0651-I-GROUP-CO-CD
+      *       기준년월
+               MOVE XDJL4651-I-BASE-YM
+                 TO XQJL0651-I-BASE-YM
+
+      *       중단거래여부 확인
+               IF BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-NEXT-KEY
+
+      *           대분류업종코드
+                   MOVE WK-LAG-CLSFI-BZTYP-CD
+                     TO XQJL0651-I-LAG-CLSFI-BZTYP-CD
+      *           산업TE기업규모구분
+                   MOVE WK-IDSTRY-TCS-DSTCD
+                     TO XQJL0651-I-IDSTRY-TCS-DSTCD
+               END-IF
+
+               #DYSQLA QJL0651 SELECT XQJL0651-CA
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR         03076006
+               END-EVALUATE
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *       총라인수
+               MOVE WK-I
+                 TO XDJL4651-O-TOTAL-LINE-CNT
+      *       대분류업종코드
+               MOVE XQJL0651-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJL4651-O-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       산업TE기업규모구분
+               MOVE XQJL0651-O-IDSTRY-TCS-DSTCD(WK-I)
+                 TO XDJL4651-O-IDSTRY-TCS-DSTCD(WK-I)
+      *       산업별규모별SUB한도
+               MOVE XQJL0651-O-IDSTRY-PSP-SUB-CLAM(WK-I)
+                 TO XDJL4651-O-IDSTRY-PSP-SUB-LIMT(WK-I)
+191220*       국외산업규모한도한도
+利             MOVE XQJL0651-O-ABRD-IS-SUB-CLAM(WK-I)
+瓢               TO XDJL4651-O-ABRD-I-SCAL-LIMT(WK-I)
+      *       취급중단년월일
+               MOVE XQJL0651-O-HNDLN-DSCN-YMD(WK-I)
+                 TO XDJL4651-O-HNDLN-DSCN-YMD(WK-I)
+      *       취급기준1적용년월일
+               MOVE XQJL0651-O-HNDLN-B-1-APLY-YMD(WK-I)
+                 TO XDJL4651-O-HNDLN-B-1-APLY-YMD(WK-I)
+      *       취급기준2적용년월일
+               MOVE XQJL0651-O-HNDLN-B-2-APLY-YMD(WK-I)
+                 TO XDJL4651-O-HNDLN-B-2-APLY-YMD(WK-I)
+171130*       조회여부
+               MOVE XQJL0651-O-INQURY-YN(WK-I)
+                 TO XDJL4651-O-INQURY-YN(WK-I)
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT > 100
+      *       대분류업종코드
+               MOVE XQJL0651-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO WK-LAG-CLSFI-BZTYP-CD
+      *       산업TE기업규모구분
+               MOVE XQJL0651-O-IDSTRY-TCS-DSTCD(WK-I)
+                 TO WK-IDSTRY-TCS-DSTCD
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+           .
+
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

@@ -1,0 +1,106 @@
+      *================================================================*
+      *@ NAME : V1JL4112                                               *
+      *@ DESC : (EAD)계좌별TE현황조회                              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2010-10-28 16:36:31                          *
+      *  생성일시     : 2010-10-28 16:36:40                          *
+      *  전체길이     : 01860302 BYTES                               *
+      *================================================================*
+      *--     출력라인수
+ROWCNT     07  V1JL4112-OUTPT-LINE-CNT           PIC  9(005).
+      *--     차주명
+           07  V1JL4112-BRWR-NAME                PIC  X(052).
+      *--     TE기준한도
+           07  V1JL4112-TE-BASE-LIMT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도산출일
+           07  V1JL4112-BASE-LIMT-CMPTN-DD       PIC  X(008).
+      *--     한도설정유효일
+           07  V1JL4112-LIMT-STUP-VALD-DD        PIC  X(008).
+      *--     여신성관리한도
+           07  V1JL4112-LNBZ-I-MGT-LIMT          PIC  9(015).
+      *--     여신성한도기준TE
+           07  V1JL4112-LNBZ-I-LIMT-BASE-TE      PIC  9(015).
+      *--     여신성잔액기준TE
+           07  V1JL4112-LNBZ-I-BAL-BASE-TE       PIC  9(015).
+      *--     여신성한도여유액
+           07  V1JL4112-LNBZ-IL-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도
+           07  V1JL4112-MRKTY-MGT-LIMT           PIC  9(015).
+      *--     시장성한도기준TE
+           07  V1JL4112-MRKTY-LIMT-BASE-TE       PIC  9(015).
+      *--     시장성잔액기준TE
+           07  V1JL4112-MRKTY-BAL-BASE-TE        PIC  9(015).
+      *--     시장성한도여유액
+           07  V1JL4112-MRKTY-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도
+           07  V1JL4112-MGT-LIMT                 PIC  9(015).
+      *--     한도기준TE
+           07  V1JL4112-LIMT-BASE-TE             PIC  9(015).
+      *--     잔액기준TE
+           07  V1JL4112-BAL-BASE-TE              PIC  9(015).
+      *--     한도여유액
+           07  V1JL4112-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     파생상품총거래한도
+           07  V1JL4112-DRVT-PT-TRAN-LIMT        PIC  9(015).
+      *--     파생상품익스포져
+           07  V1JL4112-DRVT-PRDCT-EXPSR         PIC  9(015).
+      *--     그리드
+           07  V1JL4112-GRID                     OCCURS 0 TO 005000
+               DEPENDING ON V1JL4112-OUTPT-LINE-CNT.
+      *--       계좌번호
+             09  V1JL4112-ACNO                   PIC  X(020).
+      *--       상품코드
+             09  V1JL4112-PRDCT-CD               PIC  X(012).
+      *--       상품명
+             09  V1JL4112-PRDCT-NAME             PIC  X(252).
+      *--       자산구분
+             09  V1JL4112-ASST-DSTIC             PIC  X(010).
+      *--       약정구분
+             09  V1JL4112-AGRE-DSTIC             PIC  X(010).
+      *--       명목액기준한도
+             09  V1JL4112-TTL-AMT-BASE-LIMT      PIC  9(015).
+      *--       명목액기준잔액
+             09  V1JL4112-TTL-AMT-BASE-BAL       PIC  9(015).
+      *--       관리부점
+             09  V1JL4112-MGTBRN                 PIC  X(022).
+      *--       시작년월일
+             09  V1JL4112-START-YMD              PIC  X(008).
+      *--       만기년월일
+             09  V1JL4112-EXPIR-YMD              PIC  X(008).
+      *================================================================*
+      *        V  1  J  L  4  1  1  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4112-OUTPT-LINE-CNT       ;출력라인수
+      *X  V1JL4112-BRWR-NAME            ;차주명
+      *S  V1JL4112-TE-BASE-LIMT         ;TE기준한도
+      *X  V1JL4112-BASE-LIMT-CMPTN-DD   ;기준한도산출일
+      *X  V1JL4112-LIMT-STUP-VALD-DD    ;한도설정유효일
+      *N  V1JL4112-LNBZ-I-MGT-LIMT      ;여신성관리한도
+      *N  V1JL4112-LNBZ-I-LIMT-BASE-TE  ;여신성한도기준TE
+      *N  V1JL4112-LNBZ-I-BAL-BASE-TE   ;여신성잔액기준TE
+      *S  V1JL4112-LNBZ-IL-SEXTR-AMT    ;여신성한도여유액
+      *N  V1JL4112-MRKTY-MGT-LIMT       ;시장성관리한도
+      *N  V1JL4112-MRKTY-LIMT-BASE-TE   ;시장성한도기준TE
+      *N  V1JL4112-MRKTY-BAL-BASE-TE    ;시장성잔액기준TE
+      *S  V1JL4112-MRKTY-L-SEXTR-AMT    ;시장성한도여유액
+      *N  V1JL4112-MGT-LIMT             ;관리한도
+      *N  V1JL4112-LIMT-BASE-TE         ;한도기준TE
+      *N  V1JL4112-BAL-BASE-TE          ;잔액기준TE
+      *S  V1JL4112-LIMT-SEXTR-AMT       ;한도여유액
+      *N  V1JL4112-DRVT-PT-TRAN-LIMT    ;파생상품총거래한도
+      *N  V1JL4112-DRVT-PRDCT-EXPSR     ;파생상품익스포져
+      *A  V1JL4112-GRID                 ;그리드
+      *X  V1JL4112-ACNO                 ;계좌번호
+      *X  V1JL4112-PRDCT-CD             ;상품코드
+      *X  V1JL4112-PRDCT-NAME           ;상품명
+      *X  V1JL4112-ASST-DSTIC           ;자산구분
+      *X  V1JL4112-AGRE-DSTIC           ;약정구분
+      *N  V1JL4112-TTL-AMT-BASE-LIMT    ;명목액기준한도
+      *N  V1JL4112-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *X  V1JL4112-MGTBRN               ;관리부점
+      *X  V1JL4112-START-YMD            ;시작년월일
+      *X  V1JL4112-EXPIR-YMD            ;만기년월일

@@ -1,0 +1,199 @@
+      *================================================================*
+      *@ NAME : XDJL0419                                               *
+      *@ DESC : 포괄신용공여한도적정성점검승인                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-05-02 15:17:47                          *
+      *  생성일시     : 2024-05-02 15:17:47                          *
+      *  전체길이     : 00000057 BYTES                               *
+      *================================================================*
+           03  XDJL0419-RETURN.
+             05  XDJL0419-R-STAT                 PIC  X(002).
+                 88  COND-XDJL0419-OK            VALUE  '00'.
+                 88  COND-XDJL0419-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL0419-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL0419-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL0419-ERROR         VALUE  '09'.
+                 88  COND-XDJL0419-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL0419-SYSERROR      VALUE  '99'.
+             05  XDJL0419-R-LINE                 PIC  9(006).
+             05  XDJL0419-R-ERRCD                PIC  X(008).
+             05  XDJL0419-R-TREAT-CD             PIC  X(008).
+             05  XDJL0419-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL0419-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL0419-I-PRCSS-DSTIC          PIC  X(002).
+      *--       진행상태구분
+             05  XDJL0419-I-PRGRS-STUS-DSTIC     PIC  X(001).
+      *--       신청년월일1
+             05  XDJL0419-I-APLCN-YMD1           PIC  X(008).
+      *--       신청년월일2
+             05  XDJL0419-I-APLCN-YMD2           PIC  X(008).
+      *--       조회고객식별자
+             05  XDJL0419-I-INQURY-CUST-IDNFR    PIC  X(010).
+      *--       협의체구분
+             05  XDJL0419-I-CNGP-DSTIC           PIC  X(001).
+      *--       승인위원직원번호
+             05  XDJL0419-I-ATHOR-CMMB-EMPID     PIC  X(007).
+      *--       고객식별자
+             05  XDJL0419-I-CUST-IDNFR           PIC  X(010).
+      *--       한도신청번호
+             05  XDJL0419-I-LIMT-APLCN-NO        PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL0419-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL0419-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XDJL0419-O-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       출력라인수3
+             05  XDJL0419-O-OUTPT-LINE-CNT3      PIC  9(005).
+      *--       그리드1
+             05  XDJL0419-O-GRID1                OCCURS 000100 TIMES.
+      *--         한도신청번호
+               07  XDJL0419-O-LIMT-APLCN-NO      PIC  X(010).
+      *--         한도점검진행상태구분
+               07  XDJL0419-O-LIMT-CP-STUS-DSTIC PIC  X(001).
+      *--         기준년월일
+               07  XDJL0419-O-BASE-YMD           PIC  X(008).
+      *--         고객식별자
+               07  XDJL0419-O-CUST-IDNFR         PIC  X(010).
+      *--         차주명
+               07  XDJL0419-O-BRWR-NAME          PIC  X(052).
+      *--         관리한도설정년월일
+               07  XDJL0419-O-MGT-LIMT-STUP-YMD  PIC  X(008).
+      *--         유효기일
+               07  XDJL0419-O-VALD-FXDT          PIC  X(008).
+      *--         여신성한도
+               07  XDJL0419-O-LNBZ-INCLIN-LIMT   PIC  9(016).
+      *--         포괄한도
+               07  XDJL0419-O-INLS-LIMT          PIC  9(016).
+      *--         소진율
+               07  XDJL0419-O-EXHS-RT            PIC  9(003)V9(02).
+      *--         신청신용등급
+               07  XDJL0419-O-APLCN-CRDRAT       PIC  X(004).
+      *--         신용등급
+               07  XDJL0419-O-CRDRAT             PIC  X(004).
+      *--         신청년월일
+               07  XDJL0419-O-APLCN-YMD          PIC  X(008).
+      *--         신청부점코드
+               07  XDJL0419-O-APLCN-BRNCD        PIC  X(004).
+      *--         신청직원번호
+               07  XDJL0419-O-APLCN-EMPID        PIC  X(007).
+      *--         신청직원명
+               07  XDJL0419-O-APLCN-EMNM         PIC  X(052).
+      *--         최종승인년월일
+               07  XDJL0419-O-LAST-ATHOR-YMD     PIC  X(008).
+      *--         최종승인직원번호
+               07  XDJL0419-O-LAST-ATHOR-EMPID   PIC  X(007).
+      *--         최종한도승인구분
+               07  XDJL0419-O-LAST-L-ATHOR-DSTIC PIC  X(001).
+      *--         적정성점검구분
+               07  XDJL0419-O-PRTY-CHKUP-DSTCD   PIC  X(001).
+      *--         적정구분
+               07  XDJL0419-O-PROPR-DSTIC        PIC  X(001).
+      *--         진행구분
+               07  XDJL0419-O-PRGRS-DSTIC        PIC  X(001).
+      *--         의견등록여부
+               07  XDJL0419-O-OPIN-REGI-YN       PIC  X(001).
+      *--         승인위원직원번호
+               07  XDJL0419-O-ATHOR-CMMB-EMPID   PIC  X(007).
+      *--       그리드2
+             05  XDJL0419-O-GRID2                OCCURS 000010 TIMES.
+      *--         직원번호
+               07  XDJL0419-O-EMPID              PIC  X(007).
+      *--         직원명
+               07  XDJL0419-O-EMNM               PIC  X(052).
+      *--         한도승인구분
+               07  XDJL0419-O-LIMT-ATHOR-DSTIC   PIC  X(001).
+      *--         승인의견내용
+               07  XDJL0419-O-ATHOR-OPIN-CTNT    PIC  X(302).
+      *--         최종처리일시
+               07  XDJL0419-O-LAST-PRCSS-YMS     PIC  X(014).
+      *--       재적위원수
+             05  XDJL0419-O-ENRL-CMMB-CNT        PIC  9(003).
+      *--       출석위원수
+             05  XDJL0419-O-ATTND-CMMB-CNT       PIC  9(003).
+      *--       승인위원수
+             05  XDJL0419-O-ATHOR-CMMB-CNT       PIC  9(003).
+      *--       블승인위원수
+             05  XDJL0419-O-NOT-ATHOR-CMMB-CNT   PIC  9(003).
+      *--       종합승인의견
+             05  XDJL0419-O-CMPRE-ATHOR-OPIN     PIC  X(001).
+      *--       그리드3
+             05  XDJL0419-O-GRID3                OCCURS 000010 TIMES.
+      *--         첨부파일일련번호
+               07  XDJL0419-O-APNDX-FILE-SERNO   PIC  9(003).
+      *--         첨부파일식별자
+               07  XDJL0419-O-APNDX-FILE-IDNFR   PIC  X(040).
+      *--         첨부파일내용
+               07  XDJL0419-O-APNDX-FILE-CTNT    PIC  X(172).
+      *--         첨부파일명
+               07  XDJL0419-O-APNDX-FILE-NAME    PIC  X(172).
+      *--         등록년월일
+               07  XDJL0419-O-REGI-YMD           PIC  X(008).
+      *--         등록직원번호
+               07  XDJL0419-O-REGI-EMPID         PIC  X(007).
+      *--         등록직원명
+               07  XDJL0419-O-REGI-EMNM          PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  0  4  1  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL0419-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL0419-I-PRGRS-STUS-DSTIC   ;진행상태구분
+      *X  XDJL0419-I-APLCN-YMD1         ;신청년월일1
+      *X  XDJL0419-I-APLCN-YMD2         ;신청년월일2
+      *X  XDJL0419-I-INQURY-CUST-IDNFR  ;조회고객식별자
+      *X  XDJL0419-I-CNGP-DSTIC         ;협의체구분
+      *X  XDJL0419-I-ATHOR-CMMB-EMPID   ;승인위원직원번호
+      *X  XDJL0419-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL0419-I-LIMT-APLCN-NO      ;한도신청번호
+      *N  XDJL0419-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XDJL0419-O-OUTPT-LINE-CNT2    ;출력라인수2
+      *N  XDJL0419-O-OUTPT-LINE-CNT3    ;출력라인수3
+      *A  XDJL0419-O-GRID1              ;그리드1
+      *X  XDJL0419-O-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJL0419-O-LIMT-CP-STUS-DSTIC ;한도점검진행상태구분
+      *X  XDJL0419-O-BASE-YMD           ;기준년월일
+      *X  XDJL0419-O-CUST-IDNFR         ;고객식별자
+      *X  XDJL0419-O-BRWR-NAME          ;차주명
+      *X  XDJL0419-O-MGT-LIMT-STUP-YMD  ;관리한도설정년월일
+      *X  XDJL0419-O-VALD-FXDT          ;유효기일
+      *N  XDJL0419-O-LNBZ-INCLIN-LIMT   ;여신성한도
+      *N  XDJL0419-O-INLS-LIMT          ;포괄한도
+      *N  XDJL0419-O-EXHS-RT            ;소진율
+      *X  XDJL0419-O-APLCN-CRDRAT       ;신청신용등급
+      *X  XDJL0419-O-CRDRAT             ;신용등급
+      *X  XDJL0419-O-APLCN-YMD          ;신청년월일
+      *X  XDJL0419-O-APLCN-BRNCD        ;신청부점코드
+      *X  XDJL0419-O-APLCN-EMPID        ;신청직원번호
+      *X  XDJL0419-O-APLCN-EMNM         ;신청직원명
+      *X  XDJL0419-O-LAST-ATHOR-YMD     ;최종승인년월일
+      *X  XDJL0419-O-LAST-ATHOR-EMPID   ;최종승인직원번호
+      *X  XDJL0419-O-LAST-L-ATHOR-DSTIC ;최종한도승인구분
+      *X  XDJL0419-O-PRTY-CHKUP-DSTCD   ;적정성점검구분
+      *X  XDJL0419-O-PROPR-DSTIC        ;적정구분
+      *X  XDJL0419-O-PRGRS-DSTIC        ;진행구분
+      *X  XDJL0419-O-OPIN-REGI-YN       ;의견등록여부
+      *X  XDJL0419-O-ATHOR-CMMB-EMPID   ;승인위원직원번호
+      *A  XDJL0419-O-GRID2              ;그리드2
+      *X  XDJL0419-O-EMPID              ;직원번호
+      *X  XDJL0419-O-EMNM               ;직원명
+      *X  XDJL0419-O-LIMT-ATHOR-DSTIC   ;한도승인구분
+      *X  XDJL0419-O-ATHOR-OPIN-CTNT    ;승인의견내용
+      *X  XDJL0419-O-LAST-PRCSS-YMS     ;최종처리일시
+      *N  XDJL0419-O-ENRL-CMMB-CNT      ;재적위원수
+      *N  XDJL0419-O-ATTND-CMMB-CNT     ;출석위원수
+      *N  XDJL0419-O-ATHOR-CMMB-CNT     ;승인위원수
+      *N  XDJL0419-O-NOT-ATHOR-CMMB-CNT ;블승인위원수
+      *X  XDJL0419-O-CMPRE-ATHOR-OPIN   ;종합승인의견
+      *A  XDJL0419-O-GRID3              ;그리드3
+      *N  XDJL0419-O-APNDX-FILE-SERNO   ;첨부파일일련번호
+      *X  XDJL0419-O-APNDX-FILE-IDNFR   ;첨부파일식별자
+      *X  XDJL0419-O-APNDX-FILE-CTNT    ;첨부파일내용
+      *X  XDJL0419-O-APNDX-FILE-NAME    ;첨부파일명
+      *X  XDJL0419-O-REGI-YMD           ;등록년월일
+      *X  XDJL0419-O-REGI-EMPID         ;등록직원번호
+      *X  XDJL0419-O-REGI-EMNM          ;등록직원명

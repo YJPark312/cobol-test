@@ -1,0 +1,49 @@
+      *===========================================================
+      *  프로그램명    : QJL0651
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0651
+      *  사용예        : 01  XQJL0651-CA.
+      *                      COPY  XQJL0651.
+      *  최종변경일시  : 2019년12월20일14시55분06초
+      *===========================================================
+           03  XQJL0651-IN.
+      *            그룹회사코드
+               05  XQJL0651-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL0651-I-BASE-YM
+                                          PIC  X(00006).
+      *            대분류업종코드
+               05  XQJL0651-I-LAG-CLSFI-BZTYP-CD
+                                          PIC  X(00003).
+      *            산업TE기업규모구분
+               05  XQJL0651-I-IDSTRY-TCS-DSTCD
+                                          PIC  X(00001).
+           03  XQJL0651-OUT.
+      *            대분류업종코드
+               05  XQJL0651-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00101  PIC  X(00003).
+      *            산업TE기업규모구분
+               05  XQJL0651-O-IDSTRY-TCS-DSTCD
+                           OCCURS  00101  PIC  X(00001).
+      *            산업별규모별SUB한도
+               05  XQJL0651-O-IDSTRY-PSP-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            국외산업규모한도금액
+               05  XQJL0651-O-ABRD-IS-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            취급중단년월일
+               05  XQJL0651-O-HNDLN-DSCN-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            취급기준1적용년월일
+               05  XQJL0651-O-HNDLN-B-1-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            취급기준2적용년월일
+               05  XQJL0651-O-HNDLN-B-2-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            조회여부
+               05  XQJL0651-O-INQURY-YN
+                           OCCURS  00101  PIC  X(00001).
+      *===========================================================
+      *  XQJL0651   C O P Y B O O K   E N D
+      *===========================================================

@@ -1,0 +1,585 @@
+      *================================================================*
+      *@ NAME : XDJLB009                                               *
+      *@ DESC : DC기업및그룹한도신청및승인 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-02-20 13:50:22                          *
+      *  생성일시     : 2009-02-20 13:50:24                          *
+      *================================================================*
+           03  XDJLB009-RETURN.
+             05  XDJLB009-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB009-OK            VALUE  '00'.
+                 88  COND-XDJLB009-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB009-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB009-ERROR         VALUE  '09'.
+                 88  COND-XDJLB009-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB009-SYSERROR      VALUE  '99'.
+             05  XDJLB009-R-LINE                 PIC  9(006).
+             05  XDJLB009-R-ERRCD                PIC  X(008).
+             05  XDJLB009-R-TREAT-CD             PIC  X(008).
+             05  XDJLB009-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB009-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB009-I-PRCSS-DSTIC          PIC  X(002).
+      *--       fld조회구분_hdn
+             05  XDJLB009-I-CUST-DSTIC           PIC  X(001).
+      *--       fld기업구분_hdn
+             05  XDJLB009-I-CORP-DSTIC           PIC  X(001).
+      *--       fld조회저장구분_hdn
+             05  XDJLB009-I-INQURY-STORG-DSTIC   PIC  X(001).
+      *--       fld채무자번호_hdn
+             05  XDJLB009-I-BRWR-NO              PIC  X(013).
+      *--       fld신청번호
+             05  XDJLB009-I-LIMT-APLCN-NO        PIC  X(010).
+      *--       cbo수정신용등급
+             05  XDJLB009-I-AMND-ICV-GRD-DSTCD   PIC  X(015).
+      *--       fld수정결산년월
+             05  XDJLB009-I-AMND-STLACC-YM       PIC  X(006).
+      *--       fld수정업종
+             05  XDJLB009-I-AMND-NSI-CLSFI-CD    PIC  X(005).
+      *--       fld수정업종명
+             05  XDJLB009-I-AMND-SI-CD-NAME      PIC  X(040).
+      *--       fld수정기준년도
+             05  XDJLB009-I-AMND-B-AVG-APLY-YR   PIC  X(004).
+      *--       fld수정신용등급지원비율
+             05  XDJLB009-I-AMND-C-SPORT-RATO    PIC  9(003)V9(02).
+      *--       fld수정영업이익
+             05  XDJLB009-I-AMND-OPRFT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정수입이자
+             05  XDJLB009-I-AMND-INT-ERN         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정감가상각비
+             05  XDJLB009-I-AMND-DPRC-CST        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융비용
+             05  XDJLB009-I-AMND-FNCS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정단기차입금
+             05  XDJLB009-I-AMND-SHTRM-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금상환예상액
+             05  XDJLB009-I-AMND-S-AMBR-RPAYAMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정가중평균이자율
+             05  XDJLB009-I-AMND-B-WGHTG-AVG-RT  PIC  9(003)V9(02).
+      *--       fld수정총차입금
+             05  XDJLB009-I-AMND-E-TOTAL-AMBR    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정매출액
+             05  XDJLB009-I-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정cashflow기준액
+             05  XDJLB009-I-AMND-CSFW-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금자기자본비율
+             05  XDJLB009-I-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금자기자본비율
+             05  XDJLB009-I-AMND-AMBR-ONCP-RT    PIC  9(003)V9(02).
+      *--       fld수정자기자본기준액
+             05  XDJLB009-I-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정상환능력기준한도
+             05  XDJLB009-I-AMND-S-BASE-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정전년도매출액
+             05  XDJLB009-I-AMND-SALEPR1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금매출액비율
+             05  XDJLB009-I-AMND-A-SALEPR-RATO   PIC  9(003)V9(02).
+      *--       fld수정전년도총자산
+             05  XDJLB009-I-AMND-PYY-TOTAL-ASST  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금총자산비율
+             05  XDJLB009-I-AMND-AT-ASST-RATO    PIC  9(003)V9(02).
+      *--       fld수정규모기준한도
+             05  XDJLB009-I-AMND-SCAL-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정기준한도
+             05  XDJLB009-I-AMND-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       cbo수정금융신용등급
+             05  XDJLB009-I-AMND-FICV-GRD-DSTCD  PIC  X(006).
+      *--       fld수정금융결산년월
+             05  XDJLB009-I-AMND-F-STLACC-YM     PIC  X(006).
+      *--       fld수정금융업종
+             05  XDJLB009-I-AMND-FL-BZTYP-DSTCD  PIC  X(005).
+      *--       cbo수정금융업종명
+             05  XDJLB009-I-AMND-FLB-DSTCD-NAME  PIC  X(042).
+      *--       fld수정금융업종평균기준년도
+             05  XDJLB009-I-AMND-FB-AVG-APLY-YR  PIC  X(004).
+      *--       fld수정금융신용등급별지원비율
+             05  XDJLB009-I-AMND-FC-SPORT-RATO   PIC  9(003)V9(02).
+      *--       fld수정금융전전기경상이익
+             05  XDJLB009-I-AMND-FBP-ODNR-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전기경상이익
+             05  XDJLB009-I-AMND-FP-ODNR-PRFT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융당기경상이익
+             05  XDJLB009-I-AMND-FBY-ODNR-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전전기자기자본
+             05  XDJLB009-I-AMND-FBP-ONCP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전기자기자본
+             05  XDJLB009-I-AMND-PYY-ONCP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융당기자기자본
+             05  XDJLB009-I-AMND-FB-YR-ONCP-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융최근업종평균자본비율
+             05  XDJLB009-I-AMND-F-ONCP-RATO     PIC  9(003)V9(02).
+      *--       fld수정금융상환능력기준한도
+             05  XDJLB009-I-AMND-FS-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융규모기준기준한도
+             05  XDJLB009-I-AMND-S-BASE-CLAM1    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융금융기관기준한도
+             05  XDJLB009-I-AMND-F-BASE-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld설정신청구분_hdn
+             05  XDJLB009-I-LIMT-A-KND-DSTCD     PIC  X(001).
+      *--       fld본건입력수_hdn
+             05  XDJLB009-I-MAIN-CAS-INPT-CNT    PIC  X(005).
+      *--       fld신청1_대표자
+             05  XDJLB009-I-RPRS-NAME            PIC  X(042).
+      *--       fld신청1_기업신용등급
+             05  XDJLB009-I-INTNL-CV-GRD-DSTCD1  PIC  X(006).
+      *--       fld신청1_표준산업분류코드
+             05  XDJLB009-I-NEW-SI-CLSFI-CD1     PIC  X(005).
+      *--       fld신청1_그룹명
+             05  XDJLB009-I-HANGL-GROUP-NAME     PIC  X(042).
+      *--       fld신청1_그룹등급
+             05  XDJLB009-I-CMGR-CRTDSCD         PIC  X(004).
+      *--       fld영업점코드_hdn,fld신청1_영업점코드
+             05  XDJLB009-I-BRNCD                PIC  X(004).
+      *--       fld영업점명_hdn,fld신청1_영업점명
+             05  XDJLB009-I-BRN-HANGL-NAME       PIC  X(042).
+      *--       fld신청자ID_hdn,fld신청1_신청자ID
+             05  XDJLB009-I-APLCN-EMPID          PIC  X(008).
+      *--       fld신청자명_hdn,fld신청1_신청자명
+             05  XDJLB009-I-APLCN-EMNM           PIC  X(042).
+      *--       출력라인수1
+             05  XDJLB009-I-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       grd조회내용1
+             05  XDJLB009-I-GRID1                OCCURS 0030 TIMES.
+      *--         통화코드
+               07  XDJLB009-I-CNCYCD             PIC  X(003).
+      *--         본건신청금액
+               07  XDJLB009-I-MAIN-CAS-APLCN-AMT PIC  9(015).
+      *--         본건여신종류
+               07  XDJLB009-I-TIACC-NAME         PIC  X(070).
+      *--         원화환산액
+               07  XDJLB009-I-WONC-AUC           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         원화 Exposure
+               07  XDJLB009-I-MAIN-CAS-EXPSR-AMT PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       출력라인수2
+             05  XDJLB009-I-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       grd조회내용2
+             05  XDJLB009-I-GRID2                OCCURS 0030 TIMES.
+      *--         관리한도
+               07  XDJLB009-I-MGT-CLAM2          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         익스포져
+               07  XDJLB009-I-TE-LIMT-AUC        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         본건명목액
+               07  XDJLB009-I-WONC-AUC1          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         본건익스포져
+               07  XDJLB009-I-MAIN-CAS-EXPSR-AMT1
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       출력라인수3
+             05  XDJLB009-I-OUTPT-LINE-CNT3      PIC  9(005).
+      *--       grd조회내용3
+             05  XDJLB009-I-GRID3                OCCURS 0030 TIMES.
+      *--         산업군명
+               07  XDJLB009-I-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(070).
+      *--         산업별관리한도
+               07  XDJLB009-I-IDSTRY-MGT-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         산업별Exposure
+               07  XDJLB009-I-TE-LIMT-AUC1       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       출력라인수4
+             05  XDJLB009-I-OUTPT-LINE-CNT4      PIC  9(005).
+      *--       grd조회내용4
+             05  XDJLB009-I-GRID4                OCCURS 0030 TIMES.
+      *--         여신성TE관리한도
+               07  XDJLB009-I-BF-LNBZ-INCLIN-ASST
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         시장성TE관리한도
+               07  XDJLB009-I-BF-MRKTY-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         여신성TE관리한도
+               07  XDJLB009-I-AF-LNBZ-INCLIN-ASST
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         시장성TE관리한도
+               07  XDJLB009-I-AF-MRKTY-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       mln신청1_신청사유
+             05  XDJLB009-I-APLCN-RESN-CTNT      PIC  X(252).
+      *--       fld승인_신청일자
+             05  XDJLB009-I-ATHOR-APLCN-YMD      PIC  X(008).
+      *--       fld승인_신청자ID
+             05  XDJLB009-I-ATHOR-APLCN-EMPID    PIC  X(008).
+      *--       fld승인_신청자명
+             05  XDJLB009-I-ATHOR-APLCN-EMNM     PIC  X(042).
+      *--       fld승인_영업점코드
+             05  XDJLB009-I-ATHOR-BRNCD          PIC  X(006).
+      *--       fld승인_영업점명
+             05  XDJLB009-I-ATHOR-B-HANGL-NAME   PIC  X(042).
+      *--       cbo승인_신청구분
+             05  XDJLB009-I-ATHOR-L-APLCN-DSTCD  PIC  X(001).
+      *--       fld승인_승인일자
+             05  XDJLB009-I-ATHOR-YMD            PIC  X(008).
+      *--       fld승인_기준한도산출액
+             05  XDJLB009-I-ATHOR-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld승인_TE관리한도설정액
+             05  XDJLB009-I-ATHOR-MGT-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld한도유효일
+             05  XDJLB009-I-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       fld승인_여신성TE관리한도
+             05  XDJLB009-I-ATHOR-LI-MGT-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld승인_시장성TE관리한도
+             05  XDJLB009-I-ATHOR-M-MGT-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       cbo승인권자
+             05  XDJLB009-I-ATHOR-EMPID          PIC  X(008).
+      *--       cbo조건부승인조건
+             05  XDJLB009-I-LIMT-A-CNDN-DSTCD    PIC  X(001).
+      *--       cbo승인구분
+             05  XDJLB009-I-LIMT-ATHOR-DSTCD     PIC  X(001).
+      *--       mln승인사유
+             05  XDJLB009-I-ATHOR-RESN-CTNT      PIC  X(252).
+      *----------------------------------------------------------------*
+           03  XDJLB009-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB009-O-PRCSS-RSULT          PIC  X(002).
+      *--       fld신청번호
+             05  XDJLB009-O-LIMT-APLCN-NO        PIC  X(010).
+      *--       cbo수정신용등급
+             05  XDJLB009-O-AMND-ICV-GRD-DSTCD   PIC  X(015).
+      *--       fld수정결산년월
+             05  XDJLB009-O-AMND-STLACC-YM       PIC  X(006).
+      *--       fld수정업종
+             05  XDJLB009-O-AMND-NSI-CLSFI-CD    PIC  X(005).
+      *--       fld수정업종명
+             05  XDJLB009-O-AMND-SI-CD-NAME      PIC  X(040).
+      *--       fld수정기준년도
+             05  XDJLB009-O-AMND-B-AVG-APLY-YR   PIC  X(004).
+      *--       fld수정신용등급지원비율
+             05  XDJLB009-O-AMND-C-SPORT-RATO    PIC  9(003)V9(02).
+      *--       fld수정영업이익
+             05  XDJLB009-O-AMND-OPRFT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정수입이자
+             05  XDJLB009-O-AMND-INT-ERN         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정감가상각비
+             05  XDJLB009-O-AMND-DPRC-CST        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융비용
+             05  XDJLB009-O-AMND-FNCS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정단기차입금
+             05  XDJLB009-O-AMND-SHTRM-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금상환예상액
+             05  XDJLB009-O-AMND-S-AMBR-RPAYAMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정가중평균이자율
+             05  XDJLB009-O-AMND-B-WGHTG-AVG-RT  PIC  9(003)V9(02).
+      *--       fld수정총차입금
+             05  XDJLB009-O-AMND-E-TOTAL-AMBR    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정매출액
+             05  XDJLB009-O-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정cashflow기준액
+             05  XDJLB009-O-AMND-CSFW-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정자기자본
+             05  XDJLB009-O-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금자기자본비율
+             05  XDJLB009-O-AMND-AMBR-ONCP-RT    PIC  9(003)V9(02).
+      *--       fld수정자기자본기준액
+             05  XDJLB009-O-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정상환능력기준한도
+             05  XDJLB009-O-AMND-S-BASE-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정전년도매출액
+             05  XDJLB009-O-AMND-SALEPR1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금매출액비율
+             05  XDJLB009-O-AMND-A-SALEPR-RATO   PIC  9(003)V9(02).
+      *--       fld수정전년도총자산
+             05  XDJLB009-O-AMND-PYY-TOTAL-ASST  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정차입금총자산비율
+             05  XDJLB009-O-AMND-AT-ASST-RATO    PIC  9(003)V9(02).
+      *--       fld수정규모기준한도
+             05  XDJLB009-O-AMND-SCAL-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정기준한도
+             05  XDJLB009-O-AMND-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       cbo수정금융신용등급
+             05  XDJLB009-O-AMND-FICV-GRD-DSTCD  PIC  X(006).
+      *--       fld수정금융결산년월
+             05  XDJLB009-O-AMND-F-STLACC-YM     PIC  X(006).
+      *--       fld수정금융업종
+             05  XDJLB009-O-AMND-FL-BZTYP-DSTCD  PIC  X(018).
+      *--       fld수정금융업종명
+             05  XDJLB009-O-AMND-FLB-DSTCD-NAME  PIC  X(042).
+      *--       fld수정금융업종평균기준년도
+             05  XDJLB009-O-AMND-FB-AVG-APLY-YR  PIC  X(004).
+      *--       fld수정금융신용등급별지원비율
+             05  XDJLB009-O-AMND-FC-SPORT-RATO   PIC  9(003)V9(02).
+      *--       fld수정금융전전기경상이익
+             05  XDJLB009-O-AMND-FBP-ODNR-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전기경상이익
+             05  XDJLB009-O-AMND-FP-ODNR-PRFT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융당기경상이익
+             05  XDJLB009-O-AMND-FBY-ODNR-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전전기자기자본
+             05  XDJLB009-O-AMND-FBP-ONCP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융전기자기자본
+             05  XDJLB009-O-AMND-PYY-ONCP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융당기자기자본
+             05  XDJLB009-O-AMND-FB-YR-ONCP-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융최근업종평균자본비율
+             05  XDJLB009-O-AMND-F-ONCP-RATO     PIC  9(003)V9(02).
+      *--       fld수정금융상환능력기준한도
+             05  XDJLB009-O-AMND-FS-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융규모기준기준한도
+             05  XDJLB009-O-AMND-S-BASE-CLAM1    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld수정금융금융기관기준한도
+             05  XDJLB009-O-AMND-F-BASE-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld승인_승인일자
+             05  XDJLB009-O-ATHOR-YMD            PIC  X(008).
+      *================================================================*
+      *        X  D  J  L  B  0  0  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB009-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB009-I-CUST-DSTIC         ;fld조회구분_hdn
+      *X  XDJLB009-I-CORP-DSTIC         ;fld기업구분_hdn
+      *X  XDJLB009-I-INQURY-STORG-DSTIC ;fld조회저장구분_hdn
+      *X  XDJLB009-I-BRWR-NO            ;fld채무자번호_hdn
+      *X  XDJLB009-I-LIMT-APLCN-NO      ;fld신청번호
+      *X  XDJLB009-I-AMND-ICV-GRD-DSTCD ;cbo수정신용등급
+      *X  XDJLB009-I-AMND-STLACC-YM     ;fld수정결산년월
+      *X  XDJLB009-I-AMND-NSI-CLSFI-CD  ;fld수정업종
+      *X  XDJLB009-I-AMND-SI-CD-NAME    ;fld수정업종명
+      *X  XDJLB009-I-AMND-B-AVG-APLY-YR ;fld수정기준년도
+      *N  XDJLB009-I-AMND-C-SPORT-RATO
+      * fld수정신용등급지원비율
+      *S  XDJLB009-I-AMND-OPRFT         ;fld수정영업이익
+      *S  XDJLB009-I-AMND-INT-ERN       ;fld수정수입이자
+      *S  XDJLB009-I-AMND-DPRC-CST      ;fld수정감가상각비
+      *S  XDJLB009-I-AMND-FNCS          ;fld수정금융비용
+      *S  XDJLB009-I-AMND-SHTRM-AMBR    ;fld수정단기차입금
+      *S  XDJLB009-I-AMND-S-AMBR-RPAYAMT
+      * fld수정차입금상환예상액
+      *N  XDJLB009-I-AMND-B-WGHTG-AVG-RT
+      * fld수정가중평균이자율
+      *S  XDJLB009-I-AMND-E-TOTAL-AMBR  ;fld수정총차입금
+      *S  XDJLB009-I-AMND-SALEPR        ;fld수정매출액
+      *S  XDJLB009-I-AMND-CSFW-BSAMT    ;fld수정cashflow기준액
+      *S  XDJLB009-I-AMND-B-YR-ONCP-AMT
+      * fld수정차입금자기자본비율
+      *N  XDJLB009-I-AMND-AMBR-ONCP-RT
+      * fld수정차입금자기자본비율
+      *S  XDJLB009-I-AMND-O-CAPTL-BSAMT
+      * fld수정자기자본기준액
+      *S  XDJLB009-I-AMND-S-BASE-CLAM
+      * fld수정상환능력기준한도
+      *S  XDJLB009-I-AMND-SALEPR1       ;fld수정전년도매출액
+      *N  XDJLB009-I-AMND-A-SALEPR-RATO
+      * fld수정차입금매출액비율
+      *S  XDJLB009-I-AMND-PYY-TOTAL-ASST;fld수정전년도총자산
+      *N  XDJLB009-I-AMND-AT-ASST-RATO
+      * fld수정차입금총자산비율
+      *S  XDJLB009-I-AMND-SCAL-BASE-CLAM;fld수정규모기준한도
+      *S  XDJLB009-I-AMND-BASE-CLAM     ;fld수정기준한도
+      *X  XDJLB009-I-AMND-FICV-GRD-DSTCD;cbo수정금융신용등급
+      *X  XDJLB009-I-AMND-F-STLACC-YM   ;fld수정금융결산년월
+      *X  XDJLB009-I-AMND-FL-BZTYP-DSTCD;fld수정금융업종
+      *X  XDJLB009-I-AMND-FLB-DSTCD-NAME;cbo수정금융업종명
+      *X  XDJLB009-I-AMND-FB-AVG-APLY-YR
+      * fld수정금융업종평균기준년도
+      *N  XDJLB009-I-AMND-FC-SPORT-RATO
+      * fld수정금융신용등급별지원비율
+      *S  XDJLB009-I-AMND-FBP-ODNR-PRFT
+      * fld수정금융전전기경상이익
+      *S  XDJLB009-I-AMND-FP-ODNR-PRFT
+      * fld수정금융전기경상이익
+      *S  XDJLB009-I-AMND-FBY-ODNR-PRFT
+      * fld수정금융당기경상이익
+      *S  XDJLB009-I-AMND-FBP-ONCP-AMT
+      * fld수정금융전전기자기자본
+      *S  XDJLB009-I-AMND-PYY-ONCP-AMT
+      * fld수정금융전기자기자본
+      *S  XDJLB009-I-AMND-FB-YR-ONCP-AMT
+      * fld수정금융당기자기자본
+      *N  XDJLB009-I-AMND-F-ONCP-RATO
+      * fld수정금융최근업종평균자본비율
+      *S  XDJLB009-I-AMND-FS-BASE-CLAM
+      * fld수정금융상환능력기준한도
+      *S  XDJLB009-I-AMND-S-BASE-CLAM1
+      * fld수정금융규모기준기준한도
+      *S  XDJLB009-I-AMND-F-BASE-CLAM
+      * fld수정금융금융기관기준한도
+      *X  XDJLB009-I-LIMT-A-KND-DSTCD   ;fld설정신청구분_hdn
+      *X  XDJLB009-I-MAIN-CAS-INPT-CNT  ;fld본건입력수_hdn
+      *X  XDJLB009-I-RPRS-NAME          ;fld신청1_대표자
+      *X  XDJLB009-I-INTNL-CV-GRD-DSTCD1
+      * fld신청1_기업신용등급
+      *X  XDJLB009-I-NEW-SI-CLSFI-CD1
+      * fld신청1_표준산업분류코드
+      *X  XDJLB009-I-HANGL-GROUP-NAME   ;fld신청1_그룹명
+      *X  XDJLB009-I-CMGR-CRTDSCD       ;fld신청1_그룹등급
+      *X  XDJLB009-I-BRNCD
+      * fld영업점코드_hdn,fld신청1_영업점코드
+      *X  XDJLB009-I-BRN-HANGL-NAME
+      * fld영업점명_hdn,fld신청1_영업점명
+      *X  XDJLB009-I-APLCN-EMPID
+      * fld신청자ID_hdn,fld신청1_신청자ID
+      *X  XDJLB009-I-APLCN-EMNM
+      * fld신청자명_hdn,fld신청1_신청자명
+      *N  XDJLB009-I-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJLB009-I-GRID1              ;grd조회내용1
+      *X  XDJLB009-I-CNCYCD             ;통화코드
+      *N  XDJLB009-I-MAIN-CAS-APLCN-AMT ;본건신청금액
+      *X  XDJLB009-I-TIACC-NAME         ;본건여신종류
+      *S  XDJLB009-I-WONC-AUC           ;원화환산액
+      *S  XDJLB009-I-MAIN-CAS-EXPSR-AMT ;원화 Exposure
+      *N  XDJLB009-I-OUTPT-LINE-CNT2    ;출력라인수2
+      *A  XDJLB009-I-GRID2              ;grd조회내용2
+      *S  XDJLB009-I-MGT-CLAM2          ;관리한도
+      *S  XDJLB009-I-TE-LIMT-AUC        ;익스포져
+      *S  XDJLB009-I-WONC-AUC1          ;본건명목액
+      *S  XDJLB009-I-MAIN-CAS-EXPSR-AMT1;본건익스포져
+      *N  XDJLB009-I-OUTPT-LINE-CNT3    ;출력라인수3
+      *A  XDJLB009-I-GRID3              ;grd조회내용3
+      *X  XDJLB009-I-LAG-C-BZTYP-CD-NAME;산업군명
+      *S  XDJLB009-I-IDSTRY-MGT-CLAM    ;산업별관리한도
+      *S  XDJLB009-I-TE-LIMT-AUC1       ;산업별Exposure
+      *N  XDJLB009-I-OUTPT-LINE-CNT4    ;출력라인수4
+      *A  XDJLB009-I-GRID4              ;grd조회내용4
+      *S  XDJLB009-I-BF-LNBZ-INCLIN-ASST;여신성TE관리한도
+      *S  XDJLB009-I-BF-MRKTY-ASST      ;시장성TE관리한도
+      *S  XDJLB009-I-AF-LNBZ-INCLIN-ASST;여신성TE관리한도
+      *S  XDJLB009-I-AF-MRKTY-ASST      ;시장성TE관리한도
+      *X  XDJLB009-I-APLCN-RESN-CTNT    ;mln신청1_신청사유
+      *X  XDJLB009-I-ATHOR-APLCN-YMD    ;fld승인_신청일자
+      *X  XDJLB009-I-ATHOR-APLCN-EMPID  ;fld승인_신청자ID
+      *X  XDJLB009-I-ATHOR-APLCN-EMNM   ;fld승인_신청자명
+      *X  XDJLB009-I-ATHOR-BRNCD        ;fld승인_영업점코드
+      *X  XDJLB009-I-ATHOR-B-HANGL-NAME ;fld승인_영업점명
+      *X  XDJLB009-I-ATHOR-L-APLCN-DSTCD;cbo승인_신청구분
+      *X  XDJLB009-I-ATHOR-YMD          ;fld승인_승인일자
+      *S  XDJLB009-I-ATHOR-BASE-CLAM
+      * fld승인_기준한도산출액
+      *S  XDJLB009-I-ATHOR-MGT-CLAM
+      * fld승인_TE관리한도설정액
+      *X  XDJLB009-I-LIMT-STUP-VALD-YMD ;fld한도유효일
+      *S  XDJLB009-I-ATHOR-LI-MGT-CLAM
+      * fld승인_여신성TE관리한도
+      *S  XDJLB009-I-ATHOR-M-MGT-CLAM
+      * fld승인_시장성TE관리한도
+      *X  XDJLB009-I-ATHOR-EMPID        ;cbo승인권자
+      *X  XDJLB009-I-LIMT-A-CNDN-DSTCD  ;cbo조건부승인조건
+      *X  XDJLB009-I-LIMT-ATHOR-DSTCD   ;cbo승인구분
+      *X  XDJLB009-I-ATHOR-RESN-CTNT    ;mln승인사유
+      *X  XDJLB009-O-PRCSS-RSULT        ;처리결과
+      *X  XDJLB009-O-LIMT-APLCN-NO      ;fld신청번호
+      *X  XDJLB009-O-AMND-ICV-GRD-DSTCD ;cbo수정신용등급
+      *X  XDJLB009-O-AMND-STLACC-YM     ;fld수정결산년월
+      *X  XDJLB009-O-AMND-NSI-CLSFI-CD  ;fld수정업종
+      *X  XDJLB009-O-AMND-SI-CD-NAME    ;fld수정업종명
+      *X  XDJLB009-O-AMND-B-AVG-APLY-YR ;fld수정기준년도
+      *N  XDJLB009-O-AMND-C-SPORT-RATO
+      * fld수정신용등급지원비율
+      *S  XDJLB009-O-AMND-OPRFT         ;fld수정영업이익
+      *S  XDJLB009-O-AMND-INT-ERN       ;fld수정수입이자
+      *S  XDJLB009-O-AMND-DPRC-CST      ;fld수정감가상각비
+      *S  XDJLB009-O-AMND-FNCS          ;fld수정금융비용
+      *S  XDJLB009-O-AMND-SHTRM-AMBR    ;fld수정단기차입금
+      *S  XDJLB009-O-AMND-S-AMBR-RPAYAMT
+      * fld수정차입금상환예상액
+      *N  XDJLB009-O-AMND-B-WGHTG-AVG-RT
+      * fld수정가중평균이자율
+      *S  XDJLB009-O-AMND-E-TOTAL-AMBR  ;fld수정총차입금
+      *S  XDJLB009-O-AMND-SALEPR        ;fld수정매출액
+      *S  XDJLB009-O-AMND-CSFW-BSAMT    ;fld수정cashflow기준액
+      *S  XDJLB009-O-AMND-B-YR-ONCP-AMT ;fld수정자기자본
+      *N  XDJLB009-O-AMND-AMBR-ONCP-RT
+      * fld수정차입금자기자본비율
+      *S  XDJLB009-O-AMND-O-CAPTL-BSAMT
+      * fld수정자기자본기준액
+      *S  XDJLB009-O-AMND-S-BASE-CLAM
+      * fld수정상환능력기준한도
+      *S  XDJLB009-O-AMND-SALEPR1       ;fld수정전년도매출액
+      *N  XDJLB009-O-AMND-A-SALEPR-RATO
+      * fld수정차입금매출액비율
+      *S  XDJLB009-O-AMND-PYY-TOTAL-ASST;fld수정전년도총자산
+      *N  XDJLB009-O-AMND-AT-ASST-RATO
+      * fld수정차입금총자산비율
+      *S  XDJLB009-O-AMND-SCAL-BASE-CLAM;fld수정규모기준한도
+      *S  XDJLB009-O-AMND-BASE-CLAM     ;fld수정기준한도
+      *X  XDJLB009-O-AMND-FICV-GRD-DSTCD;cbo수정금융신용등급
+      *X  XDJLB009-O-AMND-F-STLACC-YM   ;fld수정금융결산년월
+      *X  XDJLB009-O-AMND-FL-BZTYP-DSTCD;fld수정금융업종
+      *X  XDJLB009-O-AMND-FLB-DSTCD-NAME;fld수정금융업종명
+      *X  XDJLB009-O-AMND-FB-AVG-APLY-YR
+      * fld수정금융업종평균기준년도
+      *N  XDJLB009-O-AMND-FC-SPORT-RATO
+      * fld수정금융신용등급별지원비율
+      *S  XDJLB009-O-AMND-FBP-ODNR-PRFT
+      * fld수정금융전전기경상이익
+      *S  XDJLB009-O-AMND-FP-ODNR-PRFT
+      * fld수정금융전기경상이익
+      *S  XDJLB009-O-AMND-FBY-ODNR-PRFT
+      * fld수정금융당기경상이익
+      *S  XDJLB009-O-AMND-FBP-ONCP-AMT
+      * fld수정금융전전기자기자본
+      *S  XDJLB009-O-AMND-PYY-ONCP-AMT
+      * fld수정금융전기자기자본
+      *S  XDJLB009-O-AMND-FB-YR-ONCP-AMT
+      * fld수정금융당기자기자본
+      *N  XDJLB009-O-AMND-F-ONCP-RATO
+      * fld수정금융최근업종평균자본비율
+      *S  XDJLB009-O-AMND-FS-BASE-CLAM
+      * fld수정금융상환능력기준한도
+      *S  XDJLB009-O-AMND-S-BASE-CLAM1
+      * fld수정금융규모기준기준한도
+      *S  XDJLB009-O-AMND-F-BASE-CLAM
+      * fld수정금융금융기관기준한도
+      *X  XDJLB009-O-ATHOR-YMD          ;fld승인_승인일자

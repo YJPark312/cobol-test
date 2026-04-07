@@ -1,0 +1,384 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4401 (AS그룹관계기업현황조회)
+      *@처리유형  : AS
+      *@처리개요  :그룹관계기업현황을 조회하는
+      *@            :프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20240425: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4401.
+       AUTHOR.                        하윤희.
+       DATE-WRITTEN.                   24/04/25.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4401'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   그룹관계기업현황조회
+       01  XIJL4010-CA.
+           COPY  XIJL4010.
+
+      *   그룹익스포져현황조회
+       01  XQJLA325-CA.
+           COPY  XQJLA325.
+
+      *-----------------------------------------------------------------00970022
+      * DBIO SQLIO INTERFACE PARAMETER                                  00980022
+      *-----------------------------------------------------------------00990022
+      *    DBIO  INTERFACE PARAMETER
+      *    COPY    YCDBIOCA.                                            01000022
+      *    SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.                                            01010022
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJL4401-CA.
+           COPY  YNJL4401.
+
+       01  YPJL4401-CA.
+           COPY  YPJL4401.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4401-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            YCDBSQLA-CA                                 01580022
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@출력영역 확보
+           #GETOUT YPJL4401-CA
+
+      * COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    기준년월일
+           IF  YNJL4401-BASE-YMD = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *    처리구분
+           IF  YNJL4401-PRCSS-DSTCD = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *    처리구분:1 & 고객식별자 필수
+           IF  YNJL4401-PRCSS-DSTCD = CO-CHA-1
+           AND YNJL4401-CUST-IDNFR  = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *    처리구분:2 & 계열기업군코드 필수
+      *    처리구분:1 & 고객식별자 필수
+           IF  YNJL4401-PRCSS-DSTCD = CO-CHA-2
+           AND YNJL4401-AFFLT-CORP-GROUP-CD  = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           IF  YNJL4401-PRCSS-DSTCD = CO-CHA-1
+
+      *@1     그룹관계기업현황조회 프로그램호출
+               PERFORM S3100-IJL4010-CALL-RTN
+                  THRU S3100-IJL4010-CALL-EXT
+           ELSE
+      *@1     그룹익스포져현황조회 프로그램호출
+               PERFORM S3200-QJLA325-CALL-RTN
+                  THRU S3200-QJLA325-CALL-EXT
+
+           END-IF
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   그룹관계기업현황조회 IC호출
+      *-----------------------------------------------------------------
+       S3100-IJL4010-CALL-RTN.
+
+           INITIALIZE       XIJL4010-IN
+
+      *@1 입력파라미터 조립
+
+      *   기준년월일
+           MOVE  YNJL4401-BASE-YMD
+             TO  XIJL4010-I-BASE-YMD
+
+      *   고객식별자
+           MOVE  YNJL4401-CUST-IDNFR
+             TO  XIJL4010-I-CUST-IDNFR
+
+      *@1 그룹관계기업현황조회 프로그램 호출
+           #DYCALL  IJL4010  YCCOMMON-CA  XIJL4010-CA
+
+      *   처리결과CHECK
+           IF COND-XIJL4010-OK
+      *        출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           ELSE
+              #ERROR XIJL4010-R-ERRCD
+                     XIJL4010-R-TREAT-CD
+                     XIJL4010-R-STAT
+           END-IF
+           .
+       S3100-IJL4010-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   그룹익스포져현황조회 DC호출
+      *-----------------------------------------------------------------
+       S3200-QJLA325-CALL-RTN.
+
+           INITIALIZE       XQJLA325-IN
+
+      *@1 입력파라미터 조립
+
+      *   기준년월일
+           MOVE  YNJL4401-BASE-YMD
+             TO  XQJLA325-I-BASE-YMD
+      *   그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XQJLA325-I-GROUP-CO-CD
+      *   기준년월
+           MOVE  YNJL4401-BASE-YMD(1:6)
+             TO  XQJLA325-I-BASE-YM
+      *   계열기업군코드
+           MOVE  YNJL4401-AFFLT-CORP-GROUP-CD
+             TO  XQJLA325-I-AFFLT-CORP-GROUP-CD
+
+      *@1 그룹관계기업현황조회 프로그램 호출
+           #DYSQLA  QJLA325  XQJLA325-CA
+
+      *   처리결과CHECK
+           IF COND-DBSQL-OK
+      *        출력처리  2:그룹익스포져조회
+      *--     관리한도금액
+               MOVE  XQJLA325-O-LIMT
+                 TO  YPJL4401-MGT-CLAM
+      *--     한도기준토탈익스포져금액
+               MOVE  XQJLA325-O-AMUS
+                 TO  YPJL4401-LIMT-BASE-TE-AMT
+      *--     한도여유금액
+               COMPUTE YPJL4401-LIMT-EXAN =
+                       YPJL4401-MGT-CLAM  -
+                       YPJL4401-LIMT-BASE-TE-AMT
+           ELSE
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3200-QJLA325-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *-- 고객식별자
+           MOVE  YNJL4401-CUST-IDNFR
+             TO  YPJL4401-CUST-IDNFR
+      *-- 계열기업군코드
+           MOVE  YNJL4401-AFFLT-CORP-GROUP-CD
+             TO  YPJL4401-AFFLT-CORP-GROUP-CD
+      *-- 고객관리부점코드
+           MOVE  XIJL4010-O-CUST-MGT-BRNCD
+             TO  YPJL4401-CUST-MGT-BRNCD
+      *-- 명목액기준한도
+           MOVE  XIJL4010-O-TTL-AMT-BASE-CLAM
+             TO  YPJL4401-TTL-AMT-BASE-CLAM
+      *-- 명목액기준잔액
+           MOVE  XIJL4010-O-TTL-AMT-BASE-BAL
+             TO  YPJL4401-TTL-AMT-BASE-BAL
+      *-- 시설자금명목액기준한도
+           MOVE  XIJL4010-O-FCLT-BASE-CLAM
+             TO  YPJL4401-FCLT-BASE-CLAM
+      *-- 시설자금명목액기준잔액
+           MOVE  XIJL4010-O-FCLT-BASE-BAL
+             TO  YPJL4401-FCLT-BASE-BAL
+      *-- 운전자금명목액기준한도
+           MOVE  XIJL4010-O-WRKN-BASE-CLAM
+             TO  YPJL4401-WRKN-BASE-CLAM
+      *-- 운전자금명목액기준잔액
+           MOVE  XIJL4010-O-WRKN-BASE-BAL
+             TO  YPJL4401-WRKN-BASE-BAL
+      *-- 투자금융명목액기준한도
+           MOVE  XIJL4010-O-INFC-BASE-CLAM
+             TO  YPJL4401-INFC-BASE-CLAM
+      *-- 투자금융명목액기준잔액
+           MOVE  XIJL4010-O-INFC-BASE-BAL
+             TO  YPJL4401-INFC-BASE-BAL
+      *-- 기타명목액기준한도
+           MOVE  XIJL4010-O-ETC-BASE-CLAM
+             TO  YPJL4401-ETC-BASE-CLAM
+      *-- 기타자금명목액기준잔액
+           MOVE  XIJL4010-O-ECT-BASE-BAL
+             TO  YPJL4401-ECT-BASE-BAL
+      *-- 총거래한도
+           MOVE  XIJL4010-O-TOTAL-TRAN-CLAM
+             TO  YPJL4401-TOTAL-TRAN-CLAM
+      *-- 신용한도소진율
+           MOVE  XIJL4010-O-CDLN-EXHS-RT
+             TO  YPJL4401-CDLN-EXHS-RT
+      *-- 신용거래한도
+           MOVE  XIJL4010-O-CRDT-TRAN-CLAM
+             TO  YPJL4401-CRDT-TRAN-CLAM
+      *-- 담보거래한도
+           MOVE  XIJL4010-O-SCURTY-TRAN-CLAM
+             TO  YPJL4401-SCURTY-TRAN-CLAM
+      *-- 외환총한도소진율
+           MOVE  XIJL4010-O-FX-T-LIMT-EXHS-RT
+             TO  YPJL4401-FX-T-LIMT-EXHS-RT
+      *-- 담보소진율
+           MOVE  XIJL4010-O-SCURTY-EXHS-RT
+             TO  YPJL4401-SCURTY-EXHS-RT
+      *-- 한도승인금액
+           MOVE  XIJL4010-O-LIMT-ATHOR-AMT
+             TO  YPJL4401-LIMT-ATHOR-AMT
+      *-- 한도설정유효년월일
+           MOVE  XIJL4010-O-LIMT-STUP-VALD-YMD
+             TO  YPJL4401-LIMT-STUP-VALD-YMD
+
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+      *#1 중계채널구분코드로 EAI 및 단말화면으로 FORMID를 설정
+           EVALUATE BICOM-RELAY-CHNL-DSTCD
+      *#1      '01'일 경우(MCI)
+               WHEN '01'
+                   #BOFMID 'V1KJL04401000'
+
+      *#1      '02'일 경우(EAI)
+               WHEN '02'
+                   #BOFMID 'V7KJL04401000'
+           END-EVALUATE.
+
+           #OKEXIT  CO-STAT-OK
+
+           .
+       S9000-FINAL-EXT.
+           EXIT.

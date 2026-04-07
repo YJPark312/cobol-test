@@ -1,0 +1,71 @@
+      *================================================================*
+      *@ NAME : XDJL4096                                               *
+      *@ DESC : DC기업및그룹한도신청및승인(표준산업코드별비율조    *
+      *@        회) COPYBOOK                                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-25 11:42:29                          *
+      *  생성일시     : 2021-11-25 11:42:29                          *
+      *  전체길이     : 00000007 BYTES                               *
+      *================================================================*
+           03  XDJL4096-RETURN.
+             05  XDJL4096-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4096-OK            VALUE  '00'.
+                 88  COND-XDJL4096-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4096-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4096-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4096-ERROR         VALUE  '09'.
+                 88  COND-XDJL4096-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4096-SYSERROR      VALUE  '99'.
+             05  XDJL4096-R-LINE                 PIC  9(006).
+             05  XDJL4096-R-ERRCD                PIC  X(008).
+             05  XDJL4096-R-TREAT-CD             PIC  X(008).
+             05  XDJL4096-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4096-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4096-I-PRCSS-DSTIC          PIC  X(002).
+      *--       표준산업분류코드
+             05  XDJL4096-I-STND-I-CLSFI-CD      PIC  X(005).
+      *----------------------------------------------------------------*
+           03  XDJL4096-OUT.
+      *----------------------------------------------------------------*
+      *--       표준산업분류코드명
+             05  XDJL4096-O-STND-IC-CD-NAME      PIC  X(042).
+      *--       TE산업분류코드
+             05  XDJL4096-O-TE-IDSTRY-CLSFI-CD   PIC  X(003).
+      *--       TE산업분류코드명
+             05  XDJL4096-O-TE-I-CLSFI-CD-NAME   PIC  X(052).
+      *--       가중평균이자율
+             05  XDJL4096-O-WGHTG-AVGZ-IRT       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       자기자본산업적용비율
+             05  XDJL4096-O-ONCP-I-APLY-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입금자기자본율
+             05  XDJL4096-O-AMBR-ONCP-RT         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       매출액산업적용비율
+             05  XDJL4096-O-SALEPR-I-APLY-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       총자산산업적용비율
+             05  XDJL4096-O-TOTAL-AI-APLY-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입금총자산비율
+             05  XDJL4096-O-AMBR-T-ASST-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  9  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4096-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4096-I-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XDJL4096-O-STND-IC-CD-NAME    ;표준산업분류코드명
+      *X  XDJL4096-O-TE-IDSTRY-CLSFI-CD ;TE산업분류코드
+      *X  XDJL4096-O-TE-I-CLSFI-CD-NAME ;TE산업분류코드명
+      *S  XDJL4096-O-WGHTG-AVGZ-IRT     ;가중평균이자율
+      *S  XDJL4096-O-ONCP-I-APLY-RATO   ;자기자본산업적용비율
+      *S  XDJL4096-O-AMBR-ONCP-RT       ;차입금자기자본율
+      *S  XDJL4096-O-SALEPR-I-APLY-RATO ;매출액산업적용비율
+      *S  XDJL4096-O-TOTAL-AI-APLY-RATO ;총자산산업적용비율
+      *S  XDJL4096-O-AMBR-T-ASST-RATO   ;차입금총자산비율

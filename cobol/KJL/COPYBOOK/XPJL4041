@@ -1,0 +1,132 @@
+      *================================================================*
+      *@ NAME : XPJL4041                                               *
+      *@ DESC : PC국가별정보조회 COPYBOOK                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-15 16:37:26                          *
+      *  생성일시     : 2009-07-15 16:37:30                          *
+      *================================================================*
+           03  XPJL4041-RETURN.
+             05  XPJL4041-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4041-OK            VALUE  '00'.
+                 88  COND-XPJL4041-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4041-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4041-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4041-ERROR         VALUE  '09'.
+                 88  COND-XPJL4041-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4041-SYSERROR      VALUE  '99'.
+             05  XPJL4041-R-LINE                 PIC  9(006).
+             05  XPJL4041-R-ERRCD                PIC  X(008).
+             05  XPJL4041-R-TREAT-CD             PIC  X(008).
+             05  XPJL4041-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4041-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4041-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준년월
+             05  XPJL4041-I-BASE-YM              PIC  X(006).
+      *--       국가코드
+             05  XPJL4041-I-ISO-NATNL-CD         PIC  X(003).
+      *----------------------------------------------------------------*
+           03  XPJL4041-OUT.
+      *----------------------------------------------------------------*
+      *--       국가명
+             05  XPJL4041-O-ENG-NATNL-NAME       PIC  X(052).
+      *--       출력라인수1
+             05  XPJL4041-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4041-O-GRID1                OCCURS 000300 TIMES.
+      *--         국가코드
+               07  XPJL4041-O-ISO-NATNL-CD       PIC  X(003).
+      *--         국가명1
+               07  XPJL4041-O-ENG-NATNL-NAME1    PIC  X(052).
+      *--         Total관리한도
+               07  XPJL4041-O-WHOL-MGT-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         외환업무부
+               07  XPJL4041-O-FX-BZWK-TEAM-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         외화자금부
+               07  XPJL4041-O-FC-FNDS-TEAM-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         트레이딩부
+               07  XPJL4041-O-TRDN-PARTL-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         투자금융부
+               07  XPJL4041-O-INFC-TEAM-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         파생상품영업부
+               07  XPJL4041-O-DRVT-B-PARTL-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         해외사업추진부
+               07  XPJL4041-O-OVSES-P-PARTL-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         금융공학부
+               07  XPJL4041-O-FINAC-E-PARTL-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         Auckland
+               07  XPJL4041-O-OKLN-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         HongKong
+               07  XPJL4041-O-HNKN-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         London
+               07  XPJL4041-O-LNDN-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         NewYork
+               07  XPJL4041-O-NY-CLAM            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         Tokyo
+               07  XPJL4041-O-TKY-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         기타
+               07  XPJL4041-O-ETC-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         국가순위
+               07  XPJL4041-O-NATNL-RANKG        PIC  9(003).
+      *--         SP
+               07  XPJL4041-O-SNP-GRD-DSTCD      PIC  X(002).
+      *--         Moodys
+               07  XPJL4041-O-MODYS-GRD-DSTCD    PIC  X(002).
+      *--         Fitch
+               07  XPJL4041-O-FITCH-GRD-DSTCD    PIC  X(002).
+      *--         지역코드
+               07  XPJL4041-O-LIMT-MGT-AREA-DSTCD
+                                                 PIC  X(001).
+      *--         CountryType
+               07  XPJL4041-O-LIMT-N-CNSN-DSTCD  PIC  X(001).
+      *--         조기경보
+               07  XPJL4041-O-ELY-ALAM-YN        PIC  X(001).
+      *================================================================*
+      *        X  P  J  L  4  0  4  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4041-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4041-I-BASE-YM            ;조회기준년월
+      *X  XPJL4041-I-ISO-NATNL-CD       ;국가코드
+      *X  XPJL4041-O-ENG-NATNL-NAME     ;국가명
+      *N  XPJL4041-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4041-O-GRID1              ;그리드1
+      *X  XPJL4041-O-ISO-NATNL-CD       ;국가코드
+      *X  XPJL4041-O-ENG-NATNL-NAME1    ;국가명1
+      *S  XPJL4041-O-WHOL-MGT-CLAM      ;Total관리한도
+      *S  XPJL4041-O-FX-BZWK-TEAM-CLAM  ;외환업무부
+      *S  XPJL4041-O-FC-FNDS-TEAM-CLAM  ;외화자금부
+      *S  XPJL4041-O-TRDN-PARTL-CLAM    ;트레이딩부
+      *S  XPJL4041-O-INFC-TEAM-CLAM     ;투자금융부
+      *S  XPJL4041-O-DRVT-B-PARTL-CLAM  ;파생상품영업부
+      *S  XPJL4041-O-OVSES-P-PARTL-CLAM ;해외사업추진부
+      *S  XPJL4041-O-FINAC-E-PARTL-CLAM ;금융공학부
+      *S  XPJL4041-O-OKLN-CLAM          ;Auckland
+      *S  XPJL4041-O-HNKN-CLAM          ;HongKong
+      *S  XPJL4041-O-LNDN-CLAM          ;London
+      *S  XPJL4041-O-NY-CLAM            ;NewYork
+      *S  XPJL4041-O-TKY-CLAM           ;Tokyo
+      *S  XPJL4041-O-ETC-CLAM           ;기타
+      *N  XPJL4041-O-NATNL-RANKG        ;국가순위
+      *X  XPJL4041-O-SNP-GRD-DSTCD      ;SP
+      *X  XPJL4041-O-MODYS-GRD-DSTCD    ;Moodys
+      *X  XPJL4041-O-FITCH-GRD-DSTCD    ;Fitch
+      *X  XPJL4041-O-LIMT-MGT-AREA-DSTCD;지역코드
+      *X  XPJL4041-O-LIMT-N-CNSN-DSTCD  ;CountryType
+      *X  XPJL4041-O-ELY-ALAM-YN        ;조기경보

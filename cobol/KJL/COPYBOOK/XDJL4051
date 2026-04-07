@@ -1,0 +1,98 @@
+      *================================================================*
+      *@ NAME : XDJL4051                                               *
+      *@ DESC : DCSub-Limit관리조회 COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-02-09 18:22:19                          *
+      *  생성일시     : 2015-02-09 18:22:21                          *
+      *  전체길이     : 00000010 BYTES                               *
+      *================================================================*
+           03  XDJL4051-RETURN.
+             05  XDJL4051-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4051-OK            VALUE  '00'.
+                 88  COND-XDJL4051-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4051-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4051-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4051-ERROR         VALUE  '09'.
+                 88  COND-XDJL4051-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4051-SYSERROR      VALUE  '99'.
+             05  XDJL4051-R-LINE                 PIC  9(006).
+             05  XDJL4051-R-ERRCD                PIC  X(008).
+             05  XDJL4051-R-TREAT-CD             PIC  X(008).
+             05  XDJL4051-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4051-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4051-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준일자
+             05  XDJL4051-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4051-OUT.
+      *----------------------------------------------------------------*
+      *--       부동사PF한도금액
+             05  XDJL4051-O-SUB-CLAM1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       부동산PF대출잔액
+             05  XDJL4051-O-SUB-BAL1             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       부동산PF소진율
+             05  XDJL4051-O-EXHS-RT1             PIC  9(003)V9(02).
+      *--       부동산PF한도여유액
+             05  XDJL4051-O-LIMT-SEXTR-AMT1      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생명목한도금액
+             05  XDJL4051-O-SUB-CLAM2            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생명목대출잔액
+             05  XDJL4051-O-SUB-BAL2             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생명목소진율
+             05  XDJL4051-O-EXHS-RT2             PIC  9(003)V9(02).
+      *--       장외파생명목한도여유액
+             05  XDJL4051-O-LIMT-SEXTR-AMT2      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생익스포져한도금액
+             05  XDJL4051-O-SUB-CLAM3            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생익스포져대출잔액
+             05  XDJL4051-O-SUB-BAL3             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장외파생익스포져소진율
+             05  XDJL4051-O-EXHS-RT3             PIC  9(003)V9(02).
+      *--       장외파생익스포져한도여유액
+             05  XDJL4051-O-LIMT-SEXTR-AMT3      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장기자산한도금액
+             05  XDJL4051-O-SUB-CLAM4            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장기자산잔액
+             05  XDJL4051-O-SUB-BAL4             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       장기자산소진율
+             05  XDJL4051-O-EXHS-RT4             PIC  9(003)V9(02).
+      *--       장기자산여유액
+             05  XDJL4051-O-LIMT-SEXTR-AMT4      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  5  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4051-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4051-I-BASE-YMD           ;조회기준일자
+      *S  XDJL4051-O-SUB-CLAM1          ;부동사PF한도금액
+      *S  XDJL4051-O-SUB-BAL1           ;부동산PF대출잔액
+      *N  XDJL4051-O-EXHS-RT1           ;부동산PF소진율
+      *S  XDJL4051-O-LIMT-SEXTR-AMT1    ;부동산PF한도여유액
+      *S  XDJL4051-O-SUB-CLAM2          ;장외파생명목한도금액
+      *S  XDJL4051-O-SUB-BAL2           ;장외파생명목대출잔액
+      *N  XDJL4051-O-EXHS-RT2           ;장외파생명목소진율
+      *S  XDJL4051-O-LIMT-SEXTR-AMT2    ;장외파생명목한도여유액
+      *S  XDJL4051-O-SUB-CLAM3          ;장외파생익스포져한도금액
+      *S  XDJL4051-O-SUB-BAL3           ;장외파생익스포져대출잔액
+      *N  XDJL4051-O-EXHS-RT3           ;장외파생익스포져소진율
+      *S  XDJL4051-O-LIMT-SEXTR-AMT3
+      * 장외파생익스포져한도여유액
+      *S  XDJL4051-O-SUB-CLAM4          ;장기자산한도금액
+      *S  XDJL4051-O-SUB-BAL4           ;장기자산잔액
+      *N  XDJL4051-O-EXHS-RT4           ;장기자산소진율
+      *S  XDJL4051-O-LIMT-SEXTR-AMT4    ;장기자산여유액

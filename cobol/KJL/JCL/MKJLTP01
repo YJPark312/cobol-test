@@ -1,0 +1,47 @@
+//MKJLTP01 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*********************************************************************
+//*배치작업기준일 : 매월3영업일
+//*선행작업명     : MKJLTP13
+//*********************************************************************
+//*  EAD 외화파생상품추출
+//*********************************************************************
+//STEP12  EXEC JZBDEXEC,MBR=BJLI25C,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SM.BJLI25C.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%A-MKJLTP01-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*  EAD 국외점포계좌추출
+//*********************************************************************
+//STEP13  EXEC JZBDEXEC,MBR=BJLI25D,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SM.BJLI25D.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%A-MKJLTP01-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*  EAD 한도환산금액산출
+//*********************************************************************
+//STEP14  EXEC JZBDEXEC,MBR=BJLI25I,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KJL.SM.BJLI25C.V001
+//          DD DISP=SHR,DSN=KJL.SM.BJLI25D.V001
+//OTFILE    DD DSN=KJL.SM.BJLI25I.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0300,0100),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN    DD *
+KB0-%%A-MKJLTP01-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//

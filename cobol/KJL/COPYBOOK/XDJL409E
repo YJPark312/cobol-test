@@ -1,0 +1,118 @@
+      *================================================================*
+      *@ NAME : XDJL409E                                               *
+      *@ DESC : DC기업및그룹한도신청및승인조회(결의록조회)COPY     *
+      *@        BOOK                                                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-06-18 21:11:51                          *
+      *  생성일시     : 2020-06-18 21:11:52                          *
+      *  전체길이     : 00000023 BYTES                               *
+      *================================================================*
+           03  XDJL409E-RETURN.
+             05  XDJL409E-R-STAT                 PIC  X(002).
+                 88  COND-XDJL409E-OK            VALUE  '00'.
+                 88  COND-XDJL409E-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL409E-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL409E-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL409E-ERROR         VALUE  '09'.
+                 88  COND-XDJL409E-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL409E-SYSERROR      VALUE  '99'.
+             05  XDJL409E-R-LINE                 PIC  9(006).
+             05  XDJL409E-R-ERRCD                PIC  X(008).
+             05  XDJL409E-R-TREAT-CD             PIC  X(008).
+             05  XDJL409E-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL409E-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL409E-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJL409E-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJL409E-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJL409E-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL409E-OUT.
+      *----------------------------------------------------------------*
+      *--       한도승인권자구분
+             05  XDJL409E-O-LIMT-ATRZ-DSTCD      PIC  X(001).
+      *--       승인년월일
+             05  XDJL409E-O-ATHOR-YMD            PIC  X(008).
+      *--       한도설정유효년월일
+             05  XDJL409E-O-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       승인부점명
+             05  XDJL409E-O-ATHOR-BRN-NAME       PIC  X(022).
+      *--       총라인수
+             05  XDJL409E-O-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJL409E-O-GRID                 OCCURS 000100 TIMES.
+      *--         승인위원구분
+               07  XDJL409E-O-ATHOR-CMMB-DSTIC   PIC  X(001).
+      *--         승인위원직원번호
+               07  XDJL409E-O-ATHOR-CMMB-EMPID   PIC  X(007).
+      *--         승인위원직원명
+               07  XDJL409E-O-ATHOR-CMMB-EMNM    PIC  X(042).
+      *--         한도승인구분
+               07  XDJL409E-O-LIMT-ATHOR-DSTCD   PIC  X(001).
+      *--         승인의견내용
+               07  XDJL409E-O-ATHOR-OPIN-CTNT    PIC  X(302).
+      *--       승인직원번호
+             05  XDJL409E-O-ATHOR-EMPID          PIC  X(007).
+      *--       승인직원명
+             05  XDJL409E-O-ATHOR-EMNM           PIC  X(042).
+      *--       기업신용등급
+             05  XDJL409E-O-CORP-CRDRAT          PIC  X(004).
+      *--       표준산업분류코드
+             05  XDJL409E-O-STND-I-CLSFI-CD      PIC  X(005).
+      *--       그룹명
+             05  XDJL409E-O-GROUP-NAME           PIC  X(042).
+      *--       그룹등급
+             05  XDJL409E-O-GROUP-GRD            PIC  X(004).
+      *--       신청직원번호
+             05  XDJL409E-O-APLCN-EMPID          PIC  X(007).
+      *--       신청직원명
+             05  XDJL409E-O-APLCN-EMNM           PIC  X(042).
+      *--       신청구분
+             05  XDJL409E-O-APLCN-DSTIC          PIC  X(001).
+      *--       승인구분
+             05  XDJL409E-O-ATHOR-DSTIC          PIC  X(001).
+      *--       조건부승인조건
+             05  XDJL409E-O-CNDT-ATHOR-CNDN      PIC  X(001).
+      *--       기준한도산출액
+             05  XDJL409E-O-BASE-LIMT-CMPTN-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도설정액
+             05  XDJL409E-O-MGT-LIMT-STUP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  9  E    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL409E-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL409E-I-CUST-DSTIC         ;고객구분
+      *X  XDJL409E-I-KB-PIN             ;KB-PIN
+      *X  XDJL409E-I-APLCN-NO           ;신청번호
+      *X  XDJL409E-O-LIMT-ATRZ-DSTCD    ;한도승인권자구분
+      *X  XDJL409E-O-ATHOR-YMD          ;승인년월일
+      *X  XDJL409E-O-LIMT-STUP-VALD-YMD ;한도설정유효년월일
+      *X  XDJL409E-O-ATHOR-BRN-NAME     ;승인부점명
+      *N  XDJL409E-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL409E-O-GRID               ;그리드
+      *X  XDJL409E-O-ATHOR-CMMB-DSTIC   ;승인위원구분
+      *X  XDJL409E-O-ATHOR-CMMB-EMPID   ;승인위원직원번호
+      *X  XDJL409E-O-ATHOR-CMMB-EMNM    ;승인위원직원명
+      *X  XDJL409E-O-LIMT-ATHOR-DSTCD   ;한도승인구분
+      *X  XDJL409E-O-ATHOR-OPIN-CTNT    ;승인의견내용
+      *X  XDJL409E-O-ATHOR-EMPID        ;승인직원번호
+      *X  XDJL409E-O-ATHOR-EMNM         ;승인직원명
+      *X  XDJL409E-O-CORP-CRDRAT        ;기업신용등급
+      *X  XDJL409E-O-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XDJL409E-O-GROUP-NAME         ;그룹명
+      *X  XDJL409E-O-GROUP-GRD          ;그룹등급
+      *X  XDJL409E-O-APLCN-EMPID        ;신청직원번호
+      *X  XDJL409E-O-APLCN-EMNM         ;신청직원명
+      *X  XDJL409E-O-APLCN-DSTIC        ;신청구분
+      *X  XDJL409E-O-ATHOR-DSTIC        ;승인구분
+      *X  XDJL409E-O-CNDT-ATHOR-CNDN    ;조건부승인조건
+      *S  XDJL409E-O-BASE-LIMT-CMPTN-AMT;기준한도산출액
+      *S  XDJL409E-O-MGT-LIMT-STUP-AMT  ;관리한도설정액

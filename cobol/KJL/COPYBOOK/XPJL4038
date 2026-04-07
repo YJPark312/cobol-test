@@ -1,0 +1,57 @@
+      *================================================================*
+      *@ NAME : XPJL4038                                               *
+      *@ DESC : PC자회사및대주주조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-14 10:52:45                          *
+      *  생성일시     : 2009-04-14 10:52:46                          *
+      *================================================================*
+           03  XPJL4038-RETURN.
+             05  XPJL4038-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4038-OK            VALUE  '00'.
+                 88  COND-XPJL4038-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4038-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4038-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4038-ERROR         VALUE  '09'.
+                 88  COND-XPJL4038-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4038-SYSERROR      VALUE  '99'.
+             05  XPJL4038-R-LINE                 PIC  9(006).
+             05  XPJL4038-R-ERRCD                PIC  X(008).
+             05  XPJL4038-R-TREAT-CD             PIC  X(008).
+             05  XPJL4038-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4038-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4038-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회구분
+             05  XPJL4038-I-SBCO-L-SKHDR-DSTCD   PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XPJL4038-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XPJL4038-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4038-O-GRID1                OCCURS 0100 TIMES.
+      *--         채무자번호
+               07  XPJL4038-O-BRWR-NO            PIC  X(013).
+      *--         채무자명
+               07  XPJL4038-O-DBTRZ-NAME         PIC  X(052).
+      *--         등록일자
+               07  XPJL4038-O-REGI-YMD           PIC  X(008).
+      *--         출자금액
+               07  XPJL4038-O-LAG-SKHDR-AMFN     PIC  9(015).
+      *--         해제일자
+               07  XPJL4038-O-TERMI-YMD          PIC  X(008).
+      *================================================================*
+      *        X  P  J  L  4  0  3  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4038-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4038-I-SBCO-L-SKHDR-DSTCD ;조회구분
+      *N  XPJL4038-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4038-O-GRID1              ;그리드1
+      *X  XPJL4038-O-BRWR-NO            ;채무자번호
+      *X  XPJL4038-O-DBTRZ-NAME         ;채무자명
+      *X  XPJL4038-O-REGI-YMD           ;등록일자
+      *N  XPJL4038-O-LAG-SKHDR-AMFN     ;출자금액
+      *X  XPJL4038-O-TERMI-YMD          ;해제일자

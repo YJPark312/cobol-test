@@ -1,0 +1,140 @@
+//TKJLF001 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0001 계열사기본 TABLE UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0001.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0001.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(3000,3000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0001
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0001'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0001,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(3000,3000),RLSE)
+//SYSIN    DD *
+SELECT  A.그룹회사코드
+       ,CHAR(SUBSTR(A.차주번호,1,10)) AS 고객식별자
+       ,A.기준년월
+       ,CHAR('             ') AS 차주번호
+       ,A.신표준산업분류코드
+       ,A.한신평재무업종구분
+       ,A.결산년월
+       ,A.업종평균적용년
+       ,A.내부신용평가등급구분
+       ,A.신용평가년월일
+       ,A.신용평가유효년월일
+       ,A.신용등급지원비율
+       ,A.전전년사업이익
+       ,A.전년사업이익
+       ,A.기준년사업이익
+       ,A.영업이익
+       ,A.이자수익
+       ,A.감가상각비
+       ,A.금융비용
+       ,A.단기차입금
+       ,A.단기차입금상환금액
+       ,A.업종가중평균율
+       ,A.업체총차입금
+       ,A.총자산
+       ,A.매출액
+       ,A.현금흐름기준금액
+       ,A.전전년자기자본금
+       ,A.전년자기자본금
+       ,A.기준년자기자본금
+       ,A.금융자기자본비율
+       ,A.차입금자기자본율
+       ,A.자기자본기준금액
+       ,A.상환능력기준한도
+       ,A.차입금매출액비율
+       ,A.차입금총자산비율
+       ,A.규모기준한도
+       ,A.기준한도
+       ,A.외화기준한도
+       ,A.시스템최종처리일시
+       ,A.시스템최종사용자번호
+ FROM  DB2DBA.THKJL0001 A
+WHERE  A.그룹회사코드 = 'KB0'
+  AND  LENGTH(TRIM(A.차주번호)) <= 6
+  AND  A.차주번호               != ''
+UNION ALL
+SELECT  A.그룹회사코드
+       ,B.고객식별자
+       ,A.기준년월
+       ,CHAR('             ') AS 차주번호
+       ,A.신표준산업분류코드
+       ,A.한신평재무업종구분
+       ,A.결산년월
+       ,A.업종평균적용년
+       ,A.내부신용평가등급구분
+       ,A.신용평가년월일
+       ,A.신용평가유효년월일
+       ,A.신용등급지원비율
+       ,A.전전년사업이익
+       ,A.전년사업이익
+       ,A.기준년사업이익
+       ,A.영업이익
+       ,A.이자수익
+       ,A.감가상각비
+       ,A.금융비용
+       ,A.단기차입금
+       ,A.단기차입금상환금액
+       ,A.업종가중평균율
+       ,A.업체총차입금
+       ,A.총자산
+       ,A.매출액
+       ,A.현금흐름기준금액
+       ,A.전전년자기자본금
+       ,A.전년자기자본금
+       ,A.기준년자기자본금
+       ,A.금융자기자본비율
+       ,A.차입금자기자본율
+       ,A.자기자본기준금액
+       ,A.상환능력기준한도
+       ,A.차입금매출액비율
+       ,A.차입금총자산비율
+       ,A.규모기준한도
+       ,A.기준한도
+       ,A.외화기준한도
+       ,A.시스템최종처리일시
+       ,A.시스템최종사용자번호
+ FROM  DB2DBA.THKJL0001 A
+      ,DB2DBA.THKJL0015 B
+WHERE  A.그룹회사코드 = B.그룹회사코드
+  AND  A.차주번호     = B.차주번호
+  AND  LENGTH(TRIM(A.차주번호)) > 6
+WITH UR;
+/*
+//
+//

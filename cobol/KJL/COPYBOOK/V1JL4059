@@ -1,0 +1,180 @@
+      *================================================================*
+      *@ NAME : V1JL4059                                               *
+      *@ DESC : 관리한도및익스포져조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-12-23 15:36:33                          *
+      *  생성일시     : 2015-12-23 15:36:37                          *
+      *  전체길이     : 00000529 BYTES                               *
+      *================================================================*
+      *--     그룹1
+           07  V1JL4059-GROUP1.
+      *--       한도고객구분코드
+             09  V1JL4059-LIMT-CUST-DSTCD        PIC  X(001).
+      *--       명목액기준한도
+             09  V1JL4059-TTL-AMT-BASE-LIMT      PIC  9(015).
+      *--       토탈익스포져관리한도
+             09  V1JL4059-TE-MGT-LIMT            PIC  9(015).
+      *--       여신성토탈익스포져관리한도
+             09  V1JL4059-LNBZ-I-TE-MGT-LIMT     PIC  9(015).
+      *--       토탈익스포져
+             09  V1JL4059-TE                     PIC  9(015).
+      *--       여신성토탈익스포져
+             09  V1JL4059-LNBZ-INCLIN-TE         PIC  9(015).
+      *--     그룹2
+           07  V1JL4059-GROUP2.
+      *--       그룹여부
+             09  V1JL4059-GROUP-YN               PIC  X(001).
+      *--       그룹코드
+             09  V1JL4059-GROUP-CD               PIC  X(003).
+      *--       그룹명
+             09  V1JL4059-GROUP-NAME             PIC  X(042).
+      *--       그룹관리한도
+             09  V1JL4059-GROUP-MGT-LIMT         PIC  9(015).
+      *--       그룹익스포져
+             09  V1JL4059-GROUP-EXPSR            PIC  9(015).
+      *--     그룹3
+           07  V1JL4059-GROUP3.
+      *--       주업종
+             09  V1JL4059-MAIN-BZTYP.
+      *--         대분류업종코드
+               11  V1JL4059-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--         대분류업종코드명
+               11  V1JL4059-LAG-C-BZTYP-CD-NAME  PIC  X(032).
+      *--         산업토탈익스포져기업규모구분
+               11  V1JL4059-IDSTRY-TCS-DSTIC     PIC  X(001).
+      *--         한도초과년월일
+               11  V1JL4059-LIMT-EXCS-YMD        PIC  X(008).
+      *--         예외적용년월일
+               11  V1JL4059-ECEPT-APLY-YMD       PIC  X(008).
+      *--         취급중단년월일
+               11  V1JL4059-HNDLN-DSCN-YMD       PIC  X(008).
+      *--         취급기준1적용년월일
+               11  V1JL4059-HNDLN-B-1-APLY-YMD   PIC  X(008).
+      *--         취급기준2적용년월일
+               11  V1JL4059-HNDLN-B-2-APLY-YMD   PIC  X(008).
+      *--         SUB한도관리대상여부
+               11  V1JL4059-SUB-L-MGT-TAGET-YN   PIC  X(001).
+      *--         산업별규모별SUB한도
+               11  V1JL4059-IDSTRY-PSP-SUB-LIMT  PIC  9(015).
+      *--         산업별규모별토탈익스포져금액
+               11  V1JL4059-IDSTRY-PSP-TE-AMT    PIC  9(015).
+      *--       신청업종
+             09  V1JL4059-APLCN-BZTYP.
+      *--         신청대분류업종코드
+               11  V1JL4059-APLCN-LC-BZTYP-CD    PIC  X(003).
+      *--         신청대분류업종코드명
+               11  V1JL4059-APLCN-LCB-CD-NAME    PIC  X(032).
+      *--     그룹4
+           07  V1JL4059-GROUP4.
+      *--       산업업종코드
+             09  V1JL4059-IDSTRY-BZTYP-CD        PIC  X(003).
+      *--       산업업종코드명
+             09  V1JL4059-IDSTRY-B-CD-NAME       PIC  X(032).
+      *--       산업관리대상여부
+             09  V1JL4059-IDSTRY-MGT-TAGET-YN    PIC  X(001).
+      *--       산업토탈익스포져한도
+             09  V1JL4059-IDSTRY-TE-LIMT         PIC  9(015).
+      *--       산업토탈익스포져
+             09  V1JL4059-IDSTRY-TE              PIC  9(015).
+      *--       산업취급중단년월일
+             09  V1JL4059-IDSTRY-H-DSCN-YMD      PIC  X(008).
+      *--       산업예외적용년월일
+             09  V1JL4059-IDSTRY-E-APLY-YMD      PIC  X(008).
+      *--     그룹5
+           07  V1JL4059-GROUP5.
+      *--       대분류업종코드
+             09  V1JL4059-LAG-CLSFI-BZTYP-CD5    PIC  X(003).
+      *--       지역본부코드
+             09  V1JL4059-AREA-HQ-CD             PIC  X(004).
+      *--       전년도말익스포져금액
+             09  V1JL4059-PYY-X-END-EXPSR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부SUB한도금액
+             09  V1JL4059-AREA-HQ-SUB-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부순증SUB한도금액
+             09  V1JL4059-AREA-HN-SUB-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부익스포져금액
+             09  V1JL4059-AREA-HQ-EXPSR-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부한도여유금액
+             09  V1JL4059-AREA-HQ-LIMT-EXAN      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부SUB소진율
+             09  V1JL4059-AREA-HQ-SUB-EXHS-RT    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       지역본부예외승인한도금액
+             09  V1JL4059-AREA-HE-ATHOR-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역본부예외승인금액
+             09  V1JL4059-AREA-HE-ATHOR-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역예외승인여유금액
+             09  V1JL4059-AREA-E-ATHOR-EXAN      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       지역예외승인소진율
+             09  V1JL4059-AREA-EA-EXHS-RT        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       지역본부기준소진율
+             09  V1JL4059-AREA-HE-BASE           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  5  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *G  V1JL4059-GROUP1               ;그룹1
+      *X  V1JL4059-LIMT-CUST-DSTCD      ;한도고객구분코드
+      *N  V1JL4059-TTL-AMT-BASE-LIMT    ;명목액기준한도
+      *N  V1JL4059-TE-MGT-LIMT          ;토탈익스포져관리한도
+      *N  V1JL4059-LNBZ-I-TE-MGT-LIMT
+      * 여신성토탈익스포져관리한도
+      *N  V1JL4059-TE                   ;토탈익스포져
+      *N  V1JL4059-LNBZ-INCLIN-TE       ;여신성토탈익스포져
+      *G  V1JL4059-GROUP2               ;그룹2
+      *X  V1JL4059-GROUP-YN             ;그룹여부
+      *X  V1JL4059-GROUP-CD             ;그룹코드
+      *X  V1JL4059-GROUP-NAME           ;그룹명
+      *N  V1JL4059-GROUP-MGT-LIMT       ;그룹관리한도
+      *N  V1JL4059-GROUP-EXPSR          ;그룹익스포져
+      *G  V1JL4059-GROUP3               ;그룹3
+      *G  V1JL4059-MAIN-BZTYP           ;주업종
+      *X  V1JL4059-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4059-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *X  V1JL4059-IDSTRY-TCS-DSTIC
+      * 산업토탈익스포져기업규모구분
+      *X  V1JL4059-LIMT-EXCS-YMD        ;한도초과년월일
+      *X  V1JL4059-ECEPT-APLY-YMD       ;예외적용년월일
+      *X  V1JL4059-HNDLN-DSCN-YMD       ;취급중단년월일
+      *X  V1JL4059-HNDLN-B-1-APLY-YMD   ;취급기준1적용년월일
+      *X  V1JL4059-HNDLN-B-2-APLY-YMD   ;취급기준2적용년월일
+      *X  V1JL4059-SUB-L-MGT-TAGET-YN   ;SUB한도관리대상여부
+      *N  V1JL4059-IDSTRY-PSP-SUB-LIMT  ;산업별규모별SUB한도
+      *N  V1JL4059-IDSTRY-PSP-TE-AMT
+      * 산업별규모별토탈익스포져금액
+      *G  V1JL4059-APLCN-BZTYP          ;신청업종
+      *X  V1JL4059-APLCN-LC-BZTYP-CD    ;신청대분류업종코드
+      *X  V1JL4059-APLCN-LCB-CD-NAME    ;신청대분류업종코드명
+      *G  V1JL4059-GROUP4               ;그룹4
+      *X  V1JL4059-IDSTRY-BZTYP-CD      ;산업업종코드
+      *X  V1JL4059-IDSTRY-B-CD-NAME     ;산업업종코드명
+      *X  V1JL4059-IDSTRY-MGT-TAGET-YN  ;산업관리대상여부
+      *N  V1JL4059-IDSTRY-TE-LIMT       ;산업토탈익스포져한도
+      *N  V1JL4059-IDSTRY-TE            ;산업토탈익스포져
+      *X  V1JL4059-IDSTRY-H-DSCN-YMD    ;산업취급중단년월일
+      *X  V1JL4059-IDSTRY-E-APLY-YMD    ;산업예외적용년월일
+      *G  V1JL4059-GROUP5               ;그룹5
+      *X  V1JL4059-LAG-CLSFI-BZTYP-CD5  ;대분류업종코드
+      *X  V1JL4059-AREA-HQ-CD           ;지역본부코드
+      *S  V1JL4059-PYY-X-END-EXPSR-AMT  ;전년도말익스포져금액
+      *S  V1JL4059-AREA-HQ-SUB-CLAM     ;지역본부SUB한도금액
+      *S  V1JL4059-AREA-HN-SUB-CLAM
+      * 지역본부순증SUB한도금액
+      *S  V1JL4059-AREA-HQ-EXPSR-AMT    ;지역본부익스포져금액
+      *S  V1JL4059-AREA-HQ-LIMT-EXAN    ;지역본부한도여유금액
+      *S  V1JL4059-AREA-HQ-SUB-EXHS-RT  ;지역본부SUB소진율
+      *S  V1JL4059-AREA-HE-ATHOR-CLAM
+      * 지역본부예외승인한도금액
+      *S  V1JL4059-AREA-HE-ATHOR-AMT    ;지역본부예외승인금액
+      *S  V1JL4059-AREA-E-ATHOR-EXAN    ;지역예외승인여유금액
+      *S  V1JL4059-AREA-EA-EXHS-RT      ;지역예외승인소진율
+      *S  V1JL4059-AREA-HE-BASE         ;지역본부기준소진율

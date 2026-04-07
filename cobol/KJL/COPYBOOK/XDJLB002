@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : XDJLB002                                               *
+      *@ DESC : DC첨부파일관리COPYBOOK                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-16 14:45:06                          *
+      *  생성일시     : 2020-12-16 14:45:07                          *
+      *  전체길이     : 00000409 BYTES                               *
+      *================================================================*
+           03  XDJLB002-RETURN.
+             05  XDJLB002-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB002-OK            VALUE  '00'.
+                 88  COND-XDJLB002-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB002-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB002-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB002-ERROR         VALUE  '09'.
+                 88  COND-XDJLB002-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB002-SYSERROR      VALUE  '99'.
+             05  XDJLB002-R-LINE                 PIC  9(006).
+             05  XDJLB002-R-ERRCD                PIC  X(008).
+             05  XDJLB002-R-TREAT-CD             PIC  X(008).
+             05  XDJLB002-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB002-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB002-I-PRCSS-DSTIC          PIC  X(002).
+      *--       한도신청번호
+             05  XDJLB002-I-LIMT-APLCN-NO        PIC  X(010).
+      *--       첨부파일일련번호
+             05  XDJLB002-I-APNDX-FILE-SERNO     PIC  9(003).
+      *--       첨부파일식별자
+             05  XDJLB002-I-APNDX-FILE-IDNFR     PIC  X(040).
+      *--       첨부파일내용
+             05  XDJLB002-I-APNDX-FILE-CTNT      PIC  X(172).
+      *--       첨부파일명
+             05  XDJLB002-I-APNDX-FILE-NAME      PIC  X(172).
+      *--       KB-PIN
+             05  XDJLB002-I-KB-PIN               PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJLB002-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB002-O-PRCSS-RESULT         PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  0  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB002-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB002-I-LIMT-APLCN-NO      ;한도신청번호
+      *N  XDJLB002-I-APNDX-FILE-SERNO   ;첨부파일일련번호
+      *X  XDJLB002-I-APNDX-FILE-IDNFR   ;첨부파일식별자
+      *X  XDJLB002-I-APNDX-FILE-CTNT    ;첨부파일내용
+      *X  XDJLB002-I-APNDX-FILE-NAME    ;첨부파일명
+      *X  XDJLB002-I-KB-PIN             ;KB-PIN
+      *X  XDJLB002-O-PRCSS-RESULT       ;처리결과

@@ -1,0 +1,267 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4711 (DC신용공여기관정보조회)
+      *@처리유형  : DC
+      *@처리개요  : 신용공여관련 기관정보를 조회하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20120905: 신규작성
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJL0071                     : R
+      **
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4711.
+       AUTHOR.                        하윤희.
+       DATE-WRITTEN.                   12/09/05.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4711'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-B3900001             PIC  X(008) VALUE 'B3900001'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-NEXT-KEY.
+               05 WK-GRNTY-INSTI-NO    PIC  X(013).
+               05 WK-TE-GRNTY-INSTI-CD PIC  X(003).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL0711-CA.
+           COPY  XQJL0711.
+
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4711-CA.
+           COPY  XDJL4711.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4711-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4711-OUT
+                            XDJL4711-RETURN
+      *@DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@  신용공여관련기관정보(THKJL0071)원장 조회
+
+           EVALUATE XDJL4711-I-PRCSS-DSTIC
+
+           WHEN CO-CHA-01
+
+               INITIALIZE       XQJL0711-IN
+
+      *       그룹회사코드
+               MOVE  BICOM-GROUP-CO-CD
+                 TO  XQJL0711-I-GROUP-CO-CD
+      *       기준년월
+               MOVE  XDJL4711-I-BASE-YM
+                 TO  XQJL0711-I-BASE-YM
+
+      *       보증기관번호
+               MOVE  XDJL4711-I-GRNTY-INSTI-NO
+                 TO  XQJL0711-I-GRNTY-INSTI-NO
+
+      *       중단거래여부 확인
+               IF  BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-NEXT-KEY
+
+      *            N보증기관번호
+                   MOVE WK-GRNTY-INSTI-NO
+                     TO XQJL0711-I-N-GRNTY-INSTI-NO
+      *            NTE보증기관코드
+                   MOVE WK-TE-GRNTY-INSTI-CD
+                     TO XQJL0711-I-N-TE-GRNTY-INSTI-CD
+               END-IF
+
+               #DYSQLA QJL0711 SELECT XQJL0711-CA
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900001 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-EVALUATE
+
+                        .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *        총라인수
+               MOVE  WK-I
+                 TO  XDJL4711-O-TOTAL-LINE-CNT
+
+      *        보증기관번호
+               MOVE  XQJL0711-O-GRNTY-INSTI-NO(WK-I)
+                 TO  XDJL4711-O-GRNTY-INSTI-NO(WK-I)
+
+      *        TE보증기관코드
+               MOVE  XQJL0711-O-T-E-GRNTY-INSTI-CD(WK-I)
+                 TO  XDJL4711-O-T-E-GRNTY-INSTI-CD(WK-I)
+
+      *        보증기관명
+               MOVE  XQJL0711-O-GRNTY-INSTI-NAME(WK-I)
+                 TO  XDJL4711-O-GRNTY-INSTI-NAME(WK-I)
+
+      *        신표준산업분류코드
+               MOVE  XQJL0711-O-NEW-SI-CLSFI-CD(WK-I)
+                 TO  XDJL4711-O-NEW-SI-CLSFI-CD(WK-I)
+
+      *        국가코드
+               MOVE  XQJL0711-O-NATNL-CD(WK-I)
+                 TO  XDJL4711-O-NATNL-CD(WK-I)
+
+      *        신용공여위험가중치
+               MOVE  XQJL0711-O-GRCR-RISK-WGHT(WK-I)
+                 TO  XDJL4711-O-GRCR-RISK-WGHT(WK-I)
+
+      *        신용공여기관구분
+               MOVE  XQJL0711-O-GRCR-INSTI-DSTCD(WK-I)
+                 TO  XDJL4711-O-GRCR-INSTI-DSTCD(WK-I)
+
+      *        보증기관고객식별자
+               MOVE  XQJL0711-O-GRNTY-I-CUST-IDNFR(WK-I)
+                 TO  XDJL4711-O-GRNTY-I-CUST-IDNFR(WK-I)
+
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT > 100
+      *        N보증기관번호
+               MOVE XQJL0711-O-GRNTY-INSTI-NO(WK-I)
+                 TO WK-GRNTY-INSTI-NO
+      *        NTE보증기관코드
+               MOVE XQJL0711-O-T-E-GRNTY-INSTI-CD(WK-I)
+                 TO WK-TE-GRNTY-INSTI-CD
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+
+                                .
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

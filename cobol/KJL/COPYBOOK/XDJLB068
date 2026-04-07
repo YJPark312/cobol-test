@@ -1,0 +1,65 @@
+      *================================================================*
+      *@ NAME : XDJLB068                                               *
+      *@ DESC : DC산업취급관리COPYBOOK                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-10-21 13:38:36                          *
+      *  생성일시     : 2022-10-21 13:38:36                          *
+      *  전체길이     : 00039030 BYTES                               *
+      *================================================================*
+           03  XDJLB068-RETURN.
+             05  XDJLB068-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB068-OK            VALUE  '00'.
+                 88  COND-XDJLB068-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB068-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB068-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB068-ERROR         VALUE  '09'.
+                 88  COND-XDJLB068-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB068-SYSERROR      VALUE  '99'.
+             05  XDJLB068-R-LINE                 PIC  9(006).
+             05  XDJLB068-R-ERRCD                PIC  X(008).
+             05  XDJLB068-R-TREAT-CD             PIC  X(008).
+             05  XDJLB068-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB068-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB068-I-PRCSS-DSTIC          PIC  X(002).
+      *--       대분류업종코드1
+             05  XDJLB068-I-LAG-CLSFI-BZTYP-CD1  PIC  X(003).
+      *--       일련번호1
+             05  XDJLB068-I-SERNO1               PIC S9(007)    COMP-3.
+      *--       취급중단년월일
+             05  XDJLB068-I-HNDLN-DSCN-YMD       PIC  X(008).
+      *--       예외적용년월일
+             05  XDJLB068-I-ECEPT-APLY-YMD       PIC  X(008).
+      *--       총라인수
+             05  XDJLB068-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJLB068-I-GRID                 OCCURS 001000 TIMES.
+      *--         대분류업종코드2
+               07  XDJLB068-I-LAG-CLSFI-BZTYP-CD2
+                                                 PIC  X(003).
+      *--         대분류업종코드명2
+               07  XDJLB068-I-LAG-C-BZTYP-CD-NM2 PIC  X(032).
+      *--         일련번호2
+               07  XDJLB068-I-SERNO2             PIC S9(007)    COMP-3.
+      *----------------------------------------------------------------*
+           03  XDJLB068-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB068-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  6  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB068-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB068-I-LAG-CLSFI-BZTYP-CD1;대분류업종코드1
+      *S3 XDJLB068-I-SERNO1             ;일련번호1
+      *X  XDJLB068-I-HNDLN-DSCN-YMD     ;취급중단년월일
+      *X  XDJLB068-I-ECEPT-APLY-YMD     ;예외적용년월일
+      *N  XDJLB068-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB068-I-GRID               ;그리드
+      *X  XDJLB068-I-LAG-CLSFI-BZTYP-CD2;대분류업종코드2
+      *X  XDJLB068-I-LAG-C-BZTYP-CD-NM2 ;대분류업종코드명2
+      *S3 XDJLB068-I-SERNO2             ;일련번호2
+      *X  XDJLB068-O-PRCSS-RSULT        ;처리결과

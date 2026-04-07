@@ -1,0 +1,357 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: IJL4007 (TE환산적용금액　조회)
+      *@처리유형  : IC
+      *@처리개요  : TE환산적용금액　조회프로그램
+      *@호출업무  : ALPS본건금액－＞ALPS본건TE제공　기능
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20101126: NEW
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     IJL4007.
+       AUTHOR.                         백현정.
+       DATE-WRITTEN.                   10/11/26.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200223             PIC  X(008) VALUE 'B4200223'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'IJL4007'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-25               PIC  X(002) VALUE '25'.
+           03  CO-CHA-30               PIC  X(002) VALUE '30'.
+
+           03  CO-NUM-20               PIC  9(002) VALUE 20.
+           03  CO-NUM-50               PIC  9(002) VALUE 50.
+           03  CO-NUM-100              PIC  9(003) VALUE 100.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-GROUP-CO-CD          PIC  X(003).
+           03  WK-BASE-YM              PIC  X(006).
+           03  WK-PRDCT-LAG-CLSFI-CD   PIC  X(002).
+           03  WK-PRDCT-MEDM-CLSFI-CD  PIC  X(002).
+           03  WK-PRDCT-TMPLT-CD       PIC  X(003).
+           03  WK-PRDCT-NO             PIC  X(005).
+      *        상품코드
+           03  WK-PRDCT-CD             PIC  X(012).
+      *   한도기준TE환산율
+           03  WK-LIMT-BASE-TE-UTCRT   PIC  S9(003) COMP-3.
+      *   본건신청금액
+           03  WK-MAIN-CASZ-APLCN-AMT  PIC  S9(015) COMP-3.
+      *   본건TE금액
+           03  WK-MAIN-CAS-TE          PIC  S9(015) COMP-3.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *한도기준TE환산율　조회
+       01  XQJLI071-CA.
+           COPY    XQJLI071.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    IC COPYBOOK
+       01  XIJL4007-CA.
+           COPY  XIJL4007.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XIJL4007-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 초기화
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XIJL4007-OUT
+                         XIJL4007-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XIJL4007-I-PRCSS-DSTIC = SPACE
+      *@처리내용:처리구분미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4007-I-PRCSS-DSTIC = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@2.2 기준년월CHECK
+      *@실행조건:XIJL4007-I-BASE-YM = SPACE
+      *@처리내용:기준년월미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XIJL4007-I-BASE-YM = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@3 업무처리
+           IF XIJL4007-I-TOTAL-NOITM1 > ZERO
+      *@3.1 본건TE금액　산출
+               PERFORM S3100-SUB-PROCESS-RTN
+                  THRU S3100-SUB-PROCESS-EXT
+           ELSE
+      *@3.2 본건신청건수＞０이　아니면
+               MOVE  ZERO
+                 TO  XIJL4007-O-MAIN-CAS-TE
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  본건TE금액　산출
+      *------------------------------------------------------------------
+       S3100-SUB-PROCESS-RTN.
+
+      *@그리드건수만큼루프를돌면서본건토탈익스포져금액산출구현        04840019
+           PERFORM VARYING WK-I FROM 1 BY 1                             04850015
+             UNTIL WK-I > XIJL4007-I-TOTAL-NOITM1                       04860015
+                                                                        04870003
+      *@   변수 MOVE
+      *@   그룹회사코드                                                    018
+                MOVE BICOM-GROUP-CO-CD                                       018
+                  TO WK-GROUP-CO-CD                                          018
+      *@   기준년월                                                        019
+                MOVE XIJL4007-I-BASE-YM                                      019
+                  TO WK-BASE-YM                                              019
+      *@   상품대분류코드                                                  019
+                MOVE XIJL4007-I-PRDCT-LAG-CLSFI-CD(WK-I)                     019
+                  TO WK-PRDCT-LAG-CLSFI-CD                                   019
+      *@   상품중분류코드                                                  019
+                MOVE XIJL4007-I-PRDCT-MEDM-CLSFI-CD(WK-I)                    019
+                  TO WK-PRDCT-MEDM-CLSFI-CD                                  019
+      *@   상품템플릿코드                                                  019
+                MOVE XIJL4007-I-PRDCT-TMPLT-CD(WK-I)                         019
+                  TO WK-PRDCT-TMPLT-CD                                       019
+      *@   상품일련번호
+                MOVE XIJL4007-I-PRDCT-NO(WK-I)
+                  TO WK-PRDCT-NO
+
+      *@   기업여신이면　등록　환산율　조회
+               IF  WK-PRDCT-LAG-CLSFI-CD = CO-CHA-25
+      *@          한도기준TE환산율　조회
+                   PERFORM S3110-QJLI071-CALL-RTN
+                      THRU S3110-QJLI071-CALL-EXT
+               ELSE
+      *@   신탁상품이면　환산율＝１００％
+               IF  WK-PRDCT-LAG-CLSFI-CD = CO-CHA-30
+                   MOVE  CO-NUM-100
+                     TO  WK-LIMT-BASE-TE-UTCRT
+               ELSE
+      *@   기타이면　환산율＝０％
+                   MOVE  ZERO
+                     TO  WK-LIMT-BASE-TE-UTCRT
+               END-IF
+               END-IF
+
+      *@   본건신청금액
+                MOVE XIJL4007-I-MAIN-CASZ-APLCN-AMT(WK-I)
+                  TO WK-MAIN-CASZ-APLCN-AMT
+                                                                        04899519
+                IF  WK-LIMT-BASE-TE-UTCRT > 0
+                    COMPUTE  WK-MAIN-CAS-TE                                 0489
+                          =  WK-MAIN-CAS-TE                                 0489
+                          + (WK-MAIN-CASZ-APLCN-AMT
+                          *  WK-LIMT-BASE-TE-UTCRT)/100                     0490
+                END-IF
+
+           END-PERFORM                                                  04910003
+           .
+       S3100-SUB-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한도기준TE환산율　조회
+      *-----------------------------------------------------------------
+       S3110-QJLI071-CALL-RTN.
+
+      *@3.1.1 초기화
+           INITIALIZE    XQJLI071-IN
+
+      *@3.1.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJLI071)입력파라메타=
+      *@SET(그룹회사코드,기준년월일,상품정보)
+
+      *@   변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE WK-GROUP-CO-CD                                          01870024
+             TO XQJLI071-I-GROUP-CO-CD                                  01880024
+      *@   기준년월                                                   01940024
+           MOVE WK-BASE-YM                                              01950024
+             TO XQJLI071-I-BASE-YM                                      01960024
+      *@   상품대분류코드                                             01940024
+           MOVE WK-PRDCT-LAG-CLSFI-CD                                   01950024
+             TO XQJLI071-I-PRDCT-LAG-CLSFI-CD                           01960024
+      *@   상품중분류코드                                             01940024
+           MOVE WK-PRDCT-MEDM-CLSFI-CD                                  01950024
+             TO XQJLI071-I-PRDCT-MEDM-CLSFI-CD                          01960024
+      *@   상품템플릿코드                                             01940024
+           MOVE WK-PRDCT-TMPLT-CD                                       01950024
+             TO XQJLI071-I-PRDCT-TMPLT-CD                               01960024
+      *@   상품일련번호
+           MOVE WK-PRDCT-NO
+             TO XQJLI071-I-PRDCT-NO
+
+      *@3.1.3 SLQIO프로그램 호출
+      *@처리내용:QJLI071프로그램을 호출한다
+      *@관련테이블:THKJL0118 접근유형:READ
+           #DYSQLA QJLI071 XQJLI071-CA
+
+      *@3.1.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@      상품정보＝상품대＋상품중＋템플릿＋상품번호
+                    STRING XQJLI071-I-PRDCT-LAG-CLSFI-CD
+                           XQJLI071-I-PRDCT-MEDM-CLSFI-CD
+                           XQJLI071-I-PRDCT-TMPLT-CD
+                           XQJLI071-I-PRDCT-NO
+                    DELIMITED BY SIZE INTO  WK-PRDCT-CD
+
+                    IF  WK-PRDCT-CD = '2539M7100002' OR
+                                      '2539M7100003'
+                        MOVE  CO-NUM-20
+                          TO  WK-LIMT-BASE-TE-UTCRT
+                    ELSE
+                    IF  WK-PRDCT-CD = '2539M7100004'
+                        MOVE  CO-NUM-50
+                          TO  WK-LIMT-BASE-TE-UTCRT
+                    ELSE
+                        MOVE  XQJLI071-O-LIMT-BASE-TE-UTCRT
+                          TO  WK-LIMT-BASE-TE-UTCRT
+                    END-IF
+                    END-IF
+               WHEN COND-DBSQL-MRNF
+      * TE상품정보에　없으면
+                    MOVE  CO-NUM-100
+                      TO  WK-LIMT-BASE-TE-UTCRT
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B4200223 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3110-QJLI071-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력 조립
+
+      *@   본건TE금액（단위：백만원）
+      *@   본건TE금액> 0아니면　본건TE금액= 0
+           IF WK-MAIN-CAS-TE > 0
+              COMPUTE XIJL4007-O-MAIN-CAS-TE
+                    = WK-MAIN-CAS-TE / 1000000
+           ELSE
+              MOVE ZERO
+                TO XIJL4007-O-MAIN-CAS-TE
+           END-IF
+
+      *@   본건여신성TE금액=본건TE금액（단위：백만원）
+           MOVE XIJL4007-O-MAIN-CAS-TE
+             TO XIJL4007-O-MAIN-CL-INCLIN-TE
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상종료함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

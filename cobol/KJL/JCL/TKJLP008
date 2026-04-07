@@ -1,0 +1,62 @@
+//TKJLP008 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0008 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0008',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0008,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0008
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "고객식별자"                         POSITION(      12         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      22         )
+   CHAR(                     13)                ,
+   "총자산"                             POSITION(      35:      42)
+   DECIMAL                                      ,
+   "매출액"                             POSITION(      43:      50)
+   DECIMAL                                      ,
+   "기준년자기자본금"                   POSITION(      51:      58)
+   DECIMAL                                      ,
+   "금융비용차입금"                     POSITION(      59:      66)
+   DECIMAL                                      ,
+   "당행차입금"                         POSITION(      67:      74)
+   DECIMAL                                      ,
+   "영업현금흐름액"                     POSITION(      75:      82)
+   DECIMAL                                      ,
+   "업체평균이자율"                     POSITION(      83:      85)
+   DECIMAL                                      ,
+   "여신성자산한도"                     POSITION(      86:      93)
+   DECIMAL                                      ,
+   "신용등급지원비율"                   POSITION(      94:      96)
+   DECIMAL                                      ,
+   "자기자본기준금액"                   POSITION(      97:     104)
+   DECIMAL                                      ,
+   "영업활동기준한도"                   POSITION(     105:     112)
+   DECIMAL                                     ,
+   "포괄설정가능금액"                   POSITION(     113:     120)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(     121         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     141         )
+   CHAR(                      7)
+   )
+//

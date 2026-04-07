@@ -1,0 +1,199 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL413A (DC계열기업순위조회)
+      *@처리유형  : DC
+      *@처리개요  : 차주별 그룹의 계열기업순위를 조회하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20120712: 신규작성
+      *@PJH    :20170201:  KB-PIN
+      * YBH    :20170803: 암호화 작업
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL413A.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   12/07/12.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL413A'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-B2700093             PIC  X(008) VALUE 'B2700093'.
+           03  CO-UKJL0002             PIC  X(008) VALUE 'UKJL0002'.
+           03  CO-B2100001             PIC  X(008) VALUE 'B2100001'.
+           03  CO-UKJL0033             PIC  X(008) VALUE 'UKJL0033'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL013A-CA.
+           COPY  XQJL013A.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL413A-CA.
+           COPY  XDJL413A.
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL413A-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL413A-OUT
+                            XDJL413A-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   기준년월
+           IF XDJL413A-I-BASE-YM = (SPACE OR '000000')
+               #ERROR CO-B2700093 CO-UKJL0002 CO-STAT-ERROR
+           END-IF
+
+      *    KB-PIN
+           IF XDJL413A-I-KB-PIN = SPACE
+               #ERROR CO-B2100001 CO-UKJL0033 CO-STAT-ERROR
+           END-IF
+           .
+
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           INITIALIZE       XQJL013A-IN
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL013A-I-GROUP-CO-CD
+      *   기준년월
+           MOVE XDJL413A-I-BASE-YM
+             TO XQJL013A-I-BASE-YM
+170201*   고객식별자
+           MOVE XDJL413A-I-KB-PIN
+             TO XQJL013A-I-KB-PIN
+
+           #DYSQLA QJL013A SELECT XQJL013A-CA
+
+      *   조회결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *@      조회자료MOVE
+      *       계열기업군코드
+               MOVE XQJL013A-O-AFFLT-CORP-GROUP-CD
+                 TO XDJL413A-O-AFFLT-CORP-GROUP-CD
+      *       계열기업순위
+               MOVE XQJL013A-O-AFFLT-CORP-RANKG
+                 TO XDJL413A-O-AFFLT-CORP-RANKG
+      *       계열기업군명
+               MOVE XQJL013A-O-AFFLT-C-GROUP-NAME
+                 TO XDJL413A-O-AFFLT-C-GROUP-NAME
+           WHEN COND-DBSQL-MRNF
+      *       계열기업군코드
+               MOVE SPACE
+                 TO XDJL413A-O-AFFLT-CORP-GROUP-CD
+      *       계열기업순위
+               MOVE ZERO
+                 TO XDJL413A-O-AFFLT-CORP-RANKG
+      *       계열기업군명
+               MOVE SPACE
+                 TO XDJL413A-O-AFFLT-C-GROUP-NAME
+
+               #OKEXIT  CO-STAT-NOTFND
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

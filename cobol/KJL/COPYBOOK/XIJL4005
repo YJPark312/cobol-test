@@ -1,0 +1,248 @@
+      *================================================================*
+      *@ NAME : XIJL4005                                               *
+      *@ DESC : ICTE관리한도및익스포져조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-07-24 10:26:09                          *
+      *  생성일시     : 2017-07-24 10:26:10                          *
+      *  전체길이     : 00000097 BYTES                               *
+      *================================================================*
+           03  XIJL4005-RETURN.
+             05  XIJL4005-R-STAT                 PIC  X(002).
+                 88  COND-XIJL4005-OK            VALUE  '00'.
+                 88  COND-XIJL4005-KEYDUP        VALUE  '01'.
+                 88  COND-XIJL4005-NOTFOUND      VALUE  '02'.
+                 88  COND-XIJL4005-SPVSTOP       VALUE  '05'.
+                 88  COND-XIJL4005-ERROR         VALUE  '09'.
+                 88  COND-XIJL4005-ABNORMAL      VALUE  '98'.
+                 88  COND-XIJL4005-SYSERROR      VALUE  '99'.
+             05  XIJL4005-R-LINE                 PIC  9(006).
+             05  XIJL4005-R-ERRCD                PIC  X(008).
+             05  XIJL4005-R-TREAT-CD             PIC  X(008).
+             05  XIJL4005-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XIJL4005-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XIJL4005-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준일자
+             05  XIJL4005-I-BASE-YMD             PIC  X(008).
+      *--       KB-PIN
+             05  XIJL4005-I-KB-PIN               PIC  X(010).
+      *--       표준산업분류코드
+             05  XIJL4005-I-STND-I-CLSFI-CD      PIC  X(005).
+      *--       신청표준산업분류코드
+             05  XIJL4005-I-APLCN-SI-CLSFI-CD    PIC  X(005).
+      *--       지역본부코드
+             05  XIJL4005-I-AREA-HQ-CD           PIC  X(004).
+      *--       예비
+             05  XIJL4005-I-SPARE                PIC  X(063).
+      *----------------------------------------------------------------*
+           03  XIJL4005-OUT.
+      *----------------------------------------------------------------*
+      *--       그룹1(개별)
+             05  XIJL4005-O-GROUP1.
+      *--         한도고객구분
+               07  XIJL4005-O-LIMT-CUST-DSTCD    PIC  X(001).
+      *--         명목액기준한도
+               07  XIJL4005-O-TTL-AMT-BASE-CLAM  PIC  9(015).
+      *--         TE관리한도
+               07  XIJL4005-O-TE-MGT-CLAM        PIC  9(015).
+      *--         여신성TE관리한도
+               07  XIJL4005-O-LNBZ-I-TE-MGT-LIMT PIC  9(015).
+      *--         TE
+               07  XIJL4005-O-TE                 PIC  9(015).
+      *--         여신성TE
+               07  XIJL4005-O-TE-LNBZ-INCLIN-AMT PIC  9(015).
+      *--       그룹2(그룹)
+             05  XIJL4005-O-GROUP2.
+      *--         그룹여부
+               07  XIJL4005-O-GROUP-YN           PIC  X(001).
+      *--         그룹코드
+               07  XIJL4005-O-GROUP-CD           PIC  X(003).
+      *--         그룹명
+               07  XIJL4005-O-GROUP-NAME         PIC  X(042).
+      *--         그룹관리한도
+               07  XIJL4005-O-GROUP-MGT-LIMT     PIC  9(015).
+      *--         그룹익스포져
+               07  XIJL4005-O-GROUP-EXPSR        PIC  9(015).
+      *--       그룹3(SUBLIMIT)
+             05  XIJL4005-O-GROUP3.
+      *--         주업종
+               07  XIJL4005-O-MAIN-BZTYP.
+      *--           대분류업종코드
+                 09  XIJL4005-O-LAG-CLSFI-BZTYP-CD
+                                                 PIC  X(003).
+      *--           대분류업종코드명
+                 09  XIJL4005-O-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(032).
+      *--           산업TE기업규모구분
+                 09  XIJL4005-O-IDSTRY-TCS-DSTCD PIC  X(001).
+      *--           한도초과년월일
+                 09  XIJL4005-O-LIMT-EXCS-YMD    PIC  X(008).
+      *--           예외적용년월일
+                 09  XIJL4005-O-ECEPT-APLY-YMD   PIC  X(008).
+      *--           취급중단년월일
+                 09  XIJL4005-O-HNDLN-DSCN-YMD   PIC  X(008).
+      *--           취급기준1적용년월일
+                 09  XIJL4005-O-HNDLN-B-1-APLY-YMD
+                                                 PIC  X(008).
+      *--           취급기준2적용년월일
+                 09  XIJL4005-O-HNDLN-B-2-APLY-YMD
+                                                 PIC  X(008).
+      *--           SUB한도관리대상여부
+                 09  XIJL4005-O-SUB-L-MGT-TAGET-YN
+                                                 PIC  X(001).
+      *--           산업별규모별SUB한도
+                 09  XIJL4005-O-IDSTRY-PSP-SUB-CLAM
+                                                 PIC  9(015).
+      *--           산업별규모별익스포져
+                 09  XIJL4005-O-IDSTRY-PSP-TE-AMT
+                                                 PIC  9(015).
+      *--           SUB한도관리대상여부2
+                 09  XIJL4005-O-SUB-L-MGT-TAGET-YN2
+                                                 PIC  X(001).
+      *--           산업별규모별SUB한도2
+                 09  XIJL4005-O-IDSTRY-PSP-SUB-CLA2
+                                                 PIC  9(015).
+      *--           산업별규모별익스포져2
+                 09  XIJL4005-O-IDSTRY-PSP-TE-AMT2
+                                                 PIC  9(015).
+      *--         신청업종
+               07  XIJL4005-O-APLCN-BZTYP.
+      *--           신청대분류업종코드
+                 09  XIJL4005-O-APLCN-LC-BZTYP-CD
+                                                 PIC  X(003).
+      *--           신청대분류업종코드명
+                 09  XIJL4005-O-APLCN-LCB-CD-NAME
+                                                 PIC  X(032).
+      *--       그룹4(산업)
+             05  XIJL4005-O-GROUP4.
+      *--         산업업종코드
+               07  XIJL4005-O-IDSTRY-BZTYP-CD    PIC  X(003).
+      *--         산업업종코드명
+               07  XIJL4005-O-IDSTRY-B-CD-NAME   PIC  X(032).
+      *--         산업관리대상여부
+               07  XIJL4005-O-IDSTRY-MGT-TAGET-YN
+                                                 PIC  X(001).
+      *--         산업토탈익스포져한도
+               07  XIJL4005-O-IDSTRY-TE-LIMT     PIC  9(015).
+      *--         산업토탈익스포져
+               07  XIJL4005-O-IDSTRY-TE          PIC  9(015).
+      *--         산업취급중단년월일
+               07  XIJL4005-O-IDSTRY-H-DSCN-YMD  PIC  X(008).
+      *--         산업예외적용년월일
+               07  XIJL4005-O-IDSTRY-E-APLY-YMD  PIC  X(008).
+      *--       그룹5(지역본부)
+             05  XIJL4005-O-GROUP5.
+      *--         대분류업종코드
+               07  XIJL4005-O-LAG-CLSFI-BZTYP-CD5
+                                                 PIC  X(003).
+      *--         지역본부코드
+               07  XIJL4005-O-AREA-HQ-CD         PIC  X(004).
+      *--         전년도말익스포져금액
+               07  XIJL4005-O-PYY-X-END-EXPSR-AMT
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부SUB한도
+               07  XIJL4005-O-AREA-HQ-SUB-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부순증SUB한도
+               07  XIJL4005-O-AREA-HN-SUB-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부익스포져금액
+               07  XIJL4005-O-AREA-HQ-EXPSR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부한도여유금액
+               07  XIJL4005-O-AREA-HQ-LIMT-EXAN  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부SUB소진율
+               07  XIJL4005-O-AREA-HQ-SUB-EXHS-RT
+                                                 PIC  9(003)V9(02).
+      *--         지역본부예외승인한도
+               07  XIJL4005-O-AREA-HE-ATHOR-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부예외승인금액
+               07  XIJL4005-O-AREA-HE-ATHOR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역예외승인여유금액
+               07  XIJL4005-O-AREA-E-ATHOR-EXAN  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역예외승인소진율
+               07  XIJL4005-O-AREA-EA-EXHS-RT    PIC  9(003)V9(02).
+      *--         지역본부기준소진율
+               07  XIJL4005-O-AREA-HE-BASE       PIC  9(003)V9(02).
+      *--       예비
+             05  XIJL4005-O-SPARE                PIC  X(043).
+      *================================================================*
+      *        X  I  J  L  4  0  0  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XIJL4005-I-PRCSS-DSTIC        ;처리구분
+      *X  XIJL4005-I-BASE-YMD           ;조회기준일자
+      *X  XIJL4005-I-KB-PIN             ;KB-PIN
+      *X  XIJL4005-I-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XIJL4005-I-APLCN-SI-CLSFI-CD  ;신청표준산업분류코드
+      *X  XIJL4005-I-AREA-HQ-CD         ;지역본부코드
+      *X  XIJL4005-I-SPARE              ;예비
+      *G  XIJL4005-O-GROUP1             ;그룹1(개별)
+      *X  XIJL4005-O-LIMT-CUST-DSTCD    ;한도고객구분
+      *N  XIJL4005-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *N  XIJL4005-O-TE-MGT-CLAM        ;TE관리한도
+      *N  XIJL4005-O-LNBZ-I-TE-MGT-LIMT ;여신성TE관리한도
+      *N  XIJL4005-O-TE                 ;TE
+      *N  XIJL4005-O-TE-LNBZ-INCLIN-AMT ;여신성TE
+      *G  XIJL4005-O-GROUP2             ;그룹2(그룹)
+      *X  XIJL4005-O-GROUP-YN           ;그룹여부
+      *X  XIJL4005-O-GROUP-CD           ;그룹코드
+      *X  XIJL4005-O-GROUP-NAME         ;그룹명
+      *N  XIJL4005-O-GROUP-MGT-LIMT     ;그룹관리한도
+      *N  XIJL4005-O-GROUP-EXPSR        ;그룹익스포져
+      *G  XIJL4005-O-GROUP3             ;그룹3(SUBLIMIT)
+      *G  XIJL4005-O-MAIN-BZTYP         ;주업종
+      *X  XIJL4005-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XIJL4005-O-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *X  XIJL4005-O-IDSTRY-TCS-DSTCD   ;산업TE기업규모구분
+      *X  XIJL4005-O-LIMT-EXCS-YMD      ;한도초과년월일
+      *X  XIJL4005-O-ECEPT-APLY-YMD     ;예외적용년월일
+      *X  XIJL4005-O-HNDLN-DSCN-YMD     ;취급중단년월일
+      *X  XIJL4005-O-HNDLN-B-1-APLY-YMD
+      * 취급기준1적용년월일
+      *X  XIJL4005-O-HNDLN-B-2-APLY-YMD
+      * 취급기준2적용년월일
+      *X  XIJL4005-O-SUB-L-MGT-TAGET-YN ;SUB한도관리대상여부
+      *N  XIJL4005-O-IDSTRY-PSP-SUB-CLAM
+      * 산업별규모별SUB한도
+      *N  XIJL4005-O-IDSTRY-PSP-TE-AMT  ;산업별규모별익스포져
+      *X  XIJL4005-O-SUB-L-MGT-TAGET-YN2
+      * SUB한도관리대상여부2
+      *N  XIJL4005-O-IDSTRY-PSP-SUB-CLA2
+      * 산업별규모별SUB한도2
+      *N  XIJL4005-O-IDSTRY-PSP-TE-AMT2
+      * 산업별규모별익스포져2
+      *G  XIJL4005-O-APLCN-BZTYP        ;신청업종
+      *X  XIJL4005-O-APLCN-LC-BZTYP-CD  ;신청대분류업종코드
+      *X  XIJL4005-O-APLCN-LCB-CD-NAME  ;신청대분류업종코드명
+      *G  XIJL4005-O-GROUP4             ;그룹4(산업)
+      *X  XIJL4005-O-IDSTRY-BZTYP-CD    ;산업업종코드
+      *X  XIJL4005-O-IDSTRY-B-CD-NAME   ;산업업종코드명
+      *X  XIJL4005-O-IDSTRY-MGT-TAGET-YN;산업관리대상여부
+      *N  XIJL4005-O-IDSTRY-TE-LIMT     ;산업토탈익스포져한도
+      *N  XIJL4005-O-IDSTRY-TE          ;산업토탈익스포져
+      *X  XIJL4005-O-IDSTRY-H-DSCN-YMD  ;산업취급중단년월일
+      *X  XIJL4005-O-IDSTRY-E-APLY-YMD  ;산업예외적용년월일
+      *G  XIJL4005-O-GROUP5             ;그룹5(지역본부)
+      *X  XIJL4005-O-LAG-CLSFI-BZTYP-CD5;대분류업종코드
+      *X  XIJL4005-O-AREA-HQ-CD         ;지역본부코드
+      *S  XIJL4005-O-PYY-X-END-EXPSR-AMT
+      * 전년도말익스포져금액
+      *S  XIJL4005-O-AREA-HQ-SUB-CLAM   ;지역본부SUB한도
+      *S  XIJL4005-O-AREA-HN-SUB-CLAM   ;지역본부순증SUB한도
+      *S  XIJL4005-O-AREA-HQ-EXPSR-AMT  ;지역본부익스포져금액
+      *S  XIJL4005-O-AREA-HQ-LIMT-EXAN  ;지역본부한도여유금액
+      *N  XIJL4005-O-AREA-HQ-SUB-EXHS-RT;지역본부SUB소진율
+      *S  XIJL4005-O-AREA-HE-ATHOR-CLAM ;지역본부예외승인한도
+      *S  XIJL4005-O-AREA-HE-ATHOR-AMT  ;지역본부예외승인금액
+      *S  XIJL4005-O-AREA-E-ATHOR-EXAN  ;지역예외승인여유금액
+      *N  XIJL4005-O-AREA-EA-EXHS-RT    ;지역예외승인소진율
+      *N  XIJL4005-O-AREA-HE-BASE       ;지역본부기준소진율
+      *X  XIJL4005-O-SPARE              ;예비

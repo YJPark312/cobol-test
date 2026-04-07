@@ -1,0 +1,43 @@
+      *===========================================================
+      *  프로그램명    : QJL4054
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL4054
+      *  사용예        : 01  XQJL4054-CA.
+      *                      COPY  XQJL4054.
+      *  최종변경일시  : 2024년01월24일14시18분20초
+      *===========================================================
+           03  XQJL4054-IN.
+      *            그룹회사코드
+               05  XQJL4054-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL4054-I-BASE-YMD
+                                          PIC  X(00008).
+      *            차주고객식별자
+               05  XQJL4054-I-BRWR-CUST-IDNFR
+                                          PIC  X(00010).
+           03  XQJL4054-OUT.
+      *            기준년월일
+               05  XQJL4054-O-BASE-YMD
+                           OCCURS  00050  PIC  X(00008).
+      *            차주고객식별자
+               05  XQJL4054-O-BRWR-CUST-IDNFR
+                           OCCURS  00050  PIC  X(00010).
+      *            채무자명
+               05  XQJL4054-O-DBTRZ-NAME
+                           OCCURS  00050  PIC  X(00052).
+      *            거액거래상대방구분
+               05  XQJL4054-O-BSM-T-CNPRT-DSTCD
+                           OCCURS  00050  PIC  X(00001).
+      *            거액CCF환산금액
+               05  XQJL4054-O-BSM-CCF-AUC
+                           OCCURS  00050  PIC S9(00015) COMP-3.
+      *            신용공여익스포져금액
+               05  XQJL4054-O-GRCR-EXPSR-AMT
+                           OCCURS  00050  PIC S9(00015) COMP-3.
+      *            순위
+               05  XQJL4054-O-RANKG
+                           OCCURS  00050  PIC S9(00003) COMP-3.
+      *===========================================================
+      *  XQJL4054   C O P Y B O O K   E N D
+      *===========================================================

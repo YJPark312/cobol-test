@@ -1,0 +1,48 @@
+      *================================================================*
+      *@ NAME : XPJLB039                                               *
+      *@ DESC : PC본부부서기준값등록(신용공여한도관리) COPYBOO     *
+      *@        K                                                      *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-10 11:07:00                          *
+      *  생성일시     : 2009-07-10 11:07:02                          *
+      *================================================================*
+           03  XPJLB039-RETURN.
+             05  XPJLB039-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB039-OK            VALUE  '00'.
+                 88  COND-XPJLB039-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB039-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB039-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB039-ERROR         VALUE  '09'.
+                 88  COND-XPJLB039-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB039-SYSERROR      VALUE  '99'.
+             05  XPJLB039-R-LINE                 PIC  9(006).
+             05  XPJLB039-R-ERRCD                PIC  X(008).
+             05  XPJLB039-R-TREAT-CD             PIC  X(008).
+             05  XPJLB039-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB039-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB039-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XPJLB039-I-BASE-YM              PIC  X(006).
+      *--       업무규제자기자본
+             05  XPJLB039-I-BZWK-R-ONCP-BSAMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       경영지표자기자본
+             05  XPJLB039-I-MGBIZ-I-ONCP-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB039-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB039-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  3  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB039-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB039-I-BASE-YM            ;기준년월
+      *S  XPJLB039-I-BZWK-R-ONCP-BSAMT  ;업무규제자기자본
+      *S  XPJLB039-I-MGBIZ-I-ONCP-BSAMT ;경영지표자기자본
+      *X  XPJLB039-O-PRCSS-RSULT        ;처리결과

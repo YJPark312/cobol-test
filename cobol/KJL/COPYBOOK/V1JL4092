@@ -1,0 +1,742 @@
+      *================================================================*
+      *@ NAME : V1JL4092                                               *
+      *@ DESC : 기업및그룹한도신청및승인(개별그룹기준한도조회)     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-12-13 17:06:21                          *
+      *  생성일시     : 2021-12-13 17:06:25                          *
+      *  전체길이     : 00002280 BYTES                               *
+      *================================================================*
+      *--     신용등급
+           07  V1JL4092-CRDRAT                   PIC  X(004).
+      *--     전전년결산년월
+           07  V1JL4092-BF-PYY-STLACC-YM         PIC  X(006).
+      *--     전년결산년월
+           07  V1JL4092-PYY-STLACC-YM            PIC  X(006).
+      *--     결산년월
+           07  V1JL4092-STLACC-YM                PIC  X(006).
+      *--     표준산업분류코드
+           07  V1JL4092-STND-I-CLSFI-CD          PIC  X(005).
+      *--     표준산업분류코드명
+           07  V1JL4092-STND-IC-CD-NAME          PIC  X(042).
+      *--     TE산업분류코드
+           07  V1JL4092-TE-IDSTRY-CLSFI-CD       PIC  X(003).
+      *--     TE산업분류코드명
+           07  V1JL4092-TE-I-CLSFI-CD-NAME       PIC  X(052).
+      *--     업종평균기준년
+           07  V1JL4092-BZTYP-AVG-BASE-YR        PIC  X(004).
+      *--     신용등급별지원비율
+           07  V1JL4092-CRDRAT-P-SPORT-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전년영업이익
+           07  V1JL4092-BF-PYY-OPRFT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년영업이익
+           07  V1JL4092-PYY-OPRFT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     영업이익
+           07  V1JL4092-OPRFT                    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년수입이자
+           07  V1JL4092-BF-PYY-IMPRT-INT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년수입이자
+           07  V1JL4092-PYY-IMPRT-INT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수입이자
+           07  V1JL4092-IMPRT-INT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년감가상각비
+           07  V1JL4092-BF-PYY-DPRC-CST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년감가상각비
+           07  V1JL4092-PYY-DPRC-CST             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     감가상각비
+           07  V1JL4092-DPRC-CST                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년금융비용
+           07  V1JL4092-BF-PYY-FNCS              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년금융비용
+           07  V1JL4092-PYY-FNCS                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     금융비용
+           07  V1JL4092-FNCS                     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년단기차입금
+           07  V1JL4092-BF-PYY-SHTRM-AMBR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년단기차입금
+           07  V1JL4092-PYY-SHTRM-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     단기차입금
+           07  V1JL4092-SHTRM-AMBR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     차입금상환예상액
+           07  V1JL4092-AMBR-R-ANTICI-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3차입금상환예상액
+           07  V1JL4092-Y-3S-AMBR-RPAYAMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     가중평균이자율
+           07  V1JL4092-WGHTG-AVGZ-IRT           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전년금융총비용비율
+           07  V1JL4092-BF-PFT-CST-RATO          PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전년금융총비용비율
+           07  V1JL4092-PYY-FT-CST-RATO          PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     금융총비용비율
+           07  V1JL4092-FINAC-T-CST-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     금융비용가중치값
+           07  V1JL4092-FNCS-WGHT-VAL            PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3금융비용가중치값
+           07  V1JL4092-Y-3-FNCS-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     현금흐름기준액
+           07  V1JL4092-CSFW-BASE-AMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3현금흐름기준액
+           07  V1JL4092-Y-3-CSFW-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년자기자본금
+           07  V1JL4092-BF-PYY-ONCP-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년자기자본금
+           07  V1JL4092-PYY-ONCP-AMT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본
+           07  V1JL4092-ONCP                     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본산업적용비율
+           07  V1JL4092-ONCP-I-APLY-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     차입금자기자본율
+           07  V1JL4092-AMBR-ONCP-RT             PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전년업체총차입금
+           07  V1JL4092-BF-PE-TOTAL-AMBR         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년업체총차입금
+           07  V1JL4092-PYY-ENTP-TOTAL-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     총차입금
+           07  V1JL4092-TOTAL-AMBR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     총차입금자기자본비율
+           07  V1JL4092-TOTAL-A-ONCP-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3총차입금자기자본비율
+           07  V1JL4092-Y-3T-AMBR-ONCP-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     차입금자본가중치값
+           07  V1JL4092-AMBR-CAPTL-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3차입금자본가중치값
+           07  V1JL4092-Y-3A-CAPTL-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     자기자본기준액
+           07  V1JL4092-ONCP-BASE-AMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3자기자본기준금액
+           07  V1JL4092-Y-3-ONCP-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     상환능력기준한도
+           07  V1JL4092-SOLVN-BASE-LIMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3상환능력기준한도
+           07  V1JL4092-Y-3-SOLVN-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전전년매출액
+           07  V1JL4092-BF-PYY-SALEPR            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년매출액
+           07  V1JL4092-PYY-SALEPR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     매출액
+           07  V1JL4092-SALEPR                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     매출액산업적용비율
+           07  V1JL4092-SALEPR-I-APLY-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3평균매출금액
+           07  V1JL4092-Y-3-AVG-ASALE-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3평균매출액비율
+           07  V1JL4092-Y-3-AVG-SALEPR-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     매출가중치값
+           07  V1JL4092-ASALE-WGHT-VAL           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전년매출채권회전비율
+           07  V1JL4092-BF-PAB-ROTAT-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전년매출채권회전비율
+           07  V1JL4092-PYY-AB-ROTAT-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     매출채권회전비율
+           07  V1JL4092-ASALE-B-ROTAT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     매출채권회전가중치값
+           07  V1JL4092-ASALE-BR-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3매출채권회전가중값
+           07  V1JL4092-Y-3ABR-WGHTG-VAL         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     매출기준금액
+           07  V1JL4092-ASALE-BSAMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3매출기준금액
+           07  V1JL4092-Y-3-ASALE-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준전전년총자산
+           07  V1JL4092-BASE-BP-TOTAL-ASST       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준전년총자산
+           07  V1JL4092-BASE-PYY-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     총자산
+           07  V1JL4092-TOTAL-ASST               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     총자산산업적용비율
+           07  V1JL4092-TOTAL-AI-APLY-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     차입금총자산비율
+           07  V1JL4092-AMBR-T-ASST-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     총차입금총자산비율
+           07  V1JL4092-TOTAL-AT-ASST-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3총차입금총자산비율
+           07  V1JL4092-Y-3TAT-ASST-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     전전년현금성자산금액
+           07  V1JL4092-BF-PC-INCLIN-ASAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     전년현금성자산금액
+           07  V1JL4092-PYY-CSH-INCLIN-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     현금성자산금액
+           07  V1JL4092-CSH-INCLIN-ASAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     평균현금성자산금액
+           07  V1JL4092-AVG-CSH-INCLIN-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     평균총자산금액
+           07  V1JL4092-AVG-TOTAL-ASAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     평균현금성자산비율
+           07  V1JL4092-AVG-CI-ASST-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     차입자산비율가중치값
+           07  V1JL4092-BRRW-AR-WGHT-VAL         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     Y3차입자산비율가중값
+           07  V1JL4092-Y-3BA-RATO-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     현금성자산가중치값
+           07  V1JL4092-CSH-I-ASST-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     자산기준금액
+           07  V1JL4092-ASST-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3자산기준금액
+           07  V1JL4092-Y-3-ASST-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     규모기준한도
+           07  V1JL4092-SCAL-BASE-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3규모기준한도금액
+           07  V1JL4092-Y-3-SCAL-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도
+           07  V1JL4092-BASE-LIMT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     Y3기준한도금액
+           07  V1JL4092-Y-3-BASE-CLAM            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준전전전년매출액
+           07  V1JL4092-BASE-BB-PYY-SALEPR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준전전년매출액
+           07  V1JL4092-BASE-BF-PYY-SALEPR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준전년매출액
+           07  V1JL4092-BASE-PYY-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     차입금매출액비율
+           07  V1JL4092-AMBR-SALEPR-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정신용등급
+           07  V1JL4092-AMND-CRDRAT              PIC  X(004).
+      *--     수정전전년결산년월
+           07  V1JL4092-AMND-BP-STLACC-YM        PIC  X(006).
+      *--     수정전년결산년월
+           07  V1JL4092-AMND-PYY-STLACC-YM       PIC  X(006).
+      *--     수정결산년월
+           07  V1JL4092-AMND-STLACC-YM           PIC  X(006).
+      *--     수정표준산업분류코드
+           07  V1JL4092-AMND-SI-CLSFI-CD         PIC  X(005).
+      *--     수정표준산업분류코드명
+           07  V1JL4092-AMND-SIC-CD-NAME         PIC  X(042).
+      *--     수정TE산업분류코드
+           07  V1JL4092-AMND-TI-CLSFI-CD         PIC  X(003).
+      *--     수정TE산업분류코드명
+           07  V1JL4092-AMND-TIC-CD-NAME         PIC  X(052).
+      *--     수정업종평균기준년
+           07  V1JL4092-AMND-B-AVG-BASE-YR       PIC  X(004).
+      *--     수정신용등급별지원비율
+           07  V1JL4092-AMND-CP-SPORT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년영업이익
+           07  V1JL4092-AMND-BF-PYY-OPRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년영업이익
+           07  V1JL4092-AMND-PYY-OPRFT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정영업이익
+           07  V1JL4092-AMND-OPRFT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년수입이자
+           07  V1JL4092-AMND-BP-IMPRT-INT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년수입이자
+           07  V1JL4092-AMND-PYY-IMPRT-INT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정수입이자
+           07  V1JL4092-AMND-IMPRT-INT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년감가상각비
+           07  V1JL4092-AMND-B-PYY-DPRC-CST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년감가상각비
+           07  V1JL4092-AMND-PYY-DPRC-CST        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정감가상각비
+           07  V1JL4092-AMND-DPRC-CST            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년금융비용
+           07  V1JL4092-AMND-BF-PYY-FNCS         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년금융비용
+           07  V1JL4092-AMND-PYY-FNCS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용
+           07  V1JL4092-AMND-FNCS                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년단기차입금
+           07  V1JL4092-AMND-BP-SHTRM-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년단기차입금
+           07  V1JL4092-AMND-PYY-SHTRM-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정단기차입금
+           07  V1JL4092-AMND-SHTRM-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금상환예상액
+           07  V1JL4092-AMND-AR-ANTICI-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3차입금상환예상액
+           07  V1JL4092-AMND-Y3ARA-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정가중평균이자율
+           07  V1JL4092-AMND-WGHTG-AVG-IRT       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년금융총비용비율
+           07  V1JL4092-AMND-BPFT-CST-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전년금융총비용비율
+           07  V1JL4092-AMND-PFT-CST-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정금융총비용비율
+           07  V1JL4092-AMND-FTZ-CST-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용가중치값
+           07  V1JL4092-AMND-FNCS-WGHT-VAL       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3금융비용가중치값
+           07  V1JL4092-AMND-Y3F-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정현금흐름기준액
+           07  V1JL4092-AMND-CSFW-BASE-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3현금흐름기준액
+           07  V1JL4092-AMND-Y3C-BASE-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년자기자본금
+           07  V1JL4092-AMND-B-PYY-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년자기자본금
+           07  V1JL4092-AMND-PYY-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정자기자본
+           07  V1JL4092-AMND-ONCP                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정자기자본산업적용비율
+           07  V1JL4092-AMND-OI-APLY-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금자기자본율
+           07  V1JL4092-AMND-AMBR-ONCP-RT        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년업체총차입금
+           07  V1JL4092-AMND-BPE-TOTAL-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년업체총차입금
+           07  V1JL4092-AMND-PE-TOTAL-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정총차입금
+           07  V1JL4092-AMND-TOTAL-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정총차입금자기자본비율
+           07  V1JL4092-AMND-TA-ONCP-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3총차입금자기자본비율
+           07  V1JL4092-AMND-Y3TA-ONCP-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금자본가중치값
+           07  V1JL4092-AMND-AC-WGHT-VAL         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3차입자본가중치값
+           07  V1JL4092-AMND-Y3BC-WGHT-VAL       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정자기자본기준액
+           07  V1JL4092-AMND-ONCP-BASE-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3자기자본기준금액
+           07  V1JL4092-AMND-Y-3-ONCP-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정상환능력기준한도
+           07  V1JL4092-AMND-S-BASE-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3상환능력기준한도
+           07  V1JL4092-AMND-Y3S-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년매출액
+           07  V1JL4092-AMND-BF-PYY-SALEPR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년매출액
+           07  V1JL4092-AMND-PYY-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액
+           07  V1JL4092-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액산업적용비율
+           07  V1JL4092-AMND-SI-APLY-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3평균매출금액
+           07  V1JL4092-AMND-Y3A-ASALE-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3평균매출액비율
+           07  V1JL4092-AMND-Y3AS-RATO           PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정매출가중치값
+           07  V1JL4092-AMND-ASALE-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년매출채권회전률
+           07  V1JL4092-AMND-BPAB-ROTAT-RT       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전년매출채권회전비율
+           07  V1JL4092-AMND-PAB-ROTAT-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정매출채권회전비율
+           07  V1JL4092-AMND-AB-ROTAT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정매출채권회전가중치값
+           07  V1JL4092-AMND-ABR-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3매출채권회전가중치값
+           07  V1JL4092-AMND-Y3ABR-WGHT-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정매출기준금액
+           07  V1JL4092-AMND-ASALE-BSAMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3매출기준금액
+           07  V1JL4092-AMND-Y3-ASALE-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준전전년총자산
+           07  V1JL4092-AMND-BBP-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준전년총자산
+           07  V1JL4092-AMND-BP-TOTAL-ASST       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정총자산
+           07  V1JL4092-AMND-TOTAL-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정총자산산업적용비율
+           07  V1JL4092-AMND-TAI-APLY-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금총자산비율
+           07  V1JL4092-AMND-AT-ASST-RATO        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정총차입금총자산비율
+           07  V1JL4092-AMND-TAT-ASST-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3총차입금총자산비율
+           07  V1JL4092-AMND-Y3TATA-RATO         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전년현금성자산금액
+           07  V1JL4092-AMND-BPCI-ASAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년현금성자산금액
+           07  V1JL4092-AMND-PC-INCLIN-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정현금성자산금액
+           07  V1JL4092-AMND-C-INCLIN-ASAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정평균현금성자산금액
+           07  V1JL4092-AMND-AC-INCLIN-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정평균총자산금액
+           07  V1JL4092-AMND-AVG-TOTAL-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정평균현금성자산비율
+           07  V1JL4092-AMND-ACI-ASST-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정차입자산비율가중치값
+           07  V1JL4092-AMND-BAR-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3차입자산비율가중값
+           07  V1JL4092-AMND-Y3BARW-VAL          PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정현금성자산가중치값
+           07  V1JL4092-AMND-CIA-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정자산기준금액
+           07  V1JL4092-AMND-ASST-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3자산기준금액
+           07  V1JL4092-AMND-Y-3-ASST-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정규모기준한도
+           07  V1JL4092-AMND-SCAL-BASE-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3규모기준한도금액
+           07  V1JL4092-AMND-Y3S-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준한도
+           07  V1JL4092-AMND-BASE-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정Y3기준한도금액
+           07  V1JL4092-AMND-Y-3-BASE-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준전전전년매출액
+           07  V1JL4092-AMND-BBB-PYY-SALEPR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준전전년매출액
+           07  V1JL4092-AMND-BB-PYY-SALEPR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준전년매출액
+           07  V1JL4092-AMND-B-BF-YR-SALEPR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금매출액비율
+           07  V1JL4092-AMND-A-SALEPR-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  9  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4092-CRDRAT               ;신용등급
+      *X  V1JL4092-BF-PYY-STLACC-YM     ;전전년결산년월
+      *X  V1JL4092-PYY-STLACC-YM        ;전년결산년월
+      *X  V1JL4092-STLACC-YM            ;결산년월
+      *X  V1JL4092-STND-I-CLSFI-CD      ;표준산업분류코드
+      *X  V1JL4092-STND-IC-CD-NAME      ;표준산업분류코드명
+      *X  V1JL4092-TE-IDSTRY-CLSFI-CD   ;TE산업분류코드
+      *X  V1JL4092-TE-I-CLSFI-CD-NAME   ;TE산업분류코드명
+      *X  V1JL4092-BZTYP-AVG-BASE-YR    ;업종평균기준년
+      *S  V1JL4092-CRDRAT-P-SPORT-RATO  ;신용등급별지원비율
+      *S  V1JL4092-BF-PYY-OPRFT         ;전전년영업이익
+      *S  V1JL4092-PYY-OPRFT            ;전년영업이익
+      *S  V1JL4092-OPRFT                ;영업이익
+      *S  V1JL4092-BF-PYY-IMPRT-INT     ;전전년수입이자
+      *S  V1JL4092-PYY-IMPRT-INT        ;전년수입이자
+      *S  V1JL4092-IMPRT-INT            ;수입이자
+      *S  V1JL4092-BF-PYY-DPRC-CST      ;전전년감가상각비
+      *S  V1JL4092-PYY-DPRC-CST         ;전년감가상각비
+      *S  V1JL4092-DPRC-CST             ;감가상각비
+      *S  V1JL4092-BF-PYY-FNCS          ;전전년금융비용
+      *S  V1JL4092-PYY-FNCS             ;전년금융비용
+      *S  V1JL4092-FNCS                 ;금융비용
+      *S  V1JL4092-BF-PYY-SHTRM-AMBR    ;전전년단기차입금
+      *S  V1JL4092-PYY-SHTRM-AMBR       ;전년단기차입금
+      *S  V1JL4092-SHTRM-AMBR           ;단기차입금
+      *S  V1JL4092-AMBR-R-ANTICI-AMT    ;차입금상환예상액
+      *S  V1JL4092-Y-3S-AMBR-RPAYAMT    ;Y3차입금상환예상액
+      *S  V1JL4092-WGHTG-AVGZ-IRT       ;가중평균이자율
+      *S  V1JL4092-BF-PFT-CST-RATO      ;전전년금융총비용비율
+      *S  V1JL4092-PYY-FT-CST-RATO      ;전년금융총비용비율
+      *S  V1JL4092-FINAC-T-CST-RATO     ;금융총비용비율
+      *S  V1JL4092-FNCS-WGHT-VAL        ;금융비용가중치값
+      *S  V1JL4092-Y-3-FNCS-WGHT-VAL    ;Y3금융비용가중치값
+      *S  V1JL4092-CSFW-BASE-AMT        ;현금흐름기준액
+      *S  V1JL4092-Y-3-CSFW-BSAMT       ;Y3현금흐름기준액
+      *S  V1JL4092-BF-PYY-ONCP-AMT      ;전전년자기자본금
+      *S  V1JL4092-PYY-ONCP-AMT         ;전년자기자본금
+      *S  V1JL4092-ONCP                 ;자기자본
+      *S  V1JL4092-ONCP-I-APLY-RATO     ;자기자본산업적용비율
+      *S  V1JL4092-AMBR-ONCP-RT         ;차입금자기자본율
+      *S  V1JL4092-BF-PE-TOTAL-AMBR     ;전전년업체총차입금
+      *S  V1JL4092-PYY-ENTP-TOTAL-AMBR  ;전년업체총차입금
+      *S  V1JL4092-TOTAL-AMBR           ;총차입금
+      *S  V1JL4092-TOTAL-A-ONCP-RATO    ;총차입금자기자본비율
+      *S  V1JL4092-Y-3T-AMBR-ONCP-RATO
+      * Y3총차입금자기자본비율
+      *S  V1JL4092-AMBR-CAPTL-WGHT-VAL  ;차입금자본가중치값
+      *S  V1JL4092-Y-3A-CAPTL-WGHT-VAL  ;Y3차입금자본가중치값
+      *S  V1JL4092-ONCP-BASE-AMT        ;자기자본기준액
+      *S  V1JL4092-Y-3-ONCP-BSAMT       ;Y3자기자본기준금액
+      *S  V1JL4092-SOLVN-BASE-LIMT      ;상환능력기준한도
+      *S  V1JL4092-Y-3-SOLVN-BASE-CLAM  ;Y3상환능력기준한도
+      *S  V1JL4092-BF-PYY-SALEPR        ;전전년매출액
+      *S  V1JL4092-PYY-SALEPR           ;전년매출액
+      *S  V1JL4092-SALEPR               ;매출액
+      *S  V1JL4092-SALEPR-I-APLY-RATO   ;매출액산업적용비율
+      *S  V1JL4092-Y-3-AVG-ASALE-AMT    ;Y3평균매출금액
+      *S  V1JL4092-Y-3-AVG-SALEPR-RATO  ;Y3평균매출액비율
+      *S  V1JL4092-ASALE-WGHT-VAL       ;매출가중치값
+      *S  V1JL4092-BF-PAB-ROTAT-RATO    ;전전년매출채권회전비율
+      *S  V1JL4092-PYY-AB-ROTAT-RATO    ;전년매출채권회전비율
+      *S  V1JL4092-ASALE-B-ROTAT-RATO   ;매출채권회전비율
+      *S  V1JL4092-ASALE-BR-WGHT-VAL    ;매출채권회전가중치값
+      *S  V1JL4092-Y-3ABR-WGHTG-VAL     ;Y3매출채권회전가중값
+      *S  V1JL4092-ASALE-BSAMT          ;매출기준금액
+      *S  V1JL4092-Y-3-ASALE-BSAMT      ;Y3매출기준금액
+      *S  V1JL4092-BASE-BP-TOTAL-ASST   ;기준전전년총자산
+      *S  V1JL4092-BASE-PYY-TOTAL-ASST  ;기준전년총자산
+      *S  V1JL4092-TOTAL-ASST           ;총자산
+      *S  V1JL4092-TOTAL-AI-APLY-RATO   ;총자산산업적용비율
+      *S  V1JL4092-AMBR-T-ASST-RATO     ;차입금총자산비율
+      *S  V1JL4092-TOTAL-AT-ASST-RATO   ;총차입금총자산비율
+      *S  V1JL4092-Y-3TAT-ASST-RATO     ;Y3총차입금총자산비율
+      *S  V1JL4092-BF-PC-INCLIN-ASAM    ;전전년현금성자산금액
+      *S  V1JL4092-PYY-CSH-INCLIN-ASAM  ;전년현금성자산금액
+      *S  V1JL4092-CSH-INCLIN-ASAM      ;현금성자산금액
+      *S  V1JL4092-AVG-CSH-INCLIN-ASAM  ;평균현금성자산금액
+      *S  V1JL4092-AVG-TOTAL-ASAM       ;평균총자산금액
+      *S  V1JL4092-AVG-CI-ASST-RATO     ;평균현금성자산비율
+      *S  V1JL4092-BRRW-AR-WGHT-VAL     ;차입자산비율가중치값
+      *S  V1JL4092-Y-3BA-RATO-WGHT-VAL  ;Y3차입자산비율가중값
+      *S  V1JL4092-CSH-I-ASST-WGHT-VAL  ;현금성자산가중치값
+      *S  V1JL4092-ASST-BSAMT           ;자산기준금액
+      *S  V1JL4092-Y-3-ASST-BSAMT       ;Y3자산기준금액
+      *S  V1JL4092-SCAL-BASE-LIMT       ;규모기준한도
+      *S  V1JL4092-Y-3-SCAL-BASE-CLAM   ;Y3규모기준한도금액
+      *S  V1JL4092-BASE-LIMT            ;기준한도
+      *S  V1JL4092-Y-3-BASE-CLAM        ;Y3기준한도금액
+      *S  V1JL4092-BASE-BB-PYY-SALEPR   ;기준전전전년매출액
+      *S  V1JL4092-BASE-BF-PYY-SALEPR   ;기준전전년매출액
+      *S  V1JL4092-BASE-PYY-SALEPR      ;기준전년매출액
+      *S  V1JL4092-AMBR-SALEPR-RATO     ;차입금매출액비율
+      *X  V1JL4092-AMND-CRDRAT          ;수정신용등급
+      *X  V1JL4092-AMND-BP-STLACC-YM    ;수정전전년결산년월
+      *X  V1JL4092-AMND-PYY-STLACC-YM   ;수정전년결산년월
+      *X  V1JL4092-AMND-STLACC-YM       ;수정결산년월
+      *X  V1JL4092-AMND-SI-CLSFI-CD     ;수정표준산업분류코드
+      *X  V1JL4092-AMND-SIC-CD-NAME     ;수정표준산업분류코드명
+      *X  V1JL4092-AMND-TI-CLSFI-CD     ;수정TE산업분류코드
+      *X  V1JL4092-AMND-TIC-CD-NAME     ;수정TE산업분류코드명
+      *X  V1JL4092-AMND-B-AVG-BASE-YR   ;수정업종평균기준년
+      *S  V1JL4092-AMND-CP-SPORT-RATO   ;수정신용등급별지원비율
+      *S  V1JL4092-AMND-BF-PYY-OPRFT    ;수정전전년영업이익
+      *S  V1JL4092-AMND-PYY-OPRFT       ;수정전년영업이익
+      *S  V1JL4092-AMND-OPRFT           ;수정영업이익
+      *S  V1JL4092-AMND-BP-IMPRT-INT    ;수정전전년수입이자
+      *S  V1JL4092-AMND-PYY-IMPRT-INT   ;수정전년수입이자
+      *S  V1JL4092-AMND-IMPRT-INT       ;수정수입이자
+      *S  V1JL4092-AMND-B-PYY-DPRC-CST  ;수정전전년감가상각비
+      *S  V1JL4092-AMND-PYY-DPRC-CST    ;수정전년감가상각비
+      *S  V1JL4092-AMND-DPRC-CST        ;수정감가상각비
+      *S  V1JL4092-AMND-BF-PYY-FNCS     ;수정전전년금융비용
+      *S  V1JL4092-AMND-PYY-FNCS        ;수정전년금융비용
+      *S  V1JL4092-AMND-FNCS            ;수정금융비용
+      *S  V1JL4092-AMND-BP-SHTRM-AMBR   ;수정전전년단기차입금
+      *S  V1JL4092-AMND-PYY-SHTRM-AMBR  ;수정전년단기차입금
+      *S  V1JL4092-AMND-SHTRM-AMBR      ;수정단기차입금
+      *S  V1JL4092-AMND-AR-ANTICI-AMT   ;수정차입금상환예상액
+      *S  V1JL4092-AMND-Y3ARA-AMT       ;수정Y3차입금상환예상액
+      *S  V1JL4092-AMND-WGHTG-AVG-IRT   ;수정가중평균이자율
+      *S  V1JL4092-AMND-BPFT-CST-RATO
+      * 수정전전년금융총비용비율
+      *S  V1JL4092-AMND-PFT-CST-RATO    ;수정전년금융총비용비율
+      *S  V1JL4092-AMND-FTZ-CST-RATO    ;수정금융총비용비율
+      *S  V1JL4092-AMND-FNCS-WGHT-VAL   ;수정금융비용가중치값
+      *S  V1JL4092-AMND-Y3F-WGHT-VAL
+      * 수정Y3금융비용가중치값
+      *S  V1JL4092-AMND-CSFW-BASE-AMT   ;수정현금흐름기준액
+      *S  V1JL4092-AMND-Y3C-BASE-AMT    ;수정Y3현금흐름기준액
+      *S  V1JL4092-AMND-B-PYY-ONCP-AMT  ;수정전전년자기자본금
+      *S  V1JL4092-AMND-PYY-ONCP-AMT    ;수정전년자기자본금
+      *S  V1JL4092-AMND-ONCP            ;수정자기자본
+      *S  V1JL4092-AMND-OI-APLY-RATO
+      * 수정자기자본산업적용비율
+      *S  V1JL4092-AMND-AMBR-ONCP-RT    ;수정차입금자기자본율
+      *S  V1JL4092-AMND-BPE-TOTAL-AMBR
+      * 수정전전년업체총차입금
+      *S  V1JL4092-AMND-PE-TOTAL-AMBR   ;수정전년업체총차입금
+      *S  V1JL4092-AMND-TOTAL-AMBR      ;수정총차입금
+      *S  V1JL4092-AMND-TA-ONCP-RATO
+      * 수정총차입금자기자본비율
+      *S  V1JL4092-AMND-Y3TA-ONCP-RATO
+      * 수정Y3총차입금자기자본비율
+      *S  V1JL4092-AMND-AC-WGHT-VAL     ;수정차입금자본가중치값
+      *S  V1JL4092-AMND-Y3BC-WGHT-VAL
+      * 수정Y3차입자본가중치값
+      *S  V1JL4092-AMND-ONCP-BASE-AMT   ;수정자기자본기준액
+      *S  V1JL4092-AMND-Y-3-ONCP-BSAMT
+      * 수정Y3자기자본기준금액
+      *S  V1JL4092-AMND-S-BASE-LIMT     ;수정상환능력기준한도
+      *S  V1JL4092-AMND-Y3S-BASE-LIMT
+      * 수정Y3상환능력기준한도
+      *S  V1JL4092-AMND-BF-PYY-SALEPR   ;수정전전년매출액
+      *S  V1JL4092-AMND-PYY-SALEPR      ;수정전년매출액
+      *S  V1JL4092-AMND-SALEPR          ;수정매출액
+      *S  V1JL4092-AMND-SI-APLY-RATO    ;수정매출액산업적용비율
+      *S  V1JL4092-AMND-Y3A-ASALE-AMT   ;수정Y3평균매출금액
+      *S  V1JL4092-AMND-Y3AS-RATO       ;수정Y3평균매출액비율
+      *S  V1JL4092-AMND-ASALE-WGHT-VAL  ;수정매출가중치값
+      *S  V1JL4092-AMND-BPAB-ROTAT-RT
+      * 수정전전년매출채권회전률
+      *S  V1JL4092-AMND-PAB-ROTAT-RATO
+      * 수정전년매출채권회전비율
+      *S  V1JL4092-AMND-AB-ROTAT-RATO   ;수정매출채권회전비율
+      *S  V1JL4092-AMND-ABR-WGHT-VAL
+      * 수정매출채권회전가중치값
+      *S  V1JL4092-AMND-Y3ABR-WGHT-VAL
+      * 수정Y3매출채권회전가중치값
+      *S  V1JL4092-AMND-ASALE-BSAMT     ;수정매출기준금액
+      *S  V1JL4092-AMND-Y3-ASALE-BSAMT  ;수정Y3매출기준금액
+      *S  V1JL4092-AMND-BBP-TOTAL-ASST  ;수정기준전전년총자산
+      *S  V1JL4092-AMND-BP-TOTAL-ASST   ;수정기준전년총자산
+      *S  V1JL4092-AMND-TOTAL-ASST      ;수정총자산
+      *S  V1JL4092-AMND-TAI-APLY-RATO   ;수정총자산산업적용비율
+      *S  V1JL4092-AMND-AT-ASST-RATO    ;수정차입금총자산비율
+      *S  V1JL4092-AMND-TAT-ASST-RATO   ;수정총차입금총자산비율
+      *S  V1JL4092-AMND-Y3TATA-RATO
+      * 수정Y3총차입금총자산비율
+      *S  V1JL4092-AMND-BPCI-ASAM       ;수정전전년현금성자산금액
+      *S  V1JL4092-AMND-PC-INCLIN-ASAM
+      * 수정전년현금성자산금액
+      *S  V1JL4092-AMND-C-INCLIN-ASAM   ;수정현금성자산금액
+      *S  V1JL4092-AMND-AC-INCLIN-ASAM
+      * 수정평균현금성자산금액
+      *S  V1JL4092-AMND-AVG-TOTAL-ASAM  ;수정평균총자산금액
+      *S  V1JL4092-AMND-ACI-ASST-RATO   ;수정평균현금성자산비율
+      *S  V1JL4092-AMND-BAR-WGHT-VAL
+      * 수정차입자산비율가중치값
+      *S  V1JL4092-AMND-Y3BARW-VAL
+      * 수정Y3차입자산비율가중값
+      *S  V1JL4092-AMND-CIA-WGHT-VAL    ;수정현금성자산가중치값
+      *S  V1JL4092-AMND-ASST-BSAMT      ;수정자산기준금액
+      *S  V1JL4092-AMND-Y-3-ASST-BSAMT  ;수정Y3자산기준금액
+      *S  V1JL4092-AMND-SCAL-BASE-LIMT  ;수정규모기준한도
+      *S  V1JL4092-AMND-Y3S-BASE-CLAM
+      * 수정Y3규모기준한도금액
+      *S  V1JL4092-AMND-BASE-LIMT       ;수정기준한도
+      *S  V1JL4092-AMND-Y-3-BASE-CLAM   ;수정Y3기준한도금액
+      *S  V1JL4092-AMND-BBB-PYY-SALEPR
+      * 수정기준전전전년매출액
+      *S  V1JL4092-AMND-BB-PYY-SALEPR   ;수정기준전전년매출액
+      *S  V1JL4092-AMND-B-BF-YR-SALEPR  ;수정기준전년매출액
+      *S  V1JL4092-AMND-A-SALEPR-RATO   ;수정차입금매출액비율

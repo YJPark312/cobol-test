@@ -1,0 +1,122 @@
+      *================================================================*
+      *@ NAME : XPJLB041                                               *
+      *@ DESC : PC국가별정보관리 COPYBOOK                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-16 15:45:39                          *
+      *  생성일시     : 2009-07-16 15:45:43                          *
+      *================================================================*
+           03  XPJLB041-RETURN.
+             05  XPJLB041-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB041-OK            VALUE  '00'.
+                 88  COND-XPJLB041-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB041-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB041-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB041-ERROR         VALUE  '09'.
+                 88  COND-XPJLB041-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB041-SYSERROR      VALUE  '99'.
+             05  XPJLB041-R-LINE                 PIC  9(006).
+             05  XPJLB041-R-ERRCD                PIC  X(008).
+             05  XPJLB041-R-TREAT-CD             PIC  X(008).
+             05  XPJLB041-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB041-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB041-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준년월
+             05  XPJLB041-I-BASE-YM              PIC  X(006).
+      *--       국가코드
+             05  XPJLB041-I-ISO-NATNL-CD         PIC  X(003).
+      *--       국가명
+             05  XPJLB041-I-ENG-NATNL-NAME       PIC  X(052).
+      *--       Total관리한도
+             05  XPJLB041-I-WHOL-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       외환업무부
+             05  XPJLB041-I-FX-BZWK-TEAM-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       외화자금부
+             05  XPJLB041-I-FC-FNDS-TEAM-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       트레이딩부
+             05  XPJLB041-I-TRDN-PARTL-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       투자금융부
+             05  XPJLB041-I-INFC-TEAM-CLAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       파생상품영업부
+             05  XPJLB041-I-DRVT-B-PARTL-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       해외사업추진부
+             05  XPJLB041-I-OVSES-P-PARTL-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       금융공학부
+             05  XPJLB041-I-FINAC-E-PARTL-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Auckland
+             05  XPJLB041-I-OKLN-CLAM            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       HongKong
+             05  XPJLB041-I-HNKN-CLAM            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       London
+             05  XPJLB041-I-LNDN-CLAM            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       NewYork
+             05  XPJLB041-I-NY-CLAM              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Tokyo
+             05  XPJLB041-I-TKY-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기타
+             05  XPJLB041-I-ETC-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국가순위
+             05  XPJLB041-I-NATNL-RANKG          PIC  9(003).
+      *--       SP
+             05  XPJLB041-I-SNP-GRD-DSTCD        PIC  X(002).
+      *--       Moodys
+             05  XPJLB041-I-MODYS-GRD-DSTCD      PIC  X(002).
+      *--       Fitch
+             05  XPJLB041-I-FITCH-GRD-DSTCD      PIC  X(002).
+      *--       지역코드
+             05  XPJLB041-I-LIMT-MGT-AREA-DSTCD  PIC  X(001).
+      *--       CountryType
+             05  XPJLB041-I-LIMT-N-CNSN-DSTCD    PIC  X(001).
+      *--       조기경보
+             05  XPJLB041-I-ELY-ALAM-YN          PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XPJLB041-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB041-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  4  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB041-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB041-I-BASE-YM            ;조회기준년월
+      *X  XPJLB041-I-ISO-NATNL-CD       ;국가코드
+      *X  XPJLB041-I-ENG-NATNL-NAME     ;국가명
+      *S  XPJLB041-I-WHOL-MGT-CLAM      ;Total관리한도
+      *S  XPJLB041-I-FX-BZWK-TEAM-CLAM  ;외환업무부
+      *S  XPJLB041-I-FC-FNDS-TEAM-CLAM  ;외화자금부
+      *S  XPJLB041-I-TRDN-PARTL-CLAM    ;트레이딩부
+      *S  XPJLB041-I-INFC-TEAM-CLAM     ;투자금융부
+      *S  XPJLB041-I-DRVT-B-PARTL-CLAM  ;파생상품영업부
+      *S  XPJLB041-I-OVSES-P-PARTL-CLAM ;해외사업추진부
+      *S  XPJLB041-I-FINAC-E-PARTL-CLAM ;금융공학부
+      *S  XPJLB041-I-OKLN-CLAM          ;Auckland
+      *S  XPJLB041-I-HNKN-CLAM          ;HongKong
+      *S  XPJLB041-I-LNDN-CLAM          ;London
+      *S  XPJLB041-I-NY-CLAM            ;NewYork
+      *S  XPJLB041-I-TKY-CLAM           ;Tokyo
+      *S  XPJLB041-I-ETC-CLAM           ;기타
+      *N  XPJLB041-I-NATNL-RANKG        ;국가순위
+      *X  XPJLB041-I-SNP-GRD-DSTCD      ;SP
+      *X  XPJLB041-I-MODYS-GRD-DSTCD    ;Moodys
+      *X  XPJLB041-I-FITCH-GRD-DSTCD    ;Fitch
+      *X  XPJLB041-I-LIMT-MGT-AREA-DSTCD;지역코드
+      *X  XPJLB041-I-LIMT-N-CNSN-DSTCD  ;CountryType
+      *X  XPJLB041-I-ELY-ALAM-YN        ;조기경보
+      *X  XPJLB041-O-PRCSS-RSULT        ;처리결과

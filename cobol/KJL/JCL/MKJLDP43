@@ -1,0 +1,58 @@
+//MKJLDP43 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : 일자전환
+//*  %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*   CRM섭외정보적재(THKJLR004)
+//*********************************************************************
+//STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.MKJLDP43.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR004 ')
+        ,CHAR('THKJLR004DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,고객식별자
+        ,섭외년월일
+        ,유치계획건수
+        ,유치계획금액
+        ,"섭외2진행단계구분"
+        ,최초등록일시
+        ,"섭외1일련번호"
+        ,"섭외2일련번호"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJLR004
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             < TO_CHAR(TO_DATE(
+         '%%$ODATE','YYYYMMDD') - 3 MONTH,'YYYYMMDD')
+    WITH UR;
+/*
+//STEP02  EXEC JZBDEXEC,MBR=BJLDR08,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KJL.SD.SHRMFB.TABII41
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP43-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//

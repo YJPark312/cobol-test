@@ -1,0 +1,116 @@
+//TKJLP126 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0126 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0126',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK05 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK06 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK07 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK08 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK09 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK10 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(3000,100),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(3000,100),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0126,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0126
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "계좌번호"                           POSITION(       4         )
+   CHAR(                     20)                ,
+   "계좌중복일련번호"                   POSITION(      24:      27)
+   DECIMAL                                      ,
+   "기준년월"                           POSITION(      28         )
+   CHAR(                      6)                ,
+   "고객식별자"                         POSITION(      34         )
+   CHAR(                     10)                ,
+   "고객관리번호"                       POSITION(      44         )
+   CHAR(                      5)                ,
+   "해외현지법인여부"                   POSITION(      49         )
+   CHAR(                      1)                ,
+   "차주번호"                           POSITION(      50         )
+   CHAR(                     13)                ,
+   "관리부점코드"                       POSITION(      63         )
+   CHAR(                      4)                ,
+   "TE계좌고객구분"                     POSITION(      67         )
+   CHAR(                      1)                ,
+   "한도계좌여부"                       POSITION(      68         )
+   CHAR(                      1)                ,
+   "TE계좌구분"                         POSITION(      69         )
+   CHAR(                      1)                ,
+   "상품대분류코드"                     POSITION(      70         )
+   CHAR(                      2)                ,
+   "상품중분류코드"                     POSITION(      72         )
+   CHAR(                      2)                ,
+   "상품템플릿코드"                     POSITION(      74         )
+   CHAR(                      3)                ,
+   "상품번호"                           POSITION(      77         )
+   CHAR(                      5)                ,
+   "대출자격구분"                       POSITION(      82         )
+   CHAR(                      3)                ,
+   "시작년월일"                         POSITION(      85         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(      93         )
+   CHAR(                      8)                ,
+   "종료년월일"                         POSITION(     101         )
+   CHAR(                      8)                ,
+   "상품계약상태구분"                   POSITION(     109         )
+   CHAR(                      1)                ,
+   "통화코드"                           POSITION(     110         )
+   CHAR(                      3)                ,
+   "통화한도"                           POSITION(     113:     122)
+   DECIMAL                                      ,
+   "통화잔액"                           POSITION(     123:     132)
+   DECIMAL                                      ,
+   "BS기준잔액"                         POSITION(     133:     140)
+   DECIMAL                                      ,
+   "명목액기준한도"                     POSITION(     141:     148)
+   DECIMAL                                      ,
+   "명목액기준잔액"                     POSITION(     149:     156)
+   DECIMAL                                      ,
+   "CCF명목잔액환산금액"                POSITION(     157:     164)
+   DECIMAL                                      ,
+   "배분내부회복가치"                   POSITION(     165:     172)
+   DECIMAL                                      ,
+   "CA담보제외금액"                     POSITION(     173:     180)
+   DECIMAL                                      ,
+   "CA담보환산금액"                     POSITION(     181:     188)
+   DECIMAL                                      ,
+   "한도계좌번호"                       POSITION(     189         )
+   CHAR(                     20)                ,
+   "한도상품대분류코드"                 POSITION(     209         )
+   CHAR(                      2)                ,
+   "한도상품중분류코드"                 POSITION(     211         )
+   CHAR(                      2)                ,
+   "한도상품템플릿코드"                 POSITION(     213         )
+   CHAR(                      3)                ,
+   "한도상품번호"                       POSITION(     216         )
+   CHAR(                      5)                ,
+   "관련테이블명"                       POSITION(     221         )
+   CHAR(                     12)                ,
+   "과목코드"                           POSITION(     233         )
+   CHAR(                      3)                ,
+   "시스템최종처리일시"                 POSITION(     236         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     256         )
+   CHAR(                      7)                ,
+   "BS기준한도"                         POSITION(     263:     270)
+   DECIMAL                                      ,
+   "차주고객식별자"                     POSITION(     271         )
+   CHAR(                     10)
+   )
+//

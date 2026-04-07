@@ -1,0 +1,836 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB093 (기업및그룹한도신청및승인)
+      *@처리유형  : DC
+      *@처리개요  : 설정신청저장
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *김진태:20090527: 신규작성
+      *김진태:20090827: 메신저기능처리
+      *김진태:20091019: 시스템처리일시／사용자번호　삭제
+      *김진태:20091211: 에러메세지정비
+      *김진태:20091218: 미처리내역존재시비정상종료후단말에서처리
+      *김진태:20101105: 한도진행상태구분　인스턴스　추가로인한
+      *                   미처리내역존재SQLIO변경에따른프로그램변경
+      *                   한도진행상태구분　３：미처리（승인저장）추가
+      *                   THKJL0003 COPYBOOK 변경
+      *박주희:20170201:  KB-PIN 전환（２차）
+      *박주희:20170512: 신청취소　기능추가
+      * YBH    :20200723: 신청사유 길이 증가
+      *박정수:20241205: 설정해제 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  관리한도신청이력        : THKJL0003            : CRUD
+      **  한도신청승인의견        : THKJL0006            : CRUD
+      **  시그널기본              : THKJL0052            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB093.
+       AUTHOR.                         김진태.
+       DATE-WRITTEN.                   09/05/25.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000068             PIC  X(008) VALUE 'B3000068'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3800033             PIC  X(008) VALUE 'B3800033'.
+           03  CO-B3800039             PIC  X(008) VALUE 'B3800039'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB093'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+
+           03  CO-CHA-X                PIC  X(001) VALUE 'X'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+170512     03  CO-CHA-02               PIC  X(002) VALUE '02'.
+241205     03  CO-CHA-08               PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-001              PIC  X(003) VALUE '001'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-STAT                 PIC  X(002).
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통채번
+       01  XCJICN03-CA.
+           COPY XCJICN03.
+
+      *미처리존재여부조회
+       01  XQJL009U-CA.
+           COPY XQJL009U.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO  INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *    SQLIO INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *한도관리신청이력 테이블(KEY)
+       01  TKJL0003-KEY.
+           COPY    TKJL0003.
+      *한도관리신청이력 테이블(RECORD)
+       01  TRJL0003-REC.
+           COPY    TRJL0003.
+170512*기준한도수정이력 테이블(KEY)
+利     01  TKJL0004-KEY.
+           COPY    TKJL0004.
+      *기준한도수정이력 테이블(RECORD)
+       01  TRJL0004-REC.
+瓢         COPY    TRJL0004.
+      *한도신청사유실적 테이블(KEY)
+       01  TKJL0006-KEY.
+           COPY    TKJL0006.
+      *한도신청사유실적 테이블(RECORD)
+       01  TRJL0006-REC.
+           COPY    TRJL0006.
+200723*한도승인결의록관리 KEY
+       01  TKJL0005-KEY.
+           COPY    TKJL0005.
+      *한도승인결의록관리 RECORD
+       01  TRJL0005-REC.
+           COPY    TRJL0005.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      * DC COPYBOOK AREA
+       01  XDJLB093-CA.
+           COPY    XDJLB093.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB093-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               DBIO
+                      YCDBIOCA-CA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJLB093-OUT
+                      XDJLB093-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@처리구분체크(01:신청02:신청취소08:설정해제)
+           IF XDJLB093-I-PRCSS-DSTIC = CO-CHA-01 OR CO-CHA-02
+                                       OR CO-CHA-08
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@고객구분
+           IF XDJLB093-I-CUST-DSTIC = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   KB-PIN
+           IF XDJLB093-I-KB-PIN = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   처리구분
+           IF  XDJLB093-I-PRCSS-DSTIC    = CO-CHA-01 OR CO-CHA-08
+      *       신청처리
+               PERFORM S3100-PROCESS-RTN
+                  THRU S3100-PROCESS-EXT
+           ELSE
+      *       신청취소처리
+               PERFORM S3200-PROCESS-RTN
+                  THRU S3200-PROCESS-EXT
+           END-IF
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신청처리
+      *-----------------------------------------------------------------
+       S3100-PROCESS-RTN.
+
+      *@1  해당차주에대한　미처리내역이　존재하는지　확인한다
+           PERFORM S3100-QJL009U-CALL-RTN
+              THRU S3100-QJL009U-CALL-EXT
+
+      *@2  신청번호　채번
+           PERFORM S3200-CJICN03-CALL-RTN
+              THRU S3200-CJICN03-CALL-EXT
+
+      *@3  관리한도　신청이력　삽입
+           PERFORM S3300-THKJL0003-INSERT-RTN
+              THRU S3300-THKJL0003-INSERT-EXT
+
+      *@4  신청사유　삽입
+           PERFORM S3400-THKJL0006-INSERT-RTN
+              THRU S3400-THKJL0006-INSERT-EXT
+
+      *@   신청번호MOVE
+           MOVE XCJICN03-O-MGT-NO(1:10)
+             TO XDJLB093-O-APLCN-NO
+
+      *@   처리결과MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .
+       S3100-PROCESS-EXT.
+           EXIT.
+170512*-----------------------------------------------------------------
+利    *@  신청취소
+      *-----------------------------------------------------------------
+       S3200-PROCESS-RTN.
+
+      *@1  관리한도　신청이력　삭제
+           PERFORM S3700-THKJL0003-DELETE-RTN
+              THRU S3700-THKJL0003-DELETE-EXT
+
+      *@2  신청사유　삭제
+           PERFORM S3800-THKJL0006-DELETE-RTN
+              THRU S3800-THKJL0006-DELETE-EXT
+
+      *@3  기준한도산출저장내용　삭제
+           PERFORM S3900-THKJL0004-DELETE-RTN
+              THRU S3900-THKJL0004-DELETE-EXT
+
+200723*@3  한도승인결의록관리 삭제
+           PERFORM S3210-TKJL0005-DELETE-RTN
+              THRU S3210-TKJL0005-DELETE-EXT
+
+      *@   처리결과MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .
+       S3200-PROCESS-EXT.
+瓢         EXIT.
+      *-----------------------------------------------------------------
+      *@  해당차주에대한　미처리내역이　존재하는지　확인한다
+      *-----------------------------------------------------------------
+       S3100-QJL009U-CALL-RTN.
+
+      *@1.1변수초기화
+           INITIALIZE XQJL009U-IN
+
+      *@1.2변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL009U-I-GROUP-CO-CD
+      *@   차주번호
+           MOVE XDJLB093-I-KB-PIN
+             TO XQJL009U-I-KB-PIN
+      *@   한도진행상태구분
+           MOVE CO-CHA-1
+             TO XQJL009U-I-LIMT-P-STUS-DSTCD
+
+      *@1.3SQLIO CALL
+           #DYSQLA QJL009U XQJL009U-CA
+
+      *@1.4호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@해당차주에대한　미처리내역이　존재하면　신청　불가！！
+           IF XQJL009U-O-EXIST = CO-CHA-X
+              MOVE CO-STAT-ABNORMAL
+                TO WK-STAT
+      *@미처리내역존재시비정상종료결과셋팅후단말에서처리한다
+              PERFORM S9000-FINAL-RTN
+                 THRU S9000-FINAL-EXT
+           ELSE
+              CONTINUE
+           END-IF
+           .
+       S3100-QJL009U-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 신청번호　채번
+      *-----------------------------------------------------------------
+       S3200-CJICN03-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XCJICN03-IN
+
+      *@　그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJICN03-I-GROUP-CO-CD
+      *@　어플리케이션구분코드
+           MOVE 'KJL'
+             TO XCJICN03-I-UAPPL-CD
+      *@　채번식별코드
+           MOVE CO-CHA-001
+             TO XCJICN03-I-NBRING-IDNFI-CD
+      *@　부점코드
+           MOVE SPACE
+             TO XCJICN03-I-BRNCD
+
+      *@2.2 DC프로그램 호출 (CJICN03)
+      *@처리내용 : IC고객검증
+           #DYCALL CJICN03 YCCOMMON-CA XCJICN03-CA
+
+      *@2.3 호출결과 확인
+      *@처리내용 : IF 공통영역.리턴코드가 정상이 아니면
+      *@에러처리한다.
+
+           IF XCJICN03-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJICN03-R-ERRCD
+                     XCJICN03-R-TREAT-CD
+                     XCJICN03-R-STAT
+           END-IF
+           .
+       S3200-CJICN03-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 관리한도　신청이력　삽입
+      *-----------------------------------------------------------------
+       S3300-THKJL0003-INSERT-RTN.
+
+      *@3.1  원장등록
+      *@관련테이블 : 관리한도신청이력  접근유형 : CREATE
+
+      *@   초기화
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0003-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XCJICN03-O-MGT-NO
+             TO RJL0003-LIMT-APLCN-NO
+
+170201*@   고객식별자
+           MOVE XDJLB093-I-KB-PIN
+             TO RJL0003-CUST-IDNFR
+
+      *@   신청년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0003-APLCN-YMD
+
+      *@   한도신청종류구분
+           MOVE XDJLB093-I-LIMT-APLCN-DSTIC
+             TO RJL0003-LIMT-A-KND-DSTCD
+
+      *@   한도진행상태구분
+           MOVE CO-CHA-2
+             TO RJL0003-LIMT-P-STUS-DSTCD
+
+      *@   신청부점코드
+           MOVE XDJLB093-I-BBRN-CD
+             TO RJL0003-APLCN-BRNCD
+
+      *@   신청직원번호
+           MOVE XDJLB093-I-EMPID
+             TO RJL0003-APLCN-EMPID
+
+      *@   신표준산업분류코드
+           IF XDJLB093-I-STND-I-CLSFI-CD = SPACE
+              MOVE '00000'
+                TO RJL0003-NEW-SI-CLSFI-CD
+           ELSE
+              MOVE XDJLB093-I-STND-I-CLSFI-CD
+                TO RJL0003-NEW-SI-CLSFI-CD
+           END-IF
+
+      *@   내부신용평가등급구분
+           IF XDJLB093-I-CORP-CRDRAT = SPACE
+              MOVE '0000'
+                TO RJL0003-INTNL-CV-GRD-DSTCD
+           ELSE
+              MOVE XDJLB093-I-CORP-CRDRAT
+                TO RJL0003-INTNL-CV-GRD-DSTCD
+           END-IF
+
+      *@   그룹사신용등급구분
+           IF XDJLB093-I-GROUP-GRD(1:3) = SPACE
+              MOVE '000'
+                TO RJL0003-CMGR-CRTDSCD
+           ELSE
+              MOVE XDJLB093-I-GROUP-GRD(1:3)
+                TO RJL0003-CMGR-CRTDSCD
+           END-IF
+
+      *@   기업관리한도
+           COMPUTE RJL0003-CORP-TE-MGT-CLAM
+                 = XDJLB093-I-IDIVI-CORP-MGT-LIMT * 1000000
+
+      *@   그룹관리한도
+           COMPUTE RJL0003-GROUP-TE-MGT-CLAM
+                 = XDJLB093-I-GROUP-MGT-LIMT * 1000000
+
+      *@   기업토탈익스포져금액
+           COMPUTE RJL0003-CORP-TE-AMT
+                 = XDJLB093-I-IDIVI-CORP-EXPSR * 1000000
+
+      *@   그룹토탈익스포져금액
+           COMPUTE RJL0003-GROUP-TE-AMT
+                 = XDJLB093-I-GROUP-EXPSR * 1000000
+
+      *@   전여신성자산
+           COMPUTE RJL0003-BF-LNBZ-INCLIN-ASST
+                 = XDJLB093-I-MODFI-BLI-MGT-LIMT * 1000000
+
+      *@   전시장성자산
+           COMPUTE RJL0003-BF-MRKTY-ASST
+                 = XDJLB093-I-MODFI-BM-MGT-LIMT * 1000000
+
+      *@   후여신성자산
+           COMPUTE RJL0003-AF-LNBZ-INCLIN-ASST
+                 = XDJLB093-I-MODFI-ALI-MGT-LIMT * 1000000
+
+      *@   후시장성자산
+           COMPUTE RJL0003-AF-MRKTY-ASST
+                 = XDJLB093-I-MODFI-AM-MGT-LIMT * 1000000
+
+      *@   승인년월일
+           MOVE SPACE
+             TO RJL0003-ATHOR-YMD
+
+      *@   승인직원번호
+           MOVE SPACE
+             TO RJL0003-ATHOR-EMPID
+
+      *@   한도설정유효년월일
+           MOVE SPACE
+             TO RJL0003-LIMT-STUP-VALD-YMD
+
+      *@   한도신청구분
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-APLCN-DSTCD
+
+      *@   한도승인권자구분
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-ATRZ-DSTCD
+
+      *@   한도승인조건구분
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-A-CNDN-DSTCD
+
+      *@   한도승인구분
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-ATHOR-DSTCD
+
+      *@   대표자명
+           MOVE XDJLB093-I-RPRS-NAME
+             TO RJL0003-RPRS-NAME
+
+      *@   한글그룹명
+           MOVE XDJLB093-I-GROUP-NAME
+             TO RJL0003-HANGL-GROUP-NAME
+
+      *@   관리한도
+           MOVE ZERO
+             TO RJL0003-MGT-CLAM
+
+      *@   여신성관리한도
+           MOVE ZERO
+             TO RJL0003-LNBZ-I-MGT-CLAM
+
+      *@   시장성관리한도
+           MOVE ZERO
+             TO RJL0003-MRKTY-MGT-CLAM
+
+      *@   최종승인직원번호
+           MOVE SPACE
+             TO RJL0003-LAST-ATHOR-EMPID
+
+      *@3.2DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0003-PK TRJL0003-REC
+      *@3.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3300-THKJL0003-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한도신청승인의견(THKJL0006)등록
+      *-----------------------------------------------------------------
+       S3400-THKJL0006-INSERT-RTN.
+
+      *@4.1   원장등록
+      *@관련테이블 : 한도신청사유실적  접근유형 : CREATE
+
+      *@   초기화
+           INITIALIZE TKJL0006-KEY
+                      TRJL0006-REC
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0006-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XCJICN03-O-MGT-NO
+             TO RJL0006-LIMT-APLCN-NO
+
+      *@   신청사유내용
+           MOVE XDJLB093-I-APLCN-RESN
+             TO RJL0006-APLCN-RESN-CTNT
+
+      *@   승인사유내용
+           MOVE SPACE
+             TO RJL0006-ATHOR-RESN-CTNT
+
+      *@4.2DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0006-PK TRJL0006-REC
+
+      *@4.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3400-THKJL0006-INSERT-EXT.
+           EXIT.
+170512*-----------------------------------------------------------------
+利    *@ 관리한도　신청이력　삭제
+      *-----------------------------------------------------------------
+       S3700-THKJL0003-DELETE-RTN.
+
+      *@3.1  원장등록
+      *@관련테이블 : 관리한도신청이력  접근유형 : CREATE / DELETE
+
+      *@   초기화
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0003-PK-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XDJLB093-I-APLCN-NO
+             TO KJL0003-PK-LIMT-APLCN-NO
+
+      *@3.2DBIO CALL
+           #DYDBIO SELECT-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@3.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    IF  RJL0003-LIMT-P-STUS-DSTCD = '2'
+                        CONTINUE
+                    ELSE
+                        #ERROR CO-B3800033 CO-UKJL0036 CO-STAT-ERROR
+                    END-IF
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           #DYDBIO DELETE-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@3.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3700-THKJL0003-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한도신청승인의견(THKJL0006)삭제
+      *-----------------------------------------------------------------
+       S3800-THKJL0006-DELETE-RTN.
+
+      *@4.1   원장등록
+      *@관련테이블 : 한도신청사유실적  접근유형 : CREATE / DELETE
+
+      *@   초기화
+           INITIALIZE TKJL0006-KEY
+                      TRJL0006-REC
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0006-PK-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XDJLB093-I-APLCN-NO
+             TO KJL0006-PK-LIMT-APLCN-NO
+
+      *@4.2DBIO CALL
+           #DYDBIO SELECT-CMD-Y TKJL0006-PK TRJL0006-REC
+
+      *@4.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@4.2DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0006-PK TRJL0006-REC
+
+      *@4.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3800-THKJL0006-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한도산출내용(THKJL0004)삭제
+      *-----------------------------------------------------------------
+       S3900-THKJL0004-DELETE-RTN.
+
+      *@4.1   원장등록
+      *@관련테이블 : 한도산출내용　　  접근유형 : CREATE/ DELETE
+
+      *@   초기화
+           INITIALIZE TKJL0004-KEY
+                      TRJL0004-REC
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0004-PK-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XDJLB093-I-APLCN-NO
+             TO KJL0004-PK-LIMT-APLCN-NO
+
+      *@4.2DBIO CALL
+           #DYDBIO SELECT-CMD-Y TKJL0004-PK TRJL0004-REC
+
+      *@4.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@4.2DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0004-PK TRJL0004-REC
+
+      *@4.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3900-THKJL0004-DELETE-EXT.
+瓢         EXIT.
+
+      *-----------------------------------------------------------------
+200723*@ 한도승인결의록이력　삭제
+      *-----------------------------------------------------------------
+       S3210-TKJL0005-DELETE-RTN.
+
+      *@2.1변수초기화
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+      *@2.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+           MOVE XDJLB093-I-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+           MOVE LOW-VALUE
+             TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+           #DYDBIO  OPEN-CMD-1 TKJL0005-PK TRJL0005-REC
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0005-PK TRJL0005-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+                       MOVE RJL0005-ATHOR-CMMB-EMPID
+                         TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+                       #DYDBIO DELETE-CMD-Y TKJL0005-PK TRJL0005-REC
+
+                       EVALUATE TRUE
+                       WHEN COND-DBIO-OK
+                       WHEN COND-DBIO-MRNF
+                           CONTINUE
+                       WHEN OTHER
+      *@                  원장삭제오류일경우
+                           #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+                       END-EVALUATE
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3210-TKJL0005-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@   처리결과
+           MOVE WK-STAT
+             TO XDJLB093-O-PRCSS-RSULT
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

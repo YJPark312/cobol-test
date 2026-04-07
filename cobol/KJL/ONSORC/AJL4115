@@ -1,0 +1,325 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4115 (AS EAD개별그룹TotalExposure현황조회)
+      *@처리유형  : AS
+      *@처리개요  : 개별그룹Total Exposure현황조회(EAD)
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081231: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091203: PC 삭제
+      *백현정:20101120: EAD신규작성
+      *박정수:20241121: 미사용 항목 삭제
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4115.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/31.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4115 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리PC  INTERFACE
+       01  XDJL4115-CA.
+           COPY  XDJL4115.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4115-CA.
+           COPY  YNJL4115.
+      *    AS COPYBOOK
+       01  YPJL4115-CA.
+           COPY  YPJL4115.
+      *=================================================================
+       PROCEDURE                       DIVISION
+
+                                       USING       YCCOMMON-CA
+                                                   YNJL4115-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL4115-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4115-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4115-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4115-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL4115-CALL-RTN
+              THRU S3100-DJL4115-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4115-CALL-RTN.
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리PC입력파라미터=
+      *@SET(처리구분,기준년월,그룹등급,그룹순위1
+      *@그룹순위2,관리한도금액1,관리한도금액2)
+
+      *    처리구분
+           MOVE  YNJL4115-PRCSS-DSTIC
+             TO  XDJL4115-I-PRCSS-DSTIC
+
+      *    기준년월일
+           MOVE  YNJL4115-BASE-YMD
+             TO  XDJL4115-I-BASE-YMD
+
+      *    그룹순위1
+           MOVE  YNJL4115-GROUP-RANKG1
+             TO  XDJL4115-I-GROUP-RANKG1
+
+      *    그룹순위2
+           MOVE  YNJL4115-GROUP-RANKG2
+             TO  XDJL4115-I-GROUP-RANKG2
+
+      *    그룹등급
+           MOVE  YNJL4115-GROUP-GRD
+             TO  XDJL4115-I-GROUP-GRD
+
+      *    관리한도1
+           MOVE  YNJL4115-MGT-CLAM1
+             TO  XDJL4115-I-MGT-CLAM1
+
+      *    관리한도2
+           MOVE  YNJL4115-MGT-CLAM2
+             TO  XDJL4115-I-MGT-CLAM2
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4115 YCCOMMON-CA XDJL4115-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL4115-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4115-OK
+              CONTINUE
+           ELSE
+              #ERROR XDJL4115-R-ERRCD
+                     XDJL4115-R-TREAT-CD
+                     XDJL4115-R-STAT
+           END-IF
+           .
+       S3100-DJL4115-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력라인수 조립
+           MOVE XDJL4115-O-OUTPT-LINE-CNT1
+             TO YPJL4115-OUTPT-LINE-CNT1
+
+      *@4.2 그리드1 조립
+      *@실행조건:WK-I > YPJL4014-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립 =
+      *@SET(그룹순위,그룹코드,그룹명,그룹등급,그룹관리한도
+      *@,명목액직접한도,명목액간접한도,명목액기준합계한도
+      *@,명목액직접잔액,명목액간접잔액,명목액기준합계잔액
+      *@,직접한도금액,간접한도금액,합계한도기준금액
+      *@,직접한도잔액,간접한도잔액,합계잔액기준금액,소진율)
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4115-OUTPT-LINE-CNT1
+
+      *        그룹순위
+               MOVE XDJL4115-O-GROUP-RANKG(WK-I)
+                 TO YPJL4115-GROUP-RANKG(WK-I)
+
+      *        그룹코드
+               MOVE XDJL4115-O-GROUP-CD(WK-I)
+                 TO YPJL4115-GROUP-CD(WK-I)
+
+      *        그룹명
+               MOVE XDJL4115-O-GROUP-NAME(WK-I)
+                 TO YPJL4115-GROUP-NAME(WK-I)
+
+      *        그룹등급
+               MOVE XDJL4115-O-GROUP-GRD(WK-I)
+                 TO YPJL4115-GROUP-GRD(WK-I)
+
+      *        그룹관리한도
+               MOVE XDJL4115-O-GROUP-MGT-LIMT(WK-I)
+                 TO YPJL4115-GROUP-MGT-LIMT(WK-I)
+
+      *        명목액직접한도
+               MOVE XDJL4115-O-TTL-AMT-DRCT-LIMT(WK-I)
+                 TO YPJL4115-TTL-AMT-DRCT-LIMT(WK-I)
+
+      *        명목액간접한도
+               MOVE XDJL4115-O-TTL-AMT-INDR-LIMT(WK-I)
+                 TO YPJL4115-TTL-AMT-INDR-LIMT(WK-I)
+
+      *        명목액기준합계한도
+               MOVE XDJL4115-O-TTL-AB-SUM-LIMT(WK-I)
+                 TO YPJL4115-TTL-AB-SUM-LIMT(WK-I)
+
+      *        명목액직접잔액
+               MOVE XDJL4115-O-TTL-AMT-DRCT-BAL(WK-I)
+                 TO YPJL4115-TTL-AMT-DRCT-BAL(WK-I)
+
+      *        명목액간접잔액
+               MOVE XDJL4115-O-TTL-AMT-INDR-BAL(WK-I)
+                 TO YPJL4115-TTL-AMT-INDR-BAL(WK-I)
+
+      *        명목액기준합계잔액
+               MOVE XDJL4115-O-TTL-A-BASE-BALSUM(WK-I)
+                 TO YPJL4115-TTL-A-BASE-BALSUM(WK-I)
+
+      *        직접한도금액
+               MOVE XDJL4115-O-DRCT-CLAM(WK-I)
+                 TO YPJL4115-DRCT-CLAM(WK-I)
+
+      *        간접한도금액
+               MOVE XDJL4115-O-INDR-CLAM(WK-I)
+                 TO YPJL4115-INDR-CLAM(WK-I)
+
+      *        합계한도기준금액
+               MOVE XDJL4115-O-SUM-LIMT-BSAMT(WK-I)
+                 TO YPJL4115-SUM-LIMT-BSAMT(WK-I)
+
+      *        소진율
+               MOVE XDJL4115-O-EXHS-RT(WK-I)
+                 TO YPJL4115-EXHS-RT(WK-I)
+           END-PERFORM
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL04115000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

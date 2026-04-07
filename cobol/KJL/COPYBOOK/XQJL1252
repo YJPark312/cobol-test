@@ -1,0 +1,52 @@
+      *===========================================================
+      *  프로그램명    : QJL1252
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL1252
+      *  사용예        : 01  XQJL1252-CA.
+      *                      COPY  XQJL1252.
+      *  최종변경일시  : 2022년03월10일10시09분50초
+      *===========================================================
+           03  XQJL1252-IN.
+      *            그룹회사코드
+               05  XQJL1252-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL1252-I-BASE-YMD
+                                          PIC  X(00008).
+      *            KB-PIN
+               05  XQJL1252-I-KB-PIN
+                                          PIC  X(00010).
+      *            월말구분
+               05  XQJL1252-I-ENMN-DSTIC
+                                          PIC  X(00001).
+           03  XQJL1252-OUT.
+      *            기준년월일
+               05  XQJL1252-O-BASE-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            계좌번호
+               05  XQJL1252-O-ACNO
+                           OCCURS  00500  PIC  X(00020).
+      *            상품코드
+               05  XQJL1252-O-PRDCT-CD
+                           OCCURS  00500  PIC  X(00012).
+      *            상품명
+               05  XQJL1252-O-PRDCT-NAME
+                           OCCURS  00500  PIC  X(00262).
+      *            명목액기준한도
+               05  XQJL1252-O-TTL-AMT-BASE-CLAM
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            명목액기준잔액
+               05  XQJL1252-O-TTL-AMT-BASE-BAL
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            시작년월일
+               05  XQJL1252-O-START-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            만기년월일
+               05  XQJL1252-O-EXPIR-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            별도전결권적용여부
+               05  XQJL1252-O-SEPA-DAR-APLY-YN
+                           OCCURS  00500  PIC  X(00001).
+      *===========================================================
+      *  XQJL1252   C O P Y B O O K   E N D
+      *===========================================================

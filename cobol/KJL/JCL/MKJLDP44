@@ -1,0 +1,16 @@
+//MKJLDP44 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : 일자전환
+//*********************************************************************
+//*   연결회계수익증권정보적재(THKJLR016)
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLDR16,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SD.SHRKJL.KEETB09
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SD.MKJLDP44.DATA
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP44-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

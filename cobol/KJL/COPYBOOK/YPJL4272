@@ -1,0 +1,90 @@
+      *================================================================*
+      *@ NAME : YPJL4272                                               *
+      *@ DESC : AS포괄신용공여한도신청조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-09-05 14:45:15                          *
+      *  생성일시     : 2023-09-05 14:45:19                          *
+      *  전체길이     : 00000717 BYTES                               *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4272-DBTRZ-NAME               PIC  X(052).
+      *--     여신성최고한도
+           07  YPJL4272-LNBZ-I-HGST-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹명
+           07  YPJL4272-AFFLT-C-GROUP-NAME       PIC  X(052).
+      *--     유효기일
+           07  YPJL4272-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     포괄신용공여관리한도
+           07  YPJL4272-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹신용등급
+           07  YPJL4272-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     업종명
+           07  YPJL4272-STND-IDSTRY-CD-NAME      PIC  X(052).
+      *--     최종포괄신용공여관리한도
+           07  YPJL4272-LAST-INLS-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기업신용등급
+           07  YPJL4272-INTNL-CV-GRD-DSTCD1      PIC  X(004).
+      *--     부실회계기업등급
+           07  YPJL4272-INSL-ACCTG-CORP-GRD      PIC  X(001).
+      *--     기사용액
+           07  YPJL4272-INLS-GRCR-LIMT-AUC       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4272-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     산업평가등급구분
+           07  YPJL4272-IDSTRY-V-GRD-DSTCD       PIC  X(004).
+      *--     한도신청종류구분코드
+           07  YPJL4272-LIMT-A-KND-DSTCD         PIC  X(001).
+      *--     신청년월일
+           07  YPJL4272-APLCN-YMD                PIC  X(008).
+      *--     신청부점코드
+           07  YPJL4272-APLCN-BRNCD              PIC  X(004).
+      *--     부점한글명
+           07  YPJL4272-BRN-HANGL-NAME           PIC  X(052).
+      *--     신청직원번호
+           07  YPJL4272-APLCN-EMPID              PIC  X(007).
+      *--     직원명
+           07  YPJL4272-EMNM                     PIC  X(052).
+      *--     한도설정가능금액
+           07  YPJL4272-LIMT-STUP-ABLAMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도신청금액
+           07  YPJL4272-LIMT-APLCN-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신청사유내용
+           07  YPJL4272-APLCN-RESN-CTNT          PIC  X(302).
+      *--     관리여부
+           07  YPJL4272-MGT-YN                   PIC  X(001).
+      *--     포괄한도관리대상구분
+           07  YPJL4272-INLS-LM-TAGET-DSTCD      PIC  X(001).
+      *================================================================*
+      *        Y  P  J  L  4  2  7  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4272-DBTRZ-NAME           ;채무자명
+      *S  YPJL4272-LNBZ-I-HGST-LIMT     ;여신성최고한도
+      *X  YPJL4272-AFFLT-C-GROUP-NAME   ;그룹명
+      *X  YPJL4272-MGT-LIMT-VALD-YMD    ;유효기일
+      *S  YPJL4272-MGT-CLAM             ;포괄신용공여관리한도
+      *X  YPJL4272-INTNL-CV-GRD-DSTCD   ;그룹신용등급
+      *X  YPJL4272-STND-IDSTRY-CD-NAME  ;업종명
+      *S  YPJL4272-LAST-INLS-LIMT       ;최종포괄신용공여관리한도
+      *X  YPJL4272-INTNL-CV-GRD-DSTCD1  ;기업신용등급
+      *X  YPJL4272-INSL-ACCTG-CORP-GRD  ;부실회계기업등급
+      *S  YPJL4272-INLS-GRCR-LIMT-AUC   ;기사용액
+      *S  YPJL4272-LIMT-SEXTR-AMT       ;한도여유액
+      *X  YPJL4272-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분
+      *X  YPJL4272-LIMT-A-KND-DSTCD     ;한도신청종류구분코드
+      *X  YPJL4272-APLCN-YMD            ;신청년월일
+      *X  YPJL4272-APLCN-BRNCD          ;신청부점코드
+      *X  YPJL4272-BRN-HANGL-NAME       ;부점한글명
+      *X  YPJL4272-APLCN-EMPID          ;신청직원번호
+      *X  YPJL4272-EMNM                 ;직원명
+      *S  YPJL4272-LIMT-STUP-ABLAMT     ;한도설정가능금액
+      *S  YPJL4272-LIMT-APLCN-AMT       ;한도신청금액
+      *X  YPJL4272-APLCN-RESN-CTNT      ;신청사유내용
+      *X  YPJL4272-MGT-YN               ;관리여부
+      *X  YPJL4272-INLS-LM-TAGET-DSTCD  ;포괄한도관리대상구분

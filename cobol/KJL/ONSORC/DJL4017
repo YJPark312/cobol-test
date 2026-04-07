@@ -1,0 +1,309 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4017 (DC피어코드별TE현황조회)
+      *@처리유형  : DC
+      *@처리개요  : 산업 피어코드별 한도현황을 조회처리하는
+      *@            : 프로그램이다
+      *@구현방법  : SQL ARRAY
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *이동구:20081208: 신규작성
+      *김진태:20090323: 프로그램수정
+      *김진태:20091130: 에러메세지정비
+      *=================================================================
+      **  TABLE-SYNONYM       : 테이블명           : 접근유형
+      **  -------------------- ---------------------- -------------
+      **  산업등급별익스포져: THKJL0039            : R
+      **  표준산업코드목록  : THKJL0044            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4017.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/03.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4017'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO
+       01  XQJL0171-CA.
+           COPY    XQJL0171.
+      * SQLIO
+       01  XQJLZ005-CA.
+           COPY    XQJLZ005.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *공통 AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *DC COPYBOOK AREA
+       01  XDJL4017-CA.
+           COPY  XDJL4017.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4017-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE       WK-AREA
+      *                     SQLIO
+                            YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE       XDJL4017-OUT
+                            XDJL4017-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.1 처리구분코드체크
+      *@   실행조건 : 입력.처리구분코드=01
+      *@   처리내용 : 에러처리
+           IF XDJL4017-I-PRCSS-DSTIC NOT = CO-CHA-01
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.2 기준년월체크
+      *@   실행조건 : 입력.기준년월=SPACE
+      *@   처리내용 : 에러처리
+           IF XDJL4017-I-BASE-YMD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  피어코드명조회
+           PERFORM S3100-QJLZ005-CALL-RTN
+              THRU S3100-QJLZ005-CALL-EXT
+
+      *@2  피어코드별TE현황조회
+           PERFORM S3200-QJL0171-CALL-RTN
+              THRU S3200-QJL0171-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 피어코드명조회
+      *-----------------------------------------------------------------
+       S3100-QJLZ005-CALL-RTN.
+
+      *@1.1 변수초기화
+           INITIALIZE XQJLZ005-IN
+
+      *@1.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJLZ005-I-GROUP-CO-CD                                  01880024
+      *@   기준년월                                                   01940024
+           MOVE XDJL4017-I-BASE-YMD(1:6)                                01950024
+             TO XQJLZ005-I-BASE-YM                                      01960024
+      *@   피어코드                                                   01940024
+           MOVE XDJL4017-I-PEER-DSTCD                                   01950024
+             TO XQJLZ005-I-TE-PEER-DSTCD                                01960024
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJLZ005 XQJLZ005-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+                    MOVE SPACE
+                      TO XQJLZ005-O-PEER-CD-NAME
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+
+      *@   피어코드명                                                 02660024
+           MOVE XQJLZ005-O-PEER-CD-NAME                                 02670024
+             TO XDJL4017-O-PEER-CD-NAME                                 02680024
+           .
+       S3100-QJLZ005-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 피어코드별TE현황조회
+      *-----------------------------------------------------------------
+       S3200-QJL0171-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL0171-IN
+
+      *@2.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0171-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01940024
+           MOVE XDJL4017-I-BASE-YMD                                     01950024
+             TO XQJL0171-I-BASE-YMD                                     01960024
+      *@   피어코드
+           IF XDJL4017-I-PEER-DSTCD = SPACE
+               MOVE ALL '%'
+                 TO XQJL0171-I-TE-PEER-DSTCD
+           ELSE
+               MOVE XDJL4017-I-PEER-DSTCD                               01950024
+                 TO XQJL0171-I-TE-PEER-DSTCD
+           END-IF
+191220*@   국내외구분코드                                             01940024
+           MOVE XDJL4017-I-HMAB-DSTCD                                   01950024
+             TO XQJL0171-I-HMAB-DSTCD                                   01960024
+
+      *@2.3 프로그램　호출
+           #DYSQLA QJL0171 XQJL0171-CA
+
+      *@2.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@2.5 출력변수 MOVE
+
+      *@   합계처리로인해　추출건수가　１보다　클때　출력
+           IF DBSQL-SELECT-CNT > 1
+      *@   출력건수                                                   02660024
+           MOVE DBSQL-SELECT-CNT                                        02670024
+             TO XDJL4017-O-OUTPT-LINE-CNT1                              02680024
+           ELSE
+           MOVE ZERO
+             TO XDJL4017-O-OUTPT-LINE-CNT1
+           END-IF
+
+      *@   OUTPUT 출력
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4017-O-OUTPT-LINE-CNT1                    02740024
+      *@       피어구분
+               MOVE XQJL0171-O-TE-PEER-DSTCD(WK-I)
+                 TO XDJL4017-O-PEER-DSTCD1(WK-I)
+      *@       피어코드명
+               MOVE XQJL0171-O-PEER-CD-NAME(WK-I)
+                 TO XDJL4017-O-PEER-CD-NAME1(WK-I)
+      *@       대상업체건수
+               MOVE XQJL0171-O-TAGET-ENTP-NOITM(WK-I)
+                 TO XDJL4017-O-TAGET-ENTP-NOITM1(WK-I)
+      *@       명목액기준한도
+               MOVE XQJL0171-O-TTL-AMT-BASE-CLAM(WK-I)
+                 TO XDJL4017-O-TTL-AMT-BASE-CLAM1(WK-I)
+      *@       명목액기준잔액
+               MOVE XQJL0171-O-TTL-AMT-BASE-BAL(WK-I)
+                 TO XDJL4017-O-TTL-AMT-BASE-BAL1(WK-I)
+      *@       TE한도환산금액
+               MOVE XQJL0171-O-TE-LIMT-AUC(WK-I)
+                 TO XDJL4017-O-TE-LIMT-AUC1(WK-I)
+           END-PERFORM
+           .
+       S3200-QJL0171-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

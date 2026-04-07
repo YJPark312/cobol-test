@@ -1,0 +1,74 @@
+//MKJLTP12 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*           배치실행JCL
+//*********************************************************************
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*********************************************************************
+//*   외화유가증권장외파생차주별익스포져(THKJLR007)
+//*********************************************************************
+//STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.MKJLTP12.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR007 ')
+        ,CHAR('THKJLR007DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,고객식별자
+        ,고객관리번호
+        ,차주번호
+        ,차주명
+        ,네팅여부
+        ,총거래한도
+        ,담보거래한도
+        ,신용거래한도
+        ,한도유효년월일
+        ,면제여부
+        ,거래건수
+        ,위험가중자산금액
+        ,담보평가금액
+        ,외환총한도소진율
+        ,신용한도소진율
+        ,담보소진율
+        ,최근신규년월일
+        ,최근한도년월일
+        ,"초과신규여부1"
+        ,"초과신규여부2"
+        ,"초과신규여부3"
+        ,관련부점코드
+        ,"ISO국가코드"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJLR007
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//STEP02  EXEC JZBDEXEC,MBR=BJLDR07,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SD.SHRKJL.TAATR77
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SM.MKJLTP12.DATA
+//SYSIN     DD *
+KB0-%%A-MKJLTP12-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//

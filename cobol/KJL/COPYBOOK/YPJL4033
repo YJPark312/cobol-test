@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : YPJL4033                                               *
+      *@ DESC : AS동일차주별신용공여조회 COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-10-07 17:02:06                          *
+      *  생성일시     : 2009-10-07 17:02:17                          *
+      *================================================================*
+      *--     업무규제자기자본
+           07  YPJL4033-ONCP-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본기준년월
+           07  YPJL4033-ONCP-BASE-YM             PIC  X(006).
+      *--     출력라인수1
+           07  YPJL4033-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4033-GRID1                    OCCURS 000100 TIMES.
+      *--       그룹코드
+             09  YPJL4033-AFFLT-CORP-GROUP-CD    PIC  X(006).
+      *--       그룹명
+             09  YPJL4033-AFFLT-C-GROUP-NAME     PIC  X(042).
+      *--       전년말
+             09  YPJL4033-PYY-END-GRCR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월
+             09  YPJL4033-LSMN-END-GRCR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       당월
+             09  YPJL4033-TTMM-END-GRCR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말대비증감
+             09  YPJL4033-LSMN-E-CNTST-INCRDC    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년말대비증감
+             09  YPJL4033-PYY-E-CNTST-INCRDC     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본대비신용공여율
+             09  YPJL4033-ONCP-CNTST-GRCR-RT     PIC  9(003)V9(02).
+      *--       신용공여규모순위
+             09  YPJL4033-GRCR-SCAL-RANKG        PIC  9(003).
+      *================================================================*
+      *        Y  P  J  L  4  0  3  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *S  YPJL4033-ONCP-BSAMT           ;업무규제자기자본
+      *X  YPJL4033-ONCP-BASE-YM         ;자기자본기준년월
+      *N  YPJL4033-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4033-GRID1                ;그리드1
+      *X  YPJL4033-AFFLT-CORP-GROUP-CD  ;그룹코드
+      *X  YPJL4033-AFFLT-C-GROUP-NAME   ;그룹명
+      *S  YPJL4033-PYY-END-GRCR         ;전년말
+      *S  YPJL4033-LSMN-END-GRCR        ;전월
+      *S  YPJL4033-TTMM-END-GRCR        ;당월
+      *S  YPJL4033-LSMN-E-CNTST-INCRDC  ;전월말대비증감
+      *S  YPJL4033-PYY-E-CNTST-INCRDC   ;전년말대비증감
+      *N  YPJL4033-ONCP-CNTST-GRCR-RT   ;자기자본대비신용공여율
+      *N  YPJL4033-GRCR-SCAL-RANKG      ;신용공여규모순위

@@ -1,0 +1,371 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4085 (AS신용공여계좌조회)
+      *@처리유형  : AS
+      *@처리개요  : 신용공여계좌를 조회하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240425: 신규작성
+      *박정수:20240926: 컬럼 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4085.
+       AUTHOR.                        박정수.
+       DATE-WRITTEN.                   24/04/25.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4085'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   신용공여이사회승인내역조회
+       01  XDJL4085-CA.
+           COPY  XDJL4085.
+
+      *@  담보및보증내역제공
+       01  XIIEZ155-CA.
+           COPY  XIIEZ155.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJL4085-CA.
+           COPY  YNJL4085.
+
+       01  YPJL4085-CA.
+           COPY  YPJL4085.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4085-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@출력영역 확보
+           #GETOUT YPJL4085-CA
+
+      * COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    고객식별자
+           IF YNJL4085-CUST-IDNFR = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  신용공여계좌조회 프로그램호출
+           PERFORM S3100-DJL4085-CALL-RTN
+              THRU S3100-DJL4085-CALL-EXT
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   신용공여이사회승인내역조회 DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4085-CALL-RTN.
+
+      *@1 입력파라미터 조립
+
+      *    처리구분
+           MOVE YNJL4085-PRCSS-DSTIC
+             TO XDJL4085-I-PRCSS-DSTIC
+
+      *    고객식별자
+           MOVE  YNJL4085-CUST-IDNFR
+             TO  XDJL4085-I-CUST-IDNFR
+
+      *    이사회승인번호
+           MOVE  YNJL4085-BRDC-ATHOR-NO
+             TO  XDJL4085-I-BRDC-ATHOR-NO
+
+      *@1 신용공여이사회승인내역조회 프로그램 호출
+           #DYCALL  DJL4085  YCCOMMON-CA  XDJL4085-CA
+
+      *   처리결과CHECK
+           IF COND-XDJL4085-OK
+      *        출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           ELSE
+              #ERROR XDJL4085-R-ERRCD
+                     XDJL4085-R-TREAT-CD
+                     XDJL4085-R-STAT
+           END-IF
+           .
+       S3100-DJL4085-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  담보형태구분, 담보설정금액 조회
+      *-----------------------------------------------------------------
+       S3200-IIEZ155-CALL-RTN.
+
+           INITIALIZE                         XIIEZ155-IN
+
+      *-- ０２：여신계좌　기준　담보및보증내역조회
+           MOVE CO-CHA-02
+             TO XIIEZ155-I-PRCSS-DSTIC
+
+      *-- 계좌번호
+           MOVE XDJL4085-O-ACNO(WK-I)
+             TO XIIEZ155-I-SCURTY-LNBZ-ACNO
+      *-- 9 : 전체
+           MOVE '9'
+             TO XIIEZ155-I-SCURTY-FORM-DSTCD
+
+
+           #DYCALL  IIEZ155  YCCOMMON-CA  XIIEZ155-CA
+
+
+      *   에러처리
+           EVALUATE TRUE
+              WHEN COND-XIIEZ155-OK
+              WHEN COND-XIIEZ155-NOTFOUND
+                   CONTINUE
+              WHEN OTHER
+                   #ERROR  XIIEZ155-R-ERRCD
+                           XIIEZ155-R-TREAT-CD
+                           XIIEZ155-R-STAT
+           END-EVALUATE
+           .
+       S3200-IIEZ155-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+           IF YNJL4085-PRCSS-DSTIC = CO-CHA-01
+
+      *@4.2 출력라인수 조립
+               MOVE XDJL4085-O-PRSNT-NOITM2
+                 TO YPJL4085-PRSNT-NOITM2
+
+      *@4.3 그리드2 조립
+               PERFORM VARYING WK-I FROM 1 BY 1
+                       UNTIL   WK-I > YPJL4085-PRSNT-NOITM2
+
+      *         계좌번호
+                MOVE XDJL4085-O-ACNO(WK-I)
+                  TO YPJL4085-ACNO(WK-I)
+
+      *         약정계좌번호
+                MOVE XDJL4085-O-AGRE-ACNO(WK-I)
+                  TO YPJL4085-AGRE-ACNO(WK-I)
+
+      *         통합계정과목코드
+                MOVE XDJL4085-O-INTGRA-TIACC-CD(WK-I)
+                  TO YPJL4085-INTGRA-TIACC-CD(WK-I)
+
+      *         등록여부가 'Y'이면
+                IF XDJL4085-O-REGI-YN(WK-I) = 'Y'
+
+      *             담보형태구분
+                    MOVE XDJL4085-O-SCURTY-FORM-DSTCD(WK-I)
+                      TO YPJL4085-SCURTY-FORM-DSTCD(WK-I)
+
+      *             담보설정금액
+                    MOVE XDJL4085-O-SCURTY-SETAMT(WK-I)
+                      TO YPJL4085-SCURTY-SETAMT(WK-I)
+
+                ELSE
+
+      *             담보내역 조회
+                    PERFORM  S3200-IIEZ155-CALL-RTN
+                       THRU  S3200-IIEZ155-CALL-EXT
+
+                    IF XIIEZ155-O-PRSNT-NOITM > 0
+
+      *                 담보형태구분
+                        MOVE XIIEZ155-O-SCURTY-FORM-DSTCD(1)
+                          TO YPJL4085-SCURTY-FORM-DSTCD(WK-I)
+
+      *                 담보설정금액
+                        MOVE XIIEZ155-O-SETAMT(1)
+                          TO YPJL4085-SCURTY-SETAMT(WK-I)
+                    END-IF
+
+                END-IF
+
+      *         상품명
+                MOVE XDJL4085-O-PRDCT-NAME(WK-I)
+                  TO YPJL4085-PRDCT-NAME(WK-I)
+
+      *         통화코드
+                MOVE XDJL4085-O-CNCYCD(WK-I)
+                  TO YPJL4085-CNCYCD(WK-I)
+
+      *         통화한도
+                MOVE XDJL4085-O-CRNCY-CLAM(WK-I)
+                  TO YPJL4085-CRNCY-CLAM(WK-I)
+
+      *         통화잔액
+                MOVE XDJL4085-O-CRNCY-BAL(WK-I)
+                  TO YPJL4085-CRNCY-BAL(WK-I)
+
+      *         신용공여익스포져금액
+                MOVE XDJL4085-O-GRCR-EXPSR-AMT(WK-I)
+                  TO YPJL4085-GRCR-EXPSR-AMT(WK-I)
+
+      *         시작년월일
+                MOVE XDJL4085-O-START-YMD(WK-I)
+                  TO YPJL4085-START-YMD(WK-I)
+
+      *         만기년월일
+                MOVE XDJL4085-O-EXPIR-YMD(WK-I)
+                  TO YPJL4085-EXPIR-YMD(WK-I)
+
+      *         금리내용
+                MOVE XDJL4085-O-IRTZ-CTNT(WK-I)
+                  TO YPJL4085-IRTZ-CTNT(WK-I)
+
+240926*         취급부점코드
+                MOVE XDJL4085-O-HNDLN-BRNCD(WK-I)
+                  TO YPJL4085-HNDLN-BRNCD(WK-I)
+
+  ::  *         취급부점명
+                MOVE XDJL4085-O-HNDLN-BRN-NAME(WK-I)
+                  TO YPJL4085-HNDLN-BRN-NAME(WK-I)
+
+240926*         대출취급형태구분
+                MOVE XDJL4085-O-LN-HNDLN-FORM-DSTCD(WK-I)
+                  TO YPJL4085-LN-HNDLN-FORM-DSTCD(WK-I)
+
+      *         수기계좌여부
+                MOVE XDJL4085-O-HWRT-ACN-YN(WK-I)
+                  TO YPJL4085-HWRT-ACN-YN(WK-I)
+
+      *         등록여부
+                MOVE XDJL4085-O-REGI-YN(WK-I)
+                  TO YPJL4085-REGI-YN(WK-I)
+
+
+
+               END-PERFORM
+
+           END-IF
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11085000'
+
+           #OKEXIT  CO-STAT-OK .
+       S9000-FINAL-EXT.
+           EXIT.

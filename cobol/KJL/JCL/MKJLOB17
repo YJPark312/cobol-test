@@ -1,0 +1,19 @@
+//MKJLOB17 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLOP16
+//*********************************************************************
+//*    신용공여한도추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD25J,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD25I.V001
+//OTFILE   DD DSN=KJL.SD.BJLD25J.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLOB17-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

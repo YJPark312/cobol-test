@@ -1,0 +1,82 @@
+      *================================================================*
+      *@ NAME : XDJL0B18                                               *
+      *@ DESC : 포괄신용공여한도적정성점검대상관리                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-05-02 13:10:03                          *
+      *  생성일시     : 2024-05-02 13:10:04                          *
+      *  전체길이     : 00000496 BYTES                               *
+      *================================================================*
+           03  XDJL0B18-RETURN.
+             05  XDJL0B18-R-STAT                 PIC  X(002).
+                 88  COND-XDJL0B18-OK            VALUE  '00'.
+                 88  COND-XDJL0B18-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL0B18-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL0B18-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL0B18-ERROR         VALUE  '09'.
+                 88  COND-XDJL0B18-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL0B18-SYSERROR      VALUE  '99'.
+             05  XDJL0B18-R-LINE                 PIC  9(006).
+             05  XDJL0B18-R-ERRCD                PIC  X(008).
+             05  XDJL0B18-R-TREAT-CD             PIC  X(008).
+             05  XDJL0B18-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL0B18-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL0B18-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객식별자
+             05  XDJL0B18-I-CUST-IDNFR           PIC  X(010).
+      *--       담당심사역
+             05  XDJL0B18-I-RSPBL-EXMTN-DTY      PIC  X(007).
+      *--       한도신청번호
+             05  XDJL0B18-I-LIMT-APLCN-NO        PIC  X(010).
+      *--       한도점검진행상태구분
+             05  XDJL0B18-I-LIMT-CP-STUS-DSTIC   PIC  X(001).
+      *--       최종한도승인구분
+             05  XDJL0B18-I-LAST-L-ATHOR-DSTIC   PIC  X(001).
+      *--       적정성여부
+             05  XDJL0B18-I-PRTY-YN              PIC  X(001).
+      *--       보고서첨부
+             05  XDJL0B18-I-RPTDOC-APNDX         PIC  X(001).
+      *--       적정성점검구분
+             05  XDJL0B18-I-PRTY-CHKUP-DSTCD     PIC  X(001).
+      *--       총라인수1
+             05  XDJL0B18-I-TOTAL-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL0B18-I-GRID1                OCCURS 000010 TIMES.
+      *--         직원번호
+               07  XDJL0B18-I-EMPID              PIC  X(007).
+      *--       첨부파일일련번호
+             05  XDJL0B18-I-APNDX-FILE-SERNO     PIC  9(003).
+      *--       첨부파일식별자
+             05  XDJL0B18-I-APNDX-FILE-IDNFR     PIC  X(040).
+      *--       첨부파일내용
+             05  XDJL0B18-I-APNDX-FILE-CTNT      PIC  X(172).
+      *--       첨부파일명
+             05  XDJL0B18-I-APNDX-FILE-NAME      PIC  X(172).
+      *----------------------------------------------------------------*
+           03  XDJL0B18-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJL0B18-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  0  B  1  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL0B18-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL0B18-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL0B18-I-RSPBL-EXMTN-DTY    ;담당심사역
+      *X  XDJL0B18-I-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJL0B18-I-LIMT-CP-STUS-DSTIC ;한도점검진행상태구분
+      *X  XDJL0B18-I-LAST-L-ATHOR-DSTIC ;최종한도승인구분
+      *X  XDJL0B18-I-PRTY-YN            ;적정성여부
+      *X  XDJL0B18-I-RPTDOC-APNDX       ;보고서첨부
+      *X  XDJL0B18-I-PRTY-CHKUP-DSTCD   ;적정성점검구분
+      *N  XDJL0B18-I-TOTAL-LINE-CNT1    ;총라인수1
+      *A  XDJL0B18-I-GRID1              ;그리드1
+      *X  XDJL0B18-I-EMPID              ;직원번호
+      *N  XDJL0B18-I-APNDX-FILE-SERNO   ;첨부파일일련번호
+      *X  XDJL0B18-I-APNDX-FILE-IDNFR   ;첨부파일식별자
+      *X  XDJL0B18-I-APNDX-FILE-CTNT    ;첨부파일내용
+      *X  XDJL0B18-I-APNDX-FILE-NAME    ;첨부파일명
+      *X  XDJL0B18-O-PRCSS-RSULT        ;처리결과

@@ -1,0 +1,97 @@
+//MKJLDP02 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//* %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*배치작업기준일 : 매일（휴일／영업일　무관）
+//*선행작업명     : MKJLDB01
+//*********************************************************************
+//*    토탈익스포져일일배치작업결과（진행중）
+//*********************************************************************
+//STEP00 EXEC JZBDEXEC,MBR=BJLDLG1,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLDLG1.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP02-001-ONLBAT-KB STAR-%%$ODATE-1-0
+//*자료기준년월일
+//*토탈익스포져업무구분（１：TE－고정）
+//*배치완료여부（１：완료，０：진행）
+//*********************************************************************
+//*    한신평기준그룹사정보생성
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD132,OPT=&SYSUID
+//INFILE   DD DISP=OLD,DSN=KJL.SD.BJLD131.V001
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD132.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//OTFILE   DD SYSOUT=*
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP02-001-ONLBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*    한신평기준계열사정보생성
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD142,OPT=&SYSUID
+//INFILE   DD DISP=OLD,DSN=KJL.SD.BJLD141.V001
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD142.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//OTFILE   DD SYSOUT=*
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP02-001-ONLBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*    THKJL0013 그룹사기본 UNLOAD
+//*********************************************************************
+//*    - DATA UNLOAD
+//*      DADG -> DAPG
+//*      DB2ADS -> DB2APS
+//*********************************************************************
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.KJL0013.V001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT  계열기업군코드
+       ,  그룹사신용등급구분
+    FROM   DB2DBA.THKJL0013
+   WHERE  그룹회사코드 = 'KB0'
+     AND  기준년월     = '%%$YEAR.%%MONTH'
+     AND  계열적용구분 = '1'
+    WITH  UR;
+/*
+//*********************************************************************
+//*   주채무계열 계열사 등록(THKJL0014 계열적용구분= 2)
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLD143,OPT=&SYSUID,COND=(4,LT)
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD143.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP02-001-ONLBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//

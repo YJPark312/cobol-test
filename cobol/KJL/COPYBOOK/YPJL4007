@@ -1,0 +1,52 @@
+      *================================================================*
+      *@ NAME : YPJL4007                                               *
+      *@ DESC : ASTE한도관리대상조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-09 13:17:05                          *
+      *  생성일시     : 2009-06-09 13:17:13                          *
+      *================================================================*
+      *--     부점명
+           07  YPJL4007-BRN-NAME                 PIC  X(062).
+      *--     출력라인수1
+           07  YPJL4007-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4007-GRID1                    OCCURS 005000 TIMES.
+      *--       차주번호
+             09  YPJL4007-BRWR-NO                PIC  X(013).
+      *--       채무자명
+             09  YPJL4007-DBTRZ-NAME             PIC  X(042).
+      *--       기업규모
+             09  YPJL4007-CORP-SCAL              PIC  X(020).
+      *--       관리한도금액
+             09  YPJL4007-MGT-CLAM               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준한도
+             09  YPJL4007-TTL-AMT-BASE-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져금액
+             09  YPJL4007-TE-AMT                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             09  YPJL4007-LIMT-EXHS-RT           PIC  9(003)V9(02).
+      *--       동일인외화신용공여한도액
+             09  YPJL4007-SMPSN-FG-LIMT-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       동일인외화신용공여액
+             09  YPJL4007-SMPSN-FC-GRCR-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  0  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4007-BRN-NAME             ;부점명
+      *N  YPJL4007-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4007-GRID1                ;그리드1
+      *X  YPJL4007-BRWR-NO              ;차주번호
+      *X  YPJL4007-DBTRZ-NAME           ;채무자명
+      *X  YPJL4007-CORP-SCAL            ;기업규모
+      *S  YPJL4007-MGT-CLAM             ;관리한도금액
+      *S  YPJL4007-TTL-AMT-BASE-LIMT    ;명목액기준한도
+      *S  YPJL4007-TE-AMT               ;토탈익스포져금액
+      *N  YPJL4007-LIMT-EXHS-RT         ;한도소진율
+      *S  YPJL4007-SMPSN-FG-LIMT-AMT
+      * 동일인외화신용공여한도액
+      *S  YPJL4007-SMPSN-FC-GRCR-AMT    ;동일인외화신용공여액

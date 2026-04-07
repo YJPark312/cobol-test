@@ -1,0 +1,95 @@
+      *================================================================*
+      *@ NAME : XPJL409B                                               *
+      *@ DESC : PC기업및그룹한도신청및승인조회(설정승인조회) C     *
+      *@        OPYBOOK                                                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-23 10:21:07                          *
+      *  생성일시     : 2009-07-23 10:21:10                          *
+      *================================================================*
+           03  XPJL409B-RETURN.
+             05  XPJL409B-R-STAT                 PIC  X(002).
+                 88  COND-XPJL409B-OK            VALUE  '00'.
+                 88  COND-XPJL409B-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL409B-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL409B-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL409B-ERROR         VALUE  '09'.
+                 88  COND-XPJL409B-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL409B-SYSERROR      VALUE  '99'.
+             05  XPJL409B-R-LINE                 PIC  9(006).
+             05  XPJL409B-R-ERRCD                PIC  X(008).
+             05  XPJL409B-R-TREAT-CD             PIC  X(008).
+             05  XPJL409B-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL409B-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL409B-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJL409B-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJL409B-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJL409B-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XPJL409B-OUT.
+      *----------------------------------------------------------------*
+      *--       신청일자
+             05  XPJL409B-O-APLCN-DTE            PIC  X(008).
+      *--       신청직원번호
+             05  XPJL409B-O-APLCN-EMPID          PIC  X(007).
+      *--       신청직원명
+             05  XPJL409B-O-APLCN-EMNM           PIC  X(042).
+      *--       신청영업점코드
+             05  XPJL409B-O-APLCNZ-BRNCD         PIC  X(004).
+      *--       신청영업점명
+             05  XPJL409B-O-APLCN-BBRN-NAME      PIC  X(042).
+      *--       신청구분
+             05  XPJL409B-O-APLCN-DSTIC          PIC  X(001).
+      *--       승인일자
+             05  XPJL409B-O-ATHOR-DTE            PIC  X(008).
+      *--       기준한도산출액
+             05  XPJL409B-O-BASE-LIMT-CMPTN-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도설정액
+             05  XPJL409B-O-MGT-LIMT-STUP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성관리한도
+             05  XPJL409B-O-LNBZ-I-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XPJL409B-O-MRKTY-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도설정유효일
+             05  XPJL409B-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       승인권자
+             05  XPJL409B-O-ATRZ                 PIC  X(001).
+      *--       조건부승인조건
+             05  XPJL409B-O-CNDT-ATHOR-CNDN      PIC  X(001).
+      *--       승인구분
+             05  XPJL409B-O-ATHOR-DSTIC          PIC  X(001).
+      *--       승인사유
+             05  XPJL409B-O-ATHOR-RESN           PIC  X(302).
+      *================================================================*
+      *        X  P  J  L  4  0  9  B    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL409B-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL409B-I-CUST-DSTIC         ;고객구분
+      *X  XPJL409B-I-BRWR-NO            ;차주번호
+      *X  XPJL409B-I-APLCN-NO           ;신청번호
+      *X  XPJL409B-O-APLCN-DTE          ;신청일자
+      *X  XPJL409B-O-APLCN-EMPID        ;신청직원번호
+      *X  XPJL409B-O-APLCN-EMNM         ;신청직원명
+      *X  XPJL409B-O-APLCNZ-BRNCD       ;신청영업점코드
+      *X  XPJL409B-O-APLCN-BBRN-NAME    ;신청영업점명
+      *X  XPJL409B-O-APLCN-DSTIC        ;신청구분
+      *X  XPJL409B-O-ATHOR-DTE          ;승인일자
+      *S  XPJL409B-O-BASE-LIMT-CMPTN-AMT;기준한도산출액
+      *S  XPJL409B-O-MGT-LIMT-STUP-AMT  ;관리한도설정액
+      *S  XPJL409B-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *S  XPJL409B-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *X  XPJL409B-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *X  XPJL409B-O-ATRZ               ;승인권자
+      *X  XPJL409B-O-CNDT-ATHOR-CNDN    ;조건부승인조건
+      *X  XPJL409B-O-ATHOR-DSTIC        ;승인구분
+      *X  XPJL409B-O-ATHOR-RESN         ;승인사유

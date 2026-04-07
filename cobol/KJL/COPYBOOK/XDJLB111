@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : XDJLB111                                               *
+      *@ DESC : DC한도초과업체관리예외대상등록COPYBOOK               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2013-08-08 17:21:12                          *
+      *  생성일시     : 2013-08-08 17:21:14                          *
+      *  전체길이     : 00000168 BYTES                               *
+      *================================================================*
+           03  XDJLB111-RETURN.
+             05  XDJLB111-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB111-OK            VALUE  '00'.
+                 88  COND-XDJLB111-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB111-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB111-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB111-ERROR         VALUE  '09'.
+                 88  COND-XDJLB111-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB111-SYSERROR      VALUE  '99'.
+             05  XDJLB111-R-LINE                 PIC  9(006).
+             05  XDJLB111-R-ERRCD                PIC  X(008).
+             05  XDJLB111-R-TREAT-CD             PIC  X(008).
+             05  XDJLB111-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB111-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB111-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XDJLB111-I-BRWR-NO              PIC  X(013).
+      *--       예외사유구분코드
+             05  XDJLB111-I-LIMT-EM-ECEPT-DSTCD  PIC  X(001).
+      *--       예외사유
+             05  XDJLB111-I-LIMT-EM-ECEPT-CTNT   PIC  X(152).
+      *----------------------------------------------------------------*
+           03  XDJLB111-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB111-O-PRCSS-RSULT          PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  B  1  1  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB111-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB111-I-BRWR-NO            ;차주번호
+      *X  XDJLB111-I-LIMT-EM-ECEPT-DSTCD;예외사유구분코드
+      *X  XDJLB111-I-LIMT-EM-ECEPT-CTNT ;예외사유
+      *X  XDJLB111-O-PRCSS-RSULT        ;처리결과

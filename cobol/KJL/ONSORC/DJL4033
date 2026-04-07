@@ -1,0 +1,506 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4033 (동일차주별신용공여조회)
+      *@처리유형  : DC
+      *@처리개요  : 동일차주별신용공여조회
+      *@구현방법  : SQL ARRAY(100)
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090107: 신규작성
+      *김진태:20090418: 프로그램수정
+      *김진태:20091007: CJIDT04 => CJIDT17
+      *김진태:20091208: 에러메세지정비
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      ** TE자기자본기본           : THKJL0049            : R
+      ** 그룹신용공여월실적       : THKJL0038            : R
+      ** 그룹사기본               : THKJL0013            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4033.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/01/07.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900002             PIC  X(008) VALUE 'B3900002'.
+           03  CO-B4200223             PIC  X(008) VALUE 'B4200223'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4033'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-NUM-12               PIC  9(002) VALUE 12.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-EXHS-RT              PIC  9(005)V9999.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * UTILITY COPYBOOK
+       01  XCJIIL09-CA.
+           COPY    XCJIIL09.
+      * UTILITY COPYBOOK
+       01  XCJIDT17-CA.
+           COPY    XCJIDT17.
+      * SQLIO COPYBOOK
+       01  XQJL0331-CA.
+           COPY    XQJL0331.
+      * SQLIO COPYBOOK
+       01  XQJL0332-CA.
+           COPY    XQJL0332.
+      * SQLIO COPYBOOK
+       01  XQJL0333-CA.
+           COPY    XQJL0333.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE COPYBOOK
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      * DC COPYBOOK
+       01  XDJL4033-CA.
+           COPY  XDJL4033.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4033-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4033-OUT
+                      XDJL4033-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   처리구분
+           IF XDJL4033-I-PRCSS-DSTIC = CO-CHA-01
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   기준년월
+           IF XDJL4033-I-BASE-YM = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   조회구분
+           IF XDJL4033-I-INQURY-DSTIC = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@   전년말　추출
+           PERFORM S3100-CJIIL09-CALL-RTN
+              THRU S3100-CJIIL09-CALL-EXT
+
+      *@   전월　추출
+           PERFORM S3200-CJIDT17-CALL-RTN
+              THRU S3200-CJIDT17-CALL-EXT
+
+      *@1  동일차주별신용공여（헤더）조회
+           PERFORM S3300-QJL0331-CALL-RTN
+              THRU S3300-QJL0331-CALL-EXT
+
+      *@2  동일차주별신용공여　조회
+           IF XDJL4033-I-INQURY-DSTIC = CO-CHA-1
+      *@      은행기준
+              PERFORM S3400-QJL0332-CALL-RTN
+                 THRU S3400-QJL0332-CALL-EXT
+           ELSE
+      *@      금감원기준
+              PERFORM S3500-QJL0333-CALL-RTN
+                 THRU S3500-QJL0333-CALL-EXT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 전년말구하기
+      *-----------------------------------------------------------------
+       S3100-CJIIL09-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE XCJIIL09-IN
+
+      *@   산출조건 DATA MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIIL09-I-GROUP-CO-CD
+      *@   구분코드 - 1 : 증월, 2 : 감월
+           MOVE CO-CHA-2
+             TO XCJIIL09-I-DSTCD
+      *@   기준년월일
+           MOVE XDJL4033-I-BASE-YM
+             TO XCJIIL09-I-YMD(1:6)
+           MOVE CO-CHA-01
+             TO XCJIIL09-I-YMD(7:2)
+      *@   가산월／감산월
+           MOVE CO-NUM-12
+             TO XCJIIL09-I-PLS-SBTR-MN
+
+      *@    공통UTILITY CALL
+           #DYCALL CJIIL09 YCCOMMON-CA XCJIIL09-CA
+
+      *@    호출결과확인
+           IF XCJIIL09-R-STAT = ZERO
+              CONTINUE
+           ELSE
+              #ERROR XCJIIL09-R-ERRCD
+                     XCJIIL09-R-TREAT-CD
+                     XCJIIL09-R-STAT
+           END-IF
+           .
+       S3100-CJIIL09-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  일자산출－전월
+      *-----------------------------------------------------------------
+       S3200-CJIDT17-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XCJIDT17-IN
+      *@   변수 MOVE
+           MOVE XDJL4033-I-BASE-YM TO XCJIDT17-I-YMD(1:6)
+           MOVE CO-CHA-01          TO XCJIDT17-I-YMD(7:2)
+           MOVE CO-CHA-1           TO XCJIDT17-I-DSTCD
+      *@   프로그램　호출
+           #DYCALL CJIDT17 YCCOMMON-CA XCJIDT17-CA
+      *@   호출결과확인
+           IF XCJIDT17-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIDT17-R-ERRCD
+                     XCJIDT17-R-TREAT-CD
+                     XCJIDT17-R-STAT
+           END-IF
+           .
+       S3200-CJIDT17-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  동일차주별신용공여（헤더）조회
+      *-----------------------------------------------------------------
+       S3300-QJL0331-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL0331-IN
+      *@2.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0331-I-GROUP-CO-CD
+      *@   기준년월
+           MOVE XDJL4033-I-BASE-YM
+             TO XQJL0331-I-BASE-YM
+      *@2.3 프로그램 호출
+           #DYSQLA QJL0331 XQJL0331-CA
+      *@2.4 호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B4200223 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+      *@2.5 출력변수 MOVE
+      *@업무규제자기자본
+           COMPUTE XDJL4033-O-ONCP-BSAMT
+                 = XQJL0331-O-ONCP-BSAMT / 1000000
+      *@자기자본기준년월
+           MOVE XQJL0331-O-BASE-YM
+             TO XDJL4033-O-ONCP-BASE-YM
+           .
+       S3300-QJL0331-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 동일차주별신용공여（은행기준）조회
+      *-----------------------------------------------------------------
+       S3400-QJL0332-CALL-RTN.
+
+      *@3.1 변수초기화
+           INITIALIZE XQJL0332-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0332-I-GROUP-CO-CD
+      *@   기준년월
+           MOVE XDJL4033-I-BASE-YM
+             TO XQJL0332-I-BASE-YM
+      *@   전년말
+           MOVE XCJIIL09-O-ENMN-YMD(1:4)
+             TO XQJL0332-I-PYY-END(1:4)
+           MOVE CO-CHA-12
+             TO XQJL0332-I-PYY-END(5:2)
+      *@   전월
+           MOVE XCJIDT17-O-BF-YMD(1:6)
+             TO XQJL0332-I-LSMN-END
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL0332 XQJL0332-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B4200223 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4033-O-OUTPT-LINE-CNT1
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4033-O-OUTPT-LINE-CNT1
+
+      *@           계열코드                                           03550002
+                   MOVE XQJL0332-O-AFFLT-CORP-GROUP-CD(WK-I)            03560002
+                     TO XDJL4033-O-AFFLT-CORP-GROUP-CD(WK-I)            03570002
+      *@           계열명                                             03580002
+                   MOVE XQJL0332-O-AFFLT-C-GROUP-NAME(WK-I)             03590002
+                     TO XDJL4033-O-AFFLT-C-GROUP-NAME(WK-I)             03600002
+      *@           전년말잔액(은행기준)                             03610002
+                   COMPUTE XDJL4033-O-PYY-END-GRCR(WK-I)
+                         = XQJL0332-O-PYY-END-AMT (WK-I) / 1000000
+      *@           전월잔액(은행기준)                               03640002
+                   COMPUTE XDJL4033-O-LSMN-END-GRCR(WK-I)
+                         = XQJL0332-O-LSMN-AMT(WK-I) / 1000000
+      *@           당월잔액（은행기준）                               03670002
+                   COMPUTE XDJL4033-O-TTMM-END-GRCR(WK-I)
+                         = XQJL0332-O-TTMN-AMT(WK-I) / 1000000
+      *@           전월말대비증감                                     03670002
+                   COMPUTE XDJL4033-O-LSMN-E-CNTST-INCRDC(WK-I)
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) -
+                           XDJL4033-O-LSMN-END-GRCR(WK-I)
+      *@           전년말대비증감                                     03670002
+                   COMPUTE XDJL4033-O-PYY-E-CNTST-INCRDC(WK-I)
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) -
+                           XDJL4033-O-PYY-END-GRCR(WK-I)
+      *@           자기자본대비신용공여율                             03670002
+                   IF XDJL4033-O-ONCP-BSAMT > 0
+                   COMPUTE WK-EXHS-RT
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) /
+                           XDJL4033-O-ONCP-BSAMT
+                   COMPUTE XDJL4033-O-ONCP-CNTST-GRCR-RT(WK-I)
+                         = WK-EXHS-RT * 100
+                   ELSE
+                   MOVE ZERO
+                     TO XDJL4033-O-ONCP-CNTST-GRCR-RT(WK-I)
+                   END-IF
+
+      *@           신용공여규모순위                                   03670002
+                   MOVE WK-I
+                     TO XDJL4033-O-GRCR-SCAL-RANKG(WK-I)
+                                                                        03700002
+           END-PERFORM
+           .
+       S3400-QJL0332-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 동일차주별신용공여（금감원기준）조회
+      *-----------------------------------------------------------------
+       S3500-QJL0333-CALL-RTN.
+
+      *@3.1 변수초기화
+           INITIALIZE XQJL0333-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0333-I-GROUP-CO-CD
+      *@   기준년월
+           MOVE XDJL4033-I-BASE-YM
+             TO XQJL0333-I-BASE-YM
+      *@   전년말
+           MOVE XCJIIL09-O-ENMN-YMD(1:4)
+             TO XQJL0333-I-PYY-END(1:4)
+           MOVE CO-CHA-12
+             TO XQJL0333-I-PYY-END(5:2)
+      *@   전월
+           MOVE XCJIDT17-O-BF-YMD(1:6)
+             TO XQJL0333-I-LSMN-END
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL0333 XQJL0333-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B4200223 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4033-O-OUTPT-LINE-CNT1
+
+      *@   LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4033-O-OUTPT-LINE-CNT1
+
+      *@           계열코드                                           03550002
+                   MOVE XQJL0333-O-AFFLT-CORP-GROUP-CD(WK-I)            03560002
+                     TO XDJL4033-O-AFFLT-CORP-GROUP-CD(WK-I)            03570002
+      *@           계열명                                             03580002
+                   MOVE XQJL0333-O-AFFLT-C-GROUP-NAME(WK-I)             03590002
+                     TO XDJL4033-O-AFFLT-C-GROUP-NAME(WK-I)             03600002
+      *@           전년말잔액(금감원기준)                           03610002
+                   COMPUTE XDJL4033-O-PYY-END-GRCR(WK-I)
+                         = XQJL0333-O-PYY-END-AMT (WK-I) / 1000000
+      *@           전월잔액(금감원기준)                             03640002
+                   COMPUTE XDJL4033-O-LSMN-END-GRCR(WK-I)
+                         = XQJL0333-O-LSMN-AMT(WK-I) / 1000000
+      *@           당월잔액（금감원기준）                             03670002
+                   COMPUTE XDJL4033-O-TTMM-END-GRCR(WK-I)
+                         = XQJL0333-O-TTMN-AMT(WK-I) / 1000000
+      *@           전월말대비증감                                     03670002
+                   COMPUTE XDJL4033-O-LSMN-E-CNTST-INCRDC(WK-I)
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) -
+                           XDJL4033-O-LSMN-END-GRCR(WK-I)
+      *@           전년말대비증감                                     03670002
+                   COMPUTE XDJL4033-O-PYY-E-CNTST-INCRDC(WK-I)
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) -
+                           XDJL4033-O-PYY-END-GRCR(WK-I)
+      *@           자기자본대비신용공여율                             03670002
+                   IF XDJL4033-O-ONCP-BSAMT > 0
+                   COMPUTE WK-EXHS-RT
+                         = XDJL4033-O-TTMM-END-GRCR(WK-I) /
+                           XDJL4033-O-ONCP-BSAMT
+                   COMPUTE XDJL4033-O-ONCP-CNTST-GRCR-RT(WK-I)
+                         = WK-EXHS-RT * 100
+                   ELSE
+                   MOVE ZERO
+                     TO XDJL4033-O-ONCP-CNTST-GRCR-RT(WK-I)
+                   END-IF
+
+      *@           신용공여규모순위                                   03670002
+                   MOVE WK-I
+                     TO XDJL4033-O-GRCR-SCAL-RANKG(WK-I)
+                                                                        03700002
+           END-PERFORM
+           .
+       S3500-QJL0333-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

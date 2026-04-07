@@ -1,0 +1,102 @@
+      *================================================================*
+      *@ NAME : XDJL4107                                               *
+      *@ DESC : DC(EAD)TE한도관리대상조회 COPYBOOK                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2016-10-20 14:22:33                          *
+      *  생성일시     : 2016-10-20 14:22:34                          *
+      *  전체길이     : 00000046 BYTES                               *
+      *================================================================*
+           03  XDJL4107-RETURN.
+             05  XDJL4107-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4107-OK            VALUE  '00'.
+                 88  COND-XDJL4107-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4107-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4107-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4107-ERROR         VALUE  '09'.
+                 88  COND-XDJL4107-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4107-SYSERROR      VALUE  '99'.
+             05  XDJL4107-R-LINE                 PIC  9(006).
+             05  XDJL4107-R-ERRCD                PIC  X(008).
+             05  XDJL4107-R-TREAT-CD             PIC  X(008).
+             05  XDJL4107-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4107-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4107-I-PRCSS-DSTIC          PIC  X(002).
+      *--       부점코드
+             05  XDJL4107-I-BRNCD                PIC  X(004).
+      *--       고객구분
+             05  XDJL4107-I-CUST-DSTIC           PIC  X(001).
+      *--       설정상태
+             05  XDJL4107-I-STUP-STUS            PIC  X(001).
+      *--       기준년월일
+             05  XDJL4107-I-BASE-YMD             PIC  X(008).
+      *--       금액1
+             05  XDJL4107-I-AMT1                 PIC  9(015).
+      *--       금액2
+             05  XDJL4107-I-AMT2                 PIC  9(015).
+      *----------------------------------------------------------------*
+           03  XDJL4107-OUT.
+      *----------------------------------------------------------------*
+      *--       부점명
+             05  XDJL4107-O-BRN-NAME             PIC  X(062).
+      *--       출력라인수1
+             05  XDJL4107-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4107-O-GRID1                OCCURS 005000 TIMES.
+      *--         차주번호
+               07  XDJL4107-O-BRWR-NO            PIC  X(013).
+      *--         채무자명
+               07  XDJL4107-O-DBTRZ-NAME         PIC  X(042).
+      *--         기업규모
+               07  XDJL4107-O-CORP-SCAL          PIC  X(020).
+      *--         관리한도금액
+               07  XDJL4107-O-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준한도
+               07  XDJL4107-O-TTL-AMT-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         명목액기준잔액
+               07  XDJL4107-O-TTL-AMT-BASE-BAL   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         한도기준TE금액
+               07  XDJL4107-O-LIMT-BASE-TE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         한도소진율
+               07  XDJL4107-O-LIMT-EXHS-RT       PIC  9(003)V9(02).
+      *--         신용평가유효년월일
+               07  XDJL4107-O-CRDT-VALUA-VALD-YMD
+                                                 PIC  X(008).
+      *--         관리한도유효년월일
+               07  XDJL4107-O-MGT-LIMT-VALD-YMD  PIC  X(008).
+      *--         관리부점코드
+               07  XDJL4107-O-MGT-BRNCD          PIC  X(004).
+      *--         관리부점명
+               07  XDJL4107-O-MGT-BRN-NAME       PIC  X(042).
+      *================================================================*
+      *        X  D  J  L  4  1  0  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4107-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4107-I-BRNCD              ;부점코드
+      *X  XDJL4107-I-CUST-DSTIC         ;고객구분
+      *X  XDJL4107-I-STUP-STUS          ;설정상태
+      *X  XDJL4107-I-BASE-YMD           ;기준년월일
+      *N  XDJL4107-I-AMT1               ;금액1
+      *N  XDJL4107-I-AMT2               ;금액2
+      *X  XDJL4107-O-BRN-NAME           ;부점명
+      *N  XDJL4107-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4107-O-GRID1              ;그리드1
+      *X  XDJL4107-O-BRWR-NO            ;차주번호
+      *X  XDJL4107-O-DBTRZ-NAME         ;채무자명
+      *X  XDJL4107-O-CORP-SCAL          ;기업규모
+      *S  XDJL4107-O-MGT-CLAM           ;관리한도금액
+      *S  XDJL4107-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *S  XDJL4107-O-TTL-AMT-BASE-BAL   ;명목액기준잔액
+      *S  XDJL4107-O-LIMT-BASE-TE-AMT   ;한도기준TE금액
+      *N  XDJL4107-O-LIMT-EXHS-RT       ;한도소진율
+      *X  XDJL4107-O-CRDT-VALUA-VALD-YMD;신용평가유효년월일
+      *X  XDJL4107-O-MGT-LIMT-VALD-YMD  ;관리한도유효년월일
+      *X  XDJL4107-O-MGT-BRNCD          ;관리부점코드
+      *X  XDJL4107-O-MGT-BRN-NAME       ;관리부점명

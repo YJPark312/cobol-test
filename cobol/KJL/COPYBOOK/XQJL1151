@@ -1,0 +1,85 @@
+      *===========================================================
+      *  프로그램명    : QJL1151
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL1151
+      *  사용예        : 01  XQJL1151-CA.
+      *                      COPY  XQJL1151.
+      *  최종변경일시  : 2024년11월14일15시17분11초
+      *===========================================================
+           03  XQJL1151-IN.
+      *            기준년월일
+               05  XQJL1151-I-BASE-YMD
+                                          PIC  X(00008).
+      *            그룹회사코드
+               05  XQJL1151-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            그룹순위1
+               05  XQJL1151-I-GROUP-RANKG1
+                                          PIC S9(00003) COMP-3.
+      *            그룹순위2
+               05  XQJL1151-I-GROUP-RANKG2
+                                          PIC S9(00003) COMP-3.
+      *            관리한도1
+               05  XQJL1151-I-MGT-CLAM1
+                                          PIC S9(00015) COMP-3.
+      *            관리한도2
+               05  XQJL1151-I-MGT-CLAM2
+                                          PIC S9(00015) COMP-3.
+      *            그룹등급
+               05  XQJL1151-I-GROUP-GRD
+                                          PIC  X(00003).
+      *            N계열기업순위
+               05  XQJL1151-I-N-GROUP-RANKG
+                                          PIC S9(00003) COMP-3.
+      *            N계열기업군코드
+               05  XQJL1151-I-N-GROUP-CD
+                                          PIC  X(00006).
+           03  XQJL1151-OUT.
+      *            그룹순위
+               05  XQJL1151-O-GROUP-RANKG
+                           OCCURS  00101  PIC S9(00003) COMP-3.
+      *            그룹코드
+               05  XQJL1151-O-GROUP-CD
+                           OCCURS  00101  PIC  X(00006).
+      *            그룹명
+               05  XQJL1151-O-GROUP-NAME
+                           OCCURS  00101  PIC  X(00052).
+      *            그룹등급
+               05  XQJL1151-O-GROUP-GRD
+                           OCCURS  00101  PIC  X(00003).
+      *            그룹관리한도
+               05  XQJL1151-O-GROUP-MGT-LIMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액직접한도
+               05  XQJL1151-O-TTL-AMT-DRCT-LIMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액간접한도
+               05  XQJL1151-O-TTL-AMT-INDR-LIMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액기준합계한도
+               05  XQJL1151-O-TTL-AB-SUM-LIMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액직접잔액
+               05  XQJL1151-O-TTL-AMT-DRCT-BAL
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액간접잔액
+               05  XQJL1151-O-TTL-AMT-INDR-BAL
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액기준합계잔액
+               05  XQJL1151-O-TTL-AMT-BASE-BALSUM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            직접한도금액
+               05  XQJL1151-O-DRCT-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            간접한도금액
+               05  XQJL1151-O-INDR-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            합계한도기준금액
+               05  XQJL1151-O-SUM-LIMT-BSAMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            소진율
+               05  XQJL1151-O-EXHS-RT
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *===========================================================
+      *  XQJL1151   C O P Y B O O K   E N D
+      *===========================================================

@@ -1,0 +1,74 @@
+      *================================================================*
+      *@ NAME : XDJL4129                                               *
+      *@ DESC : DCTE일일변동현황조회COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-04-11 13:23:59                          *
+      *  생성일시     : 2017-04-11 13:24:00                          *
+      *  전체길이     : 00000012 BYTES                               *
+      *================================================================*
+           03  XDJL4129-RETURN.
+             05  XDJL4129-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4129-OK            VALUE  '00'.
+                 88  COND-XDJL4129-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4129-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4129-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4129-ERROR         VALUE  '09'.
+                 88  COND-XDJL4129-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4129-SYSERROR      VALUE  '99'.
+             05  XDJL4129-R-LINE                 PIC  9(006).
+             05  XDJL4129-R-ERRCD                PIC  X(008).
+             05  XDJL4129-R-TREAT-CD             PIC  X(008).
+             05  XDJL4129-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4129-IN.
+      *----------------------------------------------------------------*
+      *--       조회구분
+             05  XDJL4129-I-INQURY-DSTIC         PIC  X(001).
+      *--       변동금액구분
+             05  XDJL4129-I-FLXBL-AMT-DSTIC      PIC  X(001).
+      *--       KB-PIN
+             05  XDJL4129-I-KB-PIN               PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4129-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4129-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4129-O-GRID1                OCCURS 000100 TIMES.
+      *--         채무자명
+               07  XDJL4129-O-DBTRZ-NAME         PIC  X(052).
+      *--         KB-PIN
+               07  XDJL4129-O-KB-PIN             PIC  X(010).
+      *--         전일자TE
+               07  XDJL4129-O-PRDAY-TE           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         기준일TE
+               07  XDJL4129-O-BASE-DD-TE         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         TE변동금액
+               07  XDJL4129-O-TE-FLXBL-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         전일자대분류업종
+               07  XDJL4129-O-LSDT-L-CLSFI-BZTYP PIC  X(036).
+      *--         기준일대분류업종
+               07  XDJL4129-O-BASE-DL-CLSFI-BZTYP
+                                                 PIC  X(036).
+      *--         관리부점
+               07  XDJL4129-O-MGTBRN             PIC  X(030).
+      *================================================================*
+      *        X  D  J  L  4  1  2  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4129-I-INQURY-DSTIC       ;조회구분
+      *X  XDJL4129-I-FLXBL-AMT-DSTIC    ;변동금액구분
+      *X  XDJL4129-I-KB-PIN             ;KB-PIN
+      *N  XDJL4129-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4129-O-GRID1              ;그리드1
+      *X  XDJL4129-O-DBTRZ-NAME         ;채무자명
+      *X  XDJL4129-O-KB-PIN             ;KB-PIN
+      *S  XDJL4129-O-PRDAY-TE           ;전일자TE
+      *S  XDJL4129-O-BASE-DD-TE         ;기준일TE
+      *S  XDJL4129-O-TE-FLXBL-AMT       ;TE변동금액
+      *X  XDJL4129-O-LSDT-L-CLSFI-BZTYP ;전일자대분류업종
+      *X  XDJL4129-O-BASE-DL-CLSFI-BZTYP;기준일대분류업종
+      *X  XDJL4129-O-MGTBRN             ;관리부점

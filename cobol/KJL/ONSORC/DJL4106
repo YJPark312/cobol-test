@@ -1,0 +1,1288 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4106 (EAD-Exposure총괄조회)
+      *@처리유형  : DC
+      *@처리개요  : Exposure총괄조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *김진태:20101029: 신규작성
+      * YBH    :20130927: TE일일배치작업　진행중이면
+      *                  ＇진행중＇사용자　메세지　띄움
+      * YBH    :20150818: 조치메시지 정비
+      * YBH    :20150904: 외화기준한도 정보추가
+      * PJH    :20170201:  KB-PIN 전환（２차）　　
+      * PJH    :20170626:  KB-PIN 전환（３차）　　
+      * YBH    :20180627: 업종대분류 추가/관리대상산업 문구변경
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  간접보증인익스포져일실적: THKJL0031            : R
+      **  계열사기본              : THKJL0014            : R
+      **  상품코드목록            : THKJL0118            : R
+      **  그룹관리한도월보기본    : THKJL0012            : R
+      **  그룹사기본              : THKJL0013            : R
+      **  그룹익스포져일실적      : THKJL0135            : R
+      **  산업등급별TE현황실적  : THKJL0039            : R
+      **  산업별한도산출기본      : THKJL0051            : R
+      **  차주관리한도실적        : THKJL0011            : R
+      **  차주익스포져일실적      : THKJL0129            : R
+      **  채무자고객기본          : THKJL0015            : R
+      **  표준산업코드목록        : THKJL0044            : R
+      **  한도관리제외대상차주기본: THKJL0017            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4106.
+       AUTHOR.                         김진태.
+       DATE-WRITTEN.                   10/10/29.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+150818     03  CO-B3800205             PIC  X(008) VALUE 'B3800205'.
+150818     03  CO-UKJL0037             PIC  X(008) VALUE 'UKJL0037'.
+150904     03  CO-UKJL0032             PIC  X(008) VALUE 'UKJL0032'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4106'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+130927     03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-PJCD                 PIC  X(005).
+           03  WK-TEMP                 PIC  9(003)V99.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *전영업일추출매크로
+       01  XCJIDT16-CA.
+           COPY  XCJIDT16.
+      *업체개요조회
+130927 01  XQJL0061-CA.
+130927     COPY  XQJL0061.
+      *익스포져조회
+       01  XQJL1062-CA.
+           COPY  XQJL1062.
+      *관리한도조회
+130927 01  XQJL0063-CA.
+130927     COPY  XQJL0063.
+      *관리한도제외대상여부조회
+130927 01  XQJL0064-CA.
+130927     COPY  XQJL0064.
+      *간접익스포져조회
+130927 01  XQJL0065-CA.
+130927     COPY  XQJL0065.
+      *그룹개요조회
+130927 01  XQJL0067-CA.
+130927     COPY  XQJL0067.
+      *그룹관리한도조회
+130927 01  XQJL0068-CA.
+130927     COPY  XQJL0068.
+      *그룹익스포져조회
+       01  XQJL1068-CA.
+           COPY  XQJL1068.
+      *산업별TE조회
+130927 01  XQJLI05B-CA.
+130927     COPY  XQJLI05B.
+130927*   토탈익스포져일일배치작업결과　조회
+       01  XQJLI056-CA.
+           COPY    XQJLI056.
+150904*   외화한도소진액조회
+       01  XQJL1066-CA.
+           COPY  XQJL1066.
+
+      *-----------------------------------------------------------------01040007
+      * TABLE ACCESS INTERFACE PARAMETER                                01050007
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01060007
+      *-----------------------------------------------------------------00810000
+      * DBIO ACCESS KEY관리                                           008200
+170626*채무자고객기본　테이블(KEY)                                    009200
+       01  TKJL0015-KEY.                                                00930000
+           COPY  TKJL0015.                                              00940000
+170626*채무자고객기본　테이블(RECORD)                                 009200
+       01  TRJL0015-REC.                                                00960000
+           COPY  TRJL0015.                                              00970000
+      * DBIO ACCESS KEY관리
+180627*   표준산업코드목록　테이블(KEY)
+       01  TKJL0044-KEY.
+           COPY  TKJL0044.
+180627*   표준산업코드목록　테이블(RECORD)
+       01  TRJL0044-REC.
+           COPY  TRJL0044.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO  INTERFACE PARAMETER
+           COPY  YCDBIOCA.
+      *    SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    DC COPYBOOK
+       01  XDJL4106-CA.
+           COPY  XDJL4106.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4106-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+                         YCDBIOCA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XDJL4106-OUT
+                         XDJL4106-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XDJL4106-I-PRCSS-DSTIC NOT = CO-CHA-01 AND CO-CHA-02
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XDJL4106-I-PRCSS-DSTIC NOT = CO-CHA-01 AND CO-CHA-02
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@2.2 채무자번호미입력CHECK
+      *@실행조건:XDJL4106-I-BRWR-NO = SPACE
+      *@처리내용:채무자번호미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XDJL4106-I-BRWR-NO = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@2.3 기준년월일미입력CHECK
+      *@실행조건:XDJL4106-I-BASE-YMD = SPACE
+      *@처리내용:기준년월일미입력일경우 오류처리한다
+      *@에러메시지:필수항목미입력오류입니다.
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF XDJL4106-I-BASE-YMD = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리－익스포져총괄조회
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+130927*@1 토탈익스포져일일배치작업결과　조회
+      *@  진행중이면　＇진행중＇　사용자　메세지띄움
+           PERFORM S3900-QJLI056-CALL-RTN
+              THRU S3900-QJLI056-CALL-EXT
+
+      *@0 고객식별자，채무자명추출
+      *@3.1채무자명추출
+170626     PERFORM S3100-THKJL0015-SELECT-RTN
+              THRU S3100-THKJL0015-SELECT-EXT
+
+130927     IF XDJL4106-I-PRCSS-DSTIC = CO-CHA-01
+      *@3.2   업체개요추출
+               PERFORM S3200-QJL0061-CALL-RTN
+                  THRU S3200-QJL0061-CALL-EXT
+
+      *@3.3   익스포져추출
+               PERFORM S3300-QJL1062-CALL-RTN
+                  THRU S3300-QJL1062-CALL-EXT
+
+      *@3.4   관리한도추출
+               PERFORM S3400-QJL0063-CALL-RTN
+                  THRU S3400-QJL0063-CALL-EXT
+
+      *@3.5   관리대상제외여부추출
+               PERFORM S3500-QJL0064-CALL-RTN
+                  THRU S3500-QJL0064-CALL-EXT
+
+      *@3.6   간접익스포져추출
+               PERFORM S3600-QJL0065-CALL-RTN
+                  THRU S3600-QJL0065-CALL-EXT
+
+150904*@3.7   외화한도소진액추출
+               PERFORM S3700-QJL1066-CALL-RTN
+                  THRU S3700-QJL1066-CALL-EXT
+
+      *@3.7   그룹개요조회
+               PERFORM S3700-QJL0067-CALL-RTN
+                  THRU S3700-QJL0067-CALL-EXT
+
+      *@3.8   그룹관리한도조회
+               PERFORM S3800-QJL0068-CALL-RTN
+                  THRU S3800-QJL0068-CALL-EXT
+
+      *@3.9   그룹익스포져조회
+               PERFORM S3900-QJL1068-CALL-RTN
+                  THRU S3900-QJL1068-CALL-EXT
+
+               IF WK-PJCD = SPACE
+                   MOVE SPACE
+                     TO RJL0044-LAG-CLSFI-BZTYP-CD
+               ELSE
+180627*@3.10      산업개요조회
+                   PERFORM S3A00-RJL0044-CALL-RTN
+                      THRU S3A00-RJL0044-CALL-EXT
+               END-IF
+
+      *@3.11  산업별TE현황조회
+               PERFORM S3B00-QJLI05B-CALL-RTN
+                  THRU S3B00-QJLI05B-CALL-EXT
+
+      *       출력처리
+               PERFORM S6000-OUTPUT-SET-RTN
+                  THRU S6000-OUTPUT-SET-EXT
+           ELSE
+      *       심사승인거래
+               PERFORM S4000-IC-PROCESS-RTN
+                  THRU S4000-IC-PROCESS-EXT
+           END-IF
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+130927*@ 토탈익스포져일일배치작업결과　조회
+      *-----------------------------------------------------------------
+       S3900-QJLI056-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJLI056-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJLI056)입력파라메타=
+      *@   SET(그룹회사코드,토탈익스포져업무구분,배치작업완료여부)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLI056-I-GROUP-CO-CD
+
+      *    토탈익스포져업무구분
+           MOVE CO-CHA-1
+             TO XQJLI056-I-TE-BZWK-DSTCD
+
+      *    배치작업완료여부
+           MOVE CO-CHA-1
+             TO XQJLI056-I-BTCH-FNSH-YN
+
+      *@1  SLQIO프로그램 호출
+      *@  처리내용:QJLI056프로그램을 호출한다
+      *@  관련테이블:THKJLLOG1 접근유형:READ
+           #DYSQLA QJLI056 XQJLI056-CA
+
+      *@1 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    IF XQJLI056-O-BTCH-FNSH-YN = CO-CHA-0
+      *#2정상이지만 배치가 종료되기 전이면
+      *@에러메세지 : 거래가능시간 오류입니다.
+      *@조치메세지 : 토탈익스포져 작업 중입니다.
+150818                 #ERROR CO-B3800205 CO-UKJL0037 CO-STAT-ERROR
+                    END-IF
+               WHEN COND-DBSQL-MRNF
+      *#2원장NOT FOUND인경우
+      *@에러메세지 : 거래가능시간 오류입니다.
+      *@조치메세지 : 토탈익스포져 작업 중입니다.
+150818              #ERROR CO-B3800205 CO-UKJL0037 CO-STAT-ERROR
+               WHEN OTHER
+      *#2원장조회에러인경우
+      *@2에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3900-QJLI056-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  채무자명추출
+      *-----------------------------------------------------------------
+       S3100-THKJL0015-SELECT-RTN.
+
+      *@초기화　　　　                                                025534
+           INITIALIZE TKJL0015-KEY                                      02541109
+                      TRJL0015-REC                                      02541209
+      *@   그룹회사코드                                               025414
+           MOVE BICOM-GROUP-CO-CD                                       02541509
+             TO KJL0015-PK-GROUP-CO-CD                                  02541609
+      *@   고객식별자                                                 025417
+           MOVE XDJL4106-I-BRWR-NO                                      02541809
+             TO KJL0015-PK-CUST-IDNFR                                   02541909
+
+           #DYDBIO SELECT-CMD-Y TKJL0015-PK TRJL0015-REC                02542409
+
+           EVALUATE TRUE                                                02542609
+               WHEN COND-DBIO-OK                                        02542709
+                    MOVE RJL0015-DBTRZ-NAME
+                      TO XDJL4106-O-BRWR-NAME
+               WHEN COND-DBIO-MRNF                                      02543009
+                    CONTINUE
+               WHEN OTHER                                               02543309
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．                   0254
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다               0254
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02543609
+           END-EVALUATE                                                 02543709
+           .                                                            02543809
+       S3100-THKJL0015-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업체개요추출
+      *-----------------------------------------------------------------
+       S3200-QJL0061-CALL-RTN.
+
+      *@3.2.1 초기화
+           INITIALIZE    XQJL0061-IN
+
+      *@3.2.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0061)입력파라메타=
+      *@SET(그룹회사구분코드,차주번호)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0061-I-GROUP-CO-CD
+170201*    고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0061-I-KB-PIN
+
+      *@3.2.3 SLQIO프로그램 호출
+      *@처리내용:QJL0061프로그램을 호출한다
+      *@관련테이블:THKJL0015(채무자고객기본) 접근유형:READ
+130927     #DYSQLA QJL0061 XQJL0061-CA
+
+      *@3.2.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.2.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@3.2.6 출력변수 MOVE
+
+      *@  대표사업자번호
+           MOVE XQJL0061-O-RPSNT-BZNO
+             TO XDJL4106-O-RPSNT-BZNO
+      *@  매출액
+           MOVE XQJL0061-O-SALEPR
+             TO XDJL4106-O-SALEPR
+      *@  신용등급(내부신용평가등급구분)
+           MOVE XQJL0061-O-INTNL-CV-GRD-DSTCD
+             TO XDJL4106-O-CRDRAT
+      *@  기업규모
+           MOVE XQJL0061-O-CORP-SCAL
+             TO XDJL4106-O-CORP-SCAL
+      *@  총자산
+           MOVE XQJL0061-O-TOTAL-ASST
+             TO XDJL4106-O-TOTAL-ASST
+      *@  신용등급평가일(신용평가년월일)
+           MOVE XQJL0061-O-CRDT-VALUA-YMD
+             TO XDJL4106-O-CRDRAT-VALUA-DD
+      *@  신표준산업분류코드
+           MOVE XQJL0061-O-NEW-SI-CLSFI-CD
+             TO WK-PJCD
+           .
+       S3200-QJL0061-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  익스포져추출SQLIO호출
+      *-----------------------------------------------------------------
+       S3300-QJL1062-CALL-RTN.
+
+      *@3.3.1 초기화
+           INITIALIZE    XQJL1062-IN
+
+      *@3.3.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL1062)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1062-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL1062-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL1062-I-KB-PIN
+
+      *@3.3.3 SLQIO프로그램 호출
+      *@처리내용:QJL1062프로그램을 호출한다
+      *@관련테이블:THKJL0129(차주익스포져일집계) 접근유형:READ
+      *@관련테이블:THKJL0118(상품코드목록) 접근유형:READ
+           #DYSQLA QJL1062 XQJL1062-CA
+
+      *@3.3.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.3.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   시장성한도기준TE
+           MOVE XQJL1062-O-MRKTY-LIMT-BASE-TE
+             TO XDJL4106-O-MRKTY-LIMT-BASE-TE
+
+           .
+       S3300-QJL1062-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  관리한도금액 조회
+      *-----------------------------------------------------------------
+       S3400-QJL0063-CALL-RTN.
+
+      *@3.4.1 초기화
+           INITIALIZE XQJL0063-IN
+
+      *@3.4.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0063)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0063-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL0063-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0063-I-KB-PIN
+
+      *@3.4.3 SLQIO프로그램 호출
+      *@처리내용:QJL0063프로그램을 호출한다
+      *@관련테이블:THKJL0011(차주관리한도기본) 접근유형:READ
+130927     #DYSQLA QJL0063 XQJL0063-CA
+
+           EVALUATE TRUE
+      *@3.4.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK
+      *@처리내용:CONTINUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+      *@3.4.5 호출결과확인
+      *@실행조건:COND-DBSQL-MRNF
+      *@처리내용:MOVE '비대상' TO XQJL0063-O-MGT-TAGET-YN
+               WHEN COND-DBSQL-MRNF
+                    MOVE '비대상'
+                      TO XQJL0063-O-MGT-TAGET-YN
+      *@3.4.6 호출결과 확인
+      *@실행조건:OTHER
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+               WHEN OTHER
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.4.7 출력변수 MOVE
+
+      *@   TE기준한도(기준한도금액)
+           MOVE XQJL0063-O-BASE-CLAM
+             TO XDJL4106-O-TE-BASE-LIMT
+      *@   관리대상여부
+           MOVE XQJL0063-O-MGT-TAGET-YN
+             TO XDJL4106-O-MGT-TAGET-YN
+      *@   관리한도설정일(관리한도설정년월일)
+           MOVE XQJL0063-O-MGT-LIMT-STUP-YMD
+             TO XDJL4106-O-MGT-LIMT-STUP-DD
+      *@   한도설정유효일(관리한도유효년월일)
+           MOVE XQJL0063-O-MGT-LIMT-VALD-YMD
+             TO XDJL4106-O-LIMT-STUP-VALD-DD
+      *@   여신성관리한도
+           MOVE XQJL0063-O-LNBZ-I-MGT-CLAM
+             TO XDJL4106-O-LNBZ-I-MGT-LIMT
+      *@   시장성관리한도
+           MOVE XQJL0063-O-MRKTY-MGT-CLAM
+             TO XDJL4106-O-MRKTY-MGT-LIMT
+      *@   관리한도
+           MOVE XQJL0063-O-MGT-CLAM
+             TO XDJL4106-O-MGT-LIMT
+150904*@   외화신용공여한도
+           MOVE XQJL0063-O-FC-GRCR-CLAM
+             TO XDJL4106-O-FC-GRCR-CLAM
+           .
+       S3400-QJL0063-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  관리한도제외대상인지 확인
+      *-----------------------------------------------------------------
+       S3500-QJL0064-CALL-RTN.
+
+      *@3.5.1 초기화
+           INITIALIZE    XQJL0064-IN
+
+      *@3.5.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0064)입력파라메타=
+      *@SET(그룹회사구분코드,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0064-I-GROUP-CO-CD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0064-I-KB-PIN
+
+      *@3.5.3 SLQIO프로그램 호출
+      *@처리내용:QJL0064프로그램을 호출한다
+      *@관련테이블:THKJL0017(한도관리제외대상차주명세)
+      *@접근유형:READ
+130927     #DYSQLA QJL0064 XQJL0064-CA
+
+      *@3.5.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:MOVE '비대상' TO XDJL4106-O-MGT-TAGET-YN
+           IF COND-DBSQL-OK
+              MOVE '비대상'
+                TO XDJL4106-O-MGT-TAGET-YN
+           END-IF
+           .
+       S3500-QJL0064-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  간접익스포져금액 조회
+      *-----------------------------------------------------------------
+       S3600-QJL0065-CALL-RTN.
+
+      *@3.6.1 초기화
+           INITIALIZE    XQJL0065-IN
+
+      *@3.6.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0065)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0065-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL0065-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0065-I-KB-PIN
+
+      *@3.6.3 SLQIO프로그램 호출
+      *@처리내용:QJL0065프로그램을 호출한다
+      *@관련테이블:THKJL0031(간접보증인익스포져일집계)
+      *@접근유형:READ
+           #DYSQLA QJL0065 XQJL0065-CA
+
+      *@3.6.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.6.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3600-QJL0065-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+150904*@  외화한도소진액 조회
+      *-----------------------------------------------------------------
+       S3700-QJL1066-CALL-RTN.
+
+      *@3.7.1 초기화
+           INITIALIZE    XQJL1066-IN
+
+      *@3.7.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL1066)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1066-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL1066-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL1066-I-KB-PIN
+
+      *@3.7.3 SLQIO프로그램 호출
+      *@처리내용:QJL1066프로그램을 호출한다
+      *@관련테이블:THKJL0127(TE차주익스포져중간일집계)
+      *@접근유형:READ
+           #DYSQLA QJL1066 XQJL1066-CA
+
+      *@3.7.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+               CONTINUE
+      *@3.7.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 해당되는 자료가 존재하지 않습니다!
+           ELSE
+               #ERROR CO-B3900009 CO-UKJL0032 CO-STAT-ERROR
+           END-IF
+
+      *@3.7.6 출력변수 MOVE
+
+      *@   외화한도소진액
+           MOVE XQJL1066-O-FC-LIMT-AUC
+             TO XDJL4106-O-FC-LIMT-AUC
+           .
+       S3700-QJL1066-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  그룹개요조회
+      *-----------------------------------------------------------------
+       S3700-QJL0067-CALL-RTN.
+
+      *@3.7.1 초기화
+           INITIALIZE XQJL0067-IN
+
+      *@3.7.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0067)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0067-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL0067-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0067-I-KB-PIN
+
+      *@3.7.3 SLQIO프로그램 호출
+      *@처리내용:QJL0067프로그램을 호출한다
+      *@관련테이블:THKJL0013(그룹사기본) 접근유형:READ
+      *@관련테이블:THKJL0014(계열사기본) 접근유형:READ
+130927     #DYSQLA QJL0067 XQJL0067-CA
+
+      *@3.7.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.7.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@3.7.6 출력변수 MOVE
+
+      *@   그룹코드(계열기업군코드)
+           MOVE XQJL0067-O-AFFLT-CORP-GROUP-CD
+             TO XDJL4106-O-GROUP-CD
+      *@   그룹명(계열기업군명)
+           MOVE XQJL0067-O-AFFLT-C-GROUP-NAME
+             TO XDJL4106-O-GROUP-NAME
+      *@   그룹등급(그룹사신용등급구분)
+           MOVE XQJL0067-O-CMGR-CRTDSCD
+             TO XDJL4106-O-GROUP-GRD
+      *@   그룹순위(계열기업순위)
+           MOVE XQJL0067-O-AFFLT-CORP-RANKG
+             TO XDJL4106-O-GROUP-RANKG
+      *@   주채무계열여부
+           MOVE XQJL0067-O-MAIN-DEBT-AFFLT-YN
+             TO XDJL4106-O-MAIN-DEBT-AFFLT-YN
+           .
+       S3700-QJL0067-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  그룹관리한도조회
+      *-----------------------------------------------------------------
+       S3800-QJL0068-CALL-RTN.
+
+      *@3.8.1 초기화
+           INITIALIZE    XQJL0068-IN
+
+      *@3.8.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0068)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0068-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL0068-I-BASE-YMD
+      *@   그룹코드(계열기업군코드)
+           MOVE XDJL4106-O-GROUP-CD
+             TO XQJL0068-I-AFFLT-CORP-GROUP-CD
+
+      *@3.8.3 SLQIO프로그램 호출
+      *@처리내용:QJL0068프로그램을 호출한다
+      *@관련테이블:THKJL0012(그룹관리한도기본) 접근유형:READ
+130927     #DYSQLA QJL0068 XQJL0068-CA
+
+      *@3.8.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.8.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@3.8.6 출력변수 MOVE
+
+      *@   그룹한도설정유효일(관리한도유효년월일)
+           MOVE XQJL0068-O-MGT-LIMT-VALD-YMD
+             TO XDJL4106-O-GROUP-LS-VALD-DD
+      *@   그룹관리한도(관리한도)
+           COMPUTE XDJL4106-O-GROUP-MGT-LIMT
+                 = XQJL0068-O-MGT-CLAM / 1000000
+           .
+       S3800-QJL0068-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 그룹익스포져조회
+      *-----------------------------------------------------------------
+       S3900-QJL1068-CALL-RTN.
+
+      *@3.9.1 초기화
+           INITIALIZE    XQJL1068-IN
+
+      *@3.9.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL1068)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,계열기업군코드)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1068-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL1068-I-BASE-YMD
+      *@   그룹코드
+           MOVE XDJL4106-O-GROUP-CD
+             TO XQJL1068-I-GROUP-CD
+
+      *@3.9.3 SLQIO프로그램 호출
+      *@처리내용:QJL1068프로그램을 호출한다
+      *@관련테이블:THKJL0135(그룹익스포쳐일집계) 접근유형:READ
+           #DYSQLA QJL1068 XQJL1068-CA
+
+      *@3.9.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@3.9.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@3.9.6 출력변수 MOVE
+
+      *@   그룹한도기준TE
+           COMPUTE XDJL4106-O-GROUP-LIMT-BASE-TE
+                 = XQJL1068-O-GROUP-LIMT-BASE-TE / 1000000
+
+           .
+       S3900-QJL1068-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  산업개요조회
+      *-----------------------------------------------------------------
+       S3A00-RJL0044-CALL-RTN.
+
+      *@3.10.1 초기화
+           INITIALIZE    TKJL0044-KEY
+                         TRJL0044-REC
+
+      *@3.10.2 입력파라미터 조립
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0044-PK-GROUP-CO-CD
+      *@   기준년월
+           MOVE XDJL4106-I-BASE-YMD(1:6)
+             TO KJL0044-PK-BASE-YM
+      *@   표준산업분류코드(신표준산업분류코드)
+           MOVE WK-PJCD
+             TO KJL0044-PK-NEW-SI-CLSFI-CD
+
+      *@3.10.3 DBIO프로그램 호출
+           #DYDBIO SELECT-CMD-Y TKJL0044-PK TRJL0044-REC
+
+      *@3.10.4 호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+           WHEN COND-DBIO-MRNF
+                CONTINUE
+           WHEN OTHER
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.10.6 출력변수 MOVE
+      *@   표준산업분류코드
+           MOVE WK-PJCD
+             TO XDJL4106-O-STND-I-CLSFI-CD
+      *@   표준산업코드명
+           MOVE RJL0044-STND-IDSTRY-CD-NAME
+             TO XDJL4106-O-STND-IDSTRY-CD-NAME
+      *@   피어업종명(PEER코드명)
+           MOVE RJL0044-PEER-CD-NAME
+             TO XDJL4106-O-PEER-BZTYP
+      *@   산업등급(산업평가등급구분)
+           MOVE RJL0044-IDSTRY-V-GRD-DSTCD
+             TO XDJL4106-O-IDSTRY-GRD
+180627*@  업종대분류코드
+           MOVE RJL0044-LAG-CLSFI-BZTYP-CD
+             TO XDJL4106-O-BZTYP-LAG-CLSFI-CD
+180627*@  업종대분류명
+           MOVE RJL0044-LAG-C-BZTYP-CD-NAME
+             TO XDJL4106-O-BZTYP-E-CLSFI-NAME
+           .
+
+       S3A00-RJL0044-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  산업별TE현황조회
+      *-----------------------------------------------------------------
+       S3B00-QJLI05B-CALL-RTN.
+
+      *@3.11.1 초기화
+           INITIALIZE XQJLI05B-IN
+
+      *@3.11.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJLI05B)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,대분류업종코드)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLI05B-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJLI05B-I-BASE-YMD
+      *@   대분류업종코드
+           MOVE RJL0044-LAG-CLSFI-BZTYP-CD
+             TO XQJLI05B-I-LAG-CLSFI-BZTYP-CD
+
+      *@3.11.3 SLQIO프로그램 호출
+      *@처리내용:QJLI05B프로그램을 호출한다
+      *@관련테이블:THKJL0039(산업등급별익스포져일집계)
+      *@접근유형:READ
+130927     #DYSQLA QJLI05B XQJLI05B-CA
+
+           EVALUATE TRUE
+      *@3.11.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK
+           WHEN COND-DBSQL-OK
+180627*       관리대상산업여부
+               IF XQJLI05B-O-IDSTRY-MGT-CLAM > ZERO
+                   COMPUTE WK-TEMP                =
+                           XQJLI05B-O-TE-LIMT-AUC /
+                           XQJLI05B-O-IDSTRY-MGT-CLAM
+
+                   EVALUATE TRUE
+                   WHEN WK-TEMP  < 0.70
+                       MOVE '비대상'
+                         TO XDJL4106-O-MGT-TAGET-IDSTRY-YN
+                   WHEN WK-TEMP >= 0.70
+                    AND WK-TEMP  < 0.80
+                       MOVE '사전한도관리산업'
+                         TO XDJL4106-O-MGT-TAGET-IDSTRY-YN
+                   WHEN WK-TEMP >= 0.80
+                    AND WK-TEMP <= 1.00
+                       MOVE '한도관리산업'
+                         TO XDJL4106-O-MGT-TAGET-IDSTRY-YN
+                   WHEN WK-TEMP  > 1.00
+                       MOVE '한도초과산업'
+                         TO XDJL4106-O-MGT-TAGET-IDSTRY-YN
+                   END-EVALUATE
+               ELSE
+                   MOVE '비대상'
+                     TO XDJL4106-O-MGT-TAGET-IDSTRY-YN
+               END-IF
+           WHEN COND-DBSQL-MRNF
+                CONTINUE
+           WHEN OTHER
+                #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.11.7출력변수 MOVE
+      *@   업종대분류TE한도(산업관리한도)
+           MOVE XQJLI05B-O-IDSTRY-MGT-CLAM
+             TO XDJL4106-O-BZTYP-EC-TE-LIMT
+      *@   업종대분류TE(한도환산금액)
+           MOVE XQJLI05B-O-TE-LIMT-AUC
+             TO XDJL4106-O-BZTYP-ERA-CLSFI-TE
+           .
+       S3B00-QJLI05B-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리－심사승인조회
+      *-----------------------------------------------------------------
+       S4000-IC-PROCESS-RTN.
+      *@4 업무처리
+
+      *@4.1관리한도추출
+           PERFORM S4100-QJL0063-CALL-RTN
+              THRU S4100-QJL0063-CALL-EXT
+
+      *@4.2전영업일추출
+           PERFORM S4200-CJIDT16-CALL-RTN
+              THRU S4200-CJIDT16-CALL-EXT
+
+      *@4.3직접익스포져추출
+           PERFORM S4300-QJL1062-CALL-RTN
+              THRU S4300-QJL1062-CALL-EXT
+
+      *@4.4간접익스포져추출
+           PERFORM S4400-QJL0065-CALL-RTN
+              THRU S4400-QJL0065-CALL-EXT
+
+      *@여신성관리한도
+           MOVE XQJL0063-O-LNBZ-I-MGT-CLAM
+             TO XDJL4106-O-LNBZ-I-MGT-LIMT
+
+      *@여신성한도기준TE = 여신성한도기준TE + 간접익스포져
+           COMPUTE XDJL4106-O-LNBZ-I-LIMT-BASE-TE
+                 = XQJL1062-O-LNBZ-I-LIMT-BASE-TE +
+                   XQJL0065-O-INDR-EXPSR-AMT
+           .
+       S4000-IC-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  관리한도금액 조회
+      *-----------------------------------------------------------------
+       S4100-QJL0063-CALL-RTN.
+
+      *@4.1.1 초기화
+           INITIALIZE XQJL0063-IN
+
+      *@4.1.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0063)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0063-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XQJL0063-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0063-I-KB-PIN
+
+      *@4.1.3 SLQIO프로그램 호출
+      *@처리내용:QJL0063프로그램을 호출한다
+      *@관련테이블:THKJL0011(차주관리한도기본) 접근유형:READ
+           #DYSQLA QJL0063 XQJL0063-CA
+
+           EVALUATE TRUE
+      *@4.1.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK
+      *@처리내용:CONTINUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+      *@4.1.5 호출결과 확인
+      *@실행조건:OTHER
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+               WHEN OTHER
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4100-QJL0063-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  전영업년월일을 구한다.
+      *-----------------------------------------------------------------
+       S4200-CJIDT16-CALL-RTN.
+
+      *@    초기화
+           INITIALIZE XCJIDT16-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIDT16-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4106-I-BASE-YMD
+             TO XCJIDT16-I-YMD
+      *@   구분코드
+           MOVE CO-CHA-1
+             TO XCJIDT16-I-DSTCD
+      *@    공통 UTILITY CALL
+           #DYCALL CJIDT16 YCCOMMON-CA XCJIDT16-CA
+      *@    호출결과　확인
+           IF XCJIDT16-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIDT16-R-ERRCD
+                     XCJIDT16-R-TREAT-CD
+                     XCJIDT16-R-STAT
+           END-IF
+           .
+       S4200-CJIDT16-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  직접익스포져조회
+      *-----------------------------------------------------------------
+       S4300-QJL1062-CALL-RTN.
+
+      *@4.3.1 초기화
+           INITIALIZE    XQJL1062-IN
+
+      *@4.3.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL1062)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1062-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XCJIDT16-O-BF-BZOPR-YMD
+             TO XQJL1062-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL1062-I-KB-PIN
+
+      *@4.3.3 SLQIO프로그램 호출
+      *@처리내용:QJL1062프로그램을 호출한다
+      *@관련테이블:THKJL0129(차주익스포져일집계) 접근유형:READ
+      *@관련테이블:THKJL0118(상품코드목록) 접근유형:READ
+           #DYSQLA QJL1062 XQJL1062-CA
+
+      *@4.3.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@4.3.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S4300-QJL1062-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  간접익스포져금액추출
+      *-----------------------------------------------------------------
+       S4400-QJL0065-CALL-RTN.
+
+      *@4.4.1 초기화
+           INITIALIZE    XQJL0065-IN
+
+      *@4.4.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0065)입력파라메타=
+      *@SET(그룹회사구분코드,기준년월일,차주번호)
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0065-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XCJIDT16-O-BF-BZOPR-YMD
+             TO XQJL0065-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4106-I-BRWR-NO
+             TO XQJL0065-I-KB-PIN
+
+      *@4.4.3 SLQIO프로그램 호출
+      *@처리내용:QJL0065프로그램을 호출한다
+      *@관련테이블:THKJL0031(간접보증인익스포져일집계)
+      *@접근유형:READ
+           #DYSQLA QJL0065 XQJL0065-CA
+
+      *@4.4.4 호출결과확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+      *@4.4.5 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+           ELSE
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S4400-QJL0065-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 출력파라미터 SET
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-SET-RTN.
+      *@4 출력처리
+
+      *@한도기준TE = 한도기준TE + 간접익스포져
+           COMPUTE XDJL4106-O-LIMT-BASE-TE
+                 = XQJL1062-O-LIMT-BASE-TE +
+                   XQJL0065-O-INDR-EXPSR-AMT
+
+      *@여신성한도기준TE = 여신성한도기준TE + 간접익스포져
+           COMPUTE XDJL4106-O-LNBZ-I-LIMT-BASE-TE
+                 = XQJL1062-O-LNBZ-I-LIMT-BASE-TE +
+                   XQJL0065-O-INDR-EXPSR-AMT
+
+      *@여신성한도여유액=여신성관리한도-여신성한도기준TE
+           COMPUTE XDJL4106-O-LNBZ-IL-SEXTR-AMT
+                 = XDJL4106-O-LNBZ-I-MGT-LIMT -
+                   XDJL4106-O-LNBZ-I-LIMT-BASE-TE
+
+      *@시장성한도여유액=시장성관리한도-시장성한도기준TE
+           COMPUTE XDJL4106-O-MRKTY-L-SEXTR-AMT
+                 = XDJL4106-O-MRKTY-MGT-LIMT -
+                   XDJL4106-O-MRKTY-LIMT-BASE-TE
+
+      *@한도여유액=관리한도-한도기준TE
+           COMPUTE XDJL4106-O-LIMT-SEXTR-AMT
+                 = XDJL4106-O-MGT-LIMT -
+                   XDJL4106-O-LIMT-BASE-TE
+
+150904*@4.6 외화한도여유액계산
+      *@처리내용:외화한도여유액=외화한도-외화소진액
+           COMPUTE XDJL4106-O-FC-LIMT-SEXTR-AMT
+                 = XDJL4106-O-FC-GRCR-CLAM -
+                   XDJL4106-O-FC-LIMT-AUC
+
+150904*@4.7 신용평가기관조립
+      *@처리내용:신용평가기관='KB'
+           MOVE 'KB'
+             TO XDJL4106-O-CRA
+
+      *@그룹한도여유액=그룹관리한도-그룹한도기준TE
+           COMPUTE XDJL4106-O-GROUP-L-SEXTR-AMT
+                 = XDJL4106-O-GROUP-MGT-LIMT -
+                   XDJL4106-O-GROUP-LIMT-BASE-TE
+
+      *@업종한도여유액=업종대분류TE한도-업종대분류TE
+           COMPUTE XDJL4106-O-BZTYP-L-SEXTR-AMT
+                 = XDJL4106-O-BZTYP-EC-TE-LIMT -
+                   XDJL4106-O-BZTYP-ERA-CLSFI-TE
+           .
+       S6000-OUTPUT-SET-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상 종료 함
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

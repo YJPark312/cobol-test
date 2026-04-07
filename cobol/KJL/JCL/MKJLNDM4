@@ -1,0 +1,18 @@
+//MKJLNDM4  JOB ,'M V S',CLASS=B,MSGCLASS=X,REGION=0M
+//*********************************************************************
+//* NDM JCL (EDW => ZABA)
+//*********************************************************************
+//NDMPROC  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+ SIGNON USERID=(C309509,) ESF=NO CASE=YES
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABLO53.dat -
+         &TODSN=KJL.SD.BJLR013.V001
+ SIGNOFF
+/*
+//

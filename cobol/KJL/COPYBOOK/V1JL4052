@@ -1,0 +1,49 @@
+      *================================================================*
+      *@ NAME : V1JL4052                                               *
+      *@ DESC : 등급및규모별TE현황조회                             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2011-06-20 16:54:12                          *
+      *  생성일시     : 2011-06-20 16:54:22                          *
+      *  전체길이     : 00003215 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4052-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4052-GRID1                    OCCURS 0 TO 000030
+               DEPENDING ON V1JL4052-OUTPT-LINE-CNT1.
+      *--       내부신용평가등급구분코드
+             09  V1JL4052-INTNL-CV-GRD-DSTCD     PIC  X(006).
+      *--       대기업토탈익스포져
+             09  V1JL4052-CNGL-TE                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       중소기업토탈익스포져
+             09  V1JL4052-SME-TE                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기업형소호토탈익스포져
+             09  V1JL4052-CORP-TYP-SOHO-TE       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소매형소호토탈익스포져
+             09  V1JL4052-RTLSAL-TYP-SOHO-TE     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기타토탈익스포져
+             09  V1JL4052-ETC-TE                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소계
+             09  V1JL4052-SUBT                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       비중
+             09  V1JL4052-WGHTZ                  PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  4  0  5  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4052-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4052-GRID1                ;그리드1
+      *X  V1JL4052-INTNL-CV-GRD-DSTCD
+      * 내부신용평가등급구분코드
+      *S  V1JL4052-CNGL-TE              ;대기업토탈익스포져
+      *S  V1JL4052-SME-TE               ;중소기업토탈익스포져
+      *S  V1JL4052-CORP-TYP-SOHO-TE     ;기업형소호토탈익스포져
+      *S  V1JL4052-RTLSAL-TYP-SOHO-TE   ;소매형소호토탈익스포져
+      *S  V1JL4052-ETC-TE               ;기타토탈익스포져
+      *S  V1JL4052-SUBT                 ;소계
+      *N  V1JL4052-WGHTZ                ;비중

@@ -1,0 +1,68 @@
+      *================================================================*
+      *@ NAME : NJL04130                                               *
+      *@ DESC : 국별수기계좌조회                                     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-09 15:06:41                          *
+      *  생성일시     : 2020-12-09 15:06:45                          *
+      *  전체길이     : 00093511 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  NJL04130-PRCSS-DSTIC              PIC  X(002).
+      *--     부점코드
+           07  NJL04130-BRNCD                    PIC  X(004).
+      *--     총라인수
+ROWCNT     07  NJL04130-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  NJL04130-GRID1                    OCCURS 0 TO 000500
+               DEPENDING ON NJL04130-TOTAL-LINE-CNT.
+      *--       계좌번호
+             09  NJL04130-ACNO                   PIC  X(020).
+      *--       고객식별자
+             09  NJL04130-CUST-IDNFR             PIC  X(010).
+      *--       거래상대방
+             09  NJL04130-TRAN-CNPRT             PIC  X(082).
+      *--       상품대분류코드
+             09  NJL04130-PRDCT-LAG-CLSFI-CD     PIC  X(002).
+      *--       상품중분류코드
+             09  NJL04130-PRDCT-MEDM-CLSFI-CD    PIC  X(002).
+      *--       상품템플릿코드
+             09  NJL04130-PRDCT-TMPLT-CD         PIC  X(003).
+      *--       상품번호
+             09  NJL04130-PRDCT-NO               PIC  X(005).
+      *--       ISO국가코드
+             09  NJL04130-ISO-NATNL-CD           PIC  X(002).
+      *--       관리부점
+             09  NJL04130-MGTBRN                 PIC  X(004).
+      *--       시작년월일
+             09  NJL04130-START-YMD              PIC  X(008).
+      *--       만기년월일
+             09  NJL04130-EXPIR-YMD              PIC  X(008).
+      *--       통화코드
+             09  NJL04130-CNCYCD                 PIC  X(003).
+      *--       통화한도금액
+             09  NJL04130-CRNCY-CLAM             PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *--       통화금일잔액
+             09  NJL04130-CRNCY-TDD-BAL          PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        N  J  L  0  4  1  3  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL04130-PRCSS-DSTIC          ;처리구분
+      *X  NJL04130-BRNCD                ;부점코드
+      *L  NJL04130-TOTAL-LINE-CNT       ;총라인수
+      *A  NJL04130-GRID1                ;그리드1
+      *X  NJL04130-ACNO                 ;계좌번호
+      *X  NJL04130-CUST-IDNFR           ;고객식별자
+      *X  NJL04130-TRAN-CNPRT           ;거래상대방
+      *X  NJL04130-PRDCT-LAG-CLSFI-CD   ;상품대분류코드
+      *X  NJL04130-PRDCT-MEDM-CLSFI-CD  ;상품중분류코드
+      *X  NJL04130-PRDCT-TMPLT-CD       ;상품템플릿코드
+      *X  NJL04130-PRDCT-NO             ;상품번호
+      *X  NJL04130-ISO-NATNL-CD         ;ISO국가코드
+      *X  NJL04130-MGTBRN               ;관리부점
+      *X  NJL04130-START-YMD            ;시작년월일
+      *X  NJL04130-EXPIR-YMD            ;만기년월일
+      *X  NJL04130-CNCYCD               ;통화코드
+      *S  NJL04130-CRNCY-CLAM           ;통화한도금액
+      *S  NJL04130-CRNCY-TDD-BAL        ;통화금일잔액

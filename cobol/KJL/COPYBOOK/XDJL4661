@@ -1,0 +1,80 @@
+      *================================================================*
+      *@ NAME : XDJL4661                                               *
+      *@ DESC : DC산업별기업규모별T/E현황조회 COPYBOOK             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-12-19 15:11:30                          *
+      *  생성일시     : 2019-12-19 15:11:33                          *
+      *  전체길이     : 00000011 BYTES                               *
+      *================================================================*
+           03  XDJL4661-RETURN.
+             05  XDJL4661-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4661-OK            VALUE  '00'.
+                 88  COND-XDJL4661-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4661-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4661-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4661-ERROR         VALUE  '09'.
+                 88  COND-XDJL4661-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4661-SYSERROR      VALUE  '99'.
+             05  XDJL4661-R-LINE                 PIC  9(006).
+             05  XDJL4661-R-ERRCD                PIC  X(008).
+             05  XDJL4661-R-TREAT-CD             PIC  X(008).
+             05  XDJL4661-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4661-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4661-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월일
+             05  XDJL4661-I-BASE-YMD             PIC  X(008).
+      *--       국내외구분코드
+             05  XDJL4661-I-HMAB-DSTCD           PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJL4661-OUT.
+      *----------------------------------------------------------------*
+      *--       현재건수
+             05  XDJL4661-O-PRSNT-NOITM          PIC  9(005).
+      *--       총건수
+             05  XDJL4661-O-TOTAL-NOITM          PIC  9(005).
+      *--       그리드1
+             05  XDJL4661-O-GRID1                OCCURS 000500 TIMES.
+      *--         업종대분류코드
+               07  XDJL4661-O-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         업종명
+               07  XDJL4661-O-LAG-C-BZTYP-NAME   PIC  X(032).
+      *--         대기업토탈익스포져
+               07  XDJL4661-O-CNGL-TE            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         중소기업토탈익스포져
+               07  XDJL4661-O-SME-TE             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         기업형소호토탈익스포져
+               07  XDJL4661-O-CORP-TYP-SOHO-TE   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         소매형소호토탈익스포져
+               07  XDJL4661-O-RTLSAL-TYP-SOHO-TE PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         기타토탈익스포져
+               07  XDJL4661-O-ETC-TE             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         소계
+               07  XDJL4661-O-SUBT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  6  6  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4661-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4661-I-BASE-YMD           ;기준년월일
+      *X  XDJL4661-I-HMAB-DSTCD         ;국내외구분코드
+      *N  XDJL4661-O-PRSNT-NOITM        ;현재건수
+      *N  XDJL4661-O-TOTAL-NOITM        ;총건수
+      *A  XDJL4661-O-GRID1              ;그리드1
+      *X  XDJL4661-O-LAG-CLSFI-BZTYP-CD ;업종대분류코드
+      *X  XDJL4661-O-LAG-C-BZTYP-NAME   ;업종명
+      *S  XDJL4661-O-CNGL-TE            ;대기업토탈익스포져
+      *S  XDJL4661-O-SME-TE             ;중소기업토탈익스포져
+      *S  XDJL4661-O-CORP-TYP-SOHO-TE   ;기업형소호토탈익스포져
+      *S  XDJL4661-O-RTLSAL-TYP-SOHO-TE
+      * 소매형소호토탈익스포져
+      *S  XDJL4661-O-ETC-TE             ;기타토탈익스포져
+      *S  XDJL4661-O-SUBT               ;소계

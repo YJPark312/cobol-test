@@ -1,0 +1,61 @@
+      *================================================================*
+      *@ NAME : XDJLB039                                               *
+      *@ DESC : DC본부부서기준값등록(신용공여한도관리) COPYBOO     *
+      *@        K                                                      *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-12-12 09:46:17                          *
+      *  생성일시     : 2023-12-12 09:46:17                          *
+      *  전체길이     : 00000088 BYTES                               *
+      *================================================================*
+           03  XDJLB039-RETURN.
+             05  XDJLB039-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB039-OK            VALUE  '00'.
+                 88  COND-XDJLB039-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB039-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB039-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB039-ERROR         VALUE  '09'.
+                 88  COND-XDJLB039-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB039-SYSERROR      VALUE  '99'.
+             05  XDJLB039-R-LINE                 PIC  9(006).
+             05  XDJLB039-R-ERRCD                PIC  X(008).
+             05  XDJLB039-R-TREAT-CD             PIC  X(008).
+             05  XDJLB039-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB039-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB039-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB039-I-BASE-YM              PIC  X(006).
+      *--       업무규제자기자본
+             05  XDJLB039-I-BZWK-REGUL-ONCP      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       경영지표자기자본
+             05  XDJLB039-I-MGBIZ-INDX-ONCP      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       보통주자본
+             05  XDJLB039-I-OSHR-CAPTL           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기타자본
+             05  XDJLB039-I-ETC-CAPTL            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       보완자본
+             05  XDJLB039-I-ENHN-CAPTL           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB039-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB039-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  3  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB039-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB039-I-BASE-YM            ;기준년월
+      *S  XDJLB039-I-BZWK-REGUL-ONCP    ;업무규제자기자본
+      *S  XDJLB039-I-MGBIZ-INDX-ONCP    ;경영지표자기자본
+      *S  XDJLB039-I-OSHR-CAPTL         ;보통주자본
+      *S  XDJLB039-I-ETC-CAPTL          ;기타자본
+      *S  XDJLB039-I-ENHN-CAPTL         ;보완자본
+      *X  XDJLB039-O-PRCSS-RSULT        ;처리결과

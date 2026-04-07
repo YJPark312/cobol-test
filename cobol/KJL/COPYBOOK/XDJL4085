@@ -1,0 +1,101 @@
+      *================================================================*
+      *@ NAME : XDJL4085                                               *
+      *@ DESC : DC신용공여계좌조회COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-08-22 13:22:21                          *
+      *  생성일시     : 2024-08-22 13:22:21                          *
+      *  전체길이     : 00000022 BYTES                               *
+      *================================================================*
+           03  XDJL4085-RETURN.
+             05  XDJL4085-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4085-OK            VALUE  '00'.
+                 88  COND-XDJL4085-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4085-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4085-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4085-ERROR         VALUE  '09'.
+                 88  COND-XDJL4085-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4085-SYSERROR      VALUE  '99'.
+             05  XDJL4085-R-LINE                 PIC  9(006).
+             05  XDJL4085-R-ERRCD                PIC  X(008).
+             05  XDJL4085-R-TREAT-CD             PIC  X(008).
+             05  XDJL4085-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4085-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4085-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객식별자
+             05  XDJL4085-I-CUST-IDNFR           PIC  X(010).
+      *--       이사회승인번호
+             05  XDJL4085-I-BRDC-ATHOR-NO        PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4085-OUT.
+      *----------------------------------------------------------------*
+      *--       현재건수2
+             05  XDJL4085-O-PRSNT-NOITM2         PIC  9(005).
+      *--       그리드2
+             05  XDJL4085-O-GRID2                OCCURS 000100 TIMES.
+      *--         계좌번호
+               07  XDJL4085-O-ACNO               PIC  X(020).
+      *--         약정계좌번호
+               07  XDJL4085-O-AGRE-ACNO          PIC  X(020).
+      *--         통합계정과목코드
+               07  XDJL4085-O-INTGRA-TIACC-CD    PIC  X(013).
+      *--         상품명
+               07  XDJL4085-O-PRDCT-NAME         PIC  X(052).
+      *--         통화코드
+               07  XDJL4085-O-CNCYCD             PIC  X(003).
+      *--         통화한도
+               07  XDJL4085-O-CRNCY-CLAM         PIC  9(018).
+      *--         통화잔액
+               07  XDJL4085-O-CRNCY-BAL          PIC  9(018).
+      *--         신용공여익스포져금액
+               07  XDJL4085-O-GRCR-EXPSR-AMT     PIC  9(015).
+      *--         시작년월일
+               07  XDJL4085-O-START-YMD          PIC  X(008).
+      *--         만기년월일
+               07  XDJL4085-O-EXPIR-YMD          PIC  X(008).
+      *--         금리내용
+               07  XDJL4085-O-IRTZ-CTNT          PIC  X(042).
+      *--         담보형태구분
+               07  XDJL4085-O-SCURTY-FORM-DSTCD  PIC  X(001).
+      *--         담보설정금액
+               07  XDJL4085-O-SCURTY-SETAMT      PIC  9(015).
+      *--         취급부점코드
+               07  XDJL4085-O-HNDLN-BRNCD        PIC  X(004).
+      *--         취급부점명
+               07  XDJL4085-O-HNDLN-BRN-NAME     PIC  X(042).
+      *--         대출취급형태구분
+               07  XDJL4085-O-LN-HNDLN-FORM-DSTCD
+                                                 PIC  X(001).
+      *--         수기계좌여부
+               07  XDJL4085-O-HWRT-ACN-YN        PIC  X(001).
+      *--         등록여부
+               07  XDJL4085-O-REGI-YN            PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  4  0  8  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4085-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4085-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL4085-I-BRDC-ATHOR-NO      ;이사회승인번호
+      *N  XDJL4085-O-PRSNT-NOITM2       ;현재건수2
+      *A  XDJL4085-O-GRID2              ;그리드2
+      *X  XDJL4085-O-ACNO               ;계좌번호
+      *X  XDJL4085-O-AGRE-ACNO          ;약정계좌번호
+      *X  XDJL4085-O-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJL4085-O-PRDCT-NAME         ;상품명
+      *X  XDJL4085-O-CNCYCD             ;통화코드
+      *N  XDJL4085-O-CRNCY-CLAM         ;통화한도
+      *N  XDJL4085-O-CRNCY-BAL          ;통화잔액
+      *N  XDJL4085-O-GRCR-EXPSR-AMT     ;신용공여익스포져금액
+      *X  XDJL4085-O-START-YMD          ;시작년월일
+      *X  XDJL4085-O-EXPIR-YMD          ;만기년월일
+      *X  XDJL4085-O-IRTZ-CTNT          ;금리내용
+      *X  XDJL4085-O-SCURTY-FORM-DSTCD  ;담보형태구분
+      *N  XDJL4085-O-SCURTY-SETAMT      ;담보설정금액
+      *X  XDJL4085-O-HNDLN-BRNCD        ;취급부점코드
+      *X  XDJL4085-O-HNDLN-BRN-NAME     ;취급부점명
+      *X  XDJL4085-O-LN-HNDLN-FORM-DSTCD;대출취급형태구분
+      *X  XDJL4085-O-HWRT-ACN-YN        ;수기계좌여부
+      *X  XDJL4085-O-REGI-YN            ;등록여부

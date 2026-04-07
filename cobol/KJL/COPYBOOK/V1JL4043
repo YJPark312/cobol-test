@@ -1,0 +1,209 @@
+      *================================================================*
+      *@ NAME : V1JL4043                                               *
+      *@ DESC : 보고서조회                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-02-25 16:14:54                          *
+      *  생성일시     : 2020-02-25 16:14:59                          *
+      *  전체길이     : 00124425 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4043-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+ROWCNT     07  V1JL4043-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     출력라인수4
+ROWCNT     07  V1JL4043-OUTPT-LINE-CNT4          PIC  9(005).
+      *--     출력라인수5
+ROWCNT     07  V1JL4043-OUTPT-LINE-CNT5          PIC  9(005).
+      *--     출력라인수6
+ROWCNT     07  V1JL4043-OUTPT-LINE-CNT6          PIC  9(005).
+      *--     그리드1
+           07  V1JL4043-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4043-OUTPT-LINE-CNT1.
+      *--       한도관리지역구분코드1
+             09  V1JL4043-LIMT-MGT-ARA-DSTCD1    PIC  X(001).
+      *--       국가수1
+             09  V1JL4043-NATNL-CNT1             PIC  9(003).
+      *--       전체관리한도금액1
+             09  V1JL4043-WHOL-MGT-CLAM1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       USD한도금액1
+             09  V1JL4043-USD-CLAM1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율1
+             09  V1JL4043-LIMT-EXHS-RT1          PIC  9(003)V9(02).
+      *--       한도여유액1
+             09  V1JL4043-LIMT-SEXTR-AMT1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드2
+           07  V1JL4043-GRID2                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4043-OUTPT-LINE-CNT2.
+      *--       공통한도대상여부2
+             09  V1JL4043-NATNL-W-CM-LIMT-YN2    PIC  X(001).
+      *--       당행국가신용등급구분코드2
+             09  V1JL4043-OWBNK-NC-GRD-DSTCD2    PIC  X(004).
+      *--       국가수2
+             09  V1JL4043-NATNL-CNT2             PIC  9(003).
+      *--       전체관리한도금액2
+             09  V1JL4043-WHOL-MGT-CLAM2         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국가전체공통한도금액2
+             09  V1JL4043-NATNL-WHOL-CM-CLAM2    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도사용액2
+             09  V1JL4043-LIMT-USE-AMT2          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율2
+             09  V1JL4043-LIMT-EXHS-RT2          PIC  9(003)V9(02).
+      *--       한도여유액2
+             09  V1JL4043-LIMT-SEXTR-AMT2        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드4
+           07  V1JL4043-GRID4                    OCCURS 0 TO 000300
+               DEPENDING ON V1JL4043-OUTPT-LINE-CNT4.
+      *--       ISO국가코드4
+             09  V1JL4043-ISO-NATNL-CD4          PIC  X(002).
+      *--       영문국가명4
+             09  V1JL4043-ENG-NATNL-NAME4        PIC  X(052).
+      *--       SNP등급구분코드4
+             09  V1JL4043-SNP-GRD-DSTCD4         PIC  X(002).
+      *--       무디스등급구분코드4
+             09  V1JL4043-MODYS-GRD-DSTCD4       PIC  X(002).
+      *--       피치등급구분코드4
+             09  V1JL4043-FITCH-GRD-DSTCD4       PIC  X(002).
+      *--       당행국가신용등급구분코드4
+             09  V1JL4043-OWBNK-NC-GRD-DSTCD4    PIC  X(004).
+      *--       국가위험수준구분코드4
+             09  V1JL4043-NATNL-R-LVEL-DSTCD4    PIC  X(001).
+      *--       전체관리한도금액4
+             09  V1JL4043-WHOL-MGT-CLAM4         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       USD한도금액4
+             09  V1JL4043-USD-CLAM4              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율4
+             09  V1JL4043-LIMT-EXHS-RT4          PIC  9(003)V9(02).
+      *--       한도여유액4
+             09  V1JL4043-LIMT-SEXTR-AMT4        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월잔액4
+             09  V1JL4043-LSMN-BAL4              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       변동금액4
+             09  V1JL4043-FLXBL-AMT4             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드5
+           07  V1JL4043-GRID5                    OCCURS 0 TO 000300
+               DEPENDING ON V1JL4043-OUTPT-LINE-CNT5.
+      *--       ISO국가코드5
+             09  V1JL4043-ISO-NATNL-CD5          PIC  X(002).
+      *--       영문국가명5
+             09  V1JL4043-ENG-NATNL-NAME5        PIC  X(052).
+      *--       SNP등급구분코드5
+             09  V1JL4043-SNP-GRD-DSTCD5         PIC  X(002).
+      *--       무디스등급구분코드5
+             09  V1JL4043-MODYS-GRD-DSTCD5       PIC  X(002).
+      *--       피치등급구분코드5
+             09  V1JL4043-FITCH-GRD-DSTCD5       PIC  X(002).
+      *--       당행국가신용등급구분코드5
+             09  V1JL4043-OWBNK-NC-GRD-DSTCD5    PIC  X(004).
+      *--       국가위험수준구분코드5
+             09  V1JL4043-NATNL-R-LVEL-DSTCD5    PIC  X(001).
+      *--       전체관리한도금액5
+             09  V1JL4043-WHOL-MGT-CLAM5         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       USD한도금액5
+             09  V1JL4043-USD-CLAM5              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율5
+             09  V1JL4043-LIMT-EXHS-RT5          PIC  9(003)V9(02).
+      *--       한도여유액5
+             09  V1JL4043-LIMT-SEXTR-AMT5        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월잔액5
+             09  V1JL4043-LSMN-BAL5              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       변동금액5
+             09  V1JL4043-FLXBL-AMT5             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드6
+           07  V1JL4043-GRID6                    OCCURS 0 TO 000300
+               DEPENDING ON V1JL4043-OUTPT-LINE-CNT6.
+      *--       상품명6
+             09  V1JL4043-PRDCT-NAME6            PIC  X(020).
+      *--       전월잔액6
+             09  V1JL4043-LSMN-BAL6              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월운용비율6
+             09  V1JL4043-LSMN-MGIVST-RATO6      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       금일잔액6
+             09  V1JL4043-TDD-BAL6               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       금일운용비율6
+             09  V1JL4043-TDD-MGIVST-RATO6       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       증감6
+             09  V1JL4043-INCRDC6                PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  4  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4043-OUTPT-LINE-CNT1      ;출력라인수1
+      *L  V1JL4043-OUTPT-LINE-CNT2      ;출력라인수2
+      *L  V1JL4043-OUTPT-LINE-CNT4      ;출력라인수4
+      *L  V1JL4043-OUTPT-LINE-CNT5      ;출력라인수5
+      *L  V1JL4043-OUTPT-LINE-CNT6      ;출력라인수6
+      *A  V1JL4043-GRID1                ;그리드1
+      *X  V1JL4043-LIMT-MGT-ARA-DSTCD1  ;한도관리지역구분코드1
+      *N  V1JL4043-NATNL-CNT1           ;국가수1
+      *S  V1JL4043-WHOL-MGT-CLAM1       ;전체관리한도금액1
+      *S  V1JL4043-USD-CLAM1            ;USD한도금액1
+      *N  V1JL4043-LIMT-EXHS-RT1        ;한도소진율1
+      *S  V1JL4043-LIMT-SEXTR-AMT1      ;한도여유액1
+      *A  V1JL4043-GRID2                ;그리드2
+      *X  V1JL4043-NATNL-W-CM-LIMT-YN2  ;공통한도대상여부2
+      *X  V1JL4043-OWBNK-NC-GRD-DSTCD2
+      * 당행국가신용등급구분코드2
+      *N  V1JL4043-NATNL-CNT2           ;국가수2
+      *S  V1JL4043-WHOL-MGT-CLAM2       ;전체관리한도금액2
+      *S  V1JL4043-NATNL-WHOL-CM-CLAM2  ;국가전체공통한도금액2
+      *S  V1JL4043-LIMT-USE-AMT2        ;한도사용액2
+      *N  V1JL4043-LIMT-EXHS-RT2        ;한도소진율2
+      *S  V1JL4043-LIMT-SEXTR-AMT2      ;한도여유액2
+      *A  V1JL4043-GRID4                ;그리드4
+      *X  V1JL4043-ISO-NATNL-CD4        ;ISO국가코드4
+      *X  V1JL4043-ENG-NATNL-NAME4      ;영문국가명4
+      *X  V1JL4043-SNP-GRD-DSTCD4       ;SNP등급구분코드4
+      *X  V1JL4043-MODYS-GRD-DSTCD4     ;무디스등급구분코드4
+      *X  V1JL4043-FITCH-GRD-DSTCD4     ;피치등급구분코드4
+      *X  V1JL4043-OWBNK-NC-GRD-DSTCD4
+      * 당행국가신용등급구분코드4
+      *X  V1JL4043-NATNL-R-LVEL-DSTCD4  ;국가위험수준구분코드4
+      *S  V1JL4043-WHOL-MGT-CLAM4       ;전체관리한도금액4
+      *S  V1JL4043-USD-CLAM4            ;USD한도금액4
+      *N  V1JL4043-LIMT-EXHS-RT4        ;한도소진율4
+      *S  V1JL4043-LIMT-SEXTR-AMT4      ;한도여유액4
+      *S  V1JL4043-LSMN-BAL4            ;전월잔액4
+      *S  V1JL4043-FLXBL-AMT4           ;변동금액4
+      *A  V1JL4043-GRID5                ;그리드5
+      *X  V1JL4043-ISO-NATNL-CD5        ;ISO국가코드5
+      *X  V1JL4043-ENG-NATNL-NAME5      ;영문국가명5
+      *X  V1JL4043-SNP-GRD-DSTCD5       ;SNP등급구분코드5
+      *X  V1JL4043-MODYS-GRD-DSTCD5     ;무디스등급구분코드5
+      *X  V1JL4043-FITCH-GRD-DSTCD5     ;피치등급구분코드5
+      *X  V1JL4043-OWBNK-NC-GRD-DSTCD5
+      * 당행국가신용등급구분코드5
+      *X  V1JL4043-NATNL-R-LVEL-DSTCD5  ;국가위험수준구분코드5
+      *S  V1JL4043-WHOL-MGT-CLAM5       ;전체관리한도금액5
+      *S  V1JL4043-USD-CLAM5            ;USD한도금액5
+      *N  V1JL4043-LIMT-EXHS-RT5        ;한도소진율5
+      *S  V1JL4043-LIMT-SEXTR-AMT5      ;한도여유액5
+      *S  V1JL4043-LSMN-BAL5            ;전월잔액5
+      *S  V1JL4043-FLXBL-AMT5           ;변동금액5
+      *A  V1JL4043-GRID6                ;그리드6
+      *X  V1JL4043-PRDCT-NAME6          ;상품명6
+      *S  V1JL4043-LSMN-BAL6            ;전월잔액6
+      *S  V1JL4043-LSMN-MGIVST-RATO6    ;전월운용비율6
+      *S  V1JL4043-TDD-BAL6             ;금일잔액6
+      *S  V1JL4043-TDD-MGIVST-RATO6     ;금일운용비율6
+      *S  V1JL4043-INCRDC6              ;증감6

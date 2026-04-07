@@ -1,0 +1,44 @@
+      *================================================================*
+      *@ NAME : YPJLB056                                               *
+      *@ DESC : AS신용공여계정과목관리COPYBOOK                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-04-15 17:06:33                          *
+      *  생성일시     : 2024-04-15 17:06:35                          *
+      *  전체길이     : 00010607 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  YPJLB056-PRCSS-RSULT              PIC  X(002).
+      *--     그리드
+           07  YPJLB056-GRID.
+      *--       총라인수
+             09  YPJLB056-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  YPJLB056-DATA-BOOK              OCCURS 000100 TIMES.
+      *--         통합계정과목코드
+               11  YPJLB056-INTGRA-TIACC-CD      PIC  X(013).
+      *--         계정과목명
+               11  YPJLB056-TIACC-NAME           PIC  X(042).
+      *--         계정과목CCF환산율
+               11  YPJLB056-TIACC-CCF-UTCRT      PIC  9(003).
+      *--         신용공여계정구분
+               11  YPJLB056-GRCR-ACITM-DSTCD     PIC  X(002).
+      *--         신용공여대상구분
+               11  YPJLB056-GRCR-TAGET-DSTCD     PIC  X(001).
+      *--         신용공여중분류코드
+               11  YPJLB056-GRCR-MIDL-CLSFI-CD   PIC  X(003).
+      *--         신용공여중분류코드명
+               11  YPJLB056-GRCR-MC-CD-NAME      PIC  X(042).
+      *================================================================*
+      *        Y  P  J  L  B  0  5  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJLB056-PRCSS-RSULT          ;처리결과
+      *G  YPJLB056-GRID                 ;그리드
+      *N  YPJLB056-TOTAL-LINE-CNT       ;총라인수
+      *A  YPJLB056-DATA-BOOK            ;데이터부
+      *X  YPJLB056-INTGRA-TIACC-CD      ;통합계정과목코드
+      *X  YPJLB056-TIACC-NAME           ;계정과목명
+      *N  YPJLB056-TIACC-CCF-UTCRT      ;계정과목CCF환산율
+      *X  YPJLB056-GRCR-ACITM-DSTCD     ;신용공여계정구분
+      *X  YPJLB056-GRCR-TAGET-DSTCD     ;신용공여대상구분
+      *X  YPJLB056-GRCR-MIDL-CLSFI-CD   ;신용공여중분류코드
+      *X  YPJLB056-GRCR-MC-CD-NAME      ;신용공여중분류코드명

@@ -1,0 +1,1034 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB039 (신용공여자기자본정보등록／삭제)
+      *@처리유형  : DC
+      *@처리개요  : 신용공여자기자본정보등록／삭제
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081227: 신규작성
+      *김진태:20090413: 프로그램수정
+      *김진태:20091211: 에러메세지정비
+      *김진태:20091211: 시스템최종처리일시／사용자번호　삭제
+      *박정수:20231229: 항목 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  TE자기자본기본          : THKJL0049            : CRUD
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB039.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/27.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      * 에러메세지
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      * 조치메세지
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB039'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-5                PIC  X(001) VALUE '5'.
+           03  CO-CHA-6                PIC  X(001) VALUE '6'.
+           03  CO-CHA-7                PIC  X(001) VALUE '7'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+
+      *채무자고객기본　테이블(KEY)
+       01  TKJL0049-KEY.
+           COPY  TKJL0049.
+      *채무자고객기본　테이블(RECORD)
+       01  TRJL0049-REC.
+           COPY  TRJL0049.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      * DC COPYBOOK
+       01  XDJLB039-CA.
+           COPY  XDJLB039.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB039-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               DBIO
+                      YCDBIOCA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJLB039-OUT
+                      XDJLB039-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@처리구분이　＇등록＇，＇삭제＇　이외는 ERROR
+           IF XDJLB039-I-PRCSS-DSTIC = CO-CHA-02 OR
+                                       CO-CHA-04
+              CONTINUE
+           ELSE
+      *@ 에러메세지 : 처리구분오류입니다．
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@입력항목　체크
+           PERFORM S3110-INPUT-DATA-CHECK-RTN
+              THRU S3110-INPUT-DATA-CHECK-EXT
+
+           EVALUATE XDJLB039-I-PRCSS-DSTIC
+               WHEN CO-CHA-02
+      *@TE자기자본기준（업무규제）삭제처리
+                    PERFORM S3120-THKJL0049-DELETE-RTN
+                       THRU S3120-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（업무규제）등록처리
+                    PERFORM S3130-THKJL0049-INSERT-RTN
+                       THRU S3130-THKJL0049-INSERT-EXT
+      *@TE자기자본기준（경영지표）삭제처리
+                    PERFORM S3140-THKJL0049-DELETE-RTN
+                       THRU S3140-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（경영지표）등록처리
+                    PERFORM S3150-THKJL0049-INSERT-RTN
+                       THRU S3150-THKJL0049-INSERT-EXT
+231229*@TE자기자본기준（보통주자본）삭제처리
+                    PERFORM S4110-THKJL0049-DELETE-RTN
+                       THRU S4110-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（보통주자본）등록처리
+                    PERFORM S4120-THKJL0049-INSERT-RTN
+                       THRU S4120-THKJL0049-INSERT-EXT
+      *@TE자기자본기준（기타자본）삭제처리
+                    PERFORM S4130-THKJL0049-DELETE-RTN
+                       THRU S4130-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（기타자본）등록처리
+                    PERFORM S4140-THKJL0049-INSERT-RTN
+                       THRU S4140-THKJL0049-INSERT-EXT
+      *@TE자기자본기준（보완자본）삭제처리
+                    PERFORM S4150-THKJL0049-DELETE-RTN
+                       THRU S4150-THKJL0049-DELETE-EXT
+231229*@TE자기자본기준（보완자본）등록처리
+                    PERFORM S4160-THKJL0049-INSERT-RTN
+                       THRU S4160-THKJL0049-INSERT-EXT
+
+               WHEN CO-CHA-04
+      *@TE자기자본기준（업무규제）삭제처리
+                    PERFORM S3160-THKJL0049-DELETE-RTN
+                       THRU S3160-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（경영지표）삭제처리
+                    PERFORM S3170-THKJL0049-DELETE-RTN
+                       THRU S3170-THKJL0049-DELETE-EXT
+231229*@TE자기자본기준（보통주자본）삭제처리
+                    PERFORM S4170-THKJL0049-DELETE-RTN
+                       THRU S4170-THKJL0049-DELETE-EXT
+      *@TE자기자본기준（기타자본）삭제처리
+                    PERFORM S4180-THKJL0049-DELETE-RTN
+                       THRU S4180-THKJL0049-DELETE-EXT
+231229*@TE자기자본기준（보완자본）삭제처리
+                    PERFORM S4190-THKJL0049-DELETE-RTN
+                       THRU S4190-THKJL0049-DELETE-EXT
+               WHEN OTHER
+                    CONTINUE
+           END-EVALUATE
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력항목　필수입력　체크
+      *@  （자기자본）
+      *-----------------------------------------------------------------
+       S3110-INPUT-DATA-CHECK-RTN.
+
+      *@필수입력항목체크
+      *@기준년월
+           IF XDJLB039-I-BASE-YM = SPACE
+      *@오류일경유에러처리
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF XDJLB039-I-BZWK-REGUL-ONCP = ZERO
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF XDJLB039-I-MGBIZ-INDX-ONCP = ZERO
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3110-INPUT-DATA-CHECK-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （업무규제）
+      *-----------------------------------------------------------------
+       S3120-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-3
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류인경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3120-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)등록처리
+      *@ （업무규제）
+      *-----------------------------------------------------------------
+       S3130-THKJL0049-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0049-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO RJL0049-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-3
+             TO RJL0049-ONCP-DSTCD
+      *@자기자본기준금액
+           MOVE XDJLB039-I-BZWK-REGUL-ONCP
+             TO RJL0049-ONCP-BSAMT
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0049-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0049-REGI-YMD
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류인경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3130-THKJL0049-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （경영지표）
+      *-----------------------------------------------------------------
+       S3140-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-4
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류인경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3140-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)등록처리
+      *@ （경영지표）
+      *-----------------------------------------------------------------
+       S3150-THKJL0049-INSERT-RTN.
+
+      *@입력항목조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0049-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO RJL0049-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-4
+             TO RJL0049-ONCP-DSTCD
+      *@자기자본기준금액
+           MOVE XDJLB039-I-MGBIZ-INDX-ONCP
+             TO RJL0049-ONCP-BSAMT
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0049-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0049-REGI-YMD
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3150-THKJL0049-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （업무규제）
+      *-----------------------------------------------------------------
+       S3160-THKJL0049-DELETE-RTN.
+
+      *@카파북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-3
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장NOT FOUND일경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3160-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （경영지표）
+      *-----------------------------------------------------------------
+       S3170-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-4
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장NOT FOUND인경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3170-THKJL0049-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （보통주자본）
+      *-----------------------------------------------------------------
+       S4110-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-5
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류인경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4110-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)등록처리
+      *@ （보통주자본）
+      *-----------------------------------------------------------------
+       S4120-THKJL0049-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0049-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO RJL0049-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-5
+             TO RJL0049-ONCP-DSTCD
+      *@자기자본기준금액
+           MOVE XDJLB039-I-OSHR-CAPTL
+             TO RJL0049-ONCP-BSAMT
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0049-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0049-REGI-YMD
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류인경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4120-THKJL0049-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （기타자본）
+      *-----------------------------------------------------------------
+       S4130-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-6
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류인경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4130-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)등록처리
+      *@ （기타자본）
+      *-----------------------------------------------------------------
+       S4140-THKJL0049-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0049-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO RJL0049-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-6
+             TO RJL0049-ONCP-DSTCD
+      *@자기자본기준금액
+           MOVE XDJLB039-I-ETC-CAPTL
+             TO RJL0049-ONCP-BSAMT
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0049-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0049-REGI-YMD
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류인경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4140-THKJL0049-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （보완자본）
+      *-----------------------------------------------------------------
+       S4150-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-7
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류인경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4150-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)등록처리
+      *@ （보완자본）
+      *-----------------------------------------------------------------
+       S4160-THKJL0049-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0049-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO RJL0049-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-7
+             TO RJL0049-ONCP-DSTCD
+      *@자기자본기준금액
+           MOVE XDJLB039-I-ENHN-CAPTL
+             TO RJL0049-ONCP-BSAMT
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0049-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0049-REGI-YMD
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류인경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4160-THKJL0049-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （보통주자본）
+      *-----------------------------------------------------------------
+       S4170-THKJL0049-DELETE-RTN.
+
+      *@카파북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-5
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장NOT FOUND일경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4170-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （기타자본）
+      *-----------------------------------------------------------------
+       S4180-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-6
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장NOT FOUND인경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4180-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ TE자기자본기본(THKJL0049)삭제처리
+      *@ （보완자본）
+      *-----------------------------------------------------------------
+       S4190-THKJL0049-DELETE-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0049-KEY
+                      TRJL0049-REC
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0049-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE XDJLB039-I-BASE-YM
+             TO KJL0049-PK-BASE-YM
+      *@자기자본구분
+           MOVE CO-CHA-7
+             TO KJL0049-PK-ONCP-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장NOT FOUND인경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0049-PK TRJL0049-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4190-THKJL0049-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@종료처리
+           MOVE CO-STAT-OK
+             TO XDJLB039-O-PRCSS-RSULT
+      *@프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

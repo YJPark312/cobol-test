@@ -1,0 +1,288 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4073 (DC국외영업점편중모니터링)
+      *@처리유형  : DC
+      *@처리개요  : 국외영업점편중모니터링 프로그램이다
+      *@구현방법  : 자동거래（중단거래）
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20200327: 신규작성
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM            : 테이블명           : 접근유형
+      **  ----------------------   -----------------------------------
+      ** 국외영업점산업별TE현황: THKJL0091            : R
+      *  표준산업코드목록        : THKJL0044            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4073.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   20/03/27.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4073'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+      *
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-MAX-CNT              PIC  9(003) VALUE  100.
+
+      *   하노이
+           03  CO-CHA-2950             PIC  X(004) VALUE '2950'.
+      *   호치민
+           03  CO-CHA-7531             PIC  X(004) VALUE '7531'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO COPYBOOK
+170224 01  XQJL0911-CA.
+           COPY  XQJL0911.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    DC COPYBOOK
+       01  XDJL4073-CA.
+           COPY  XDJL4073.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4073-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XDJL4073-OUT
+           INITIALIZE    XDJL4073-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+           IF XDJL4073-I-PRCSS-DSTIC = CO-CHA-01
+               CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+180627     EVALUATE XDJL4073-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+170224*@      국외영업점편중모니터링
+               PERFORM S3100-QJL0911-CALL-RTN
+                  THRU S3100-QJL0911-CALL-EXT
+           END-EVALUATE
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국외영업점편중모니터링
+      *-----------------------------------------------------------------
+170224 S3100-QJL0911-CALL-RTN.
+
+      *@  변수초기화
+           INITIALIZE XQJL0911-IN
+
+      *@  변수 MOVE
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0911-I-GROUP-CO-CD
+      *@  기준년월일
+           MOVE XDJL4073-I-BASE-YMD
+             TO XQJL0911-I-BASE-YMD
+
+           EVALUATE XDJL4073-I-MGT-BRNCD
+      *   하노이==>호치민
+           WHEN CO-CHA-2950
+      *@      관리부점코드
+               MOVE CO-CHA-7531
+                 TO XQJL0911-I-MGT-BRNCD
+           WHEN OTHER
+      *@      관리부점코드
+               MOVE XDJL4073-I-MGT-BRNCD
+                 TO XQJL0911-I-MGT-BRNCD
+           END-EVALUATE
+
+      *@   SQLIO CALL
+           #DYSQLA QJL0911 SELECT XQJL0911-CA
+
+      *@   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *@      출력처리
+               PERFORM S3110-OUTPUT-SET-RTN
+                  THRU S3110-OUTPUT-SET-EXT
+           WHEN COND-DBSQL-MRNF
+               #OKEXIT  CO-STAT-NOTFND
+           WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3100-QJL0911-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력파라미터 SET
+      *-----------------------------------------------------------------
+       S3110-OUTPUT-SET-RTN.
+      *@4 출력처리
+
+      *@4.2 그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                     UNTIL WK-I > DBSQL-SELECT-CNT OR WK-I > 100
+      *       출력라인수1
+               MOVE WK-I
+                 TO XDJL4073-O-OUTPT-LINE-CNT1
+
+150522*@      기준년월일
+               MOVE XQJL0911-O-BASE-YMD(WK-I)
+                 TO XDJL4073-O-BASE-YMD(WK-I)
+170224*@      관리부점코드
+               MOVE XQJL0911-O-MGT-BRNCD(WK-I)
+                 TO XDJL4073-O-MGT-BRNCD(WK-I)
+150521*       부점명
+               MOVE XQJL0911-O-BRN-NAME(WK-I)
+                 TO XDJL4073-O-BRN-NAME(WK-I)
+      *       대분류업종코드
+               MOVE XQJL0911-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJL4073-O-LAG-CLSFI-BZTYP-CD(WK-I)
+150521*       대분류업종코드명
+               MOVE XQJL0911-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                 TO XDJL4073-O-LAG-C-BZTYP-CD-NAME(WK-I)
+      *       산업별TE
+               MOVE XQJL0911-O-IDSTRY-PER-TE-AMT(WK-I)
+                 TO XDJL4073-O-IDSTRY-PER-TE-AMT(WK-I)
+191122*       비중
+               MOVE XQJL0911-O-WGHTZ(WK-I)
+                 TO XDJL4073-O-WGHTZ(WK-I)
+191122*       편중관리익스포져금액
+               MOVE XQJL0911-O-LNUP-MGT-EXPSR-AMT(WK-I)
+                 TO XDJL4073-O-LNUP-MGT-EXPSR-AMT(WK-I)
+191122*       투자비중
+               MOVE XQJL0911-O-INVST-WGHT(WK-I)
+                 TO XDJL4073-O-INVST-WGHT(WK-I)
+191122*       편중관리대상여부
+               MOVE XQJL0911-O-LNUP-MGT-TAGET-YN(WK-I)
+                 TO XDJL4073-O-LNUP-MGT-TAGET-YN(WK-I)
+191122*       편중관리비율
+               MOVE XQJL0911-O-LNUP-MGT-CST-RT(WK-I)
+                 TO XDJL4073-O-LNUP-MGT-CST-RT(WK-I)
+191122*       관리비중초과여부
+               MOVE XQJL0911-O-MGT-WGHT-EXCS-YN(WK-I)
+                 TO XDJL4073-O-MGT-WGHT-EXCS-YN(WK-I)
+191122*       여유액
+               MOVE XQJL0911-O-SEXTR-AMT(WK-I)
+                 TO XDJL4073-O-SEXTR-AMT(WK-I)
+           END-PERFORM
+           .
+
+       S3110-OUTPUT-SET-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상 종료 함
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

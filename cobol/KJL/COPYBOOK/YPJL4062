@@ -1,0 +1,71 @@
+      *================================================================*
+      *@ NAME : YPJL4062                                               *
+      *@ DESC : ASSub-Limit현황(미기표포함)COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-01-05 11:15:52                          *
+      *  생성일시     : 2018-01-05 11:15:58                          *
+      *  전체길이     : 00020805 BYTES                               *
+      *================================================================*
+      *--     총라인수
+           07  YPJL4062-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  YPJL4062-GRID1                    OCCURS 000100 TIMES.
+      *--       SUB업종코드
+             09  YPJL4062-SUB-BZTYP-CD           PIC  X(003).
+      *--       SUB업종코드명
+             09  YPJL4062-SUB-BZTYP-CD-NAME      PIC  X(042).
+      *--       산업TE기업규모구분
+             09  YPJL4062-IDSTRY-TCS-DSTCD       PIC  X(001).
+      *--       전년도말익스포져금액
+             09  YPJL4062-PYY-X-END-EXPSR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       SUB관리한도금액
+             09  YPJL4062-SUB-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       SUB익스포져금액
+             09  YPJL4062-SUB-EXPSR-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여유액
+             09  YPJL4062-SEXTR-AMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율1
+             09  YPJL4062-EXHS-RT1               PIC  9(003)V9(02).
+      *--       순증한도
+             09  YPJL4062-NTIC-LIMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       순증토탈익스포져
+             09  YPJL4062-NTIC-TE                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       순증여유액
+             09  YPJL4062-NTIC-SEXTR-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율2
+             09  YPJL4062-EXHS-RT2               PIC  9(003)V9(02).
+      *--       대출금액
+             09  YPJL4062-LN-AMT                 PIC S9(018)
+                                                 LEADING  SEPARATE.
+      *--       실질여유액
+             09  YPJL4062-ATUAL-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       실질소진율
+             09  YPJL4062-ATUAL-EXHS-RT          PIC  9(003)V9(02).
+      *================================================================*
+      *        Y  P  J  L  4  0  6  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4062-TOTAL-LINE-CNT       ;총라인수
+      *A  YPJL4062-GRID1                ;그리드1
+      *X  YPJL4062-SUB-BZTYP-CD         ;SUB업종코드
+      *X  YPJL4062-SUB-BZTYP-CD-NAME    ;SUB업종코드명
+      *X  YPJL4062-IDSTRY-TCS-DSTCD     ;산업TE기업규모구분
+      *S  YPJL4062-PYY-X-END-EXPSR-AMT  ;전년도말익스포져금액
+      *S  YPJL4062-SUB-MGT-CLAM         ;SUB관리한도금액
+      *S  YPJL4062-SUB-EXPSR-AMT        ;SUB익스포져금액
+      *S  YPJL4062-SEXTR-AMT            ;여유액
+      *N  YPJL4062-EXHS-RT1             ;소진율1
+      *S  YPJL4062-NTIC-LIMT            ;순증한도
+      *S  YPJL4062-NTIC-TE              ;순증토탈익스포져
+      *S  YPJL4062-NTIC-SEXTR-AMT       ;순증여유액
+      *N  YPJL4062-EXHS-RT2             ;소진율2
+      *S  YPJL4062-LN-AMT               ;대출금액
+      *S  YPJL4062-ATUAL-SEXTR-AMT      ;실질여유액
+      *N  YPJL4062-ATUAL-EXHS-RT        ;실질소진율

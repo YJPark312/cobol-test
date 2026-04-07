@@ -1,0 +1,62 @@
+//TKJLP030 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0030 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0030',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0030,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0030
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월"                           POSITION(       4         )
+   CHAR(                      6)                ,
+   "차주고객식별자"                     POSITION(      10         )
+   CHAR(                     10)                ,
+   "상품대분류코드"                     POSITION(      20         )
+   CHAR(                      2)                ,
+   "상품중분류코드"                     POSITION(      22         )
+   CHAR(                      2)                ,
+   "상품템플릿코드"                     POSITION(      24         )
+   CHAR(                      3)                ,
+   "상품번호"                           POSITION(      27         )
+   CHAR(                      5)                ,
+   "차주번호"                           POSITION(      32         )
+   CHAR(                     13)                ,
+   "명목액기준한도"                     POSITION(      45:      52)
+   DECIMAL                                      ,
+   "명목액기준잔액"                     POSITION(      53:      60)
+   DECIMAL                                      ,
+   "TE한도환산금액"                     POSITION(      61:      68)
+   DECIMAL                                      ,
+   "TE잔액환산금액"                     POSITION(      69:      76)
+   DECIMAL                                      ,
+   "CP한도환산금액"                     POSITION(      77:      84)
+   DECIMAL                                      ,
+   "CP잔액환산금액"                     POSITION(      85:      92)
+   DECIMAL                                      ,
+   "외화한도환산금액"                   POSITION(      93:     100)
+   DECIMAL                                      ,
+   "외화잔액환산금액"                   POSITION(     101:     108)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(     109         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     129         )
+   CHAR(                      7)
+   )
+//

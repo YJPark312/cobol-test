@@ -1,0 +1,79 @@
+      *===========================================================
+      *  프로그램명    : QJL0081
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0081
+      *  사용예        : 01  XQJL0081-CA.
+      *                      COPY  XQJL0081.
+      *  최종변경일시  : 2024년11월29일16시32분05초
+      *===========================================================
+           03  XQJL0081-IN.
+      *            그룹회사코드
+               05  XQJL0081-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            KB-PIN
+               05  XQJL0081-I-KB-PIN
+                                          PIC  X(00010).
+      *            신청부점코드
+               05  XQJL0081-I-APLCN-BRNCD
+                                          PIC  X(00004).
+      *            한도신청종류구분
+               05  XQJL0081-I-LIMT-A-KND-DSTCD
+                                          PIC  X(00001).
+      *            한도진행상태구분
+               05  XQJL0081-I-LIMT-P-STUS-DSTCD
+                                          PIC  X(00001).
+      *            신청년월일1
+               05  XQJL0081-I-APLCN-YMD1
+                                          PIC  X(00008).
+      *            신청년월일2
+               05  XQJL0081-I-APLCN-YMD2
+                                          PIC  X(00008).
+      *            승인위원직원번호
+               05  XQJL0081-I-ATHOR-CMMB-EMPID
+                                          PIC  X(00007).
+           03  XQJL0081-OUT.
+      *            부점한글명
+               05  XQJL0081-O-BRN-HANGL-NAME
+                           OCCURS  00100  PIC  X(00022).
+      *            고객식별자
+               05  XQJL0081-O-CUST-IDNFR
+                           OCCURS  00100  PIC  X(00010).
+      *            차주명
+               05  XQJL0081-O-CUST-DBTRZ-NAME
+                           OCCURS  00100  PIC  X(00052).
+      *            한도신청구분
+               05  XQJL0081-O-LIMT-APLCN-DSTCD
+                           OCCURS  00100  PIC  X(00001).
+      *            한도진행상태구분
+               05  XQJL0081-O-LIMT-P-STUS-DSTCD
+                           OCCURS  00100  PIC  X(00010).
+      *            한도승인구분
+               05  XQJL0081-O-LIMT-ATHOR-DSTCD
+                           OCCURS  00100  PIC  X(00001).
+      *            한도승인금액
+               05  XQJL0081-O-LIMT-ATHOR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            한도신청번호
+               05  XQJL0081-O-LIMT-APLCN-NO
+                           OCCURS  00100  PIC  X(00010).
+      *            승인번호
+               05  XQJL0081-O-ATHOR-NO
+                           OCCURS  00100  PIC  X(00010).
+      *            한도승인권자
+               05  XQJL0081-O-LIMT-ATRZ-DSTCD
+                           OCCURS  00100  PIC  X(00020).
+      *            승인년월일
+               05  XQJL0081-O-ATHOR-YMD
+                           OCCURS  00100  PIC  X(00008).
+      *            기존T/E관리한도
+               05  XQJL0081-O-EXSTN-TE-MGT-LIMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            기준한도
+               05  XQJL0081-O-BASE-CLAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            내부신용평가등급구분
+               05  XQJL0081-O-INTNL-CV-GRD-DSTCD
+                           OCCURS  00100  PIC  X(00004).
+      *===========================================================
+      *  XQJL0081   C O P Y B O O K   E N D
+      *===========================================================

@@ -1,0 +1,59 @@
+      *================================================================*
+      *@ NAME : YPJL4041                                               *
+      *@ DESC : AS국가별정보조회 COPYBOOK                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-02-11 15:52:27                          *
+      *  생성일시     : 2020-02-11 15:52:34                          *
+      *  전체길이     : 00034557 BYTES                               *
+      *================================================================*
+      *--     국가명
+           07  YPJL4041-ENG-NATNL-NAME           PIC  X(052).
+      *--     출력라인수1
+           07  YPJL4041-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4041-GRID1                    OCCURS 000300 TIMES.
+      *--       국가코드
+             09  YPJL4041-ISO-NATNL-CD           PIC  X(002).
+      *--       국가명1
+             09  YPJL4041-ENG-NATNL-NAME1        PIC  X(052).
+      *--       Total관리한도
+             09  YPJL4041-WHOL-MGT-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       SP
+             09  YPJL4041-SNP-GRD-DSTCD          PIC  X(002).
+      *--       Moodys
+             09  YPJL4041-MODYS-GRD-DSTCD        PIC  X(002).
+      *--       Fitch
+             09  YPJL4041-FITCH-GRD-DSTCD        PIC  X(002).
+      *--       당행국가신용등급구분
+             09  YPJL4041-OWBNK-NC-GRD-DSTCD     PIC  X(004).
+      *--       한도관리지역구분
+             09  YPJL4041-LIMT-MGT-AREA-DSTCD    PIC  X(001).
+      *--       지역관리한도금액
+             09  YPJL4041-AREA-MGT-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국가전체공통한도여부
+             09  YPJL4041-NATNL-W-CMN-LIMT-YN    PIC  X(001).
+      *--       공통관리한도금액
+             09  YPJL4041-CMN-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국가위험수준구분
+             09  YPJL4041-NATNL-R-LVEL-DSTCD     PIC  X(001).
+      *================================================================*
+      *        Y  P  J  L  4  0  4  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4041-ENG-NATNL-NAME       ;국가명
+      *N  YPJL4041-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4041-GRID1                ;그리드1
+      *X  YPJL4041-ISO-NATNL-CD         ;국가코드
+      *X  YPJL4041-ENG-NATNL-NAME1      ;국가명1
+      *S  YPJL4041-WHOL-MGT-CLAM        ;Total관리한도
+      *X  YPJL4041-SNP-GRD-DSTCD        ;SP
+      *X  YPJL4041-MODYS-GRD-DSTCD      ;Moodys
+      *X  YPJL4041-FITCH-GRD-DSTCD      ;Fitch
+      *X  YPJL4041-OWBNK-NC-GRD-DSTCD   ;당행국가신용등급구분
+      *X  YPJL4041-LIMT-MGT-AREA-DSTCD  ;한도관리지역구분
+      *S  YPJL4041-AREA-MGT-CLAM        ;지역관리한도금액
+      *X  YPJL4041-NATNL-W-CMN-LIMT-YN  ;국가전체공통한도여부
+      *S  YPJL4041-CMN-MGT-CLAM         ;공통관리한도금액
+      *X  YPJL4041-NATNL-R-LVEL-DSTCD   ;국가위험수준구분

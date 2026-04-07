@@ -1,0 +1,49 @@
+//MKJLSND3 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLDP35
+//*********************************************************************
+//*   그룹사기본 UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0013.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT  그룹회사코드
+         ,  기준년월
+         ,  계열적용구분
+         ,  계열기업군코드
+         ,  계열기업순위
+         ,  주채권은행코드
+         ,  계열기업군명
+         ,  그룹사신용등급구분
+         ,  등록직원번호
+         ,  등록년월일
+         ,  시스템최종처리일시
+         ,  시스템최종사용자번호
+      FROM  DB2DBA.THKJL0013
+     WHERE 그룹회사코드= 'KB0'
+    WITH  UR;
+//*
+//

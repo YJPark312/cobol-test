@@ -1,0 +1,60 @@
+//MKJLDP04 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//* %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*배치작업기준일 : 매일（휴일／영업일　무관）
+//*선행작업명     : MKJLDB03
+//*********************************************************************
+//*   개별기업및금융기준한도산출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD013,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD011.V001
+//OTFILE   DD DSN=KJL.SD.BJLD013.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=652)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP04-001-NORBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*   그룹기준한도산출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD014,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD012.V001
+//OTFILE   DD DSN=KJL.SD.BJLD014.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,LRECL=652)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP04-001-NORBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*   기준한도기초자료(개별기업및그룹사)정보적재
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD015,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD013.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLD014.V001
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD015.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP04-001-NORBAT-KB STAR-%%$DATE
+//*자료기준년월일
+//*********************************************************************
+//*    토탈익스포져일일배치작업결과（완료）
+//*********************************************************************
+//STEP99 EXEC JZBDEXEC,MBR=BJLDLG1,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLDLG1.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP04-001-ONLBAT-KB STAR-%%$ODATE-1-1
+//*자료기준년월일
+//*토탈익스포져업무구분（１：TE－고정）
+//*배치완료여부（１：완료，０：진행）

@@ -1,0 +1,64 @@
+      *================================================================*
+      *@ NAME : XDJL4001                                               *
+      *@ DESC : DC채무자고객번호및고객명조회 COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-11-22 17:44:22                          *
+      *  생성일시     : 2019-11-22 17:44:24                          *
+      *  전체길이     : 00000067 BYTES                               *
+      *================================================================*
+           03  XDJL4001-RETURN.
+             05  XDJL4001-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4001-OK            VALUE  '00'.
+                 88  COND-XDJL4001-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4001-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4001-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4001-ERROR         VALUE  '09'.
+                 88  COND-XDJL4001-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4001-SYSERROR      VALUE  '99'.
+             05  XDJL4001-R-LINE                 PIC  9(006).
+             05  XDJL4001-R-ERRCD                PIC  X(008).
+             05  XDJL4001-R-TREAT-CD             PIC  X(008).
+             05  XDJL4001-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4001-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4001-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XDJL4001-I-BRWR-NO              PIC  X(013).
+      *--       채무자명
+             05  XDJL4001-I-DBTRZ-NAME           PIC  X(042).
+      *--       KB-PIN
+             05  XDJL4001-I-KB-PIN               PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4001-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4001-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4001-O-GRID1                OCCURS 000030 TIMES.
+      *--         차주번호
+               07  XDJL4001-O-BRWR-NO            PIC  X(013).
+      *--         KB-PIN
+               07  XDJL4001-O-KB-PIN             PIC  X(010).
+      *--         채무자명
+               07  XDJL4001-O-DBTRZ-NAME         PIC  X(042).
+      *--         모기업법인고객식별자
+               07  XDJL4001-O-MAMA-CC-CUST-IDNFR PIC  X(010).
+      *--         모기업법인고객명
+               07  XDJL4001-O-MAMA-CC-CUST-NAME  PIC  X(042).
+      *================================================================*
+      *        X  D  J  L  4  0  0  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4001-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4001-I-BRWR-NO            ;차주번호
+      *X  XDJL4001-I-DBTRZ-NAME         ;채무자명
+      *X  XDJL4001-I-KB-PIN             ;KB-PIN
+      *N  XDJL4001-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4001-O-GRID1              ;그리드1
+      *X  XDJL4001-O-BRWR-NO            ;차주번호
+      *X  XDJL4001-O-KB-PIN             ;KB-PIN
+      *X  XDJL4001-O-DBTRZ-NAME         ;채무자명
+      *X  XDJL4001-O-MAMA-CC-CUST-IDNFR ;모기업법인고객식별자
+      *X  XDJL4001-O-MAMA-CC-CUST-NAME  ;모기업법인고객명

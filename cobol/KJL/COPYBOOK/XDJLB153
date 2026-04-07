@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : XDJLB153                                               *
+      *@ DESC : DCT/E변경고객정보관리COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-04-09 16:56:36                          *
+      *  생성일시     : 2018-04-09 16:56:37                          *
+      *  전체길이     : 00000019 BYTES                               *
+      *================================================================*
+           03  XDJLB153-RETURN.
+             05  XDJLB153-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB153-OK            VALUE  '00'.
+                 88  COND-XDJLB153-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB153-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB153-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB153-ERROR         VALUE  '09'.
+                 88  COND-XDJLB153-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB153-SYSERROR      VALUE  '99'.
+             05  XDJLB153-R-LINE                 PIC  9(006).
+             05  XDJLB153-R-ERRCD                PIC  X(008).
+             05  XDJLB153-R-TREAT-CD             PIC  X(008).
+             05  XDJLB153-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB153-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB153-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJLB153-I-KB-PIN               PIC  X(010).
+      *--       신표준산업분류코드
+             05  XDJLB153-I-NEW-SI-CLSFI-CD      PIC  X(005).
+      *--       한신평재무업종구분
+             05  XDJLB153-I-KIS-F-BZTYP-DSTCD    PIC  X(002).
+      *----------------------------------------------------------------*
+           03  XDJLB153-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB153-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  1  5  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB153-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB153-I-KB-PIN             ;KB-PIN
+      *X  XDJLB153-I-NEW-SI-CLSFI-CD    ;신표준산업분류코드
+      *X  XDJLB153-I-KIS-F-BZTYP-DSTCD  ;한신평재무업종구분
+      *X  XDJLB153-O-PRCSS-RSULT        ;처리결과

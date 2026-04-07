@@ -1,0 +1,180 @@
+      *================================================================*
+      *@ NAME : V1JLB009                                               *
+      *@ DESC : 기업및그룹한도신청및승인                             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-02-20 13:25:46                          *
+      *  생성일시     : 2009-02-20 13:26:48                          *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB009-PRCSS-RSULT              PIC  X(002).
+      *--     한도신청번호
+           07  V1JLB009-LIMT-APLCN-NO            PIC  X(010).
+      *--     수정내부신용평가등급구분코드
+           07  V1JLB009-AMND-ICV-GRD-DSTCD       PIC  X(015).
+      *--     수정결산년월
+           07  V1JLB009-AMND-STLACC-YM           PIC  X(006).
+      *--     수정신표준산업분류코드
+           07  V1JLB009-AMND-NSI-CLSFI-CD        PIC  X(005).
+      *--     수정표준산업코드명
+           07  V1JLB009-AMND-SI-CD-NAME          PIC  X(040).
+      *--     수정업종평균적용년
+           07  V1JLB009-AMND-B-AVG-APLY-YR       PIC  X(004).
+      *--     수정신용지원비율
+           07  V1JLB009-AMND-C-SPORT-RATO        PIC  9(003)V9(02).
+      *--     수정영업이익
+           07  V1JLB009-AMND-OPRFT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정이자수익
+           07  V1JLB009-AMND-INT-ERN             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정감가상각비
+           07  V1JLB009-AMND-DPRC-CST            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용
+           07  V1JLB009-AMND-FNCS                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정단기차입금
+           07  V1JLB009-AMND-SHTRM-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정단기차입금상환금액
+           07  V1JLB009-AMND-S-AMBR-RPAYAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정업종가중평균율
+           07  V1JLB009-AMND-B-WGHTG-AVG-RT      PIC  9(003)V9(02).
+      *--     수정업체총차입금
+           07  V1JLB009-AMND-E-TOTAL-AMBR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액
+           07  V1JLB009-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정현금흐름기준금액
+           07  V1JLB009-AMND-CSFW-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준년자기자본금
+           07  V1JLB009-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금자기자본율
+           07  V1JLB009-AMND-AMBR-ONCP-RT        PIC  9(003)V9(02).
+      *--     수정자기자본기준금액
+           07  V1JLB009-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정상환능력기준한도금액
+           07  V1JLB009-AMND-S-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액1
+           07  V1JLB009-AMND-SALEPR1             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금매출액비율
+           07  V1JLB009-AMND-A-SALEPR-RATO       PIC  9(003)V9(02).
+      *--     수정전년총자산
+           07  V1JLB009-AMND-PYY-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금총자산비율
+           07  V1JLB009-AMND-AT-ASST-RATO        PIC  9(003)V9(02).
+      *--     수정규모기준한도금액
+           07  V1JLB009-AMND-SCAL-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준한도금액
+           07  V1JLB009-AMND-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융내부신용평가등급구분코드
+           07  V1JLB009-AMND-FICV-GRD-DSTCD      PIC  X(006).
+      *--     수정금융결산년월
+           07  V1JLB009-AMND-F-STLACC-YM         PIC  X(006).
+      *--     수정금융한도업종구분코드
+           07  V1JLB009-AMND-FL-BZTYP-DSTCD      PIC  X(018).
+      *--     수정금융한도업종구분코드명
+           07  V1JLB009-AMND-FLB-DSTCD-NAME      PIC  X(042).
+      *--     수정금융업종평균적용년
+           07  V1JLB009-AMND-FB-AVG-APLY-YR      PIC  X(004).
+      *--     수정금융신용등급지원비율
+           07  V1JLB009-AMND-FC-SPORT-RATO       PIC  9(003)V9(02).
+      *--     수정금융전전년경상이익
+           07  V1JLB009-AMND-FBP-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융전년경상이익
+           07  V1JLB009-AMND-FP-ODNR-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준년경상이익
+           07  V1JLB009-AMND-FBY-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융전전년자기자본금
+           07  V1JLB009-AMND-FBP-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년자기자본금
+           07  V1JLB009-AMND-PYY-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준년자기자본금
+           07  V1JLB009-AMND-FB-YR-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융자기자본비율
+           07  V1JLB009-AMND-F-ONCP-RATO         PIC  9(003)V9(02).
+      *--     수정금융상환능력기준한도금액
+           07  V1JLB009-AMND-FS-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정규모기준한도금액1
+           07  V1JLB009-AMND-S-BASE-CLAM1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준한도금액
+           07  V1JLB009-AMND-F-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     승인년월일
+           07  V1JLB009-ATHOR-YMD                PIC  X(008).
+      *================================================================*
+      *        V  1  J  L  B  0  0  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB009-PRCSS-RSULT          ;처리결과
+      *X  V1JLB009-LIMT-APLCN-NO        ;한도신청번호
+      *X  V1JLB009-AMND-ICV-GRD-DSTCD
+      * 수정내부신용평가등급구분코드
+      *X  V1JLB009-AMND-STLACC-YM       ;수정결산년월
+      *X  V1JLB009-AMND-NSI-CLSFI-CD    ;수정신표준산업분류코드
+      *X  V1JLB009-AMND-SI-CD-NAME      ;수정표준산업코드명
+      *X  V1JLB009-AMND-B-AVG-APLY-YR   ;수정업종평균적용년
+      *N  V1JLB009-AMND-C-SPORT-RATO    ;수정신용지원비율
+      *S  V1JLB009-AMND-OPRFT           ;수정영업이익
+      *S  V1JLB009-AMND-INT-ERN         ;수정이자수익
+      *S  V1JLB009-AMND-DPRC-CST        ;수정감가상각비
+      *S  V1JLB009-AMND-FNCS            ;수정금융비용
+      *S  V1JLB009-AMND-SHTRM-AMBR      ;수정단기차입금
+      *S  V1JLB009-AMND-S-AMBR-RPAYAMT
+      * 수정단기차입금상환금액
+      *N  V1JLB009-AMND-B-WGHTG-AVG-RT  ;수정업종가중평균율
+      *S  V1JLB009-AMND-E-TOTAL-AMBR    ;수정업체총차입금
+      *S  V1JLB009-AMND-SALEPR          ;수정매출액
+      *S  V1JLB009-AMND-CSFW-BSAMT      ;수정현금흐름기준금액
+      *S  V1JLB009-AMND-B-YR-ONCP-AMT   ;수정기준년자기자본금
+      *N  V1JLB009-AMND-AMBR-ONCP-RT    ;수정차입금자기자본율
+      *S  V1JLB009-AMND-O-CAPTL-BSAMT   ;수정자기자본기준금액
+      *S  V1JLB009-AMND-S-BASE-CLAM     ;수정상환능력기준한도금액
+      *S  V1JLB009-AMND-SALEPR1         ;수정매출액1
+      *N  V1JLB009-AMND-A-SALEPR-RATO   ;수정차입금매출액비율
+      *S  V1JLB009-AMND-PYY-TOTAL-ASST  ;수정전년총자산
+      *N  V1JLB009-AMND-AT-ASST-RATO    ;수정차입금총자산비율
+      *S  V1JLB009-AMND-SCAL-BASE-CLAM  ;수정규모기준한도금액
+      *S  V1JLB009-AMND-BASE-CLAM       ;수정기준한도금액
+      *X  V1JLB009-AMND-FICV-GRD-DSTCD
+      * 수정금융내부신용평가등급구분코드
+      *X  V1JLB009-AMND-F-STLACC-YM     ;수정금융결산년월
+      *X  V1JLB009-AMND-FL-BZTYP-DSTCD
+      * 수정금융한도업종구분코드
+      *X  V1JLB009-AMND-FLB-DSTCD-NAME
+      * 수정금융한도업종구분코드명
+      *X  V1JLB009-AMND-FB-AVG-APLY-YR
+      * 수정금융업종평균적용년
+      *N  V1JLB009-AMND-FC-SPORT-RATO
+      * 수정금융신용등급지원비율
+      *S  V1JLB009-AMND-FBP-ODNR-PRFT   ;수정금융전전년경상이익
+      *S  V1JLB009-AMND-FP-ODNR-PRFT    ;수정금융전년경상이익
+      *S  V1JLB009-AMND-FBY-ODNR-PRFT   ;수정금융기준년경상이익
+      *S  V1JLB009-AMND-FBP-ONCP-AMT
+      * 수정금융전전년자기자본금
+      *S  V1JLB009-AMND-PYY-ONCP-AMT    ;수정전년자기자본금
+      *S  V1JLB009-AMND-FB-YR-ONCP-AMT
+      * 수정금융기준년자기자본금
+      *N  V1JLB009-AMND-F-ONCP-RATO     ;수정금융자기자본비율
+      *S  V1JLB009-AMND-FS-BASE-CLAM
+      * 수정금융상환능력기준한도금액
+      *S  V1JLB009-AMND-S-BASE-CLAM1    ;수정규모기준한도금액1
+      *S  V1JLB009-AMND-F-BASE-CLAM     ;수정금융기준한도금액
+      *X  V1JLB009-ATHOR-YMD            ;승인년월일

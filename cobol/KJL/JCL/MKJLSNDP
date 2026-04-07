@@ -1,0 +1,159 @@
+//MKJLSNDP JOB ,'M V S',CLASS=B,MSGCLASS=X,REGION=0M
+//*================================================================*/
+//* 계열기업 및 소속업체 정보 추출                       */
+//*----------------------------------------------------------------*/
+//*  계열기업기본 정보
+//*----------------------------------------------------------------*/
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.UNLOAD.KJL0013.MBFD06'
+  DELETE  'KJL.SD.UNLOAD.KJL0014.MBFD07'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+       LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.UNLOAD.KJL0013.MBFD06,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT CAST('%%$ODATE' AS CHAR(8))        AS 기준년월일
+      ,CAST(',' AS CHAR(1))
+      ,A.계열기업군코드
+      ,CAST(',' AS CHAR(1))
+      ,CAST(A.계열기업군명 AS CHAR(40)) AS 계열기업군명
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(A.계열기업순위 AS DECIMAL(5)))
+                                          AS 그룹순위
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(VALUE((
+       SELECT COUNT(*)
+         FROM DB2DBA.THKJL0014
+        WHERE 그룹회사코드   = A.그룹회사코드
+          AND 기준년월       = A.기준년월
+          AND 계열적용구분   = A.계열적용구분
+          AND 계열기업군코드 = A.계열기업군코드
+                          ),0) AS DECIMAL(5)))
+                                          AS 소속기업수
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(VALUE(ROUND(
+       CASE WHEN B.관리한도유효년월일 >= '%%$ODATE'
+            THEN B.관리한도
+            ELSE 0
+       END,0),0) AS DECIMAL(15)))         AS 그룹한도금액
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(VALUE((
+       SELECT ROUND(DECIMAL(SUM("한도기준TE금액")),0)
+         FROM DB2DBA.THKJL0135
+        WHERE 그룹회사코드   = A.그룹회사코드
+          AND 기준년월일     = '%%$ODATE'
+          AND 계열기업군코드 = A.계열기업군코드
+                          ),0) AS DECIMAL(15))) AS 그룹사용액
+      ,CAST(',' AS CHAR(1))
+      ,CAST(VALUE(CASE WHEN B.그룹사신용등급구분 = '000'
+                       THEN ' '
+                       ELSE B.그룹사신용등급구분
+                  END,' ') AS CHAR(3))
+  FROM DB2DBA.THKJL0013 A LEFT OUTER JOIN
+       DB2DBA.THKJL0012 B
+    ON A.그룹회사코드   = B.그룹회사코드
+   AND A.기준년월       = B.기준년월
+   AND A.계열기업군코드 = B.계열기업군코드
+ WHERE A.그룹회사코드  = 'KB0'
+   AND A.기준년월      = '%%$OYEAR.%%OMONTH'
+   AND A.계열적용구분  = '1'
+   AND A.계열기업순위 != 999
+  WITH UR;
+/*
+//*----------------------------------------------------------------*/
+//*  계열기업소속업체기본 정보
+//*----------------------------------------------------------------*/
+//STEP02 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+       LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.UNLOAD.KJL0014.MBFD07,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT CAST('%%$ODATE' AS CHAR(8))         AS 기준년월일
+      ,CAST(',' AS CHAR(1))
+      ,B.차주번호                        AS 법인등록번호
+      ,CAST(',' AS CHAR(1))
+      ,B.계열기업군코드
+      ,CAST(',' AS CHAR(1))
+      ,B.고객식별자
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(VALUE(ROUND(DECIMAL(
+       CASE WHEN C.관리한도유효년월일 >= '%%$ODATE'
+            THEN C.관리한도
+            ELSE 0
+       END),0),0) AS DECIMAL(15)))         AS 관리한도
+      ,CAST(',' AS CHAR(1))
+      ,DIGITS(CAST(VALUE(
+       ROUND(DECIMAL(D.직접한도금액),0) +
+       ROUND(DECIMAL(D.간접한도금액),0),0) AS DECIMAL(15)))
+                                           AS 사용액
+      ,CAST(',' AS CHAR(1))
+      ,CAST(VALUE(CASE WHEN C.내부신용평가등급구분 = '0000'
+                       THEN ' '
+                       ELSE C.내부신용평가등급구분
+                  END,' ') AS CHAR(4)) AS 신용등급
+  FROM DB2DBA.THKJL0013 A
+      ,DB2DBA.THKJL0014 B LEFT OUTER JOIN
+       DB2DBA.THKJL0011 C
+    ON B.그룹회사코드 = C.그룹회사코드
+   AND B.기준년월     = C.기준년월
+   AND B.고객식별자   = C.고객식별자
+       LEFT OUTER JOIN
+      (SELECT 차주고객식별자
+             ,SUM(직접한도금액) AS 직접한도금액
+             ,SUM(간접한도금액) AS 간접한도금액
+         FROM (SELECT 차주고객식별자     AS 차주고객식별자
+                     ,"한도기준TE금액" AS 직접한도금액
+                     ,0                    AS 간접한도금액
+                 FROM DB2DBA.THKJL0129
+                WHERE 그룹회사코드 = 'KB0'
+                  AND 기준일       = SUBSTR('%%$ODATE',7,2)
+                  AND 기준년월     = SUBSTR('%%$ODATE',1,6)
+                UNION ALL
+               SELECT 담보보증고객식별자 AS 차주고객식별자
+                     ,0                    AS 직접한도금액
+                     ,간접익스포져금액   AS 간접한도금액
+                 FROM DB2DBA.THKJL0031
+                WHERE 그룹회사코드 = 'KB0'
+                  AND 기준일       = SUBSTR('%%$ODATE',7,2)
+                  AND 기준년월     = SUBSTR('%%$ODATE',1,6)
+               ) TAB1
+        GROUP BY 차주고객식별자
+       ) D
+    ON B.고객식별자  = D.차주고객식별자
+ WHERE A.그룹회사코드   = B.그룹회사코드
+   AND A.기준년월       = B.기준년월
+   AND A.계열적용구분   = B.계열적용구분
+   AND A.계열기업군코드 = B.계열기업군코드
+   AND A.그룹회사코드   = 'KB0'
+   AND A.기준년월       = SUBSTR('%%$ODATE',1,6)
+   AND A.계열적용구분   = '1'
+   AND A.계열기업순위  != 999
+ ORDER BY 계열기업군코드
+  WITH UR;
+/*
+//

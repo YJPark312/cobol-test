@@ -1,0 +1,52 @@
+//MKJLDP24 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* %%SET %%A = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLDP14
+//*********************************************************************
+//*   신용공여차주별집계원장추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD331,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD331.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP24-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   신용공여그룹별집계원장추출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD371,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD371.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP24-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   거액신용공여정보원장추출
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD411,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD411.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP24-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   신용공여초과대상업체추출
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLD401,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD401.D%%A.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP24-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

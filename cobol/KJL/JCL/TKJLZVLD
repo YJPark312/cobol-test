@@ -1,0 +1,536 @@
+//TKJLZVLD JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=T,MSGCLASS=X
+//*------------------------------------------------------------------*/
+//* 2단계보안조치 관련 정보삭제 검증작업
+//*------------------------------------------------------------------*/
+//DSNTEP1  EXEC PGM=IKJEFT01,DYNAMNBR=20
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTEP2) PLAN(DSNTEP13) -
+  LIB('DB2APS.DSND10.RUNLIB.LOAD') PARMS('/ALIGN(MID)')
+  END
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0001 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0003 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0004 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT C.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0003 B
+      ,DB2DBA.THKJL0006 C
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND B.그룹회사코드     = C.그룹회사코드
+   AND B.한도신청번호     = C.한도신청번호
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0007 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0008 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0009 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0010 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0011 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0014 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0015 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.그룹회사코드     = 'KB0'
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0016 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0017 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0020 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0024 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0027 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0028 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0031 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0032 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0033 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0034 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0040 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0041 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0042 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0055 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0059 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0062 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0071 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.보증기관고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0074 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0075 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0125 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0126 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0127 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0128 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0129 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0130 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0151 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0152 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0153 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0161 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0162 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLG001 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR003 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.심사고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR004 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR005 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR006 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR007 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR009 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR011 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR012 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0072 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+   AND B.기준일           >= '01'
+   AND B.기준년월         >= '190001'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0072 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+   AND B.기준일              >= '01'
+   AND B.기준년월            >= '190001'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0073 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0073 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR013 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR013 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+  WITH UR;
+
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR014 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.담보여신계좌번호
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+   AND B.기준년월일       >= '19000101'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR014 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.담보여신계좌번호
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+   AND B.기준년월일          >= '19000101'
+  WITH UR;
+/*
+//

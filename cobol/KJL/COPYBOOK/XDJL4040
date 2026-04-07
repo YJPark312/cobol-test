@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : XDJL4040                                               *
+      *@ DESC : DC국가코드,국가명조회(팝업) COPYBOOK             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-16 17:06:50                          *
+      *  생성일시     : 2009-07-16 17:06:56                          *
+      *================================================================*
+           03  XDJL4040-RETURN.
+             05  XDJL4040-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4040-OK            VALUE  '00'.
+                 88  COND-XDJL4040-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4040-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4040-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4040-ERROR         VALUE  '09'.
+                 88  COND-XDJL4040-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4040-SYSERROR      VALUE  '99'.
+             05  XDJL4040-R-LINE                 PIC  9(006).
+             05  XDJL4040-R-ERRCD                PIC  X(008).
+             05  XDJL4040-R-TREAT-CD             PIC  X(008).
+             05  XDJL4040-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4040-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4040-I-PRCSS-DSTIC          PIC  X(002).
+      *--       국가코드
+             05  XDJL4040-I-ISO-NATNL-CD         PIC  X(003).
+      *--       국가명
+             05  XDJL4040-I-ENG-NATNL-NAME       PIC  X(052).
+      *----------------------------------------------------------------*
+           03  XDJL4040-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4040-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4040-O-GRID1                OCCURS 000300 TIMES.
+      *--         국가코드
+               07  XDJL4040-O-ISO-NATNL-CD       PIC  X(003).
+      *--         국가명
+               07  XDJL4040-O-ENG-NATNL-NAME     PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  4  0  4  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4040-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4040-I-ISO-NATNL-CD       ;국가코드
+      *X  XDJL4040-I-ENG-NATNL-NAME     ;국가명
+      *N  XDJL4040-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4040-O-GRID1              ;그리드1
+      *X  XDJL4040-O-ISO-NATNL-CD       ;국가코드
+      *X  XDJL4040-O-ENG-NATNL-NAME     ;국가명

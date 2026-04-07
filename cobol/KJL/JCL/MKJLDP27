@@ -1,0 +1,60 @@
+//MKJLDP27 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLDB17
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0074
+//* %%GLOBAL  PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//STEP01   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0074',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+  LOAD DATA
+  LOG NO  NOCOPYPEND KEEPDICTIONARY
+  INTO TABLE DB2DBA.THKJL0074
+                   PART %%A INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*신용공여일중간집계계좌정보THKJL0074(일)/THKJL0075(월)
+//*********************************************************************
+//STEP02   EXEC JZBDEXEC,MBR=BJLD741,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.KJL0074.V001,DISP=SHR
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP27-001-ONLBAT-KB STAR-%%$ODATE-Y
+//*자료기준년월일-원장삭제구분
+//*********************************************************************
+//*THKJL0074(일) LOAD
+//*********************************************************************
+//STEP03   EXEC DSNUPROC,PARM='DAPG,KJL0074',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.SD.KJL0074.V001,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME YES
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0074
+//
+/*

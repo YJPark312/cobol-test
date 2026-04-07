@@ -1,0 +1,565 @@
+//TKJLG021 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* 지주사 리스크분석DATA 구축 UNLOAD
+//* 간접익스포져상품코드목록 (THKJL0019)
+//*  KJL.SM.KJL0019.EXPM24.G021 => KB0_FBJ_EXP_M24_YYYYMM.DAT
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 1 6
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHKTMP4'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHK4'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DATTMP4'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DAT4'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP4,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 기준년월
+        ,CHAR(',')
+        ,CHAR(HEX(CURRENT DATE))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201404'
+	 GROUP BY 기준년월
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP4,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHK4,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP4,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=241,BLKSIZE=27840)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT           CHAR(기준년월)
+        ,CHAR(','),CHAR(그룹회사코드)
+        ,CHAR(','),CHAR(상품대분류코드)
+        ,CHAR(','),CHAR(상품중분류코드)
+        ,CHAR(','),CHAR(상품템플릿코드)
+        ,CHAR(','),CHAR(상품번호)
+        ,CHAR(','),CHAR(간접중분류구분)
+        ,CHAR(','),CHAR(REPLACE(간접중분류구분명  ,',',' '))
+        ,CHAR(','),CHAR(REPLACE(간접상품명  ,',',' '))
+        ,CHAR(','),CHAR(DIGITS("간접TE환산율"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 기준년월
+                                    ,그룹회사코드
+                                    ,상품대분류코드
+                                    ,상품중분류코드
+                                    ,상품템플릿코드
+                                    ,상품번호) AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM  DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201404'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP4,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.DAT4,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=240,BLKSIZE=27840)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0019 간접익스포져상품코드목록
+//*-------------------------------------------------------------------*
+//JL0019C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.CHK4 -
+    &TODSN="KB0_FBJ_EXP_M24_201404.chk"
+  SIGNOFF
+/*
+//JL0019D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.DAT4 -
+    &TODSN="KB0_FBJ_EXP_M24_201404.dat"
+  SIGNOFF
+/*
+//DELETE   EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHKTMP5'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHK5'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DATTMP5'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DAT5'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP5,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 기준년월
+        ,CHAR(',')
+        ,CHAR(HEX(CURRENT DATE))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201405'
+	 GROUP BY 기준년월
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP5,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHK5,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP5,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=241,BLKSIZE=27840)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT           CHAR(기준년월)
+        ,CHAR(','),CHAR(그룹회사코드)
+        ,CHAR(','),CHAR(상품대분류코드)
+        ,CHAR(','),CHAR(상품중분류코드)
+        ,CHAR(','),CHAR(상품템플릿코드)
+        ,CHAR(','),CHAR(상품번호)
+        ,CHAR(','),CHAR(간접중분류구분)
+        ,CHAR(','),CHAR(REPLACE(간접중분류구분명  ,',',' '))
+        ,CHAR(','),CHAR(REPLACE(간접상품명  ,',',' '))
+        ,CHAR(','),CHAR(DIGITS("간접TE환산율"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 기준년월
+                                    ,그룹회사코드
+                                    ,상품대분류코드
+                                    ,상품중분류코드
+                                    ,상품템플릿코드
+                                    ,상품번호) AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM  DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201405'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP5,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.DAT5,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=240,BLKSIZE=27840)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0019 간접익스포져상품코드목록
+//*-------------------------------------------------------------------*
+//JL0019C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.CHK5 -
+    &TODSN="KB0_FBJ_EXP_M24_201405.chk"
+  SIGNOFF
+/*
+//JL0019D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.DAT5 -
+    &TODSN="KB0_FBJ_EXP_M24_201405.dat"
+  SIGNOFF
+/*
+//DELETE   EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHKTMP6'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.CHK6'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DATTMP6'
+  DELETE  'KJL.SM.KJL0019.EXPM24.G021.DAT6'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP6,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 기준년월
+        ,CHAR(',')
+        ,CHAR(HEX(CURRENT DATE))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201406'
+	 GROUP BY 기준년월
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHKTMP6,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.CHK6,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP6,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=241,BLKSIZE=27840)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT           CHAR(기준년월)
+        ,CHAR(','),CHAR(그룹회사코드)
+        ,CHAR(','),CHAR(상품대분류코드)
+        ,CHAR(','),CHAR(상품중분류코드)
+        ,CHAR(','),CHAR(상품템플릿코드)
+        ,CHAR(','),CHAR(상품번호)
+        ,CHAR(','),CHAR(간접중분류구분)
+        ,CHAR(','),CHAR(REPLACE(간접중분류구분명  ,',',' '))
+        ,CHAR(','),CHAR(REPLACE(간접상품명  ,',',' '))
+        ,CHAR(','),CHAR(DIGITS("간접TE환산율"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 기준년월
+                                    ,그룹회사코드
+                                    ,상품대분류코드
+                                    ,상품중분류코드
+                                    ,상품템플릿코드
+                                    ,상품번호) AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM  DB2DBA.THKJL0019
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월     = '201406'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0019.EXPM24.G021.DATTMP6,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0019.EXPM24.G021.DAT6,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=240,BLKSIZE=27840)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0019 간접익스포져상품코드목록
+//*-------------------------------------------------------------------*
+//JL0019C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.CHK6 -
+    &TODSN="KB0_FBJ_EXP_M24_201406.chk"
+  SIGNOFF
+/*
+//JL0019D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0019.EXPM24.G021.DAT6 -
+    &TODSN="KB0_FBJ_EXP_M24_201406.dat"
+  SIGNOFF
+/*
+//

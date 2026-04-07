@@ -1,0 +1,15 @@
+//TKJLTSO1 JOB (LWY,BANCS),CLASS=T,MSGCLASS=X,NOTIFY=&SYSUID
+//*-----------------------------------------------------------
+//* 업무명    : KJL     (토탈 익스포져)
+//* 처리유형  : BATCH 　
+//* 처리개요  : TE 원장 소산 처리
+//*               '23.06.22 오류데이터정비 작업
+//*-----------------------------------------------------------
+//STEPT009  EXEC  PGM=ICEGENER,REGION=0M
+//SYSUT1    DD  DSN=KJL.SY.CHGLOG.TKJLT009.D%%ODATE,DISP=SHR
+//SYSUT2    DD  DSN=TAS.CTTBB.KJLSTY05.CHGLOG.BJLT009.OLD,
+//          DISP=(NEW,KEEP),UNIT=TTAPE,
+//          DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756)
+//SYSPRINT  DD  SYSOUT=*
+//SYSIN     DD  DUMMY
+/*

@@ -1,0 +1,233 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4081 (AS신용공여이사회승인내역조회)
+      *@처리유형  : AS
+      *@처리개요  : 신용공여이사회승인내역을 조회하는
+      *@            : 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240425: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4081.
+       AUTHOR.                        박정수.
+       DATE-WRITTEN.                   24/04/25.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4081'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   신용공여이사회승인내역조회
+       01  XDJL4081-CA.
+           COPY  XDJL4081.
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJL4081-CA.
+           COPY  YNJL4081.
+
+       01  YPJL4081-CA.
+           COPY  YPJL4081.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4081-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@출력영역 확보
+           #GETOUT YPJL4081-CA
+
+      * COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    소관부점코드
+           IF YNJL4081-JRSDZ-BRNCD = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  신용공여이사회승인내역조회 프로그램호출
+           PERFORM S3100-DJL4081-CALL-RTN
+              THRU S3100-DJL4081-CALL-EXT
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   신용공여이사회승인내역조회 DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4081-CALL-RTN.
+
+      *@1 입력파라미터 조립
+
+      *    소관부점코드
+           MOVE YNJL4081-JRSDZ-BRNCD
+             TO XDJL4081-I-JRSDZ-BRNCD
+
+      *    고객식별자
+           MOVE  YNJL4081-CUST-IDNFR
+             TO  XDJL4081-I-CUST-IDNFR
+
+      *@1 신용공여이사회승인내역조회 프로그램 호출
+           #DYCALL  DJL4081  YCCOMMON-CA  XDJL4081-CA
+
+      *   처리결과CHECK
+           IF COND-XDJL4081-OK
+      *        출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           ELSE
+              #ERROR XDJL4081-R-ERRCD
+                     XDJL4081-R-TREAT-CD
+                     XDJL4081-R-STAT
+           END-IF
+           .
+       S3100-DJL4081-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL4081-O-PRSNT-NOITM1
+             TO YPJL4081-PRSNT-NOITM1
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJL4081-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4081-PRSNT-NOITM1
+      *            그리드
+                   MOVE XDJL4081-O-GRID1(WK-I)
+                     TO YPJL4081-GRID1(WK-I)
+           END-PERFORM
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11081000'
+
+           #OKEXIT  CO-STAT-OK .
+       S9000-FINAL-EXT.
+           EXIT.

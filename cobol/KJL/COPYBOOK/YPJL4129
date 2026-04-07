@@ -1,0 +1,44 @@
+      *================================================================*
+      *@ NAME : YPJL4129                                               *
+      *@ DESC : ASTE일일변동현황조회COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-04-11 13:23:55                          *
+      *  생성일시     : 2017-04-11 13:24:02                          *
+      *  전체길이     : 00021205 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4129-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4129-GRID1                    OCCURS 000100 TIMES.
+      *--       채무자명
+             09  YPJL4129-DBTRZ-NAME             PIC  X(052).
+      *--       KB-PIN
+             09  YPJL4129-KB-PIN                 PIC  X(010).
+      *--       전일자TE
+             09  YPJL4129-PRDAY-TE               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준일TE
+             09  YPJL4129-BASE-DD-TE             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       TE변동금액
+             09  YPJL4129-TE-FLXBL-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전일자대분류업종
+             09  YPJL4129-PRDAY-L-CLSFI-BZTYP    PIC  X(036).
+      *--       기준일대분류업종
+             09  YPJL4129-BASE-DL-CLSFI-BZTYP    PIC  X(036).
+      *--       관리부점
+             09  YPJL4129-MGTBRN                 PIC  X(030).
+      *================================================================*
+      *        Y  P  J  L  4  1  2  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4129-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4129-GRID1                ;그리드1
+      *X  YPJL4129-DBTRZ-NAME           ;채무자명
+      *X  YPJL4129-KB-PIN               ;KB-PIN
+      *S  YPJL4129-PRDAY-TE             ;전일자TE
+      *S  YPJL4129-BASE-DD-TE           ;기준일TE
+      *S  YPJL4129-TE-FLXBL-AMT         ;TE변동금액
+      *X  YPJL4129-PRDAY-L-CLSFI-BZTYP  ;전일자대분류업종
+      *X  YPJL4129-BASE-DL-CLSFI-BZTYP  ;기준일대분류업종
+      *X  YPJL4129-MGTBRN               ;관리부점

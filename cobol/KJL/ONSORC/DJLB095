@@ -1,0 +1,1544 @@
+      *=================================================================00010001
+      *@¾÷¹«¸í    : KJL     (Total Exposure)                          00020030
+      *@ÇÁ·Î±×·¥¸í: DJLB095 (±â¾÷¹×±×·ìÇÑµµ½ÅÃ»¹×½ÂÀÎ)              00030030
+      *@Ã³¸®À¯Çü  : DC                                                00040030
+      *@Ã³¸®°³¿ä  : °áÀÇ·Ï°ü¸®
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   º¯¡¡°æ¡¡ÀÌ¡¡·Â                00070030
+      *-----------------------------------------------------------------00080001
+      *@¼º¸í : ÀÏÀÚ : º¯¡¡°æ¡¡³»¡¡¿ë                              00090030
+      * ----------------------------------------------------------------00100001
+      *@YBH    :20200625: ½Å±ÔÀÛ¼º                                    00110030
+      * YBH    :20220915: ±âÁØÇÑµµ Ã³¸® º¸¿Ï
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM             : Å×ÀÌºí¸í           : Á¢±ÙÀ¯Çü 00150030
+      **  ------------------------- ------------------------------------00160001
+      ** °ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â         : THKJL0003            : RU
+      ** ±âÁØÇÑµµ¼öÁ¤ÀÌ·Â         : THKJL0004            : R
+      ** ÇÑµµ½ÂÀÎ°áÀÇ·Ï°ü¸®       : THKJL0005            : CRUD
+      **  Â÷ÁÖ°ü¸®ÇÑµµ±âº»        : THKJL0011            : CRU
+      **  ±×·ì°ü¸®ÇÑµµ±âº»        : THKJL0012            : CRU
+      **  Ã¤¹«ÀÚ°í°´±âº»¡¡        : THKJL0015            : R
+      ******************************************************************00240001
+       IDENTIFICATION                  DIVISION.                        00250001
+      *=================================================================00260001
+       PROGRAM-ID.                     DJLB095.                         00270001
+       AUTHOR.                         YBH.                             00280030
+       DATE-WRITTEN.                   20/06/25.                        00290001
+      *=================================================================00300001
+       ENVIRONMENT                     DIVISION.                        00310001
+      *=================================================================00320001
+       CONFIGURATION                   SECTION.                         00330001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00340001
+       DATA                            DIVISION.                        00350001
+      *=================================================================00360001
+       WORKING-STORAGE                 SECTION.                         00370001
+      *-----------------------------------------------------------------00380001
+      *CONSTANT ERROR AREA                                              00390001
+      *-----------------------------------------------------------------00400001
+       01  CO-ERROR-AREA.
+      *¿¡·¯¸Þ½ÃÁöÁ¤ÀÇ
+           03  CO-B2500200             PIC  X(008) VALUE 'B2500200'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      *Á¶Ä¡¸Þ½ÃÁöÁ¤ÀÇ
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00460001
+      * CONSTANT AREA                                                   00470001
+      *-----------------------------------------------------------------00480001
+       01  CO-AREA.                                                     00490001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB095'.     00500001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00510001
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00520001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00530001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00540001
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00550001
+                                                                        00560001
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.           00570001
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00570001
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.           00570001
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.           00570001
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00650069
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.          00650069
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+101015     03  CO-CHAR-LF              PIC  X(001) VALUE X'25'.
+
+       01  CO-CSTMSG.
+           03  CO-MSG1                 PIC  X(100) VALUE
+           '±âÁØÇÑµµ¡¡»êÃâ¡¡¹×¡¡ÀúÀåÈÄ¡¡½ÂÀÎ¡¡¿ä¸Á£¡£¡£¡'.
+           03  CO-MSG2                 PIC  X(100) VALUE
+           'ÀÌ¹Ì¡¡Ã³¸®µÈ¡¡½ÅÃ»³»¿ªÀÔ´Ï´Ù£®¡¡È®ÀÎ¡¡¿ä¸Á£¡£¡£¡'.
+           03  CO-MSG3                 PIC  X(100) VALUE
+           'ÇØ´ç¡¡Ã¤¹«ÀÚ¿¡´ëÇÑ¡¡½ÅÃ»Á¤º¸°¡¡¡Á¸ÀçÇÏÁö¾Ê½À´Ï´Ù£¡£¡£¡'.
+           03  CO-MSG4                 PIC  X(100) VALUE
+           'ÇØ´ç¡¡Ã¤¹«ÀÚ¿¡´ëÇÑ¡¡°ü¸®ÇÑµµÁ¤º¸°¡¡¡Á¸ÀçÇÏÁö¾Ê½À´Ï´Ù£¡'.
+           03  CO-MSG5                 PIC  X(100) VALUE
+           'ÇØ´ç À§¿øÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù£¡'.
+           03  CO-MSG6                 PIC  X(100) VALUE
+           '½ÂÀÎ½ÅÃ»ÈÄ °Å·¡ °¡´ÉÇÕ´Ï´Ù£®È®ÀÎ¡¡¿ä¸Á£¡£¡£¡'.
+           03  CO-SUBMSG1              PIC  X(050) VALUE
+           'ÁøÇà»óÅÂ¡¡¿À·ù'.
+      *-----------------------------------------------------------------00740001
+      * WORKING AREA                                                    00750001
+      *-----------------------------------------------------------------00760001
+       01  WK-AREA.                                                     00770001
+           03  WK-STAT                 PIC  X(002).                     00780001
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-KB-PIN               PIC  X(011).
+      *-----------------------------------------------------------------00850001
+      * PGM INTERFACE PARAMETER                                         00860001
+      *-----------------------------------------------------------------00870001
+      *MESSENGER COPYBOOK
+       01  XZUGMSNM-CA.
+           COPY    XZUGMSNM.
+       01  XQJL0032-CA.
+           COPY  XQJL0032.
+      *-----------------------------------------------------------------01860001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01870001
+      *-----------------------------------------------------------------01880001
+      *    DBIO  INTERFACE PARAMETER
+           COPY    YCDBIOCA.                                            01900001
+      *    SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.                                            01890001
+      *-----------------------------------------------------------------01910001
+      * TABLE ACCESS INTERFACE PARAMETER                                01920001
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01930001
+      *-----------------------------------------------------------------01940001
+      * DBIO ACCESS KEY°ü¸®                                           01950030
+      *-----------------------------------------------------------------01960001
+      *°ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â KEY
+       01  TKJL0003-KEY.                                                02050001
+           COPY    TKJL0003.                                            02060001
+      *°ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â RECORD
+       01  TRJL0003-REC.                                                02070001
+           COPY    TRJL0003.                                            02080001
+
+      *±âÁØÇÑµµ¼öÁ¤ÀÌ·Â KEY
+       01  TKJL0004-KEY.                                                02050001
+           COPY    TKJL0004.                                            02060001
+      *±âÁØÇÑµµ¼öÁ¤ÀÌ·Â RECORD
+       01  TRJL0004-REC.                                                02070001
+           COPY    TRJL0004.                                            02080001
+
+      *ÇÑµµ½ÂÀÎ°áÀÇ·Ï°ü¸® KEY
+       01  TKJL0005-KEY.                                                02050001
+           COPY    TKJL0005.
+      *ÇÑµµ½ÂÀÎ°áÀÇ·Ï°ü¸® RECORD
+       01  TRJL0005-REC.                                                02070001
+           COPY    TRJL0005.
+
+      *Â÷ÁÖ°ü¸®ÇÑµµ±âº» KEY
+       01  TKJL0011-KEY.                                                02050001
+           COPY    TKJL0011.                                            02060001
+      *Â÷ÁÖ°ü¸®ÇÑµµ±âº» RECORD
+       01  TRJL0011-REC.                                                02070001
+           COPY    TRJL0011.                                            02080001
+
+      *±×·ì°ü¸®ÇÑµµ±âº» KEY
+       01  TKJL0012-KEY.                                                02050001
+           COPY    TKJL0012.                                            02060001
+      *±×·ì°ü¸®ÇÑµµ±âº» RECORD
+       01  TRJL0012-REC.                                                02070001
+           COPY    TRJL0012.                                            02080001
+
+      *Ã¤¹«ÀÚ°í°´±âº» KEY
+       01  TKJL0015-KEY.                                                02050001
+           COPY    TKJL0015.                                            02060001
+      *Ã¤¹«ÀÚ°í°´±âº» RECORD
+       01  TRJL0015-REC.                                                02070001
+           COPY    TRJL0015.                                            02080001
+      *-----------------------------------------------------------------02210001
+       LINKAGE                         SECTION.                         02220001
+      *-----------------------------------------------------------------02230001
+      * COMMON
+       01  YCCOMMON-CA.                                                 02240001
+           COPY    YCCOMMON.                                            02250001
+      * DC COPYBOOK
+       01  XDJLB095-CA.                                                 02260001
+           COPY    XDJLB095.                                            02270001
+      *=================================================================02280001
+       PROCEDURE                       DIVISION                         02290001
+                                       USING       YCCOMMON-CA          02300001
+                                                   XDJLB095-CA          02310001
+                                                   .                    02320001
+      *=================================================================02330001
+      *-----------------------------------------------------------------02340001
+      *@  Ã³¸®¸ÞÀÎ                                                    02350030
+      *-----------------------------------------------------------------02360001
+       S0000-MAIN-RTN.                                                  02370001
+                                                                        02380001
+      *@  ÃÊ±âÈ­                                                      02390030
+           PERFORM S1000-INITIALIZE-RTN                                 02400001
+              THRU S1000-INITIALIZE-EXT                                 02410001
+                                                                        02420001
+      *@  ÀÔ·Â°ª¡¡CHECK                                               02430030
+           PERFORM S2000-VALIDATION-RTN                                 02440001
+              THRU S2000-VALIDATION-EXT                                 02450001
+                                                                        02460001
+      *@  ¾÷¹«Ã³¸®                                                    02470030
+           PERFORM S3000-PROCESS-RTN                                    02480001
+              THRU S3000-PROCESS-EXT                                    02490001
+                                                                        02500001
+      *@  Ã³¸®Á¾·á                                                    02510030
+           PERFORM S9000-FINAL-RTN                                      02520001
+              THRU S9000-FINAL-EXT                                      02530001
+           .                                                            02540001
+       S0000-MAIN-EXT.                                                  02550001
+           EXIT.                                                        02560001
+      *-----------------------------------------------------------------02570001
+      *@  ÃÊ±âÈ­                                                      02580030
+      *-----------------------------------------------------------------02590001
+       S1000-INITIALIZE-RTN.                                            02600001
+                                                                        02610001
+      *@   WK-AREA ¹×¡¡ÇÁ·Î±×·¥ÆÄ¶ó¹ÌÅÍ¡¡ÃÊ±âÈ­                       02620030
+           INITIALIZE WK-AREA                                           02630001
+      *               DBIO
+                      YCDBIOCA-CA                                       02640001
+      *               SQLIO
+                      YCDBSQLA-CA                                       02650001
+                                                                        02660001
+      *@  Ãâ·Â¿µ¿ª¡¡¹×¡¡°á°úÄÚµå¡¡ÃÊ±âÈ­                              02670030
+           INITIALIZE XDJLB095-OUT                                      02680001
+                      XDJLB095-RETURN                                   02690001
+           .                                                            02700001
+       S1000-INITIALIZE-EXT.                                            02710001
+           EXIT.                                                        02720001
+      *-----------------------------------------------------------------02730001
+      *@  ÀÔ·Â°ª°ËÁõ                                                  02740030
+      *-----------------------------------------------------------------02750001
+       S2000-VALIDATION-RTN.                                            02760001
+                                                                        02770001
+      *@Ã³¸®±¸ºÐÃ¼Å©(01:À§¿øÀúÀå    /02:¹Ý¼Û/
+      *                03:°³º°ÀÇ°ßµî·Ï/04:TEÈ®Á¤)
+           IF XDJLB095-I-PRCSS-DSTIC = CO-CHA-01 OR CO-CHA-02 OR
+                                       CO-CHA-03 OR CO-CHA-04
+               CONTINUE
+           ELSE
+      * ¿¡·¯¸Þ¼¼Áö : Ã³¸®±¸ºÐ¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@½ÅÃ»¹øÈ£
+           IF XDJLB095-I-LIMT-APLCN-NO = SPACE
+      * ¿¡·¯¸Þ¼¼Áö : ÇÊ¼öÇ×¸ñ¹ÌÀÔ·Â¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            02880001
+
+       S2000-VALIDATION-EXT.                                            02890001
+           EXIT.                                                        02900001
+      *-----------------------------------------------------------------03120001
+      *@  ¾÷¹«Ã³¸®                                                    03130030
+      *-----------------------------------------------------------------03140001
+       S3000-PROCESS-RTN.                                               03150001
+
+      *@1 Ã¼Å©»çÇ×¡¡È®ÀÎ
+           PERFORM S3100-UPDATE-CHECK-RTN
+              THRU S3100-UPDATE-CHECK-EXT
+
+      *    01:À§¿øÀúÀå
+           EVALUATE XDJLB095-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *@2     ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â »èÁ¦
+               PERFORM S3200-THKJL0005-DELETE-RTN
+                  THRU S3200-THKJL0005-DELETE-EXT
+
+      *@3     ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â »ðÀÔ
+               PERFORM S3300-THKJL0005-INSERT-RTN
+                  THRU S3300-THKJL0005-INSERT-EXT
+      *    02:¹Ý¼Û
+      *   ±âÁØÇÑµµ¸¦ ´Ù½Ã »êÃâÇÒ ¼ö ÀÖ´Â
+      *   ½ÅÃ»¿Ï·á(2)»óÅÂ·Î µ¹¾Æ°£´Ù.
+           WHEN CO-CHA-02
+      *@2     °ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â UPDATE
+               PERFORM S3400-THKJL0003-UPDATE-RTN
+                  THRU S3400-THKJL0003-UPDATE-EXT
+      *    03:°³º°ÀÇ°ßµî·Ï
+           WHEN CO-CHA-03
+      *@2     ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â UPDATE
+               PERFORM S3500-THKJL0005-UPDATE-RTN
+                  THRU S3500-THKJL0005-UPDATE-EXT
+
+      *@2     ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â SELECT(¸Þ½ÅÀúÃ³¸®¿ë)
+               PERFORM S3600-QJL0032-SELECT-RTN
+                  THRU S3600-QJL0032-SELECT-EXT
+      *    04:TEÈ®Á¤
+           WHEN CO-CHA-04
+      *@2     °ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â UPDATE
+               PERFORM S3700-THKJL0003-UPDATE-RTN
+                  THRU S3700-THKJL0003-UPDATE-EXT
+
+      *@4     ½ÂÀÎÀÏ°æ¿ì¸¸ °ü¸®ÇÑµµ¸¦ °»½ÅÇÑ´Ù.
+              IF XDJLB095-I-CMPRE-ATHOR-DSTIC = CO-CHA-1
+      *@         °ü¸®ÇÑµµ°»½Å
+                 PERFORM S3800-HANDO-UPDATE-RTN
+                    THRU S3800-HANDO-UPDATE-EXT
+              END-IF
+
+      *@5     ¸Þ½ÅÀúÃ³¸®
+              PERFORM S3900-MESSENGER-SEND-RTN
+                 THRU S3900-MESSENGER-SEND-EXT
+           END-EVALUATE
+
+      *@6  Ã³¸®°á°ú MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .                                                            03380001
+       S3000-PROCESS-EXT.                                               03390001
+           EXIT.                                                        03400001
+
+      *-----------------------------------------------------------------
+      *@1.½ÂÀÎÀü¡¡ÀÌ¹Ì¡¡Ã³¸®µÈ¡¡³»¿ªÀÌ¸é¡¡¿¡·¯¡¡Ã³¸®¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡
+      *@2.½ÂÀÎÀü¡¡¹ÌÃ³¸®£¨½ÂÀÎ½ÅÃ»£©µÇ¾îÀÖÁö¾ÊÀ»°æ¿ì¡¡¿¡·¯Ã³¸®¡¡¡¡¡¡
+      *-----------------------------------------------------------------
+       S3100-UPDATE-CHECK-RTN.
+
+      *@1.1 ÃÊ±âÈ­
+           INITIALIZE TKJL0004-KEY
+                      TRJL0004-REC
+
+      *@1.2 È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0004-PK-GROUP-CO-CD
+      *@   ÇÑµµ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0004-PK-LIMT-APLCN-NO
+
+      *@1.3 ÇÁ·Î±×·¥¡¡È£Ãâ
+           #DYDBIO SELECT-CMD-N TKJL0004-PK TRJL0004-REC
+
+      *@1.4 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    MOVE CO-STAT-ABNORMAL
+                      TO WK-STAT
+      *@±âÁØÇÑµµ¹ÌÀúÀå½ÃºñÁ¤»óÁ¾·áÈÄ´Ü¸»¿¡¼­Ã³¸®ÇÑ´Ù
+                    PERFORM S9000-FINAL-RTN
+                       THRU S9000-FINAL-EXT
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@°ü¸®ÇÑµµÁøÇà»óÅÂ°¡¡¡Ã³¸®ÀÎ°æ¿ì¡¡¿¡·¯¡¡Ã³¸®
+      *@1.1 ÃÊ±âÈ­
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+
+      *@1.2 È£Ãâº¯¼ö MOVE
+      *@±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0003-PK-GROUP-CO-CD
+      *@ÇÑµµ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0003-PK-LIMT-APLCN-NO
+
+      *@1.3 ÇÁ·Î±×·¥¡¡È£Ãâ
+           #DYDBIO SELECT-CMD-N TKJL0003-PK TRJL0003-REC
+
+      *@1.4 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               IF RJL0003-LIMT-P-STUS-DSTCD = CO-CHA-1
+                   #CSTMSG CO-MSG2     CO-SUBMSG1
+                   #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               ELSE
+                   IF RJL0003-LIMT-P-STUS-DSTCD = CO-CHA-2
+                       #CSTMSG CO-MSG6     CO-SUBMSG1
+                       #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+                   ELSE
+                       CONTINUE
+                   END-IF
+               END-IF
+           WHEN COND-DBIO-MRNF
+               #CSTMSG CO-MSG3     CO-SUBMSG1
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+      * ¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3100-UPDATE-CHECK-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â¡¡»èÁ¦
+      *-----------------------------------------------------------------
+       S3200-THKJL0005-DELETE-RTN.
+
+      *@2.1º¯¼öÃÊ±âÈ­
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+      *@2.2º¯¼ö MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+           MOVE LOW-VALUE
+             TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+           #DYDBIO  OPEN-CMD-1 TKJL0005-PK TRJL0005-REC
+
+      *@1.1 Á¶È¸°á°úÈ®ÀÎ
+      *@Ã³¸®³»¿ë : IF Á¶È¸ error ÀÌ¸é ¿¡·¯Ã³¸®
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0005-PK TRJL0005-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+                       MOVE RJL0005-ATHOR-CMMB-EMPID
+                         TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+                       #DYDBIO DELETE-CMD-Y TKJL0005-PK TRJL0005-REC
+
+                       EVALUATE TRUE
+                       WHEN COND-DBIO-OK
+                       WHEN COND-DBIO-MRNF
+                           CONTINUE
+                       WHEN OTHER
+      *@                  ¿øÀå»èÁ¦¿À·ùÀÏ°æ¿ì
+                           #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+                       END-EVALUATE
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       ¿øÀå¿¡·¯ÀÏ°æ¿ì¡¡¿¡·¯Ã³¸®
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3200-THKJL0005-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â¡¡»ðÀÔ(À§¿øÀúÀå)
+      *-----------------------------------------------------------------
+       S3300-THKJL0005-INSERT-RTN.
+
+      *@3.1  ¿øÀåµî·Ï
+      *@  ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0005-GROUP-CO-CD
+      *@  ÇÑµµ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO RJL0005-LIMT-APLCN-NO
+
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > XDJLB095-I-TOTAL-LINE-CNT
+170201*@      ½ÂÀÎÀ§¿øÁ÷¿ø¹øÈ£
+               MOVE XDJLB095-I-ATHOR-CMMB-EMPID(WK-I)
+                 TO RJL0005-ATHOR-CMMB-EMPID
+      *@      ½ÂÀÎÀ§¿ø±¸ºÐ
+               MOVE XDJLB095-I-ATHOR-CMMB-DSTIC(WK-I)
+                 TO RJL0005-ATHOR-CMMB-DSTCD
+      *       Ã³À½ ÀúÀå½Ã¿¡´Â SPACE,ÀçÀúÀå½Ã º¸°ü¿ë
+      *@      ÇÑµµ½ÂÀÎ±¸ºÐ
+               MOVE XDJLB095-I-LIMT-ATHOR-DSTCD(WK-I)
+                 TO RJL0005-LIMT-ATHOR-DSTCD
+      *@      ½ÂÀÎÀÇ°ß³»¿ë
+               MOVE XDJLB095-I-ATHOR-OPIN-CTNT(WK-I)
+                 TO RJL0005-ATHOR-OPIN-CTNT
+
+      *@3.2DBIO CALL
+               #DYDBIO INSERT-CMD-Y TKJL0005-PK TRJL0005-REC
+
+      *@3.3Ã³¸®°á°úÈ®ÀÎ
+               EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@5         ¸Þ½ÅÀúÃ³¸®
+                   PERFORM S3310-MESSENGER-SEND-RTN
+                      THRU S3310-MESSENGER-SEND-EXT
+               WHEN OTHER
+      *@¿øÀåµî·Ï¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí INSERT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                        #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-PERFORM
+           .
+
+       S3300-THKJL0005-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  ¸Þ½ÅÀúÃ³¸®(´ã´çÀ§¿ø¿¡°Ô)
+      *-----------------------------------------------------------------
+       S3310-MESSENGER-SEND-RTN.
+
+      *@¸Þ½ÅÀúÃ³¸®
+      *@   COPYBOOK ÃÊ±âÈ­
+           INITIALIZE XZUGMSNM-IN
+
+      *@À¯Æ¿¸®Æ¼¡¡ÆÄ¶ó¹ÌÅÍ MOVE
+      *@   ¼­ºñ½ºÀ¯Çü
+           MOVE CO-CHA-0
+             TO XZUGMSNM-IN-SERVTYPE
+
+      *@   ¼ö½ÅÁ÷¿ø¹øÈ£
+           MOVE XDJLB095-I-ATHOR-CMMB-EMPID(WK-I)
+             TO XZUGMSNM-IN-REMPNO
+
+      *@   ¹ß½ÅÁ÷¿ø¹øÈ£
+           MOVE BICOM-USER-EMPID
+             TO XZUGMSNM-IN-SENDNO
+
+      *@   ÂÊÁöÁ¦¸ñ
+           MOVE 'ÇùÀÇÀÇ°ß µî·Ï'
+             TO XZUGMSNM-IN-TITLE
+
+           IF XDJLB095-I-CUST-DSTIC = CO-CHA-1
+               STRING XDJLB095-I-KB-PIN(1:5) '-'
+                      XDJLB095-I-KB-PIN(6:5)        DELIMITED BY SIZE
+                 INTO WK-KB-PIN
+           ELSE
+               STRING XDJLB095-I-KB-PIN(1:5)        DELIMITED BY SIZE
+                 INTO WK-KB-PIN
+           END-IF
+
+      *@   ÂÊÁöº»¹®
+           STRING 'KB-PIN : '                       DELIMITED BY SIZE
+                  WK-KB-PIN                         DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '°í°´¸í : '
+                  XDJLB095-I-CUSTNM                 DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '»ó±â Â÷ÁÖ(±×·ì)ÀÇ TE°ü¸®ÇÑµµ '
+                  'ÇùÀÇÀ§¿øÀ¸·Î µî·ÏµÇ¾ú½À´Ï´Ù.'
+                                                    DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  'TEÇÑµµ½ÅÃ»¹×½ÂÀÎ°á°úÁ¶È¸(04-3H-004) È­¸é ³»'
+                                                    DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  'ÇØ´ç¾÷Ã¼ ¼±ÅÃÈÄ °áÀÇ·Ï ÅÇ¿¡¼­ '
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  'ÇùÀÇÀÇ°ßÀ» µî·ÏÇØ ÁÖ½Ã±â ¹Ù¶ø´Ï´Ù.'
+                                                    DELIMITED BY SIZE
+             INTO XZUGMSNM-IN-BODY
+
+      *@   ±ä±Þ¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-URGENTYN
+
+      *@   ¹ß½ÅÇÔÀúÀå¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-SAVEOPTION
+
+      *@   UTILITY CALL
+           #DYCALL ZUGMSNM YCCOMMON-CA XZUGMSNM-CA
+
+      *@   À¯Æ¿¸®Æ¼¡¡Ã³¸®°á°ú¡¡È®ÀÎ
+           IF NOT COND-XZUGMSNM-OK
+              #USRLOG '°á°ú:' XZUGMSNM-R-STAT
+           END-IF
+           .
+
+       S3310-MESSENGER-SEND-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  °ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â UPDATE(¹Ý¼Û)
+      *-----------------------------------------------------------------
+       S3400-THKJL0003-UPDATE-RTN.
+
+      *@    ÃÊ±âÈ­
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+
+      *@   È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0003-PK-GROUP-CO-CD
+
+      *@   ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0003-PK-LIMT-APLCN-NO
+
+      *@    UPDATEÀü¿¡LOCK SELECT°Ë»ö
+           #DYDBIO SELECT-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@   È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG3     CO-SUBMSG1
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@   °»½ÅÇÒ¡¡º¯¼ö MOVE
+      *@   ÇÑµµÁøÇà»óÅÂ±¸ºÐ(2:½ÅÃ»¿Ï·á)
+           MOVE CO-CHA-2
+             TO RJL0003-LIMT-P-STUS-DSTCD
+
+      *@   ½ÂÀÎÁ÷¿ø¹øÈ£
+           MOVE SPACE
+             TO RJL0003-ATHOR-EMPID
+
+      *@   ÇÑµµ¼³Á¤À¯È¿³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0003-LIMT-STUP-VALD-YMD
+
+      *@   ÇÑµµ½ÅÃ»±¸ºÐ
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-APLCN-DSTCD
+
+      *@   ÇÑµµ½ÂÀÎ±ÇÀÚ±¸ºÐ
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-ATRZ-DSTCD
+
+      *@   ÇÑµµ½ÂÀÎÁ¶°Ç±¸ºÐ
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-A-CNDN-DSTCD
+
+      *@   ÇÑµµ½ÂÀÎ±¸ºÐ
+           MOVE CO-CHA-0
+             TO RJL0003-LIMT-ATHOR-DSTCD
+
+      *@   °ü¸®ÇÑµµ
+           MOVE ZERO
+             TO RJL0003-MGT-CLAM
+
+      *@   ¿©½Å¼º°ü¸®ÇÑµµ
+           MOVE ZERO
+             TO RJL0003-LNBZ-I-MGT-CLAM
+
+      *@   ½ÃÀå¼º°ü¸®ÇÑµµ
+           MOVE ZERO
+             TO RJL0003-MRKTY-MGT-CLAM
+
+161019*   Àü½Å¿ëÆò°¡À¯È¿³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0003-BF-C-VALUA-VALD-YMD
+
+161019*   ÈÄ½Å¿ëÆò°¡À¯È¿³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0003-AF-C-VALUA-VALD-YMD
+
+200625*    ½ÂÀÎºÎÁ¡ÄÚµå(½ÂÀÎ½ÅÃ»)
+           MOVE SPACE
+             TO RJL0003-ATHOR-BRNCD
+
+      *@2.6 DBIOÈ£Ãâ
+           #DYDBIO UPDATE-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@2.7 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG3     CO-SUBMSG1
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀå°»½Å¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí UPDATE ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3400-THKJL0003-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ ÇÑµµ½ÂÀÎ°áÀÇ·ÏÀÌ·Â UPDATE(°³º°ÀÇ°ßµî·Ï)
+      *-----------------------------------------------------------------
+       S3500-THKJL0005-UPDATE-RTN.
+
+      *@3.1 ÃÊ±âÈ­
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+
+      *@3.2 È£Ãâº¯¼ö MOVE
+      *@  ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+      *@  ÇÑµµ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > XDJLB095-I-TOTAL-LINE-CNT
+170201*@      ½ÂÀÎÀ§¿øÁ÷¿ø¹øÈ£
+               MOVE XDJLB095-I-ATHOR-CMMB-EMPID(WK-I)
+                 TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+      *@3.3 UPDATEÀü¿¡LOCK SELECT°Ë»ö
+               #DYDBIO SELECT-CMD-Y TKJL0005-PK TRJL0005-REC
+
+      *@3.4 È£Ãâ°á°ú¡¡È®ÀÎ
+               EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                   #CSTMSG CO-MSG5     CO-SUBMSG1
+                   #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+      *@3.5 °»½Åº¯¼ö MOVE
+      *@      ÇÑµµ½ÂÀÎ±¸ºÐ
+               MOVE XDJLB095-I-LIMT-ATHOR-DSTCD(WK-I)
+                 TO RJL0005-LIMT-ATHOR-DSTCD
+      *@      ½ÂÀÎÀÇ°ß³»¿ë
+               MOVE XDJLB095-I-ATHOR-OPIN-CTNT(WK-I)
+                 TO RJL0005-ATHOR-OPIN-CTNT
+
+      *@3.6 DBIO CALL
+               #DYDBIO UPDATE-CMD-Y TKJL0005-PK TRJL0005-REC
+
+      *@3.7 È£Ãâ°á°ú¡¡È®ÀÎ
+               EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                   CONTINUE
+               WHEN COND-DBIO-MRNF
+                   #CSTMSG CO-MSG5     CO-SUBMSG1
+                   #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+                   #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+           END-PERFORM
+           .
+
+       S3500-THKJL0005-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ ÀÇ°ßµî·Ï¿Ï·á¿©ºÎÁ¶È¸
+      *-----------------------------------------------------------------
+       S3600-QJL0032-SELECT-RTN.
+
+           INITIALIZE       XQJL0032-IN
+
+      *   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0032-I-GROUP-CO-CD
+      *   ÇÑµµ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO XQJL0032-I-LIMT-APLCN-NO
+
+           #DYSQLA QJL0032 SELECT XQJL0032-CA
+
+      *@1.1 Á¶È¸°á°úÈ®ÀÎ
+      *@Ã³¸®³»¿ë : IF Á¶È¸ error ÀÌ¸é ¿¡·¯Ã³¸®
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *       ÀÇ°ßµî·Ï ¾ÈÇÑÁ÷¿øÀÌ ¾øÀ¸¸é
+               IF XQJL0032-O-ATHOR-CMMB-EMPID = SPACE
+      *@5         ¸Þ½ÅÀúÃ³¸®
+                   PERFORM S3610-MESSENGER-SEND-RTN
+                      THRU S3610-MESSENGER-SEND-EXT
+               END-IF
+           WHEN COND-DBSQL-MRNF
+               #CSTMSG CO-MSG3     CO-SUBMSG1
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+      *       ¿øÀå¿¡·¯ÀÏ°æ¿ì¡¡¿¡·¯Ã³¸®
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3600-QJL0032-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  ¸Þ½ÅÀúÃ³¸®(´ã´ç½É»ç¿ª¿¡°Ô)
+      *-----------------------------------------------------------------
+       S3610-MESSENGER-SEND-RTN.
+
+      *@¸Þ½ÅÀúÃ³¸®
+      *@   COPYBOOK ÃÊ±âÈ­
+           INITIALIZE XZUGMSNM-IN
+
+      *@À¯Æ¿¸®Æ¼¡¡ÆÄ¶ó¹ÌÅÍ MOVE
+      *@   ¼­ºñ½ºÀ¯Çü
+           MOVE CO-CHA-0
+             TO XZUGMSNM-IN-SERVTYPE
+
+      *@   ¼ö½ÅÁ÷¿ø¹øÈ£
+           MOVE XQJL0032-O-ATHOR-EMPID
+             TO XZUGMSNM-IN-REMPNO
+
+      *@   ¹ß½ÅÁ÷¿ø¹øÈ£
+           MOVE BICOM-USER-EMPID
+             TO XZUGMSNM-IN-SENDNO
+
+      *@   ÂÊÁöÁ¦¸ñ
+           MOVE 'ÇùÀÇÀÇ°ß µî·Ï¿Ï·á'
+             TO XZUGMSNM-IN-TITLE
+
+           IF XDJLB095-I-CUST-DSTIC = CO-CHA-1
+               STRING XDJLB095-I-KB-PIN(1:5) '-'
+                      XDJLB095-I-KB-PIN(6:5)        DELIMITED BY SIZE
+                 INTO WK-KB-PIN
+           ELSE
+               STRING XDJLB095-I-KB-PIN(1:5)        DELIMITED BY SIZE
+                 INTO WK-KB-PIN
+           END-IF
+
+      *@   ÂÊÁöº»¹®
+           STRING 'KB-PIN : '                       DELIMITED BY SIZE
+                  WK-KB-PIN                         DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '°í°´¸í : '
+                  XDJLB095-I-CUSTNM                 DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '×ÇùÀÇÃ¼ ÀÇ°ßµî·ÏøÀÌ ¿Ï·á µÇ¾ú½À´Ï´Ù. '
+                  'TEÈ®Á¤µî·Ï ÇØ ÁÖ½Ã±â ¹Ù¶ø´Ï´Ù.'
+                                                    DELIMITED BY SIZE
+             INTO XZUGMSNM-IN-BODY
+
+      *@   ±ä±Þ¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-URGENTYN
+
+      *@   ¹ß½ÅÇÔÀúÀå¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-SAVEOPTION
+
+      *@   UTILITY CALL
+           #DYCALL ZUGMSNM YCCOMMON-CA XZUGMSNM-CA
+
+      *@   À¯Æ¿¸®Æ¼¡¡Ã³¸®°á°ú¡¡È®ÀÎ
+           IF NOT COND-XZUGMSNM-OK
+              #USRLOG '°á°ú:' XZUGMSNM-R-STAT
+           END-IF
+           .
+
+       S3610-MESSENGER-SEND-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  °ü¸®ÇÑµµ½ÅÃ»ÀÌ·Â UPDATE
+      *-----------------------------------------------------------------
+       S3700-THKJL0003-UPDATE-RTN.
+
+      *@    ÃÊ±âÈ­
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+
+      *@   È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0003-PK-GROUP-CO-CD
+
+      *@   ½ÅÃ»¹øÈ£
+           MOVE XDJLB095-I-LIMT-APLCN-NO
+             TO KJL0003-PK-LIMT-APLCN-NO
+
+      *@    UPDATEÀü¿¡LOCK SELECT°Ë»ö
+           #DYDBIO SELECT-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@   È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG3     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@   °»½ÅÇÒ¡¡º¯¼ö MOVE
+      *@   ÇÑµµÁøÇà»óÅÂ±¸ºÐ£ºÃ³¸®
+           MOVE CO-CHA-1
+             TO RJL0003-LIMT-P-STUS-DSTCD
+
+      *@   ÇÑµµ½ÂÀÎ±ÇÀÚ±¸ºÐ(ÇùÀÇÃ¼±¸ºÐ)
+           MOVE XDJLB095-I-LIMT-ATRZ-DSTCD
+             TO RJL0003-LIMT-ATRZ-DSTCD
+
+      *@   ÇÑµµ½ÂÀÎ±¸ºÐ(Á¾ÇÕ½ÂÀÎ±¸ºÐ)
+           MOVE XDJLB095-I-CMPRE-ATHOR-DSTIC
+             TO RJL0003-LIMT-ATHOR-DSTCD
+
+      *@   ½ÂÀÎ³â¿ùÀÏ-ÃÖÁ¾½ÂÀÎ½Ã¼ÂÆÃ2010.11.05
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0003-ATHOR-YMD
+
+      *@   ÃÖÁ¾½ÂÀÎÁ÷¿ø¹øÈ£
+           MOVE BICOM-USER-EMPID
+             TO RJL0003-LAST-ATHOR-EMPID
+
+      *@2.6 DBIOÈ£Ãâ
+           #DYDBIO UPDATE-CMD-Y TKJL0003-PK TRJL0003-REC
+
+      *@2.7 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG3     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀå°»½Å¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí UPDATE ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3700-THKJL0003-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ °ü¸®ÇÑµµ¸¦¡¡½Å±Ô¡¡¶Ç´Â¡¡°»½ÅÇÑ´Ù
+      *-----------------------------------------------------------------
+       S3800-HANDO-UPDATE-RTN.
+
+      *@4.1 °í°´±¸ºÐ¿¡µû¶ó¡¡°³º°±â¾÷¡¡¶Ç´Â¡¡±×·ìÀ¸·Î¡¡ºÐ±âÇÑ´Ù
+           IF XDJLB095-I-CUST-DSTIC = CO-CHA-1
+      *@      °³º°±â¾÷°ü¸®ÇÑµµ°»½Å
+              PERFORM S3810-THKJL0011-SELECT-RTN
+                 THRU S3810-THKJL0011-SELECT-EXT
+           ELSE
+      *@      ±×·ì°ü¸®ÇÑµµ°»½Å
+              PERFORM S3820-THKJL0012-SELECT-RTN
+                 THRU S3820-THKJL0012-SELECT-EXT
+           END-IF
+           .
+       S3800-HANDO-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ Â÷ÁÖ°ü¸®ÇÑµµ±âº»¡¡¿øÀåÀ»¡¡Á¶È¸ÇÑ´Ù
+      *@ ¿øÀå¿¡¡¡Á¸Àç : UPDATE
+      *@ ¿øÀå¿¡¹ÌÁ¸Àç : INSERT
+      *-----------------------------------------------------------------
+       S3810-THKJL0011-SELECT-RTN.
+
+      *@4.1.1 ÃÊ±âÈ­
+           INITIALIZE TKJL0011-KEY
+                      TRJL0011-REC
+
+      *@4.1.2 È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0011-PK-GROUP-CO-CD
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0011-PK-BASE-YM
+170201*@   KB-PIN
+           MOVE XDJLB095-I-KB-PIN
+             TO KJL0011-PK-CUST-IDNFR
+
+      *@4.1.3 ÇÁ·Î±×·¥¡¡È£Ãâ
+           #DYDBIO SELECT-CMD-N TKJL0011-PK TRJL0011-REC
+
+      *@4.1.4 È£Ãâ°á°úÈ®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@¿øÀå¿¡¡¡Á¸Àç½Ã¡¡¿øÀå¡¡°»½Å
+                    PERFORM S3811-THKJL0011-UPDATE-RTN
+                       THRU S3811-THKJL0011-UPDATE-EXT
+               WHEN COND-DBIO-MRNF
+      *@¿øÀå¿¡¹ÌÁ¸Àç½Ã¡¡¿øÀå¡¡»ðÀÔ
+                    PERFORM S3812-THKJL0011-INSERT-RTN
+                       THRU S3812-THKJL0011-INSERT-EXT
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3810-THKJL0011-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  Â÷ÁÖ°ü¸®ÇÑµµ±âº» UPDATE
+      *-----------------------------------------------------------------
+       S3811-THKJL0011-UPDATE-RTN.
+
+      *@4.2.1 ÃÊ±âÈ­
+           INITIALIZE TKJL0011-KEY
+                      TRJL0011-REC
+
+      *@4.2.2 È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0011-PK-GROUP-CO-CD
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0011-PK-BASE-YM
+170201*@   KB-PIN
+           MOVE XDJLB095-I-KB-PIN
+             TO KJL0011-PK-CUST-IDNFR
+
+      *@4.2.3 UPDATEÀü¿¡LOCK SELECT°Ë»ö
+           #DYDBIO SELECT-CMD-Y TKJL0011-PK TRJL0011-REC
+
+      *@4.2.4 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG4     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@4.2.5 °»½ÅÇÒ¡¡º¯¼ö MOVE
+      *@ ÇÑµµ½ÅÃ»±¸ºÐÀÌ¡¡°ü¸®ÇÑµµ½Å±Ô£¯°ü¸®ÇÑµµÀç¼³Á¤ÀÏ°æ¿ì
+      *@ ±âÁØÇÑµµ£¬±âÁØÇÑµµ»êÃâÀÏ
+      *@ °ü¸®ÇÑµµ£¬°ü¸®ÇÑµµ¼³Á¤ÀÏ£¬°ü¸®ÇÑµµÀ¯È¿ÀÏ
+      *@ ¿©½Å¼º°ü¸®ÇÑµµ£¬½ÃÀå¼º°ü¸®ÇÑµµ¸¦¡¡°»½ÅÇÑ´Ù£®
+           IF RJL0003-LIMT-APLCN-DSTCD = CO-CHA-1 OR CO-CHA-2
+220915*@      ±âÁØÇÑµµ
+               COMPUTE RJL0011-BASE-CLAM
+                     = RJL0004-BASE-CLAM
+                     + RJL0004-Y-3-BASE-CLAM
+
+      *@      ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+               MOVE RJL0004-REGI-YM
+                 TO RJL0011-BASE-LIMT-CMPTN-YMD(1:6)
+
+      *@      ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+               MOVE RJL0004-REGI-DD
+                 TO RJL0011-BASE-LIMT-CMPTN-YMD(7:2)
+
+      *@      °ü¸®ÇÑµµ
+               MOVE RJL0003-MGT-CLAM
+                 TO RJL0011-MGT-CLAM
+
+      *@      °ü¸®ÇÑµµ¼³Á¤³â¿ùÀÏ
+               MOVE BICOM-TRAN-BASE-YMD
+                 TO RJL0011-MGT-LIMT-STUP-YMD
+
+      *@      °ü¸®ÇÑµµÀ¯È¿³â¿ùÀÏ
+               MOVE RJL0003-LIMT-STUP-VALD-YMD
+                 TO RJL0011-MGT-LIMT-VALD-YMD
+
+      *@      ¿©½Å¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-LNBZ-I-MGT-CLAM
+                 TO RJL0011-LNBZ-I-MGT-CLAM
+
+      *@      ½ÃÀå¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-MRKTY-MGT-CLAM
+                 TO RJL0011-MRKTY-MGT-CLAM
+
+      *@ ÇÑµµ½ÅÃ»±¸ºÐÀÌ¡¡ÇÑµµÀü¿ë½ÅÃ»ÀÏ°æ¿ì
+      *@ ¿©½Å¼º°ü¸®ÇÑµµ£¬½ÃÀå¼º°ü¸®ÇÑµµ¸¦¡¡°»½ÅÇÑ´Ù£®
+           ELSE
+      *@      ¿©½Å¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-LNBZ-I-MGT-CLAM
+                 TO RJL0011-LNBZ-I-MGT-CLAM
+
+      *@      ½ÃÀå¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-MRKTY-MGT-CLAM
+                 TO RJL0011-MRKTY-MGT-CLAM
+           END-IF
+
+      *@4.2.6 DBIOÈ£Ãâ
+           #DYDBIO UPDATE-CMD-Y TKJL0011-PK TRJL0011-REC
+
+      *@4.2.7 È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG4     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀå°»½Å¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí UPDATE ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3811-THKJL0011-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  Â÷ÁÖ°ü¸®ÇÑµµ±âº» INSERT
+      *-----------------------------------------------------------------
+       S3812-THKJL0011-INSERT-RTN.
+
+      *@°ü¸®ÇÑµµ¸¦¡¡½Å±Ô·Î¡¡ÀúÀåÇÏ±âÀü¿¡¡¡°í°´Á¤º¸¸¦¡¡¸ÕÀú¡¡ÃßÃâÇÑ´Ù
+
+      *@   ÃÊ±âÈ­
+           INITIALIZE TKJL0015-KEY
+                      TRJL0015-REC
+
+      *@   È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0015-PK-GROUP-CO-CD
+170201*@   °í°´½Äº°ÀÚ
+           MOVE XDJLB095-I-KB-PIN
+             TO KJL0015-PK-CUST-IDNFR
+
+      *@   DBIO CALL
+           #DYDBIO SELECT-CMD-N TKJL0015-PK TRJL0015-REC
+
+      *@   È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@¿øÀåµî·Ï
+      *@°ü·ÃÅ×ÀÌºí : Â÷ÁÖ°ü¸®ÇÑµµ±âº»  Á¢±ÙÀ¯Çü : CREATE
+      *@Ä«ÇÇºÏÃÊ±âÈ­
+           INITIALIZE TKJL0011-KEY
+                      TRJL0011-REC
+
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0011-GROUP-CO-CD
+
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO RJL0011-BASE-YM
+
+170201*@   KB-PIN
+           MOVE XDJLB095-I-KB-PIN
+             TO RJL0011-CUST-IDNFR
+
+      *@   ÇÑµµ°í°´±¸ºÐ
+           MOVE CO-CHA-1
+             TO RJL0011-LIMT-CUST-DSTCD
+
+      *@   ±â¾÷±Ô¸ð±¸ºÐ
+           MOVE RJL0015-TE-CORP-SCAL-DSTCD
+             TO RJL0011-TE-CORP-SCAL-DSTCD
+
+      *@   °í°´°ü¸®ºÎÁ¡ÄÚµå
+           MOVE RJL0015-CUST-MGT-BRNCD
+             TO RJL0011-CUST-MGT-BRNCD
+
+      *@   ³»ºÎ½Å¿ëÆò°¡µî±Þ±¸ºÐ
+           MOVE RJL0015-INTNL-CV-GRD-DSTCD
+             TO RJL0011-INTNL-CV-GRD-DSTCD
+
+      *@   ½Å¿ëÆò°¡³â¿ùÀÏ
+           MOVE RJL0015-CRDT-VALUA-YMD
+             TO RJL0011-CRDT-VALUA-YMD
+
+      *@   ½ÅÇ¥ÁØ»ê¾÷ºÐ·ùÄÚµå
+           MOVE RJL0015-NEW-SI-CLSFI-CD
+             TO RJL0011-NEW-SI-CLSFI-CD
+
+220915*@   ±âÁØÇÑµµ
+           COMPUTE RJL0011-BASE-CLAM
+                 = RJL0004-BASE-CLAM
+                 + RJL0004-Y-3-BASE-CLAM
+
+      *@   ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+           MOVE RJL0004-REGI-YM
+             TO RJL0011-BASE-LIMT-CMPTN-YMD(1:6)
+
+      *@   ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+           MOVE RJL0004-REGI-DD
+             TO RJL0011-BASE-LIMT-CMPTN-YMD(7:2)
+
+      *@   °ü¸®ÇÑµµ
+           MOVE RJL0003-MGT-CLAM
+             TO RJL0011-MGT-CLAM
+
+      *@   °ü¸®ÇÑµµ¼³Á¤³â¿ùÀÏ
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0011-MGT-LIMT-STUP-YMD
+
+      *@   °ü¸®ÇÑµµÀ¯È¿³â¿ùÀÏ
+           MOVE RJL0003-LIMT-STUP-VALD-YMD
+             TO RJL0011-MGT-LIMT-VALD-YMD
+
+      *@   ¿©½Å¼º°ü¸®ÇÑµµ
+           MOVE RJL0003-LNBZ-I-MGT-CLAM
+             TO RJL0011-LNBZ-I-MGT-CLAM
+
+      *@   ½ÃÀå¼º°ü¸®ÇÑµµ
+           MOVE RJL0003-MRKTY-MGT-CLAM
+             TO RJL0011-MRKTY-MGT-CLAM
+
+      *@   ¿ÜÈ­±âÁØÇÑµµ
+           MOVE ZERO
+             TO RJL0011-FC-BASE-CLAM
+
+      *@   ¿ÜÈ­½Å¿ë°ø¿©ÇÑµµ
+           MOVE ZERO
+             TO RJL0011-FC-GRCR-CLAM
+
+      *@   ¿ÜÈ­ÇÑµµ¼³Á¤³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0011-FC-LIMT-STUP-YMD
+
+      *@   ¿ÜÈ­ÇÑµµÀ¯È¿³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0011-FC-LIMT-VALD-YMD
+
+      *@   DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0011-PK TRJL0011-REC
+
+      *@   Ã³¸®°á°úÈ®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@¿øÀåµî·Ï¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí INSERT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3812-THKJL0011-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ ±×·ì°ü¸®ÇÑµµ±âº»¡¡¿øÀåÀ»¡¡Á¶È¸ÇÑ´Ù
+      *@ ¿øÀå¿¡¡¡Á¸Àç : UPDATE
+      *@ ¿øÀå¿¡¹ÌÁ¸Àç : INSERT
+      *-----------------------------------------------------------------
+       S3820-THKJL0012-SELECT-RTN.
+
+      *@   ÃÊ±âÈ­
+           INITIALIZE TKJL0012-KEY
+                      TRJL0012-REC
+
+      *@   È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0012-PK-GROUP-CO-CD
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0012-PK-BASE-YM
+      *@   °è¿­±â¾÷±ºÄÚµå
+           MOVE XDJLB095-I-KB-PIN(1:6)
+             TO KJL0012-PK-AFFLT-CORP-GROUP-CD
+
+      *@   ÇÁ·Î±×·¥¡¡È£Ãâ
+           #DYDBIO SELECT-CMD-N TKJL0012-PK TRJL0012-REC
+
+      *@   È£Ãâ°á°úÈ®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@¿øÀå¿¡¡¡Á¸Àç½Ã¡¡¿øÀå¡¡°»½Å
+                    PERFORM S3821-THKJL0012-UPDATE-RTN
+                       THRU S3821-THKJL0012-UPDATE-EXT
+               WHEN COND-DBIO-MRNF
+      *@¿øÀå¿¡¹ÌÁ¸Àç½Ã¡¡¿øÀå¡¡»ðÀÔ
+                    PERFORM S3822-THKJL0012-INSERT-RTN
+                       THRU S3822-THKJL0012-INSERT-EXT
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3820-THKJL0012-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  ±×·ì°ü¸®ÇÑµµ±âº» UPDATE
+      *-----------------------------------------------------------------
+       S3821-THKJL0012-UPDATE-RTN.
+
+      *@   ÃÊ±âÈ­
+           INITIALIZE TKJL0012-KEY
+                      TRJL0012-REC
+
+      *@   È£Ãâº¯¼ö MOVE
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0012-PK-GROUP-CO-CD
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0012-PK-BASE-YM
+      *@   °è¿­±â¾÷±ºÄÚµå
+           MOVE XDJLB095-I-KB-PIN(1:6)
+             TO KJL0012-PK-AFFLT-CORP-GROUP-CD
+
+      *@   UPDATEÀü¿¡LOCK SELECT°Ë»ö
+           #DYDBIO SELECT-CMD-Y TKJL0012-PK TRJL0012-REC
+
+      *@   È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG4     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀåÁ¶È¸¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí SELECT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@ °»½ÅÇÒ¡¡º¯¼ö MOVE
+
+      *@ ÇÑµµ½ÅÃ»±¸ºÐÀÌ¡¡°ü¸®ÇÑµµ½Å±Ô£¯°ü¸®ÇÑµµÀç¼³Á¤ÀÏ°æ¿ì
+      *@ ±âÁØÇÑµµ£¬±âÁØÇÑµµ»êÃâÀÏ
+      *@ °ü¸®ÇÑµµ£¬°ü¸®ÇÑµµ¼³Á¤ÀÏ£¬°ü¸®ÇÑµµÀ¯È¿ÀÏ
+      *@ ¿©½Å¼º°ü¸®ÇÑµµ£¬½ÃÀå¼º°ü¸®ÇÑµµ¸¦¡¡°»½ÅÇÑ´Ù£®
+           IF RJL0003-LIMT-APLCN-DSTCD = CO-CHA-1 OR CO-CHA-2
+220915*@      ±âÁØÇÑµµ
+               COMPUTE RJL0012-BASE-CLAM
+                     = RJL0004-BASE-CLAM
+                     + RJL0004-Y-3-BASE-CLAM
+
+      *@      ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+              MOVE RJL0004-REGI-YM
+                TO RJL0012-BASE-LIMT-CMPTN-YMD(1:6)
+
+      *@      ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+              MOVE RJL0004-REGI-DD
+                TO RJL0012-BASE-LIMT-CMPTN-YMD(7:2)
+
+      *@      °ü¸®ÇÑµµ
+              MOVE RJL0003-MGT-CLAM
+                TO RJL0012-MGT-CLAM
+
+      *@      °ü¸®ÇÑµµ¼³Á¤³â¿ùÀÏ
+              MOVE BICOM-TRAN-BASE-YMD
+                TO RJL0012-MGT-LIMT-STUP-YMD
+
+      *@      °ü¸®ÇÑµµÀ¯È¿³â¿ùÀÏ
+              MOVE RJL0003-LIMT-STUP-VALD-YMD
+                TO RJL0012-MGT-LIMT-VALD-YMD
+
+      *@      ¿©½Å¼º°ü¸®ÇÑµµ
+              MOVE RJL0003-LNBZ-I-MGT-CLAM
+                TO RJL0012-LNBZ-I-MGT-CLAM
+
+      *@      ½ÃÀå¼º°ü¸®ÇÑµµ
+              MOVE RJL0003-MRKTY-MGT-CLAM
+                TO RJL0012-MRKTY-MGT-CLAM
+
+      *@ ÇÑµµ½ÅÃ»±¸ºÐÀÌ¡¡ÇÑµµÀü¿ë½ÅÃ»ÀÏ°æ¿ì
+      *@ ¿©½Å¼º°ü¸®ÇÑµµ£¬½ÃÀå¼º°ü¸®ÇÑµµ¸¦¡¡°»½ÅÇÑ´Ù£®
+           ELSE
+      *@      ¿©½Å¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-LNBZ-I-MGT-CLAM
+                 TO RJL0012-LNBZ-I-MGT-CLAM
+
+      *@      ½ÃÀå¼º°ü¸®ÇÑµµ
+               MOVE RJL0003-MRKTY-MGT-CLAM
+                 TO RJL0012-MRKTY-MGT-CLAM
+           END-IF
+
+      *@   DBIOÈ£Ãâ
+           #DYDBIO UPDATE-CMD-Y TKJL0012-PK TRJL0012-REC
+
+      *@   È£Ãâ°á°ú¡¡È®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    #CSTMSG CO-MSG4     CO-SUBMSG1
+      * ¿¡·¯¸Þ¼¼Áö : ½ÂÀÎ´Ü°è¡¡¿À·ùÀÔ´Ï´Ù£®
+      * Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù
+                    #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@¿øÀå°»½Å¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí UPDATE ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3821-THKJL0012-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  ±×·ì°ü¸®ÇÑµµ±âº» INSERT
+      *-----------------------------------------------------------------
+       S3822-THKJL0012-INSERT-RTN.
+
+      *@¿øÀåµî·Ï
+      *@°ü·ÃÅ×ÀÌºí : ±×·ì°ü¸®ÇÑµµ±âº»  Á¢±ÙÀ¯Çü : CREATE
+
+      *@   ÃÊ±âÈ­
+           INITIALIZE TKJL0012-KEY
+                      TRJL0012-REC
+
+      *@   ±×·ìÈ¸»çÄÚµå
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0012-GROUP-CO-CD
+
+      *@   ±âÁØ³â¿ù
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO RJL0012-BASE-YM
+
+      *@   °è¿­±â¾÷±ºÄÚµå
+           MOVE XDJLB095-I-KB-PIN(1:6)
+             TO RJL0012-AFFLT-CORP-GROUP-CD
+
+      *@   ±×·ì»ç½Å¿ëµî±Þ±¸ºÐ
+           MOVE RJL0004-INTNL-CV-GRD-DSTCD(1:3)
+             TO RJL0012-CMGR-CRTDSCD
+
+      *@   ½Å¿ëÆò°¡³â¿ùÀÏ
+           MOVE SPACE
+             TO RJL0012-CRDT-VALUA-YMD
+
+220915*@   ±âÁØÇÑµµ
+           COMPUTE RJL0012-BASE-CLAM
+                 = RJL0004-BASE-CLAM
+                 + RJL0004-Y-3-BASE-CLAM
+
+      *@   ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+           MOVE RJL0004-REGI-YM
+             TO RJL0012-BASE-LIMT-CMPTN-YMD(1:6)
+
+      *@   ±âÁØÇÑµµ»êÃâ³â¿ùÀÏ
+           MOVE RJL0004-REGI-DD
+             TO RJL0012-BASE-LIMT-CMPTN-YMD(7:2)
+
+      *@   °ü¸®ÇÑµµ
+           MOVE RJL0003-MGT-CLAM
+             TO RJL0012-MGT-CLAM
+
+      *@   °ü¸®ÇÑµµ¼³Á¤³â¿ùÀÏ
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0012-MGT-LIMT-STUP-YMD
+
+      *@   °ü¸®ÇÑµµÀ¯È¿³â¿ùÀÏ
+           MOVE RJL0003-LIMT-STUP-VALD-YMD
+             TO RJL0012-MGT-LIMT-VALD-YMD
+
+      *@   ¿©½Å¼º°ü¸®ÇÑµµ
+           MOVE RJL0003-LNBZ-I-MGT-CLAM
+             TO RJL0012-LNBZ-I-MGT-CLAM
+
+      *@   ½ÃÀå¼º°ü¸®ÇÑµµ
+           MOVE RJL0003-MRKTY-MGT-CLAM
+             TO RJL0012-MRKTY-MGT-CLAM
+
+      *@   DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0012-PK TRJL0012-REC
+
+      *@   Ã³¸®°á°úÈ®ÀÎ
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@¿øÀåµî·Ï¿À·ùÀÏ°æ¿ì
+      *@¿¡·¯¸Þ¼¼Áö : Å×ÀÌºí INSERT ¿À·ùÀÔ´Ï´Ù£®
+      *@Á¶Ä¡¸Þ¼¼Áö : Àü»ê¾÷¹«´ã´çÀÚ¿¡°Ô¡¡¹®ÀÇ¹Ù¶ø´Ï´Ù.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3822-THKJL0012-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  ¸Þ½ÅÀúÃ³¸®
+      *-----------------------------------------------------------------
+       S3900-MESSENGER-SEND-RTN.
+
+      *@¸Þ½ÅÀúÃ³¸®
+      *@   COPYBOOK ÃÊ±âÈ­
+           INITIALIZE XZUGMSNM-IN
+
+      *@À¯Æ¿¸®Æ¼¡¡ÆÄ¶ó¹ÌÅÍ MOVE
+      *@   ¼­ºñ½ºÀ¯Çü
+           MOVE CO-CHA-0
+             TO XZUGMSNM-IN-SERVTYPE
+
+      *@   ¼ö½ÅÁ÷¿ø¹øÈ£
+           MOVE RJL0003-APLCN-EMPID
+             TO XZUGMSNM-IN-REMPNO
+
+      *@   ¹ß½ÅÁ÷¿ø¹øÈ£
+           MOVE BICOM-USER-EMPID
+             TO XZUGMSNM-IN-SENDNO
+
+      *@   ÂÊÁöÁ¦¸ñ
+           MOVE 'T/E ÇÑµµ¡¡½ÂÀÎ'
+             TO XZUGMSNM-IN-TITLE
+
+      *@   ÂÊÁöº»¹®
+           MOVE 'T/E ÇÑµµ½ÅÃ»ÀÌ¡¡Ã³¸®µÇ¾ú½À´Ï´Ù'
+             TO XZUGMSNM-IN-BODY
+
+      *@   ±ä±Þ¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-URGENTYN
+
+      *@   ¹ß½ÅÇÔÀúÀå¿©ºÎ
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-SAVEOPTION
+
+      *@   UTILITY CALL
+           #DYCALL ZUGMSNM YCCOMMON-CA XZUGMSNM-CA
+
+      *@   À¯Æ¿¸®Æ¼¡¡Ã³¸®°á°ú¡¡È®ÀÎ
+           IF NOT COND-XZUGMSNM-OK
+              #USRLOG '°á°ú:' XZUGMSNM-R-STAT
+           END-IF
+           .
+       S3900-MESSENGER-SEND-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------32250001
+      *@  Ã³¸®Á¾·á                                                    32260030
+      *-----------------------------------------------------------------32270001
+       S9000-FINAL-RTN.                                                 32280001
+      *@3 Á¾·áÃ³¸®                                                    32290030
+                                                                        32300001
+      *@   Ã³¸®°á°ú MOVE
+           MOVE WK-STAT
+             TO XDJLB095-O-PRCSS-RSULT
+
+      *@3.1 ÇÁ·Î±×·¥ Á¾·á                                           32310030
+      *@Ã³¸®³»¿ë : ÇÁ·Î±×·¥À» Á¤»ó Á¾·á ÇÔ                    32320030
+                                                                        32330001
+           #OKEXIT  CO-STAT-OK                                          32340001
+           .                                                            32350001
+       S9000-FINAL-EXT.                                                 32360001
+           EXIT.                                                        32370001

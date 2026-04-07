@@ -1,0 +1,366 @@
+      *================================================================*
+      *@ NAME : NJL11009                                               *
+      *@ DESC : 기업및그룹한도신청및승인                             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-02-20 13:25:45                          *
+      *  생성일시     : 2009-02-20 13:26:46                          *
+      *================================================================*
+      *--     처리구분
+           07  NJL11009-PRCSS-DSTIC              PIC  X(002).
+      *--     고객구분
+           07  NJL11009-CUST-DSTIC               PIC  X(001).
+      *--     기업구분
+           07  NJL11009-CORP-DSTIC               PIC  X(001).
+      *--     조회저장구분
+           07  NJL11009-INQURY-STORG-DSTIC       PIC  X(001).
+      *--     차주번호
+           07  NJL11009-BRWR-NO                  PIC  X(013).
+      *--     한도신청번호
+           07  NJL11009-LIMT-APLCN-NO            PIC  X(010).
+      *--     수정내부신용평가등급구분코드
+           07  NJL11009-AMND-ICV-GRD-DSTCD       PIC  X(015).
+      *--     수정결산년월
+           07  NJL11009-AMND-STLACC-YM           PIC  X(006).
+      *--     수정신표준산업분류코드
+           07  NJL11009-AMND-NSI-CLSFI-CD        PIC  X(005).
+      *--     수정표준산업코드명
+           07  NJL11009-AMND-SI-CD-NAME          PIC  X(040).
+      *--     수정업종평균적용년
+           07  NJL11009-AMND-B-AVG-APLY-YR       PIC  X(004).
+      *--     수정신용지원비율
+           07  NJL11009-AMND-C-SPORT-RATO        PIC  9(003)V9(02).
+      *--     수정영업이익
+           07  NJL11009-AMND-OPRFT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정이자수익
+           07  NJL11009-AMND-INT-ERN             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정감가상각비
+           07  NJL11009-AMND-DPRC-CST            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용
+           07  NJL11009-AMND-FNCS                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정단기차입금
+           07  NJL11009-AMND-SHTRM-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정단기차입금상환금액
+           07  NJL11009-AMND-S-AMBR-RPAYAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정업종가중평균율
+           07  NJL11009-AMND-B-WGHTG-AVG-RT      PIC  9(003)V9(02).
+      *--     수정업체총차입금
+           07  NJL11009-AMND-E-TOTAL-AMBR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액
+           07  NJL11009-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정현금흐름기준금액
+           07  NJL11009-AMND-CSFW-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준년자기자본금
+           07  NJL11009-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금자기자본율
+           07  NJL11009-AMND-AMBR-ONCP-RT        PIC  9(003)V9(02).
+      *--     수정자기자본기준금액
+           07  NJL11009-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정상환능력기준한도금액
+           07  NJL11009-AMND-S-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액1
+           07  NJL11009-AMND-SALEPR1             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금매출액비율
+           07  NJL11009-AMND-A-SALEPR-RATO       PIC  9(003)V9(02).
+      *--     수정전년총자산
+           07  NJL11009-AMND-PYY-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정차입금총자산비율
+           07  NJL11009-AMND-AT-ASST-RATO        PIC  9(003)V9(02).
+      *--     수정규모기준한도금액
+           07  NJL11009-AMND-SCAL-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준한도금액
+           07  NJL11009-AMND-BASE-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융내부신용평가등급구분코드
+           07  NJL11009-AMND-FICV-GRD-DSTCD      PIC  X(006).
+      *--     수정금융결산년월
+           07  NJL11009-AMND-F-STLACC-YM         PIC  X(006).
+      *--     수정금융한도업종구분코드
+           07  NJL11009-AMND-FL-BZTYP-DSTCD      PIC  X(005).
+      *--     수정금융한도업종구분코드명
+           07  NJL11009-AMND-FLB-DSTCD-NAME      PIC  X(042).
+      *--     수정금융업종평균적용년
+           07  NJL11009-AMND-FB-AVG-APLY-YR      PIC  X(004).
+      *--     수정금융신용등급지원비율
+           07  NJL11009-AMND-FC-SPORT-RATO       PIC  9(003)V9(02).
+      *--     수정금융전전년경상이익
+           07  NJL11009-AMND-FBP-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융전년경상이익
+           07  NJL11009-AMND-FP-ODNR-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준년경상이익
+           07  NJL11009-AMND-FBY-ODNR-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융전전년자기자본금
+           07  NJL11009-AMND-FBP-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전년자기자본금
+           07  NJL11009-AMND-PYY-ONCP-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준년자기자본금
+           07  NJL11009-AMND-FB-YR-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융자기자본비율
+           07  NJL11009-AMND-F-ONCP-RATO         PIC  9(003)V9(02).
+      *--     수정금융상환능력기준한도금액
+           07  NJL11009-AMND-FS-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정규모기준한도금액1
+           07  NJL11009-AMND-S-BASE-CLAM1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융기준한도금액
+           07  NJL11009-AMND-F-BASE-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도신청종류구분코드
+           07  NJL11009-LIMT-A-KND-DSTCD         PIC  X(001).
+      *--     본건입력수
+           07  NJL11009-MAIN-CAS-INPT-CNT        PIC  X(005).
+      *--     대표자명
+           07  NJL11009-RPRS-NAME                PIC  X(042).
+      *--     내부신용평가등급구분코드1
+           07  NJL11009-INTNL-CV-GRD-DSTCD1      PIC  X(006).
+      *--     신표준산업분류코드1
+           07  NJL11009-NEW-SI-CLSFI-CD1         PIC  X(005).
+      *--     한글그룹명
+           07  NJL11009-HANGL-GROUP-NAME         PIC  X(042).
+      *--     그룹사신용등급구분코드
+           07  NJL11009-CMGR-CRTDSCD             PIC  X(004).
+      *--     부점코드
+           07  NJL11009-BRNCD                    PIC  X(004).
+      *--     부점한글명
+           07  NJL11009-BRN-HANGL-NAME           PIC  X(042).
+      *--     신청직원번호
+           07  NJL11009-APLCN-EMPID              PIC  X(008).
+      *--     신청직원명
+           07  NJL11009-APLCN-EMNM               PIC  X(042).
+      *--     출력라인수1
+ROWCNT     07  NJL11009-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  NJL11009-GRID1                    OCCURS 0 TO 0030
+               DEPENDING ON NJL11009-OUTPT-LINE-CNT1.
+      *--       통화코드
+             09  NJL11009-CNCYCD                 PIC  X(003).
+      *--       본건신청액
+             09  NJL11009-MAIN-CAS-APLCN-AMT     PIC  9(015).
+      *--       계정과목명
+             09  NJL11009-TIACC-NAME             PIC  X(070).
+      *--       원화환산금액
+             09  NJL11009-WONC-AUC               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       본건익스포져금액
+             09  NJL11009-MAIN-CAS-EXPSR-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수2
+ROWCNT     07  NJL11009-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     그리드2
+           07  NJL11009-GRID2                    OCCURS 0 TO 0030
+               DEPENDING ON NJL11009-OUTPT-LINE-CNT2.
+      *--       관리한도금액2
+             09  NJL11009-MGT-CLAM2              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액
+             09  NJL11009-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       원화환산금액1
+             09  NJL11009-WONC-AUC1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       본건익스포져금액1
+             09  NJL11009-MAIN-CAS-EXPSR-AMT1    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수3
+ROWCNT     07  NJL11009-OUTPT-LINE-CNT3          PIC  9(005).
+      *--     그리드3
+           07  NJL11009-GRID3                    OCCURS 0 TO 0030
+               DEPENDING ON NJL11009-OUTPT-LINE-CNT3.
+      *--       대분류업종코드명
+             09  NJL11009-LAG-C-BZTYP-CD-NAME    PIC  X(070).
+      *--       산업관리한도금액
+             09  NJL11009-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액1
+             09  NJL11009-TE-LIMT-AUC1           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수4
+ROWCNT     07  NJL11009-OUTPT-LINE-CNT4          PIC  9(005).
+      *--     그리드2
+           07  NJL11009-GRID4                    OCCURS 0 TO 0030
+               DEPENDING ON NJL11009-OUTPT-LINE-CNT4.
+      *--       전여신성자산
+             09  NJL11009-BF-LNBZ-INCLIN-ASST    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전시장성자산
+             09  NJL11009-BF-MRKTY-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       후여신성자산
+             09  NJL11009-AF-LNBZ-INCLIN-ASST    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       후시장성자산
+             09  NJL11009-AF-MRKTY-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신청사유내용
+           07  NJL11009-APLCN-RESN-CTNT          PIC  X(252).
+      *--     승인신청년월일
+           07  NJL11009-ATHOR-APLCN-YMD          PIC  X(008).
+      *--     승인신청직원번호
+           07  NJL11009-ATHOR-APLCN-EMPID        PIC  X(008).
+      *--     승인신청직원명
+           07  NJL11009-ATHOR-APLCN-EMNM         PIC  X(042).
+      *--     승인부점코드
+           07  NJL11009-ATHOR-BRNCD              PIC  X(006).
+      *--     승인부점한글명
+           07  NJL11009-ATHOR-B-HANGL-NAME       PIC  X(042).
+      *--     승인한도신청구분코드
+           07  NJL11009-ATHOR-L-APLCN-DSTCD      PIC  X(001).
+      *--     승인년월일
+           07  NJL11009-ATHOR-YMD                PIC  X(008).
+      *--     승인기준한도금액
+           07  NJL11009-ATHOR-BASE-CLAM          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     승인관리한도금액
+           07  NJL11009-ATHOR-MGT-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도설정유효년월일
+           07  NJL11009-LIMT-STUP-VALD-YMD       PIC  X(008).
+      *--     승인여신성관리한도금액
+           07  NJL11009-ATHOR-LI-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     승인시장성관리한도금액
+           07  NJL11009-ATHOR-M-MGT-CLAM         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     승인직원번호
+           07  NJL11009-ATHOR-EMPID              PIC  X(008).
+      *--     한도승인조건구분코드
+           07  NJL11009-LIMT-A-CNDN-DSTCD        PIC  X(001).
+      *--     한도승인구분코드
+           07  NJL11009-LIMT-ATHOR-DSTCD         PIC  X(001).
+      *--     승인사유내용
+           07  NJL11009-ATHOR-RESN-CTNT          PIC  X(252).
+      *================================================================*
+      *        N  J  L  1  1  0  0  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL11009-PRCSS-DSTIC          ;처리구분
+      *X  NJL11009-CUST-DSTIC           ;고객구분
+      *X  NJL11009-CORP-DSTIC           ;기업구분
+      *X  NJL11009-INQURY-STORG-DSTIC   ;조회저장구분
+      *X  NJL11009-BRWR-NO              ;차주번호
+      *X  NJL11009-LIMT-APLCN-NO        ;한도신청번호
+      *X  NJL11009-AMND-ICV-GRD-DSTCD
+      * 수정내부신용평가등급구분코드
+      *X  NJL11009-AMND-STLACC-YM       ;수정결산년월
+      *X  NJL11009-AMND-NSI-CLSFI-CD    ;수정신표준산업분류코드
+      *X  NJL11009-AMND-SI-CD-NAME      ;수정표준산업코드명
+      *X  NJL11009-AMND-B-AVG-APLY-YR   ;수정업종평균적용년
+      *N  NJL11009-AMND-C-SPORT-RATO    ;수정신용지원비율
+      *S  NJL11009-AMND-OPRFT           ;수정영업이익
+      *S  NJL11009-AMND-INT-ERN         ;수정이자수익
+      *S  NJL11009-AMND-DPRC-CST        ;수정감가상각비
+      *S  NJL11009-AMND-FNCS            ;수정금융비용
+      *S  NJL11009-AMND-SHTRM-AMBR      ;수정단기차입금
+      *S  NJL11009-AMND-S-AMBR-RPAYAMT
+      * 수정단기차입금상환금액
+      *N  NJL11009-AMND-B-WGHTG-AVG-RT  ;수정업종가중평균율
+      *S  NJL11009-AMND-E-TOTAL-AMBR    ;수정업체총차입금
+      *S  NJL11009-AMND-SALEPR          ;수정매출액
+      *S  NJL11009-AMND-CSFW-BSAMT      ;수정현금흐름기준금액
+      *S  NJL11009-AMND-B-YR-ONCP-AMT   ;수정기준년자기자본금
+      *N  NJL11009-AMND-AMBR-ONCP-RT    ;수정차입금자기자본율
+      *S  NJL11009-AMND-O-CAPTL-BSAMT   ;수정자기자본기준금액
+      *S  NJL11009-AMND-S-BASE-CLAM     ;수정상환능력기준한도금액
+      *S  NJL11009-AMND-SALEPR1         ;수정매출액1
+      *N  NJL11009-AMND-A-SALEPR-RATO   ;수정차입금매출액비율
+      *S  NJL11009-AMND-PYY-TOTAL-ASST  ;수정전년총자산
+      *N  NJL11009-AMND-AT-ASST-RATO    ;수정차입금총자산비율
+      *S  NJL11009-AMND-SCAL-BASE-CLAM  ;수정규모기준한도금액
+      *S  NJL11009-AMND-BASE-CLAM       ;수정기준한도금액
+      *X  NJL11009-AMND-FICV-GRD-DSTCD
+      * 수정금융내부신용평가등급구분코드
+      *X  NJL11009-AMND-F-STLACC-YM     ;수정금융결산년월
+      *X  NJL11009-AMND-FL-BZTYP-DSTCD
+      * 수정금융한도업종구분코드
+      *X  NJL11009-AMND-FLB-DSTCD-NAME
+      * 수정금융한도업종구분코드명
+      *X  NJL11009-AMND-FB-AVG-APLY-YR
+      * 수정금융업종평균적용년
+      *N  NJL11009-AMND-FC-SPORT-RATO
+      * 수정금융신용등급지원비율
+      *S  NJL11009-AMND-FBP-ODNR-PRFT   ;수정금융전전년경상이익
+      *S  NJL11009-AMND-FP-ODNR-PRFT    ;수정금융전년경상이익
+      *S  NJL11009-AMND-FBY-ODNR-PRFT   ;수정금융기준년경상이익
+      *S  NJL11009-AMND-FBP-ONCP-AMT
+      * 수정금융전전년자기자본금
+      *S  NJL11009-AMND-PYY-ONCP-AMT    ;수정전년자기자본금
+      *S  NJL11009-AMND-FB-YR-ONCP-AMT
+      * 수정금융기준년자기자본금
+      *N  NJL11009-AMND-F-ONCP-RATO     ;수정금융자기자본비율
+      *S  NJL11009-AMND-FS-BASE-CLAM
+      * 수정금융상환능력기준한도금액
+      *S  NJL11009-AMND-S-BASE-CLAM1    ;수정규모기준한도금액1
+      *S  NJL11009-AMND-F-BASE-CLAM     ;수정금융기준한도금액
+      *X  NJL11009-LIMT-A-KND-DSTCD     ;한도신청종류구분코드
+      *X  NJL11009-MAIN-CAS-INPT-CNT    ;본건입력수
+      *X  NJL11009-RPRS-NAME            ;대표자명
+      *X  NJL11009-INTNL-CV-GRD-DSTCD1
+      * 내부신용평가등급구분코드1
+      *X  NJL11009-NEW-SI-CLSFI-CD1     ;신표준산업분류코드1
+      *X  NJL11009-HANGL-GROUP-NAME     ;한글그룹명
+      *X  NJL11009-CMGR-CRTDSCD         ;그룹사신용등급구분코드
+      *X  NJL11009-BRNCD                ;부점코드
+      *X  NJL11009-BRN-HANGL-NAME       ;부점한글명
+      *X  NJL11009-APLCN-EMPID          ;신청직원번호
+      *X  NJL11009-APLCN-EMNM           ;신청직원명
+      *L  NJL11009-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  NJL11009-GRID1                ;그리드1
+      *X  NJL11009-CNCYCD               ;통화코드
+      *N  NJL11009-MAIN-CAS-APLCN-AMT   ;본건신청액
+      *X  NJL11009-TIACC-NAME           ;계정과목명
+      *S  NJL11009-WONC-AUC             ;원화환산금액
+      *S  NJL11009-MAIN-CAS-EXPSR-AMT   ;본건익스포져금액
+      *L  NJL11009-OUTPT-LINE-CNT2      ;출력라인수2
+      *A  NJL11009-GRID2                ;그리드2
+      *S  NJL11009-MGT-CLAM2            ;관리한도금액2
+      *S  NJL11009-TE-LIMT-AUC          ;토탈익스포져한도환산금액
+      *S  NJL11009-WONC-AUC1            ;원화환산금액1
+      *S  NJL11009-MAIN-CAS-EXPSR-AMT1  ;본건익스포져금액1
+      *L  NJL11009-OUTPT-LINE-CNT3      ;출력라인수3
+      *A  NJL11009-GRID3                ;그리드3
+      *X  NJL11009-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *S  NJL11009-IDSTRY-MGT-CLAM      ;산업관리한도금액
+      *S  NJL11009-TE-LIMT-AUC1         ;토탈익스포져한도환산금액1
+      *L  NJL11009-OUTPT-LINE-CNT4      ;출력라인수4
+      *A  NJL11009-GRID4                ;그리드2
+      *S  NJL11009-BF-LNBZ-INCLIN-ASST  ;전여신성자산
+      *S  NJL11009-BF-MRKTY-ASST        ;전시장성자산
+      *S  NJL11009-AF-LNBZ-INCLIN-ASST  ;후여신성자산
+      *S  NJL11009-AF-MRKTY-ASST        ;후시장성자산
+      *X  NJL11009-APLCN-RESN-CTNT      ;신청사유내용
+      *X  NJL11009-ATHOR-APLCN-YMD      ;승인신청년월일
+      *X  NJL11009-ATHOR-APLCN-EMPID    ;승인신청직원번호
+      *X  NJL11009-ATHOR-APLCN-EMNM     ;승인신청직원명
+      *X  NJL11009-ATHOR-BRNCD          ;승인부점코드
+      *X  NJL11009-ATHOR-B-HANGL-NAME   ;승인부점한글명
+      *X  NJL11009-ATHOR-L-APLCN-DSTCD  ;승인한도신청구분코드
+      *X  NJL11009-ATHOR-YMD            ;승인년월일
+      *S  NJL11009-ATHOR-BASE-CLAM      ;승인기준한도금액
+      *S  NJL11009-ATHOR-MGT-CLAM       ;승인관리한도금액
+      *X  NJL11009-LIMT-STUP-VALD-YMD   ;한도설정유효년월일
+      *S  NJL11009-ATHOR-LI-MGT-CLAM    ;승인여신성관리한도금액
+      *S  NJL11009-ATHOR-M-MGT-CLAM     ;승인시장성관리한도금액
+      *X  NJL11009-ATHOR-EMPID          ;승인직원번호
+      *X  NJL11009-LIMT-A-CNDN-DSTCD    ;한도승인조건구분코드
+      *X  NJL11009-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *X  NJL11009-ATHOR-RESN-CTNT      ;승인사유내용

@@ -1,0 +1,70 @@
+      *================================================================*
+      *@ NAME : YPJL4020                                               *
+      *@ DESC : AS상품정보원장조회 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-12-04 13:34:25                          *
+      *  생성일시     : 2009-12-04 13:34:32                          *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4020-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4020-GRID1                    OCCURS 002000 TIMES.
+      *--       회계구분명
+             09  YPJL4020-ACCTG-DSTIC-NAME       PIC  X(020).
+      *--       상품대분류코드
+             09  YPJL4020-PRDCT-LAG-CLSFI-CD     PIC  X(002).
+      *--       상품중분류코드
+             09  YPJL4020-PRDCT-MEDM-CLSFI-CD    PIC  X(002).
+      *--       상품템플릿코드
+             09  YPJL4020-PRDCT-TMPLT-CD         PIC  X(003).
+      *--       상품번호
+             09  YPJL4020-PRDCT-NO               PIC  X(005).
+      *--       자산구분명
+             09  YPJL4020-ASST-DSTIC-NAME        PIC  X(010).
+      *--       토탈익스포져환산율
+             09  YPJL4020-TE-UTCRT               PIC  9(003).
+      *--       토탈익스포져금융환산율
+             09  YPJL4020-TE-FINAC-UTCRT         PIC  9(003).
+      *--       CA대상계정여부
+             09  YPJL4020-CA-TAGET-ACITM-YN      PIC  X(004).
+      *--       신용공여한도환산율
+             09  YPJL4020-GRCR-LIMT-UTCRT        PIC  9(003).
+      *--       포괄신용공여대상계정여부
+             09  YPJL4020-INLS-GT-ACITM-YN       PIC  X(004).
+      *--       포괄신용공여환산율
+             09  YPJL4020-INLS-GRCR-UTCRT        PIC  9(003).
+      *--       상품명
+             09  YPJL4020-PRDCT-NAME             PIC  X(262).
+      *--       토탈익스포져중분류코드
+             09  YPJL4020-TE-MEDM-CLSFI-CD       PIC  X(003).
+      *--       토탈익스포져중분류명
+             09  YPJL4020-TE-MEDM-CLSFI-NAME     PIC  X(042).
+      *--       CA중분류코드
+             09  YPJL4020-CA-MEDM-CLSFI-CD       PIC  X(003).
+      *--       CA중분류명
+             09  YPJL4020-CA-MEDM-CLSFI-NAME     PIC  X(042).
+      *--       통합계정과목코드
+             09  YPJL4020-INTGRA-TIACC-CD        PIC  X(013).
+      *================================================================*
+      *        Y  P  J  L  4  0  2  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4020-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4020-GRID1                ;그리드1
+      *X  YPJL4020-ACCTG-DSTIC-NAME     ;회계구분명
+      *X  YPJL4020-PRDCT-LAG-CLSFI-CD   ;상품대분류코드
+      *X  YPJL4020-PRDCT-MEDM-CLSFI-CD  ;상품중분류코드
+      *X  YPJL4020-PRDCT-TMPLT-CD       ;상품템플릿코드
+      *X  YPJL4020-PRDCT-NO             ;상품번호
+      *X  YPJL4020-ASST-DSTIC-NAME      ;자산구분명
+      *N  YPJL4020-TE-UTCRT             ;토탈익스포져환산율
+      *N  YPJL4020-TE-FINAC-UTCRT       ;토탈익스포져금융환산율
+      *X  YPJL4020-CA-TAGET-ACITM-YN    ;CA대상계정여부
+      *N  YPJL4020-GRCR-LIMT-UTCRT      ;신용공여한도환산율
+      *X  YPJL4020-INLS-GT-ACITM-YN     ;포괄신용공여대상계정여부
+      *N  YPJL4020-INLS-GRCR-UTCRT      ;포괄신용공여환산율
+      *X  YPJL4020-PRDCT-NAME           ;상품명
+      *X  YPJL4020-TE-MEDM-CLSFI-CD     ;토탈익스포져중분류코드
+      *X  YPJL4020-TE-MEDM-CLSFI-NAME   ;토탈익스포져중분류명
+      *X  YPJL4020-CA-MEDM-CLSFI-CD     ;CA중분류코드
+      *X  YPJL4020-CA-MEDM-CLSFI-NAME   ;CA중분류명
+      *X  YPJL4020-INTGRA-TIACC-CD      ;통합계정과목코드

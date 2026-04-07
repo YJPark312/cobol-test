@@ -1,0 +1,115 @@
+//TKJLFR07 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR007 파생상품차주별현황 TABLE UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJLR007.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJLR007.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJLR007
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJLR007'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJLR007,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT
+ 그룹회사코드
+,기준년월일
+,고객식별자
+,고객관리번호
+,CHAR('             ') AS  차주번호
+,차주명
+,네팅여부
+,총거래한도
+,담보거래한도
+,신용거래한도
+,한도유효년월일
+,면제여부
+,거래건수
+,위험가중자산금액
+,담보평가금액
+,외환총한도소진율
+,신용한도소진율
+,담보소진율
+,최근신규년월일
+,최근한도년월일
+,"초과신규여부1"
+,"초과신규여부2"
+,"초과신규여부3"
+,관련부점코드
+,"ISO국가코드"
+,시스템최종처리일시
+,시스템최종사용자번호
+ FROM  DB2DBA.THKJLR007
+WHERE 그룹회사코드 = 'KB0'
+  AND 고객식별자 <> ''
+UNION ALL
+SELECT
+ A.그룹회사코드
+,A.기준년월일
+,CHAR(B.고객식별자)  AS 고객식별자
+,A.고객관리번호
+,CHAR('             ') AS 차주번호
+,A.차주명
+,A.네팅여부
+,A.총거래한도
+,A.담보거래한도
+,A.신용거래한도
+,A.한도유효년월일
+,A.면제여부
+,A.거래건수
+,A.위험가중자산금액
+,A.담보평가금액
+,A.외환총한도소진율
+,A.신용한도소진율
+,A.담보소진율
+,A.최근신규년월일
+,A.최근한도년월일
+,A."초과신규여부1"
+,A."초과신규여부2"
+,A."초과신규여부3"
+,A.관련부점코드
+,A."ISO국가코드"
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+ FROM  DB2DBA.THKJLR007 A
+      ,DB2DBA.THKJL0015 B
+WHERE  A.그룹회사코드 = B.그룹회사코드
+  AND  A.차주번호     = B.차주번호
+  AND  A.고객식별자   = ''
+ WITH UR;
+/*
+//
+//

@@ -1,0 +1,25 @@
+//MKJLOP16 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLOP14 / MKJLOP15
+//*********************************************************************
+//*   한도환산금액산출
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLD25I,OPT=&SYSUID
+//INFILE   DD DISP=OLD,DSN=KJL.SD.BJLD257.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD258.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD25A.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD25B.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD25C.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD25D.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD25H.V001
+//OTFILE   DD DSN=KJL.SD.BJLD25I.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLOP16-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

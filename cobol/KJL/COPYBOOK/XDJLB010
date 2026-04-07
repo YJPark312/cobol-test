@@ -1,0 +1,76 @@
+      *================================================================*
+      *@ NAME : XDJLB010                                               *
+      *@ DESC : DC산업별TE한도등록COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-12 15:15:36                          *
+      *  생성일시     : 2020-03-12 15:15:38                          *
+      *  전체길이     : 00094013 BYTES                               *
+      *================================================================*
+           03  XDJLB010-RETURN.
+             05  XDJLB010-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB010-OK            VALUE  '00'.
+                 88  COND-XDJLB010-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB010-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB010-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB010-ERROR         VALUE  '09'.
+                 88  COND-XDJLB010-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB010-SYSERROR      VALUE  '99'.
+             05  XDJLB010-R-LINE                 PIC  9(006).
+             05  XDJLB010-R-ERRCD                PIC  X(008).
+             05  XDJLB010-R-TREAT-CD             PIC  X(008).
+             05  XDJLB010-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB010-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB010-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB010-I-BASE-YM              PIC  X(006).
+      *--       총라인수
+             05  XDJLB010-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB010-I-GRID1                OCCURS 001000 TIMES.
+      *--         토탈익스포져PEER구분코드
+               07  XDJLB010-I-TE-PEER-DSTCD      PIC  X(005).
+      *--         산업평가등급구분코드
+               07  XDJLB010-I-IDSTRY-V-GRD-DSTCD PIC  X(004).
+      *--         산업별EAD금액
+               07  XDJLB010-I-IDSTRY-PER-EAD-AMT PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         가용EAD금액
+               07  XDJLB010-I-AVL-EAD-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         산업별조정비율
+               07  XDJLB010-I-IDSTRY-P-ADJS-RATO PIC  9(003)V9(02).
+      *--         산업토탈익스포져금액
+               07  XDJLB010-I-IDSTRY-TE-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         산업관리한도금액
+               07  XDJLB010-I-IDSTRY-MGT-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         국외산업관리한도금액
+               07  XDJLB010-I-ABRD-I-MGT-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB010-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB010-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB010-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB010-I-BASE-YM            ;기준년월
+      *N  XDJLB010-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB010-I-GRID1              ;그리드1
+      *X  XDJLB010-I-TE-PEER-DSTCD
+      * 토탈익스포져PEER구분코드
+      *X  XDJLB010-I-IDSTRY-V-GRD-DSTCD ;산업평가등급구분코드
+      *S  XDJLB010-I-IDSTRY-PER-EAD-AMT ;산업별EAD금액
+      *S  XDJLB010-I-AVL-EAD-AMT        ;가용EAD금액
+      *N  XDJLB010-I-IDSTRY-P-ADJS-RATO ;산업별조정비율
+      *S  XDJLB010-I-IDSTRY-TE-AMT      ;산업토탈익스포져금액
+      *S  XDJLB010-I-IDSTRY-MGT-CLAM    ;산업관리한도금액
+      *S  XDJLB010-I-ABRD-I-MGT-CLAM    ;국외산업관리한도금액
+      *X  XDJLB010-O-PRCSS-RSULT        ;처리결과

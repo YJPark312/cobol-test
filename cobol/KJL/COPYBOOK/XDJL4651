@@ -1,0 +1,73 @@
+      *================================================================*
+      *@ NAME : XDJL4651                                               *
+      *@ DESC : DC산업별규모별SUB한도조회COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-12-20 14:32:50                          *
+      *  생성일시     : 2019-12-20 14:32:52                          *
+      *  전체길이     : 00000008 BYTES                               *
+      *================================================================*
+           03  XDJL4651-RETURN.
+             05  XDJL4651-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4651-OK            VALUE  '00'.
+                 88  COND-XDJL4651-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4651-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4651-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4651-ERROR         VALUE  '09'.
+                 88  COND-XDJL4651-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4651-SYSERROR      VALUE  '99'.
+             05  XDJL4651-R-LINE                 PIC  9(006).
+             05  XDJL4651-R-ERRCD                PIC  X(008).
+             05  XDJL4651-R-TREAT-CD             PIC  X(008).
+             05  XDJL4651-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4651-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4651-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJL4651-I-BASE-YM              PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XDJL4651-OUT.
+      *----------------------------------------------------------------*
+      *--       총라인수
+             05  XDJL4651-O-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJL4651-O-GRID                 OCCURS 000100 TIMES.
+      *--         대분류업종코드
+               07  XDJL4651-O-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         산업TE기업규모구분
+               07  XDJL4651-O-IDSTRY-TCS-DSTCD   PIC  X(001).
+      *--         산업별규모별SUB한도
+               07  XDJL4651-O-IDSTRY-PSP-SUB-LIMT
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         국외산업규모한도
+               07  XDJL4651-O-ABRD-I-SCAL-LIMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         취급중단년월일
+               07  XDJL4651-O-HNDLN-DSCN-YMD     PIC  X(008).
+      *--         취급기준1적용년월일
+               07  XDJL4651-O-HNDLN-B-1-APLY-YMD PIC  X(008).
+      *--         취급기준2적용년월일
+               07  XDJL4651-O-HNDLN-B-2-APLY-YMD PIC  X(008).
+      *--         조회여부
+               07  XDJL4651-O-INQURY-YN          PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  4  6  5  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4651-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4651-I-BASE-YM            ;기준년월
+      *N  XDJL4651-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4651-O-GRID               ;그리드
+      *X  XDJL4651-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4651-O-IDSTRY-TCS-DSTCD   ;산업TE기업규모구분
+      *S  XDJL4651-O-IDSTRY-PSP-SUB-LIMT
+      * 산업별규모별SUB한도
+      *S  XDJL4651-O-ABRD-I-SCAL-LIMT   ;국외산업규모한도
+      *X  XDJL4651-O-HNDLN-DSCN-YMD     ;취급중단년월일
+      *X  XDJL4651-O-HNDLN-B-1-APLY-YMD
+      * 취급기준1적용년월일
+      *X  XDJL4651-O-HNDLN-B-2-APLY-YMD
+      * 취급기준2적용년월일
+      *X  XDJL4651-O-INQURY-YN          ;조회여부

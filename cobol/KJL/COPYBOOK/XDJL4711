@@ -1,0 +1,75 @@
+      *================================================================*
+      *@ NAME : XDJL4711                                               *
+      *@ DESC : DC신용공여기관정보조회COPYBOOK                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2012-09-26 11:14:03                          *
+      *  생성일시     : 2012-09-26 11:14:05                          *
+      *  전체길이     : 00000021 BYTES                               *
+      *================================================================*
+           03  XDJL4711-RETURN.
+             05  XDJL4711-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4711-OK            VALUE  '00'.
+                 88  COND-XDJL4711-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4711-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4711-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4711-ERROR         VALUE  '09'.
+                 88  COND-XDJL4711-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4711-SYSERROR      VALUE  '99'.
+             05  XDJL4711-R-LINE                 PIC  9(006).
+             05  XDJL4711-R-ERRCD                PIC  X(008).
+             05  XDJL4711-R-TREAT-CD             PIC  X(008).
+             05  XDJL4711-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4711-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4711-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJL4711-I-BASE-YM              PIC  X(006).
+      *--       보증기관번호
+             05  XDJL4711-I-GRNTY-INSTI-NO       PIC  X(013).
+      *----------------------------------------------------------------*
+           03  XDJL4711-OUT.
+      *----------------------------------------------------------------*
+      *--       그리드
+             05  XDJL4711-O-GRID.
+      *--         총라인수
+               07  XDJL4711-O-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJL4711-O-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           보증기관번호
+                 09  XDJL4711-O-GRNTY-INSTI-NO   PIC  X(013).
+      *--           TE보증기관코드
+                 09  XDJL4711-O-T-E-GRNTY-INSTI-CD
+                                                 PIC  X(003).
+      *--           보증기관명
+                 09  XDJL4711-O-GRNTY-INSTI-NAME PIC  X(052).
+      *--           신표준산업분류코드
+                 09  XDJL4711-O-NEW-SI-CLSFI-CD  PIC  X(005).
+      *--           국가코드
+                 09  XDJL4711-O-NATNL-CD         PIC  X(003).
+      *--           신용공여위험가중치
+                 09  XDJL4711-O-GRCR-RISK-WGHT   PIC  9(003).
+      *--           신용공여기관구분
+                 09  XDJL4711-O-GRCR-INSTI-DSTCD PIC  X(001).
+      *--           보증기관고객식별자
+                 09  XDJL4711-O-GRNTY-I-CUST-IDNFR
+                                                 PIC  X(010).
+      *================================================================*
+      *        X  D  J  L  4  7  1  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4711-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4711-I-BASE-YM            ;기준년월
+      *X  XDJL4711-I-GRNTY-INSTI-NO     ;보증기관번호
+      *G  XDJL4711-O-GRID               ;그리드
+      *N  XDJL4711-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4711-O-DATA-BOOK          ;데이터부
+      *X  XDJL4711-O-GRNTY-INSTI-NO     ;보증기관번호
+      *X  XDJL4711-O-T-E-GRNTY-INSTI-CD ;TE보증기관코드
+      *X  XDJL4711-O-GRNTY-INSTI-NAME   ;보증기관명
+      *X  XDJL4711-O-NEW-SI-CLSFI-CD    ;신표준산업분류코드
+      *X  XDJL4711-O-NATNL-CD           ;국가코드
+      *N  XDJL4711-O-GRCR-RISK-WGHT     ;신용공여위험가중치
+      *X  XDJL4711-O-GRCR-INSTI-DSTCD   ;신용공여기관구분
+      *X  XDJL4711-O-GRNTY-I-CUST-IDNFR ;보증기관고객식별자

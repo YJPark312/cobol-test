@@ -1,0 +1,465 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4026 (포괄신용공여한도신청및승인결과조회)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도신청및승인결과조회
+      *@구현방법  : OPEN-FETCH-CLOSE
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090109: 신규작성
+      *김진태:20090814: 오류메세지수정
+      *김진태:20091208: 에러메세지정비
+      *김진태:20100212: 공통유틸리티경고리턴코드처리
+      * YBH    :20150430: KB-PIN 처리
+      * PJH    :20170201: KB-PIN
+      * PJH    :20170626: KB-PIN (３차　）
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  CP차주관리한도기본      : THKJL0010            : R
+      ** 차주익스포져일실적       : THKJL0029            : R
+      ** 계정코드목록             : THKJL0018            : R
+      ** 계열사기본               : THKJL0014            : R
+      ** 그룹사기본               : THKJL0013            : R
+      ** 표준산업코드목록         : THKJL0044            : R
+      ** 차주계좌실적             : THKJL0025            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4026.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/01/09.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200220             PIC  X(008) VALUE 'B4200220'.
+           03  CO-B4200231             PIC  X(008) VALUE 'B4200231'.
+      *        전산업무담당자에게　문의하시기　바랍니다．
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4026'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-MAX-CNT              PIC  9(005) VALUE 1000.
+           03  CO-CHA-Y                PIC  X(001) VALUE '1'.
+           03  CO-CHA-N                PIC  X(001) VALUE '0'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-BIT                  PIC  X(001).
+           03  WK-CUR-CNT              PIC S9(004) COMP.
+170224     03  WK-SELECT-CNT           PIC  9(005).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * 부점명추출 COPYBOOK
+       01  XCJIBR01-CA.
+           COPY  XCJIBR01.
+      * 포괄한도신청및승인조회 SQLIO COPYBOOK
+       01  XQJL0261-CA.
+           COPY  XQJL0261.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO  INTERFACE PARAMETER
+           COPY  YCDBIOCA.                                              00750000
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------00780000
+      * TABLE ACCESS INTERFACE PARAMETER                                00790000
+      * LIBRARY : KJL.DDB2.DBCOPY                                       00800000
+      *-----------------------------------------------------------------00810000
+      * DBIO ACCESS KEY관리                                           008200
+170626*채무자고객기본　테이블(KEY)                                    009200
+       01  TKJL0015-KEY.                                                00930000
+           COPY  TKJL0015.                                              00940000
+170626*채무자고객기본　테이블(RECORD)                                 009200
+       01  TRJL0015-REC.                                                00960000
+           COPY  TRJL0015.                                              00970000
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4026-CA.
+           COPY  XDJL4026.
+      *=================================================================
+       PROCEDURE                       DIVISION
+      *=================================================================
+                                       USING       YCCOMMON-CA
+                                                   XDJL4026-CA.
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE       WK-AREA
+      *                     SQLIO
+                            YCDBSQLA-CA
+                            YCDBIOCA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE       XDJL4026-OUT
+                            XDJL4026-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+           IF XDJL4026-I-PRCSS-DSTIC NOT = CO-CHA-01
+      *       에러메세지 : 처리구분오류입니다．
+      *       조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  부점명조회
+           IF XDJL4026-I-BRNCD NOT = '9999'
+      *@      부점명조회호출
+              PERFORM S3100-CJIBR01-CALL-RTN
+                 THRU S3100-CJIBR01-CALL-EXT
+           ELSE
+              MOVE '부점전체'
+                TO XDJL4026-O-BRN-NAME
+           END-IF
+
+      *@2  차주명조회
+           IF  XDJL4026-I-BRWR-NO NOT = SPACE
+170224*@      차주명호출
+               PERFORM S3200-THKJL0015-SELECT-RTN
+                  THRU S3200-THKJL0015-SELECT-EXT
+
+      *@       차주명
+               MOVE RJL0015-DBTRZ-NAME
+                 TO XDJL4026-O-DBTRZ-NAME
+           ELSE
+               MOVE SPACE
+                 TO XDJL4026-O-DBTRZ-NAME
+           END-IF
+
+      *@3  포괄신용공여한도신청및승인내역조회
+           PERFORM S3300-QJL0261-CALL-RTN
+              THRU S3300-QJL0261-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  부점명을조회한다
+      *-----------------------------------------------------------------
+       S3100-CJIBR01-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE XCJIBR01-IN
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIBR01-I-GROUP-CO-CD
+      *@   부점코드
+           MOVE XDJL4026-I-BRNCD
+             TO XCJIBR01-I-BRNCD
+      *@   조회요청년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO XCJIBR01-I-YMD
+
+      *@   UTILITY CALL
+           #DYCALL CJIBR01 YCCOMMON-CA XCJIBR01-CA
+
+      *@  처리결과확인
+      *@  호출결과가경고인경우도정상처리한다
+      *@  폐쇠점인경우리턴코드０７（경고）
+           IF COND-XCJIBR01-OK OR COND-XCJIBR01-WARN
+              MOVE XCJIBR01-O-BRN-HANGL-NAME
+                TO XDJL4026-O-BRN-NAME
+           ELSE
+              #ERROR XCJIBR01-R-ERRCD
+                     XCJIBR01-R-TREAT-CD
+                     XCJIBR01-R-STAT
+           END-IF
+           .
+       S3100-CJIBR01-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  채무자명추출
+      *-----------------------------------------------------------------
+       S3200-THKJL0015-SELECT-RTN.
+
+      *@초기화　　　　                                                025534
+           INITIALIZE TKJL0015-KEY                                      02541109
+                      TRJL0015-REC                                      02541209
+      *@   그룹회사코드                                               025414
+           MOVE BICOM-GROUP-CO-CD                                       02541509
+             TO KJL0015-PK-GROUP-CO-CD                                  02541609
+170201*@   고객식별자                                                 025417
+           MOVE XDJL4026-I-BRWR-NO                                      02541809
+             TO KJL0015-PK-CUST-IDNFR                                   02541909
+
+           #DYDBIO SELECT-CMD-Y TKJL0015-PK TRJL0015-REC                02542409
+
+           EVALUATE TRUE                                                02542609
+               WHEN COND-DBIO-OK                                        02542709
+               WHEN COND-DBIO-MRNF                                      02543009
+                    CONTINUE
+               WHEN OTHER                                               02543309
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．                   0254
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다               0254
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02543609
+           END-EVALUATE                                                 02543709
+           .                                                            02543809
+       S3200-THKJL0015-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  포괄신용공여한도신청및승인내역조회
+      *-----------------------------------------------------------------
+       S3300-QJL0261-CALL-RTN.
+
+      *@   SQLIO OPEN
+           PERFORM S3310-QJL0261-OPEN-RTN                               02187307
+              THRU S3310-QJL0261-OPEN-EXT                               02187407
+                                                                        02187507
+           MOVE CO-CHA-Y                                                02187607
+             TO WK-BIT                                                  02187707
+                                                                        02187807
+      *@   SQLIO FETCH
+           PERFORM UNTIL WK-BIT     = CO-CHA-N OR                       02187907
+                         WK-CUR-CNT = CO-MAX-CNT                        02188007
+      *@      SQLIO FETCH CALL
+              PERFORM S3320-QJL0261-FETCH-RTN                           02188107
+                 THRU S3320-QJL0261-FETCH-EXT                           02188207
+           END-PERFORM                                                  02188307
+                                                                        02188407
+      *@   SQLIO CLOSE
+           PERFORM S3330-QJL0261-CLOSE-RTN                              02188507
+              THRU S3330-QJL0261-CLOSE-EXT                              02188607
+                                                                        02188707
+      *@   총건수
+           MOVE WK-CUR-CNT                                              02188807
+             TO XDJL4026-O-OUTPT-LINE-CNT1                              02188907
+           .
+       S3300-QJL0261-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------02189307
+      *@  SQLIO QJL0261 OPEN                                            02189407
+      *-----------------------------------------------------------------02189507
+       S3310-QJL0261-OPEN-RTN.                                          02189607
+                                                                        02189707
+      *@   초기화
+           INITIALIZE XQJL0261-IN
+
+      *@   부점코드
+           MOVE XDJL4026-I-BRNCD
+             TO XQJL0261-I-APLCN-BRNCD
+      *@   진행상태
+           MOVE XDJL4026-I-LIMT-P-STUS-DSTCD
+             TO XQJL0261-I-LIMT-P-STUS-DSTCD
+170201*@    KB-PIN
+170626     MOVE XDJL4026-I-BRWR-NO
+))           TO XQJL0261-I-KB-PIN
+      *@   신청년월일
+           MOVE XDJL4026-I-APLCN-YMD1
+             TO XQJL0261-I-APLCN-YMD1
+           MOVE XDJL4026-I-APLCN-YMD2
+             TO XQJL0261-I-APLCN-YMD2
+                                                                        02191007
+      *@   SQLIO CALL
+           #DYSQLA QJL0261 OPEN XQJL0261-CA                             02191107
+                                                                        02191207
+      *@   호출결과확인
+           EVALUATE TRUE                                                02191307
+               WHEN COND-DBSQL-OK                                       02191407
+                    CONTINUE                                            02191507
+               WHEN OTHER                                               02191607
+      *@원장오픈에러인경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．                     02191707
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02191807
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02191907
+           END-EVALUATE                                                 02192007
+           .                                                            02192107
+       S3310-QJL0261-OPEN-EXT.                                          02192207
+           EXIT.                                                        02192307
+      *-----------------------------------------------------------------02192407
+      *@  SQLIO QJL0261 FETCH                                           02192507
+      *-----------------------------------------------------------------02192607
+       S3320-QJL0261-FETCH-RTN.                                         02192707
+                                                                        02192807
+      *@   SQLIO FETCH                                                  02192907
+           #DYSQLA QJL0261 FETCH XQJL0261-CA                            02193007
+
+      *@   결과확인                                                   02193107
+           EVALUATE TRUE                                                02193207
+               WHEN COND-DBSQL-OK                                       02193307
+      *@            OUTPUT CALL
+                    PERFORM S6000-OUTPUT-SET-RTN                        02193407
+                       THRU S6000-OUTPUT-SET-EXT                        02193507
+               WHEN COND-DBSQL-MRNF                                     02193607
+                    MOVE CO-CHA-N TO WK-BIT                             02193707
+               WHEN OTHER                                               02193807
+      *@원장패치에러인경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．                    02193907
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02194007
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR        02194107
+           END-EVALUATE                                                 02194207
+           .                                                            02194307
+       S3320-QJL0261-FETCH-EXT.                                         02194407
+           EXIT.                                                        02194507
+      *-----------------------------------------------------------------02194607
+      *@  SQLIO QJL0261 CLOSE                                           02194707
+      *-----------------------------------------------------------------02194807
+       S3330-QJL0261-CLOSE-RTN.                                         02194907
+                                                                        02195007
+      *@   SQLIO CLOSE                                                  02195107
+           #DYSQLA QJL0261 CLOSE XQJL0261-CA                            02195207
+
+      *@   결과확인                                                   02195307
+           EVALUATE TRUE                                                02195407
+               WHEN COND-DBSQL-OK                                       02195507
+                    CONTINUE                                            02195607
+               WHEN OTHER                                               02195707
+      *@원장클로즈에러인경우
+      *@에러메세지 : 테이블 CLOSE 오류입니다．                    02195807
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02195907
+                    #ERROR CO-B4200231 CO-UKJL0036 CO-STAT-ERROR        02196007
+           END-EVALUATE                                                 02196107
+           .                                                            02196207
+       S3330-QJL0261-CLOSE-EXT.                                         02196307
+           EXIT.                                                        02196407
+      *-----------------------------------------------------------------
+      *@ 출력파라미터 SET
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-SET-RTN.
+
+170224     MOVE DBSQL-SELECT-CNT
+             TO WK-SELECT-CNT
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > WK-SELECT-CNT
+
+               ADD 1 TO WK-CUR-CNT
+
+      *@       영업점
+               MOVE XQJL0261-O-APLCN-BRNCD(WK-I)
+                 TO XDJL4026-O-BRNCD(WK-CUR-CNT)
+
+      *@       영업점명
+               MOVE XQJL0261-O-BRN-HANGL-NAME(WK-I)
+                 TO XDJL4026-O-BBRN-NAME(WK-CUR-CNT)
+
+      *@       차주번호
+170626         MOVE XQJL0261-O-KB-PIN(WK-I)
+                 TO XDJL4026-O-BRWR-NO(WK-CUR-CNT)
+
+150430*        KB-PIN
+               MOVE XQJL0261-O-KB-PIN(WK-I)
+                 TO XDJL4026-O-KB-PIN(WK-CUR-CNT)
+
+      *@       채무자명
+170626         MOVE XQJL0261-O-DBTRZ-NAME(WK-I)
+                 TO XDJL4026-O-DBTRZ-NAME1(WK-CUR-CNT)
+
+      *@       진행상태
+               MOVE XQJL0261-O-LIMT-P-STUS-DSTCD(WK-I)
+                 TO XDJL4026-O-LIMT-P-STUS-DSTCD(WK-CUR-CNT)
+
+      *@       승인구분
+               MOVE XQJL0261-O-LIMT-ATHOR-DSTCD(WK-I)
+                 TO XDJL4026-O-LIMT-ATHOR-DSTCD(WK-CUR-CNT)
+
+      *@       신청금액
+               COMPUTE XDJL4026-O-LIMT-APLCN-AMT(WK-CUR-CNT)
+                     = XQJL0261-O-LIMT-APLCN-AMT(WK-I)
+                     / 1000000
+
+      *@       승인금액
+               COMPUTE XDJL4026-O-LIMT-ATHOR-AMT(WK-CUR-CNT)
+                     = XQJL0261-O-LIMT-ATHOR-AMT(WK-I)
+                     / 1000000
+
+      *@       신청번호
+               MOVE XQJL0261-O-LIMT-APLCN-NO(WK-I)
+                 TO XDJL4026-O-LIMT-APLCN-NO(WK-CUR-CNT)
+
+      *@       승인번호
+               MOVE XQJL0261-O-LIMT-ATHOR-NO(WK-I)
+                 TO XDJL4026-O-LIMT-ATHOR-NO(WK-CUR-CNT)
+
+           END-PERFORM
+           .
+       S6000-OUTPUT-SET-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

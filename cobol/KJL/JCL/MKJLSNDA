@@ -1,0 +1,64 @@
+//MKJLSNDA JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLDP35
+//*********************************************************************
+//*   차주관리한도기본UNLOAD - DW제공자료
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.SHRTAA.SKJL0011.P00001'
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0011.P00001,
+//            UNIT=SYSPA,DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(1000,0500),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT
+        그룹회사코드
+       ,기준년월
+       ,고객식별자
+       ,차주번호
+       ,한도고객구분
+       ,"TE기업규모구분"
+       ,고객관리부점코드
+       ,내부신용평가등급구분
+       ,신용평가년월일
+       ,신표준산업분류코드
+       ,기준한도
+       ,기준한도산출년월일
+       ,관리한도
+       ,관리한도설정년월일
+       ,관리한도유효년월일
+       ,여신성관리한도
+       ,시장성관리한도
+       ,외화기준한도
+       ,외화신용공여한도
+       ,외화한도설정년월일
+       ,외화한도유효년월일
+       ,시스템최종처리일시
+       ,시스템최종사용자번호
+      FROM  DB2DBA.THKJL0011
+     WHERE 그룹회사코드= 'KB0'
+    WITH  UR;
+//*
+//

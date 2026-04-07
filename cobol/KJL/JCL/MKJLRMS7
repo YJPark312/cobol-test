@@ -1,0 +1,54 @@
+//MKJLRMS7 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//* %%GLOBAL PARMGLB1                                                */
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2                                */
+//*********************************************************************
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMS6                                       */
+//*********************************************************************
+//*   차주익스포져일집계원장UNLOAD -지주　제공자료               */
+//********************************************************************/
+//STEP01   EXEC PGM=IKJEFT01,DYNAMNBR=20
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SD.SHRRMS.SKJL0029.P00001,DISP=SHR
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+  SELECT 그룹회사코드
+       , 기준일
+       , 기준년월
+       , 차주번호
+       , 상품대분류코드
+       , 상품중분류코드
+       , 상품템플릿코드
+       , 상품번호
+       ,  SUBSTR(CHAR(명목액기준한도),2,15)
+       ,  SUBSTR(CHAR(명목액기준잔액),2,15)
+       ,  SUBSTR(CHAR("TE한도환산금액"),2,15)
+       ,  SUBSTR(CHAR("TE잔액환산금액"),2,15)
+       ,  SUBSTR(CHAR("CP한도환산금액"),2,15)
+       ,  SUBSTR(CHAR("CP잔액환산금액"),2,15)
+       ,  SUBSTR(CHAR(외화한도환산금액),2,15)
+       ,  SUBSTR(CHAR(외화잔액환산금액),2,15)
+       , 시스템최종처리일시
+       , 시스템최종사용자번호
+    FROM  DB2DBA.THKJL0029  A
+   WHERE 그룹회사코드= 'KB0'
+     AND 기준일    = '%%A'
+     AND 기준년월  = '%%$OYEAR.%%OMONTH'
+     AND NOT EXISTS (SELECT 1
+                      FROM DB2DBA.THKJL0015
+                     WHERE 그룹회사코드 = A.그룹회사코드
+                       AND 차주번호     = A.차주번호
+                       AND 차주번호구분 = '1'
+                    )
+    WITH UR;
+/*

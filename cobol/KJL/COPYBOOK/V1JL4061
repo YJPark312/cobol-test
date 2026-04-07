@@ -1,0 +1,69 @@
+      *================================================================*
+      *@ NAME : V1JL4061                                               *
+      *@ DESC : 대분류업종별TE현황(미기표포함)                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-11-10 11:04:16                          *
+      *  생성일시     : 2017-11-10 11:04:20                          *
+      *  전체길이     : 00019705 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4061-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4061-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4061-OUTPT-LINE-CNT1.
+      *--       대분류업종코드
+             09  V1JL4061-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  V1JL4061-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       전년도말익스포져금액
+             09  V1JL4061-PYY-X-END-EXPSR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업관리한도금액
+             09  V1JL4061-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액
+             09  V1JL4061-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도여유액
+             09  V1JL4061-LIMT-SEXTR-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율1
+             09  V1JL4061-EXHS-RT1               PIC  9(003)V9(02).
+      *--       순증한도
+             09  V1JL4061-NTIC-LIMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       순증토탈익스포져
+             09  V1JL4061-NTIC-TE                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       순증여유액
+             09  V1JL4061-NTIC-SEXTR-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       소진율2
+             09  V1JL4061-EXHS-RT2               PIC  9(003)V9(02).
+      *--       대출금액
+             09  V1JL4061-LN-AMT                 PIC S9(018)
+                                                 LEADING  SEPARATE.
+      *--       실질여유액
+             09  V1JL4061-ATUAL-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       실질소진율
+             09  V1JL4061-ATUAL-EXHS-RT          PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  4  0  6  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4061-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4061-GRID1                ;그리드1
+      *X  V1JL4061-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4061-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *S  V1JL4061-PYY-X-END-EXPSR-AMT  ;전년도말익스포져금액
+      *S  V1JL4061-IDSTRY-MGT-CLAM      ;산업관리한도금액
+      *S  V1JL4061-TE-LIMT-AUC          ;토탈익스포져한도환산금액
+      *S  V1JL4061-LIMT-SEXTR-AMT       ;한도여유액
+      *N  V1JL4061-EXHS-RT1             ;소진율1
+      *S  V1JL4061-NTIC-LIMT            ;순증한도
+      *S  V1JL4061-NTIC-TE              ;순증토탈익스포져
+      *S  V1JL4061-NTIC-SEXTR-AMT       ;순증여유액
+      *N  V1JL4061-EXHS-RT2             ;소진율2
+      *S  V1JL4061-LN-AMT               ;대출금액
+      *S  V1JL4061-ATUAL-SEXTR-AMT      ;실질여유액
+      *N  V1JL4061-ATUAL-EXHS-RT        ;실질소진율

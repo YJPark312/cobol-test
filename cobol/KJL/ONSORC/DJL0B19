@@ -1,0 +1,837 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL0B19 (DC포괄신용공여한도적정성점검대상승인)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도적정성점검대상승인
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *최주원 : 20210901 : 신규작성
+      *박정수 : 20230330 : P20232237652 삭제처리 추가
+      *박정수 : 20231012 : 쪽지 프로세스 추가
+      *박정수 : 20240321 : 쪽지 프로세스 보완
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **  THKJL0018 : 포괄신용공여한도 점검기본
+      **  THKJL0005 : 한도승인결의록관리
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL0B19.
+       AUTHOR.                         최주원.
+       DATE-WRITTEN.                   21/09/01.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지
+      *처리구분코드 오류입니다.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+      *필수항목 오류입니다.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+      *데이터를 검색할 수 없습니다.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *데이터를 생성할 수 없습니다.
+           03  CO-B3900010             PIC  X(008) VALUE 'B3900010'.
+      *데이터를 삭제할 수 없습니다.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+      *데이터가 존재하지 않습니다.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+      *데이터를 변경 할 수 없습니다.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+
+           03  CO-B2500200             PIC  X(008) VALUE 'B2500200'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+      *조치메시지
+      *전산업무담당자에게 문의바랍니다.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL0B19'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+231012     03  CO-CHA-0                PIC  X(001) VALUE '0'.
+231012     03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-5                PIC  X(001) VALUE '5'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+           03  CO-CHA-06               PIC  X(002) VALUE '06'.
+230330     03  CO-CHA-07               PIC  X(002) VALUE '07'.
+231012     03  CO-CHAR-LF              PIC  X(001) VALUE X'25'.
+
+240321 01  CO-CSTMSG.
+      *사용자메시지
+           03  CO-MSG1                 PIC  X(056) VALUE
+           '협의위원의 심사의견이 등록되어 있지 않습니다.'.
+           03  CO-MSG4                 PIC  X(032) VALUE
+           '확인 바랍니다.'.
+           03  CO-SUBMSG               PIC  X(050) VALUE
+           '토탈익스포져　등록　오류'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *
+           03  WK-I                    PIC S9(004) COMP.
+231012     03  WK-APLCN-EMPID          PIC  X(007).
+231012     03  WK-CHK-YN               PIC  X(001).
+240321     03  WK-FINAL-CHK-YN         PIC  X(001).
+240321*    사용자메시지
+           03  WK-MSG                  PIC  X(100).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+231012*MESSENGER COPYBOOK
+       01  XZUGMSNM-CA.
+           COPY    XZUGMSNM.
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TKJL0018-KEY.
+           COPY  TKJL0018.
+
+       01  TRJL0018-REC.
+           COPY  TRJL0018.
+
+       01  TKJL0005-KEY.
+           COPY  TKJL0005.
+
+       01  TRJL0005-REC.
+           COPY  TRJL0005.
+
+230330 01  TKJL0002-KEY.
+           COPY  TKJL0002.
+
+230330 01  TRJL0002-REC.
+           COPY  TRJL0002.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIOV INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      * SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL0B19-CA.
+           COPY  XDJL0B19.
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL0B19-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL0B19-OUT
+                            XDJL0B19-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+                            YCDBSQLA-CA
+
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.1 처리구분코드체크
+      *@   실행조건 : 입력-처리구분코드
+      *     04:의견등록 / 05:최종승인처리 / 06:불참처리
+230330*     07:삭제
+      *@   처리내용 : 에러처리
+           IF XDJL0B19-I-PRCSS-DSTIC   = ( CO-CHA-04 OR
+                                           CO-CHA-05 OR
+                                           CO-CHA-06 OR
+                                           CO-CHA-07 )
+              CONTINUE
+           ELSE
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           #USRLOG  " <<< S3000-PROCESS-RTN >>> "
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*           INPUT DJL0B19 DATA                   *"
+           #USRLOG  "=================================================="
+           #USRLOG  " PRCSS-DSTIC    : " XDJL0B19-I-PRCSS-DSTIC
+           #USRLOG  "=================================================="
+           #USRLOG  " CUST-IDNFR     : " XDJL0B19-I-CUST-IDNFR
+           #USRLOG  " LIMT-APLCN-NO  : " XDJL0B19-I-LIMT-APLCN-NO
+           #USRLOG  "=================================================="
+
+
+      *     04:의견등록 / 05:최종승인처리 / 06:불참처리
+      *     07:삭제
+           EVALUATE XDJL0B19-I-PRCSS-DSTIC
+           WHEN CO-CHA-04
+           WHEN CO-CHA-06
+      *           THKJL0005 (협의위원-의견등록)
+                  PERFORM S3100-ADD-OPIN-RTN
+                     THRU S3100-ADD-OPIN-EXT
+           WHEN CO-CHA-05
+      *           THKJL0018 (최종승인처리)
+                  PERFORM S3200-FINAL-SAVE-RTN
+                     THRU S3200-FINAL-SAVE-EXT
+           WHEN CO-CHA-07
+230330*           삭제처리
+                  PERFORM S3300-DELETE-RTN
+                     THRU S3300-DELETE-EXT
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  THKJL0005 협의위원 : 의견등록
+      *-----------------------------------------------------------------
+       S3100-ADD-OPIN-RTN.
+
+      *@3.1 초기화
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+
+      *@3.2 호출변수 MOVE
+      *@  그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+      *@  한도신청번호
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+      *@  승인위원직원번호
+           IF   XDJL0B19-I-PRCSS-DSTIC = CO-CHA-04
+                MOVE BICOM-USER-EMPID
+                  TO KJL0005-PK-ATHOR-CMMB-EMPID
+           ELSE
+                MOVE XDJL0B19-I-ATHOR-CMMB-EMPID
+                  TO KJL0005-PK-ATHOR-CMMB-EMPID
+           END-IF
+
+      *@3.3 UPDATE전에LOCK SELECT검색
+           #DYDBIO SELECT-CMD-Y TKJL0005-PK TRJL0005-REC
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+                    CONTINUE
+           WHEN COND-DBIO-MRNF
+      *        #CSTMSG CO-MSG5     CO-SUBMSG1
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 갱신변수 MOVE
+           IF   XDJL0B19-I-PRCSS-DSTIC = CO-CHA-04
+      *@        한도승인구분
+                MOVE XDJL0B19-I-LIMT-ATHOR-DSTIC
+                  TO RJL0005-LIMT-ATHOR-DSTCD
+      *@        승인의견내용
+                MOVE XDJL0B19-I-ATHOR-OPIN-CTNT
+                  TO RJL0005-ATHOR-OPIN-CTNT
+           ELSE
+      *@        한도승인구분
+                MOVE CO-CHA-5
+                  TO RJL0005-LIMT-ATHOR-DSTCD
+      *@        승인의견내용
+                MOVE '불참'
+                  TO RJL0005-ATHOR-OPIN-CTNT
+           END-IF
+
+      *@3.6 DBIO CALL
+           #DYDBIO UPDATE-CMD-Y TKJL0005-PK TRJL0005-REC
+
+      *@3.7 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+231012*@       신청직원번호 검색
+               PERFORM S3110-APLCN-EMPID-RTN
+                  THRU S3110-APLCN-EMPID-EXT
+
+231012*@       승인구분 체크
+               PERFORM S3120-THKJL0005-CHK-RTN
+                  THRU S3120-THKJL0005-CHK-EXT
+
+               IF WK-CHK-YN = 'Y'
+231012*@           메신저처리
+                   PERFORM S3130-MESSENGER-SEND-RTN
+                      THRU S3130-MESSENGER-SEND-EXT
+               END-IF
+           WHEN COND-DBIO-MRNF
+      *        #CSTMSG CO-MSG5     CO-SUBMSG1
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3100-ADD-OPIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+231012*@  신청직원번호 검색
+      *-----------------------------------------------------------------
+       S3110-APLCN-EMPID-RTN.
+      *@   초기화
+           INITIALIZE TKJL0018-KEY
+                      TRJL0018-REC
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0018-PK-GROUP-CO-CD
+      *    한도신청번호
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0018-PK-LIMT-APLCN-NO
+
+           #DYDBIO SELECT-CMD-Y TKJL0018-PK TRJL0018-REC
+
+      *@   호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *        신청직원번호
+               MOVE RJL0018-APLCN-EMPID
+                 TO WK-APLCN-EMPID
+
+           WHEN COND-DBIO-MRNF
+               #ERROR CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3110-APLCN-EMPID-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+231012*@  승인구분 체크
+      *-----------------------------------------------------------------
+       S3120-THKJL0005-CHK-RTN.
+      *@2.1변수초기화
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+      *@2.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+           MOVE LOW-VALUE
+             TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+           #DYDBIO  OPEN-CMD-1 TKJL0005-PK TRJL0005-REC
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+
+               MOVE 'Y'
+                 TO WK-CHK-YN
+
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0005-PK TRJL0005-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+
+                       IF RJL0005-LIMT-ATHOR-DSTCD = CO-CHA-0
+                           MOVE 'N'
+                             TO WK-CHK-YN
+                       END-IF
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3120-THKJL0005-CHK-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+231012*@  메신저처리
+      *-----------------------------------------------------------------
+       S3130-MESSENGER-SEND-RTN.
+
+      *@메신저처리
+      *@   COPYBOOK 초기화
+           INITIALIZE XZUGMSNM-IN
+
+      *@유틸리티　파라미터 MOVE
+      *@   서비스유형
+           MOVE CO-CHA-0
+             TO XZUGMSNM-IN-SERVTYPE
+
+      *@   수신직원번호
+           MOVE WK-APLCN-EMPID
+             TO XZUGMSNM-IN-REMPNO
+
+      *@   발신직원번호
+           MOVE BICOM-USER-EMPID
+             TO XZUGMSNM-IN-SENDNO
+
+      *@   쪽지제목
+           MOVE '포괄신용공여한도 적정성 점검 승인'
+             TO XZUGMSNM-IN-TITLE
+
+      *@   쪽지본문
+           STRING '한도신청번호 : ' XDJL0B19-I-LIMT-APLCN-NO
+                                                    DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  'KB-PIN : ' XDJL0B19-I-CUST-IDNFR DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '포괄신용공여한도 적정성점검 '
+                  '승인이 완료되었습니다.'
+                                                    DELIMITED BY SIZE
+                  CO-CHAR-LF                        DELIMITED BY SIZE
+                  '담당심사역은 최종확정 바랍니다.'
+                                                    DELIMITED BY SIZE
+             INTO XZUGMSNM-IN-BODY
+
+      *@   긴급여부
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-URGENTYN
+
+      *@   발신함저장여부
+           MOVE CO-CHA-1
+             TO XZUGMSNM-IN-SAVEOPTION
+
+      *@   UTILITY CALL
+           #DYCALL ZUGMSNM YCCOMMON-CA XZUGMSNM-CA
+
+      *@   유틸리티　처리결과　확인
+           IF NOT COND-XZUGMSNM-OK
+              #USRLOG '결과:' XZUGMSNM-R-STAT
+           END-IF
+           .
+       S3130-MESSENGER-SEND-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  THKJL0018 최종승인처리
+      *-----------------------------------------------------------------
+       S3200-FINAL-SAVE-RTN.
+
+           PERFORM  S3210-FINAL-CHK-RTN
+              THRU  S3210-FINAL-CHK-EXT
+
+
+
+      *@3.1 초기화
+           INITIALIZE TKJL0018-KEY
+                      TRJL0018-REC
+
+      *@3.2 호출변수 MOVE
+      *@  그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0018-PK-GROUP-CO-CD
+      *@  한도신청번호
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0018-PK-LIMT-APLCN-NO
+
+      *@3.3 UPDATE전에LOCK SELECT검색
+           #DYDBIO SELECT-CMD-Y TKJL0018-PK TRJL0018-REC
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+                    CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 갱신변수 MOVE
+      *       최종승인년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0018-LAST-ATHOR-YMD
+      *       최종승인직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0018-LAST-ATHOR-EMPID
+      *       최종한도승인구분
+           MOVE XDJL0B19-I-LAST-L-ATHOR-DSTIC
+             TO RJL0018-LAST-L-ATHOR-DSTCD
+
+      *@3.6 DBIO CALL
+           #DYDBIO UPDATE-CMD-Y TKJL0018-PK TRJL0018-REC
+
+      *@3.7 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3200-FINAL-SAVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+240321*@  승인구분 체크(최종확정시)
+      *-----------------------------------------------------------------
+       S3210-FINAL-CHK-RTN.
+      *@2.1변수초기화
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+      *@2.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+           MOVE LOW-VALUE
+             TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+           #DYDBIO  OPEN-CMD-1 TKJL0005-PK TRJL0005-REC
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+
+               MOVE 'Y'
+                 TO WK-FINAL-CHK-YN
+
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0005-PK TRJL0005-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+
+                       IF RJL0005-LIMT-ATHOR-DSTCD = CO-CHA-0
+                           MOVE 'N'
+                             TO WK-FINAL-CHK-YN
+                       END-IF
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *    한도승인구분 = '0' 해당무가 있을 경우
+           IF WK-FINAL-CHK-YN = 'N'
+               STRING CO-MSG1
+                      CO-MSG4
+               DELIMITED BY SIZE INTO  WK-MSG
+
+      *        사용자　메세지　에러　발생
+               #CSTMSG WK-MSG CO-SUBMSG
+
+               #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S3210-FINAL-CHK-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+230330*@  삭제처리
+      *-----------------------------------------------------------------
+       S3300-DELETE-RTN.
+
+      *    THKJL0018 삭제처리
+           PERFORM S3310-THKJL0018-DEL-RTN
+              THRU S3310-THKJL0018-DEL-EXT
+      *    THKJL0005 삭제처리
+           PERFORM S3320-THKJL0005-DEL-RTN
+              THRU S3320-THKJL0005-DEL-EXT
+      *    THKJL0002 삭제처리
+           PERFORM S3330-THKJL0002-DEL-RTN
+              THRU S3330-THKJL0002-DEL-EXT
+
+           .
+       S3300-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  THKJL0018 삭제처리
+      *-----------------------------------------------------------------
+       S3310-THKJL0018-DEL-RTN.
+           #USRLOG  " <<< S3310-THKJL0018-DELETE-RTN >>> "
+      *@3.1 초기화
+           INITIALIZE TKJL0018-KEY
+                      TRJL0018-REC
+
+      *@3.2 호출변수 MOVE
+      *@  그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0018-PK-GROUP-CO-CD
+      *@  한도신청번호
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0018-PK-LIMT-APLCN-NO
+
+      *@3.3 UPDATE전에LOCK SELECT검색
+           #DYDBIO SELECT-CMD-Y TKJL0018-PK TRJL0018-REC
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+                    CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+
+
+      *@3.6 DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0018-PK TRJL0018-REC
+
+      *@3.7 호출결과　확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR  CO-B2500200 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           #USRLOG  " <<< S3310-THKJL0018-DELETE-EXT >>> "
+           .
+       S3310-THKJL0018-DEL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  THKJL0005 삭제처리
+      *-----------------------------------------------------------------
+       S3320-THKJL0005-DEL-RTN.
+           #USRLOG  " <<< S3320-THKJL0005-DELETE-RTN >>> "
+
+      *@2.1변수초기화
+           INITIALIZE TKJL0005-KEY
+                      TRJL0005-REC
+      *@2.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0005-PK-GROUP-CO-CD
+
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0005-PK-LIMT-APLCN-NO
+
+           MOVE LOW-VALUE
+             TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+           #DYDBIO  OPEN-CMD-1 TKJL0005-PK TRJL0005-REC
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 10
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0005-PK TRJL0005-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+      *                     승인위원직원번호
+                       MOVE RJL0005-ATHOR-CMMB-EMPID
+                         TO KJL0005-PK-ATHOR-CMMB-EMPID
+
+                       #DYDBIO DELETE-CMD-Y TKJL0005-PK TRJL0005-REC
+
+                       EVALUATE TRUE
+                       WHEN COND-DBIO-OK
+                       WHEN COND-DBIO-MRNF
+                           CONTINUE
+                       WHEN OTHER
+      *@                  원장삭제오류일경우
+                           #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+                       END-EVALUATE
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           #USRLOG  " <<< S3320-THKJL0005-DELETE-EXT >>> "
+           .
+       S3320-THKJL0005-DEL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  THKJL0002 삭제처리
+      *-----------------------------------------------------------------
+       S3330-THKJL0002-DEL-RTN.
+           #USRLOG  " <<< S3330-THKJL0002-DELETE-RTN >>> "
+
+      *@2.1변수초기화
+           INITIALIZE TKJL0002-KEY
+                      TRJL0002-REC
+      *@2.2변수 MOVE
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0002-PK-GROUP-CO-CD
+
+      *    한도신청번호
+           MOVE XDJL0B19-I-LIMT-APLCN-NO
+             TO KJL0002-PK-LIMT-APLCN-NO
+
+      *    첨부파일일련번호
+           MOVE 0
+             TO KJL0002-PK-APNDX-FILE-SERNO
+
+           #DYDBIO  OPEN-CMD-1 TKJL0002-PK TRJL0002-REC
+
+      *#1  DBIO 호출결과 확인
+           IF NOT COND-DBIO-OK
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+                     UNTIL COND-DBIO-MRNF
+
+               #DYDBIO  FETCH-CMD-1 TKJL0002-PK TRJL0002-REC
+
+      *#1      DBIO 호출결과 확인
+               IF NOT COND-DBIO-OK   AND
+                  NOT COND-DBIO-MRNF THEN
+                  #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+
+               IF NOT COND-DBIO-MRNF THEN
+      *            그룹회사코드
+                   MOVE BICOM-GROUP-CO-CD
+                     TO KJL0002-PK-GROUP-CO-CD
+
+      *            한도신청번호
+                   MOVE XDJL0B19-I-LIMT-APLCN-NO
+                     TO KJL0002-PK-LIMT-APLCN-NO
+
+      *            첨부파일일련번호
+                   MOVE RJL0002-APNDX-FILE-SERNO
+                     TO KJL0002-PK-APNDX-FILE-SERNO
+
+                   #DYDBIO SELECT-CMD-Y TKJL0002-PK TRJL0002-REC
+
+                   IF NOT COND-DBIO-OK   AND
+                      NOT COND-DBIO-MRNF THEN
+                      #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+                   END-IF
+
+                   #DYDBIO DELETE-CMD-Y TKJL0002-PK TRJL0002-REC
+
+                   IF NOT COND-DBIO-OK   AND
+                      NOT COND-DBIO-MRNF THEN
+                      #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+                   END-IF
+
+               END-IF
+           END-PERFORM
+
+           #DYDBIO  CLOSE-CMD-1 TKJL0002-PK TRJL0002-REC
+
+           IF NOT COND-DBIO-OK   AND
+              NOT COND-DBIO-MRNF THEN
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           #USRLOG  " <<< S3330-THKJL0002-DELETE-EXT >>> "
+           .
+       S3330-THKJL0002-DEL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@처리결과MOVE
+           MOVE CO-STAT-OK
+             TO XDJL0B19-O-PRCSS-RSULT
+
+           #OKEXIT  CO-STAT-OK.
+
+       S9000-FINAL-EXT.
+           EXIT.

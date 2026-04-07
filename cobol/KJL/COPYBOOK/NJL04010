@@ -1,0 +1,53 @@
+      *================================================================*
+      *@ NAME : NJL04010                                               *
+      *@ DESC : 산업별TE한도설정조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-12 16:00:47                          *
+      *  생성일시     : 2020-03-12 16:00:52                          *
+      *  전체길이     : 00094013 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  NJL04010-PRCSS-DSTIC              PIC  X(002).
+      *--     기준년월
+           07  NJL04010-BASE-YM                  PIC  X(006).
+      *--     총라인수
+ROWCNT     07  NJL04010-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  NJL04010-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON NJL04010-TOTAL-LINE-CNT.
+      *--       토탈익스포져PEER구분코드
+             09  NJL04010-TE-PEER-DSTCD          PIC  X(005).
+      *--       산업평가등급구분코드
+             09  NJL04010-IDSTRY-V-GRD-DSTCD     PIC  X(004).
+      *--       산업별EAD금액
+             09  NJL04010-IDSTRY-PER-EAD-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       가용EAD금액
+             09  NJL04010-AVL-EAD-AMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별조정비율
+             09  NJL04010-IDSTRY-P-ADJS-RATO     PIC  9(003)V9(02).
+      *--       산업토탈익스포져금액
+             09  NJL04010-IDSTRY-TE-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업관리한도금액
+             09  NJL04010-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국외산업관리한도금액
+             09  NJL04010-ABRD-I-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        N  J  L  0  4  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL04010-PRCSS-DSTIC          ;처리구분
+      *X  NJL04010-BASE-YM              ;기준년월
+      *L  NJL04010-TOTAL-LINE-CNT       ;총라인수
+      *A  NJL04010-GRID1                ;그리드1
+      *X  NJL04010-TE-PEER-DSTCD        ;토탈익스포져PEER구분코드
+      *X  NJL04010-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분코드
+      *S  NJL04010-IDSTRY-PER-EAD-AMT   ;산업별EAD금액
+      *S  NJL04010-AVL-EAD-AMT          ;가용EAD금액
+      *N  NJL04010-IDSTRY-P-ADJS-RATO   ;산업별조정비율
+      *S  NJL04010-IDSTRY-TE-AMT        ;산업토탈익스포져금액
+      *S  NJL04010-IDSTRY-MGT-CLAM      ;산업관리한도금액
+      *S  NJL04010-ABRD-I-MGT-CLAM      ;국외산업관리한도금액

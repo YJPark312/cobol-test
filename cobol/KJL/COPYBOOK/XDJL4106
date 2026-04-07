@@ -1,0 +1,175 @@
+      *================================================================*
+      *@ NAME : XDJL4106                                               *
+      *@ DESC : DCExposure총괄조회 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-06-12 15:46:31                          *
+      *  생성일시     : 2018-06-12 15:46:32                          *
+      *  전체길이     : 00000023 BYTES                               *
+      *================================================================*
+           03  XDJL4106-RETURN.
+             05  XDJL4106-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4106-OK            VALUE  '00'.
+                 88  COND-XDJL4106-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4106-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4106-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4106-ERROR         VALUE  '09'.
+                 88  COND-XDJL4106-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4106-SYSERROR      VALUE  '99'.
+             05  XDJL4106-R-LINE                 PIC  9(006).
+             05  XDJL4106-R-ERRCD                PIC  X(008).
+             05  XDJL4106-R-TREAT-CD             PIC  X(008).
+             05  XDJL4106-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4106-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4106-I-PRCSS-DSTIC          PIC  X(002).
+      *--       채무자번호
+             05  XDJL4106-I-BRWR-NO              PIC  X(013).
+      *--       조회기준일자
+             05  XDJL4106-I-BASE-YMD             PIC  X(008).
+      *----------------------------------------------------------------*
+           03  XDJL4106-OUT.
+      *----------------------------------------------------------------*
+      *--       차주명
+             05  XDJL4106-O-BRWR-NAME            PIC  X(042).
+      *--       대표사업자번호
+             05  XDJL4106-O-RPSNT-BZNO           PIC  X(010).
+      *--       매출액
+             05  XDJL4106-O-SALEPR               PIC  9(015).
+      *--       신용등급
+             05  XDJL4106-O-CRDRAT               PIC  X(004).
+      *--       기업규모
+             05  XDJL4106-O-CORP-SCAL            PIC  X(020).
+      *--       총자산
+             05  XDJL4106-O-TOTAL-ASST           PIC  9(015).
+      *--       신용등급평가일
+             05  XDJL4106-O-CRDRAT-VALUA-DD      PIC  X(008).
+      *--       TE기준한도
+             05  XDJL4106-O-TE-BASE-LIMT         PIC  9(015).
+      *--       관리대상여부
+             05  XDJL4106-O-MGT-TAGET-YN         PIC  X(008).
+      *--       관리한도설정일
+             05  XDJL4106-O-MGT-LIMT-STUP-DD     PIC  X(008).
+      *--       한도설정유효일
+             05  XDJL4106-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       여신성관리한도
+             05  XDJL4106-O-LNBZ-I-MGT-LIMT      PIC  9(015).
+      *--       여신성한도기준TE
+             05  XDJL4106-O-LNBZ-I-LIMT-BASE-TE  PIC  9(015).
+      *--       여신성한도여유액
+             05  XDJL4106-O-LNBZ-IL-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XDJL4106-O-MRKTY-MGT-LIMT       PIC  9(015).
+      *--       시장성한도기준TE
+             05  XDJL4106-O-MRKTY-LIMT-BASE-TE   PIC  9(015).
+      *--       시장성한도여유액
+             05  XDJL4106-O-MRKTY-L-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도
+             05  XDJL4106-O-MGT-LIMT             PIC  9(015).
+      *--       한도기준TE
+             05  XDJL4106-O-LIMT-BASE-TE         PIC  9(015).
+      *--       한도여유액
+             05  XDJL4106-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       외화신용공여한도
+             05  XDJL4106-O-FC-GRCR-CLAM         PIC  9(015).
+      *--       외화한도소진액
+             05  XDJL4106-O-FC-LIMT-AUC          PIC  9(015).
+      *--       외화한도여유액
+             05  XDJL4106-O-FC-LIMT-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신용평가기관
+             05  XDJL4106-O-CRA                  PIC  X(002).
+      *--       그룹코드
+             05  XDJL4106-O-GROUP-CD             PIC  X(006).
+      *--       그룹명
+             05  XDJL4106-O-GROUP-NAME           PIC  X(042).
+      *--       그룹등급
+             05  XDJL4106-O-GROUP-GRD            PIC  X(004).
+      *--       그룹순위
+             05  XDJL4106-O-GROUP-RANKG          PIC  9(003).
+      *--       주채무계열여부
+             05  XDJL4106-O-MAIN-DEBT-AFFLT-YN   PIC  X(010).
+      *--       그룹한도설정유효일
+             05  XDJL4106-O-GROUP-LS-VALD-DD     PIC  X(008).
+      *--       그룹관리한도
+             05  XDJL4106-O-GROUP-MGT-LIMT       PIC  9(015).
+      *--       그룹한도기준TE
+             05  XDJL4106-O-GROUP-LIMT-BASE-TE   PIC  9(015).
+      *--       그룹한도여유액
+             05  XDJL4106-O-GROUP-L-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       표준산업분류코드
+             05  XDJL4106-O-STND-I-CLSFI-CD      PIC  X(005).
+      *--       표준산업코드명
+             05  XDJL4106-O-STND-IDSTRY-CD-NAME  PIC  X(042).
+      *--       PEER업종
+             05  XDJL4106-O-PEER-BZTYP           PIC  X(102).
+      *--       산업등급
+             05  XDJL4106-O-IDSTRY-GRD           PIC  X(004).
+      *--       관리대상산업여부
+             05  XDJL4106-O-MGT-TAGET-IDSTRY-YN  PIC  X(020).
+      *--       업종대분류코드
+             05  XDJL4106-O-BZTYP-LAG-CLSFI-CD   PIC  X(003).
+      *--       업종대분류명
+             05  XDJL4106-O-BZTYP-E-CLSFI-NAME   PIC  X(032).
+      *--       업종대분류TE한도
+             05  XDJL4106-O-BZTYP-EC-TE-LIMT     PIC  9(015).
+      *--       업종대분류TE
+             05  XDJL4106-O-BZTYP-ERA-CLSFI-TE   PIC  9(015).
+      *--       업종한도여유액
+             05  XDJL4106-O-BZTYP-L-SEXTR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  1  0  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4106-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4106-I-BRWR-NO            ;채무자번호
+      *X  XDJL4106-I-BASE-YMD           ;조회기준일자
+      *X  XDJL4106-O-BRWR-NAME          ;차주명
+      *X  XDJL4106-O-RPSNT-BZNO         ;대표사업자번호
+      *N  XDJL4106-O-SALEPR             ;매출액
+      *X  XDJL4106-O-CRDRAT             ;신용등급
+      *X  XDJL4106-O-CORP-SCAL          ;기업규모
+      *N  XDJL4106-O-TOTAL-ASST         ;총자산
+      *X  XDJL4106-O-CRDRAT-VALUA-DD    ;신용등급평가일
+      *N  XDJL4106-O-TE-BASE-LIMT       ;TE기준한도
+      *X  XDJL4106-O-MGT-TAGET-YN       ;관리대상여부
+      *X  XDJL4106-O-MGT-LIMT-STUP-DD   ;관리한도설정일
+      *X  XDJL4106-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *N  XDJL4106-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *N  XDJL4106-O-LNBZ-I-LIMT-BASE-TE;여신성한도기준TE
+      *S  XDJL4106-O-LNBZ-IL-SEXTR-AMT  ;여신성한도여유액
+      *N  XDJL4106-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *N  XDJL4106-O-MRKTY-LIMT-BASE-TE ;시장성한도기준TE
+      *S  XDJL4106-O-MRKTY-L-SEXTR-AMT  ;시장성한도여유액
+      *N  XDJL4106-O-MGT-LIMT           ;관리한도
+      *N  XDJL4106-O-LIMT-BASE-TE       ;한도기준TE
+      *S  XDJL4106-O-LIMT-SEXTR-AMT     ;한도여유액
+      *N  XDJL4106-O-FC-GRCR-CLAM       ;외화신용공여한도
+      *N  XDJL4106-O-FC-LIMT-AUC        ;외화한도소진액
+      *S  XDJL4106-O-FC-LIMT-SEXTR-AMT  ;외화한도여유액
+      *X  XDJL4106-O-CRA                ;신용평가기관
+      *X  XDJL4106-O-GROUP-CD           ;그룹코드
+      *X  XDJL4106-O-GROUP-NAME         ;그룹명
+      *X  XDJL4106-O-GROUP-GRD          ;그룹등급
+      *N  XDJL4106-O-GROUP-RANKG        ;그룹순위
+      *X  XDJL4106-O-MAIN-DEBT-AFFLT-YN ;주채무계열여부
+      *X  XDJL4106-O-GROUP-LS-VALD-DD   ;그룹한도설정유효일
+      *N  XDJL4106-O-GROUP-MGT-LIMT     ;그룹관리한도
+      *N  XDJL4106-O-GROUP-LIMT-BASE-TE ;그룹한도기준TE
+      *S  XDJL4106-O-GROUP-L-SEXTR-AMT  ;그룹한도여유액
+      *X  XDJL4106-O-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XDJL4106-O-STND-IDSTRY-CD-NAME;표준산업코드명
+      *X  XDJL4106-O-PEER-BZTYP         ;PEER업종
+      *X  XDJL4106-O-IDSTRY-GRD         ;산업등급
+      *X  XDJL4106-O-MGT-TAGET-IDSTRY-YN;관리대상산업여부
+      *X  XDJL4106-O-BZTYP-LAG-CLSFI-CD ;업종대분류코드
+      *X  XDJL4106-O-BZTYP-E-CLSFI-NAME ;업종대분류명
+      *N  XDJL4106-O-BZTYP-EC-TE-LIMT   ;업종대분류TE한도
+      *N  XDJL4106-O-BZTYP-ERA-CLSFI-TE ;업종대분류TE
+      *S  XDJL4106-O-BZTYP-L-SEXTR-AMT  ;업종한도여유액

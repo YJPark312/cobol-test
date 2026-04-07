@@ -1,0 +1,58 @@
+//TKJLP061 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0061 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0061',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0061,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0061
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "고객식별자"                         POSITION(      12         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      22         )
+   CHAR(                     13)                ,
+   "기업상호명"                         POSITION(      35         )
+   CHAR(                     52)                ,
+   "고객관리부점코드"                   POSITION(      87         )
+   CHAR(                      4)                ,
+   "TE기업규모구분"                     POSITION(      91         )
+   CHAR(                      1)                ,
+   "명목액기준한도"                     POSITION(      92:      99)
+   DECIMAL                                      ,
+   "TE관리한도"                         POSITION(     100:     107)
+   DECIMAL                                      ,
+   "토탈익스포져금액"                   POSITION(     108:     115)
+   DECIMAL                                      ,
+   "여신성관리한도"                     POSITION(     116:     123)
+   DECIMAL                                      ,
+   "여신성익스포져금액"                 POSITION(     124:     131)
+   DECIMAL                                      ,
+   "시장성관리한도"                     POSITION(     132:     139)
+   DECIMAL                                      ,
+   "시장성익스포져금액"                 POSITION(     140:     147)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(     148         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     168         )
+   CHAR(                      7)
+   )
+//

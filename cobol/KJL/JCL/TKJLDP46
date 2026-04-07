@@ -1,0 +1,44 @@
+//TKJLDP46 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* 토탈익스포져　해외고객정보　추출（글로벌제공）
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLD115,OPT=&SYSUID
+//OTFILE  DD DSN=KJL.SD.SHRKFI.BJLD115.V001,DISP=SHR
+//SYSIN   DD *
+KB0-%%$ODATE-TKJLDP46-001-ONLBAT-KB STAR-%%$ODATE-&SYSUID
+//*자료기준년월일-작업직원번호
+/*
+//*********************************************************************
+//* 파일보안서버 전송
+//*********************************************************************
+//NDMSEND  EXEC PGM=DMBATCH
+//DMNETMAP DD  DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB DD  DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL DD  DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT  DD  SYSOUT=*
+//SYSIN    DD  *
+  SIGNON  USERID=(KJL000N,)  ESF=NO  CASE=YES
+  SUBMIT  PROC=MKJLNDM0  MAXDELAY=0             -
+  &SERVNM=nepapo23                              -
+  &TODIR1=/data/efms/data/ftp/kjl000            -
+  &FRDSN1=KJL.SD.SHRKFI.BJLD115.V001            -
+  &TODSN1=3801074-3801074-KJL_BJLD115_%%$ODATE.TXT
+  SIGNOFF
+/*
+//*********************************************************************
+//* 파일보안서버 전송
+//*********************************************************************
+//NDMSEND  EXEC PGM=DMBATCH
+//DMNETMAP DD  DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB DD  DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL DD  DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT  DD  SYSOUT=*
+//SYSIN    DD  *
+  SIGNON  USERID=(KJL000N,)  ESF=NO  CASE=YES
+  SUBMIT  PROC=MKJLNDM0  MAXDELAY=0             -
+  &SERVNM=nepapo23                              -
+  &TODIR1=/data/efms/data/ftp/kjl000            -
+  &FRDSN1=KJL.SD.SHRKFI.BJLD115.V001            -
+  &TODSN1=3801074-1634477-KJL_BJLD115_%%$ODATE.TXT
+  SIGNOFF
+//

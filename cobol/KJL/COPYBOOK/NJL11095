@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : NJL11095                                               *
+      *@ DESC : 기업및그룹한도신청및승인(결의록관리)               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-06-11 18:49:26                          *
+      *  생성일시     : 2020-06-11 18:49:32                          *
+      *  전체길이     : 00031182 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  NJL11095-PRCSS-DSTIC              PIC  X(002).
+      *--     고객구분
+           07  NJL11095-CUST-DSTIC               PIC  X(001).
+      *--     KB-PIN
+           07  NJL11095-KB-PIN                   PIC  X(010).
+      *--     고객명
+           07  NJL11095-CUSTNM                   PIC  X(052).
+      *--     한도신청번호
+           07  NJL11095-LIMT-APLCN-NO            PIC  X(010).
+      *--     한도승인권자구분
+           07  NJL11095-LIMT-ATRZ-DSTCD          PIC  X(001).
+      *--     종합승인구분
+           07  NJL11095-CMPRE-ATHOR-DSTIC        PIC  X(001).
+      *--     총라인수
+ROWCNT     07  NJL11095-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  NJL11095-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON NJL11095-TOTAL-LINE-CNT.
+      *--       승인위원직원번호
+             09  NJL11095-ATHOR-CMMB-EMPID       PIC  X(007).
+      *--       승인위원구분
+             09  NJL11095-ATHOR-CMMB-DSTIC       PIC  X(001).
+      *--       한도승인구분코드
+             09  NJL11095-LIMT-ATHOR-DSTCD       PIC  X(001).
+      *--       승인의견내용
+             09  NJL11095-ATHOR-OPIN-CTNT        PIC  X(302).
+      *================================================================*
+      *        N  J  L  1  1  0  9  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL11095-PRCSS-DSTIC          ;처리구분
+      *X  NJL11095-CUST-DSTIC           ;고객구분
+      *X  NJL11095-KB-PIN               ;KB-PIN
+      *X  NJL11095-CUSTNM               ;고객명
+      *X  NJL11095-LIMT-APLCN-NO        ;한도신청번호
+      *X  NJL11095-LIMT-ATRZ-DSTCD      ;한도승인권자구분
+      *X  NJL11095-CMPRE-ATHOR-DSTIC    ;종합승인구분
+      *L  NJL11095-TOTAL-LINE-CNT       ;총라인수
+      *A  NJL11095-GRID1                ;그리드1
+      *X  NJL11095-ATHOR-CMMB-EMPID     ;승인위원직원번호
+      *X  NJL11095-ATHOR-CMMB-DSTIC     ;승인위원구분
+      *X  NJL11095-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *X  NJL11095-ATHOR-OPIN-CTNT      ;승인의견내용

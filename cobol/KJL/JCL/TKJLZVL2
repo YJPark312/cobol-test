@@ -1,0 +1,336 @@
+//TKJLZVL2 JOB 'KIC',REGION=0M,NOTIFY=$SYSUID,CLASS=T,MSGCLASS=X
+//*------------------------------------------------------------------*/
+//* 2단계보안조치 관련 정보삭제 검증작업
+//*------------------------------------------------------------------*/
+//DSNTEP1  EXEC PGM=IKJEFT01,DYNAMNBR=20
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTEP2) PLAN(DSNTEP13) -
+  LIB('DB2APS.DSND10.RUNLIB.LOAD') PARMS('/ALIGN(MID)')
+  END
+//SYSIN    DD *
+(SELECT 'THKICBR01' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICBR01
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICBR04' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICBR04
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICBR05' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICBR05
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICBR06' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICBR06
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL01' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL01
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL02' 테이블명, '공동차주주민번호' 컬럼명
+      , 공동차주주민번호
+   FROM DB2DBA.THKICNL02
+  WHERE 공동차주주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL03' 테이블명, '보증인주민번호' 컬럼명
+      , 보증인주민번호
+   FROM DB2DBA.THKICNL03
+  WHERE 보증인주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL04' 테이블명, '보증채무주민번호' 컬럼명
+      , 보증채무주민번호
+   FROM DB2DBA.THKICNL04
+  WHERE 보증채무주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL10' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL10
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL11' 테이블명, '공동차주주민번호' 컬럼명
+      , 공동차주주민번호
+   FROM DB2DBA.THKICNL11
+  WHERE 공동차주주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL12' 테이블명, '보증인주민번호' 컬럼명
+      , 보증인주민번호
+   FROM DB2DBA.THKICNL12
+  WHERE 보증인주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL13' 테이블명, '보증채무주민번호' 컬럼명
+      , 보증채무주민번호
+   FROM DB2DBA.THKICNL13
+  WHERE 보증채무주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL34' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL34
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL40' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL40
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL43' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL43
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICNL99' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICNL99
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICPR13' 테이블명, '고객주민번호' 컬럼명
+      , 고객주민번호
+   FROM DB2DBA.THKICPR13
+  WHERE 고객주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICPR22' 테이블명, '보증인주민번호' 컬럼명
+      , 보증인주민번호
+   FROM DB2DBA.THKICPR22
+  WHERE 보증인주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKICPR23' 테이블명, '보증채무주민번호' 컬럼명
+      , 보증채무주민번호
+   FROM DB2DBA.THKICPR23
+  WHERE 보증채무주민번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0001' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0001
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0003' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0003
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0004' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0004
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0007' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0007
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0008' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0008
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0009' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0009
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0010' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0010
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0011' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0011
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0014' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0014
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0015' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0015
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0015' 테이블명, '모기업법인등록번호' 컬럼명
+      , 모기업법인등록번호
+   FROM DB2DBA.THKJL0015
+  WHERE 모기업법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0016' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0016
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0016' 테이블명, '모기업법인등록번호' 컬럼명
+      , 모기업법인등록번호
+   FROM DB2DBA.THKJL0016
+  WHERE 모기업법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0017' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0017
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0020' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0020
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0027' 테이블명, '담보보증차주번호' 컬럼명
+      , 담보보증차주번호
+   FROM DB2DBA.THKJL0027
+  WHERE 담보보증차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0027' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0027
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0028' 테이블명, '담보보증차주번호' 컬럼명
+      , 담보보증차주번호
+   FROM DB2DBA.THKJL0028
+  WHERE 담보보증차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0028' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0028
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0031' 테이블명, '담보보증차주번호' 컬럼명
+      , 담보보증차주번호
+   FROM DB2DBA.THKJL0031
+  WHERE 담보보증차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0032' 테이블명, '담보보증차주번호' 컬럼명
+      , 담보보증차주번호
+   FROM DB2DBA.THKJL0032
+  WHERE 담보보증차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0033' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0033
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0034' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0034
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0040' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0040
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0041' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0041
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0042' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0042
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0055' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0055
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0059' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0059
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0062' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0062
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0074' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0074
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0075' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0075
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0125' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0125
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0126' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0126
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0127' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0127
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0128' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0128
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0129' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0129
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0130' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0130
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0151' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0151
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0152' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0152
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0161' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0161
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJL0162' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJL0162
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR005' 테이블명, '통합CRM번호' 컬럼명
+      , '통합CRM번호'
+   FROM DB2DBA.THKJLR005
+  WHERE '통합CRM번호' > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR005' 테이블명, '고객고유번호' 컬럼명
+      , 고객고유번호
+   FROM DB2DBA.THKJLR005
+  WHERE 고객고유번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR005' 테이블명, '법인등록번호' 컬럼명
+      , 법인등록번호
+   FROM DB2DBA.THKJLR005
+  WHERE 법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR006' 테이블명, '고객고유번호' 컬럼명
+      , 고객고유번호
+   FROM DB2DBA.THKJLR006
+  WHERE 고객고유번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR006' 테이블명, '발행법인등록번호' 컬럼명
+      , 발행법인등록번호
+   FROM DB2DBA.THKJLR006
+  WHERE 발행법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR007' 테이블명, '차주번호' 컬럼명, 차주번호
+   FROM DB2DBA.THKJLR007
+  WHERE 차주번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR009' 테이블명, '법인등록번호' 컬럼명
+      , 법인등록번호
+   FROM DB2DBA.THKJLR009
+  WHERE 법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR011' 테이블명, '고객고유번호' 컬럼명
+      , 고객고유번호
+   FROM DB2DBA.THKJLR011
+  WHERE 고객고유번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR011' 테이블명, '법인등록번호' 컬럼명
+      , 법인등록번호
+   FROM DB2DBA.THKJLR011
+  WHERE 법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR012' 테이블명, '고객고유번호' 컬럼명
+      , 고객고유번호
+   FROM DB2DBA.THKJLR012
+  WHERE 고객고유번호 > ''
+  FETCH FIRST 50 ROWS ONLY) UNION ALL
+(SELECT 'THKJLR012' 테이블명, '발행법인등록번호' 컬럼명
+      , 발행법인등록번호
+   FROM DB2DBA.THKJLR012
+  WHERE 발행법인등록번호 > ''
+  FETCH FIRST 50 ROWS ONLY)
+   WITH UR;
+/*
+//

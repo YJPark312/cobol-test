@@ -1,0 +1,53 @@
+      *================================================================*
+      *@ NAME : V1JL4010                                               *
+      *@ DESC : 산업별TE한도설정조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-12 16:00:47                          *
+      *  생성일시     : 2020-03-12 16:00:53                          *
+      *  전체길이     : 00196007 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4010-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4010-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4010-OUTPT-LINE-CNT1.
+      *--       PEER구분코드
+             09  V1JL4010-PEER-DSTCD             PIC  X(005).
+      *--       PEER코드명
+             09  V1JL4010-PEER-CD-NAME           PIC  X(102).
+      *--       산업평가등급구분코드
+             09  V1JL4010-IDSTRY-V-GRD-DSTCD     PIC  X(004).
+      *--       산업별EAD금액
+             09  V1JL4010-IDSTRY-PER-EAD-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       가용EAD금액
+             09  V1JL4010-AVL-EAD-AMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별조정비율
+             09  V1JL4010-IDSTRY-P-ADJS-RATO     PIC  9(003)V9(02).
+      *--       산업토탈익스포져금액
+             09  V1JL4010-IDSTRY-TE-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업관리한도금액
+             09  V1JL4010-IDSTRY-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국외산업관리한도금액
+             09  V1JL4010-ABRD-I-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     처리결과
+           07  V1JL4010-PRCSS-RSULT              PIC  X(002).
+      *================================================================*
+      *        V  1  J  L  4  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4010-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4010-GRID1                ;그리드1
+      *X  V1JL4010-PEER-DSTCD           ;PEER구분코드
+      *X  V1JL4010-PEER-CD-NAME         ;PEER코드명
+      *X  V1JL4010-IDSTRY-V-GRD-DSTCD   ;산업평가등급구분코드
+      *S  V1JL4010-IDSTRY-PER-EAD-AMT   ;산업별EAD금액
+      *S  V1JL4010-AVL-EAD-AMT          ;가용EAD금액
+      *N  V1JL4010-IDSTRY-P-ADJS-RATO   ;산업별조정비율
+      *S  V1JL4010-IDSTRY-TE-AMT        ;산업토탈익스포져금액
+      *S  V1JL4010-IDSTRY-MGT-CLAM      ;산업관리한도금액
+      *S  V1JL4010-ABRD-I-MGT-CLAM      ;국외산업관리한도금액
+      *X  V1JL4010-PRCSS-RSULT          ;처리결과

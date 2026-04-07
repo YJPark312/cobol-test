@@ -1,0 +1,76 @@
+      *===========================================================
+      *  프로그램명    : QJL0531
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0531
+      *  사용예        : 01  XQJL0531-CA.
+      *                      COPY  XQJL0531.
+      *  최종변경일시  : 2019년12월24일10시49분56초
+      *===========================================================
+           03  XQJL0531-IN.
+      *            국내외구분
+               05  XQJL0531-I-HMAB-DSTCD
+                                          PIC  X(00001).
+      *            그룹회사코드
+               05  XQJL0531-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0531-I-BASE-YMD
+                                          PIC  X(00008).
+      *            신표준산업분류코드
+               05  XQJL0531-I-NEW-SI-CLSFI-CD
+                                          PIC  X(00005).
+      *            산업TE기업규모구분
+               05  XQJL0531-I-IDSTRY-TCS-DSTCD
+                                          PIC  X(00001).
+      *            N업종코드
+               05  XQJL0531-I-N-BZTYP-CD
+                                          PIC  X(00003).
+      *            N기업규모구분
+               05  XQJL0531-I-N-TCS-DSTCD
+                                          PIC  X(00001).
+           03  XQJL0531-OUT.
+      *            대분류업종코드
+               05  XQJL0531-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00101  PIC  X(00003).
+      *            대분류업종코드명
+               05  XQJL0531-O-LAG-C-BZTYP-CD-NAME
+                           OCCURS  00101  PIC  X(00032).
+      *            산업TE기업규모구분
+               05  XQJL0531-O-IDSTRY-TCS-DSTCD
+                           OCCURS  00101  PIC  X(00001).
+      *            산업별규모별SUB한도
+               05  XQJL0531-O-IDSTRY-PSP-SUB-CLAM
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            산업별규모별TE금액
+               05  XQJL0531-O-IDSTRY-PSP-TE-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            비중
+               05  XQJL0531-O-WGHTZ
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            소진율
+               05  XQJL0531-O-EXHS-RT
+                           OCCURS  00101  PIC S9(00003)V9(2) COMP-3.
+      *            여유액
+               05  XQJL0531-O-LIMT-SEXTR-AMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            대상여부
+               05  XQJL0531-O-TAGET-YN
+                           OCCURS  00101  PIC  X(00001).
+      *            한도초과년월일
+               05  XQJL0531-O-LIMT-EXCS-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            예외적용년월일
+               05  XQJL0531-O-ECEPT-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            취급중단년월일
+               05  XQJL0531-O-HNDLN-DSCN-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            취급기준1적용년월일
+               05  XQJL0531-O-HNDLN-B-1-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            취급기준2적용년월일
+               05  XQJL0531-O-HNDLN-B-2-APLY-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *===========================================================
+      *  XQJL0531   C O P Y B O O K   E N D
+      *===========================================================

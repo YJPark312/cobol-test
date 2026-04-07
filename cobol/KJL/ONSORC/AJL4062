@@ -1,0 +1,284 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4062 (ASSub-Limit현황(미기표포함))
+      *@처리유형  : AS
+      *@처리개요  : Sub-Limit현황(미기표포함)조회
+      *@             하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20171117: 신규작성
+      * YBH    :20180117: 기업규모구분 추가
+      * PJH    :20191220: 국내외구분코드　추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4062.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   17/11/17.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4062'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   Sub-Limit현황(미기표포함)조회
+       01  XDJL4821-CA.
+           COPY  XDJL4821.
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJL4062-CA.
+           COPY  YNJL4062.
+
+       01  YPJL4062-CA.
+           COPY  YPJL4062.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4062-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@1 출력영역 확보
+           #GETOUT YPJL4062-CA
+           .
+      * COMMON AREA SETTING 파라미터 조립
+      * MOVE 계좌번호           TO JICOM-ACNO
+      * MOVE 상품코드           TO JICOM-PRDCT-CD
+      * MOVE 고객번호           TO JICOM-CNO
+      * MOVE 상품계약회차       TO JICOM-PRDCT-CTRC-NTH
+
+      *@1  COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   처리구분에 따른 입력값 검증(01:조회)
+           EVALUATE YNJL4062-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *       기준년월일
+               IF YNJL4062-BASE-YMD = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN OTHER
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           EVALUATE YNJL4062-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *#1     조회처리시
+      *@1     Sub-Limit현황(미기표포함)조회 프로그램호출
+               PERFORM S3100-DJL4821-CALL-RTN                           01040003
+                  THRU S3100-DJL4821-CALL-EXT                           01050003
+           END-EVALUATE
+
+      *@1 폼ID SET
+           #BOFMID 'V1KJL04062000'
+           .                                                            01060003
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------01090004
+      *@   Sub-Limit현황(미기표포함)조회 DC호출
+      *-----------------------------------------------------------------01110004
+       S3100-DJL4821-CALL-RTN.                                          01120003
+
+           INITIALIZE       XDJL4821-IN
+
+      *@1 입력파라미터 조립
+      *   처리구분                                                    01170003
+           MOVE YNJL4062-PRCSS-DSTIC                                    01180003
+             TO XDJL4821-I-PRCSS-DSTIC                                  01190003
+      *   기준년월일
+           MOVE YNJL4062-BASE-YMD
+             TO XDJL4821-I-BASE-YMD
+191220*    국내외구분코드                                             01940024
+           MOVE YNJL4062-HMAB-DSTCD                                     01950024
+             TO XDJL4821-I-HMAB-DSTCD                                   01960024
+
+      *@1 Sub-Limit현황(미기표포함)조회 프로그램 호출
+           #DYCALL DJL4821 YCCOMMON-CA XDJL4821-CA                      01910003
+                                                                        01920003
+      *   처리결과CHECK
+           EVALUATE TRUE
+           WHEN COND-XDJL4821-OK
+      *@      출력파라미터 조립
+      *       총라인수
+               MOVE XDJL4821-O-OUTPT-LINE-CNT1
+                 TO YPJL4062-TOTAL-LINE-CNT
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR WK-I > XDJL4821-O-OUTPT-LINE-CNT1
+      *            SUB업종코드
+                   MOVE XDJL4821-O-SUB-BZTYP-CD(WK-I)
+                     TO YPJL4062-SUB-BZTYP-CD(WK-I)
+      *            SUB업종코드명
+                   MOVE XDJL4821-O-SUB-BZTYP-CD-NAME(WK-I)
+                     TO YPJL4062-SUB-BZTYP-CD-NAME(WK-I)
+180117*           산업TE기업규모구분
+                   MOVE XDJL4821-O-IDSTRY-TCS-DSTCD(WK-I)
+                     TO YPJL4062-IDSTRY-TCS-DSTCD(WK-I)
+      *           전년도말익스포져금액
+                   MOVE XDJL4821-O-PYY-X-END-EXPSR-AMT(WK-I)
+                     TO YPJL4062-PYY-X-END-EXPSR-AMT(WK-I)
+      *            SUB관리한도금액
+                   MOVE XDJL4821-O-SUB-MGT-CLAM(WK-I)
+                     TO YPJL4062-SUB-MGT-CLAM(WK-I)
+      *            SUB익스포져금액
+                   MOVE XDJL4821-O-SUB-EXPSR-AMT(WK-I)
+                     TO YPJL4062-SUB-EXPSR-AMT(WK-I)
+      *           여유액
+                   MOVE XDJL4821-O-SEXTR-AMT(WK-I)
+                     TO YPJL4062-SEXTR-AMT(WK-I)
+      *           소진율1
+                   MOVE XDJL4821-O-EXHS-RT1(WK-I)
+                     TO YPJL4062-EXHS-RT1(WK-I)
+      *           순증한도
+                   MOVE XDJL4821-O-NTIC-LIMT(WK-I)
+                     TO YPJL4062-NTIC-LIMT(WK-I)
+      *           순증토탈익스포져
+                   MOVE XDJL4821-O-NTIC-TE(WK-I)
+                     TO YPJL4062-NTIC-TE(WK-I)
+      *           순증여유액
+                   MOVE XDJL4821-O-NTIC-SEXTR-AMT(WK-I)
+                     TO YPJL4062-NTIC-SEXTR-AMT(WK-I)
+      *           소진율2
+                   MOVE XDJL4821-O-EXHS-RT2(WK-I)
+                     TO YPJL4062-EXHS-RT2(WK-I)
+      *           대출금액
+                   MOVE XDJL4821-O-LN-AMT(WK-I)
+                     TO YPJL4062-LN-AMT(WK-I)
+      *           실질여유액
+                   MOVE XDJL4821-O-ATUAL-SEXTR-AMT(WK-I)
+                     TO YPJL4062-ATUAL-SEXTR-AMT(WK-I)
+      *           실질소진율
+                   MOVE XDJL4821-O-ATUAL-EXHS-RT(WK-I)
+                     TO YPJL4062-ATUAL-EXHS-RT(WK-I)
+               END-PERFORM
+           WHEN COND-XDJL4821-NOTFOUND
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJL4821-R-ERRCD
+                      XDJL4821-R-TREAT-CD
+                      XDJL4821-R-STAT
+           END-EVALUATE
+           .                                                            02030003
+
+       S3100-DJL4821-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK WK-MESSAGE.
+       S9000-FINAL-EXT.
+           EXIT.

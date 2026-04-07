@@ -1,0 +1,1799 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD014 (BT그룹　기준한도　산출）
+      *@처리유형  : BATCH
+      *@처리개요  : 그룹　기준한도 산출한다.
+      *@
+      *@ 1. BJLD011 :기준한도　재무제표　자료만　추출(BCV)
+      *@ 2. BJLD014 :기준한도　산출（상품처리계）    ㅤ
+      *@ 3. BJLD015 : BJLD014에서　산출한　기준한도　INSERT
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20090417: 신규작성
+      * YBH    :20120224: 기준한도 산식변경
+      *  - 상환능력기준한도 MAX ==> MIN
+      * HYH    :20170224: KB-PIN 전환
+      * YBH    :20170615:  3개년 재무제표실적에 의한
+      *                   기준한도 산출
+      * YBH    :20170818: 전전년자기자본금,전년자기자본금 추가
+      * HYH    :20211007: 기준한도 산출 방식 변경
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM                : 테이블명         : 접근유형
+      **  ----------------------------   -------------------------------
+      **   TE자기자본기본       : THKJL0049              : R
+      **  신용등급별가중치      : THKJL0045              : R
+      **  한은업종가중치        : THKJL0047              : R
+      **  표준산업코드목록      : THKJL0044              : R
+      **  기준한도업종별적용배수이력 : THKJL0048         : R
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD014.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/04/10.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       CONFIGURATION                   SECTION.
+      *-----------------------------------------------------------------
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *-----------------------------------------------------------------
+       INPUT-OUTPUT                    SECTION.
+      *-----------------------------------------------------------------
+       FILE-CONTROL.
+           SELECT  IN-FILE             ASSIGN       TO  INFILE
+                                       ORGANIZATION IS  SEQUENTIAL
+                                       FILE STATUS  IS  WK-IN-F-ST.
+           SELECT  OT-FILE             ASSIGN       TO  OTFILE
+                                       ORGANIZATION IS  SEQUENTIAL
+                                       FILE STATUS  IS  WK-OT-F-ST.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       FILE                            SECTION.
+      *-----------------------------------------------------------------
+       FD  IN-FILE LABEL RECORD IS     STANDARD RECORDING MODE F.
+       01  IN-REC.
+      *        계열기업군코드
+           03 IN-AFFLT-CORP-GROUP-CD        PIC  X(00006).
+      *       신평산업코드（표준산업분류코드）
+           03 IN-IDSTRY-CD                  PIC  X(00005).
+      *       한신평재무업종구분
+           03 IN-F-BZTYP-DSTCD              PIC  X(00002).
+      *       결산년월
+           03 IN-STLACC-YR                  PIC  X(00004).
+      *       그룹사신용등급구분
+           03 IN-CMGR-CRTDSCD               PIC  X(00003).
+      *       1. 영업이익
+           03 IN-YYI-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-YYI-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-YYI-AMT                    PIC S9(00015) COMP-3.
+      *       2. 이자수익
+           03 IN-IJS-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-IJS-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-IJS-AMT                    PIC S9(00015) COMP-3.
+      *       3. 감가상각비
+           03 IN-GGS-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-GGS-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-GGS-AMT                    PIC S9(00015) COMP-3.
+      *       7. 금융비용
+           03 IN-GBY-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-GBY-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-GBY-AMT                    PIC S9(00015) COMP-3.
+      *       9. 단기차입금
+           03 IN-DCI-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-DCI-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-DCI-AMT                    PIC S9(00015) COMP-3.
+      *       18.업체총차입금
+           03 IN-UCC-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-UCC-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-UCC-AMT                    PIC S9(00015) COMP-3.
+      *       19.총자산
+           03 IN-JSC-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-JSC-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-JSC-AMT                    PIC S9(00015) COMP-3.
+      *       20.매출액
+           03 IN-MCA-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-MCA-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-MCA-AMT                    PIC S9(00015) COMP-3.
+      *       22.자기자본
+           03 IN-JJB-AMT-2                  PIC S9(00015) COMP-3.
+           03 IN-JJB-AMT-1                  PIC S9(00015) COMP-3.
+           03 IN-JJB-AMT                    PIC S9(00015) COMP-3.
+
+       FD  OT-FILE LABEL RECORD IS     STANDARD RECORDING MODE F.
+       01  OT-REC.
+           COPY  TRJL0001.
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      * CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD014'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-OK                   PIC  9(003) VALUE  000.
+           03  CO-NOT-FOUND            PIC  9(003) VALUE  100.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+           03  CO-CHA-KRW              PIC  X(003) VALUE 'KRW'.
+
+           03  CO-NUM-0                PIC  9(001) VALUE  0.
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+
+      *-----------------------------------------------------------------
+      * FILE STATUS
+      *-----------------------------------------------------------------
+       01  WK-FILE-STATUS.
+           03  WK-IN-F-ST              PIC  X(002) VALUE  SPACE.
+           03  WK-OT-F-ST              PIC  X(002) VALUE  SPACE.
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-READ-CNT          PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-WRITE-CNT         PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  EOF-Y                           VALUE 'Y'.
+           03  WK-SW-CHK               PIC  X(001) VALUE  SPACE.
+               88  CHK-Y                           VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA-TOT.
+      *자기자본기준금액（그룹별최고한도액）
+           03  WK-ONCP-BSAMT-GROUP     PIC S9(018) COMP-3.
+
+       01  WK-AREA.
+      *       고객식별자
+           03  WK-CUST-IDNFR           PIC  X(010).
+      *       한신평재무업종구분
+           03  WK-F-BZTYP-DSTCD        PIC  X(002).
+      *       신표준산업분류코드
+           03  WK-NEW-SI-CLSFI-CD      PIC  X(005).
+      *       영업신용등급
+           03  WK-LAST-CRTDSCD         PIC  X(004).
+      *       한도기업구분
+           03  WK-LIMT-CORP-DSTCD      PIC  X(001).
+      *       기준한도업종구분
+           03  WK-BASE-L-BZTYP-DSTCD   PIC  X(001).
+
+      *       업체평균이자율
+           03  WK-ENTP-AVG-INT-RT      PIC S9(007)V9(4) COMP-3.
+      *       지원비율
+           03  WK-SPORT-RATO           PIC S9(007)V9(4) COMP-3.
+      *       상환예상비율
+           03  WK-RPAY-ANTICI-RATO     PIC S9(007)V9(4) COMP-3.
+      *       업종가중평균율
+           03  WK-BZTYP-WGHTG-AVG-RT   PIC S9(007)V9(4) COMP-3.
+      *       차입금매출액비율
+           03  WK-AMBR-SALEPR-RATO     PIC S9(007)V9(4) COMP-3.
+      *       차입금자기자본율
+           03  WK-AMBR-ONCP-RT         PIC S9(007)V9(4) COMP-3.
+      *       차입금총자산비율
+           03  WK-AMBR-T-ASST-RATO     PIC S9(007)V9(4) COMP-3.
+      *       기준한도적용배수율
+           03  WK-BASE-L-APLY-MLPL-RT  PIC S9(007)V9(4) COMP-3.
+
+      *       현금흐름기준금액
+           03  WK-CSFW-BSAMT           PIC S9(018) COMP-3.
+      *       자기자본기준금액
+           03  WK-ONCP-BSAMT           PIC S9(018) COMP-3.
+      *       상환능력기준한도
+           03  WK-SOLVN-BASE-CLAM      PIC S9(018) COMP-3.
+      *       규모기준한도
+           03  WK-SCAL-BASE-CLAM       PIC S9(018) COMP-3.
+      *       기준한도
+           03  WK-BASE-CLAM            PIC S9(018) COMP-3.
+      *       외화기준한도
+           03  WK-FC-BASE-CLAM         PIC S9(018) COMP-3.
+      *       현금흐름기준금액(3개년)
+           03  WK-CSFW-BSAMT-3         PIC S9(018) COMP-3.
+      *       자기자본기준금액(3개년)
+           03  WK-ONCP-BSAMT-3         PIC S9(018) COMP-3.
+      *       상환능력기준한도(3개년)
+           03  WK-SOLVN-BASE-CLAM-3    PIC S9(018) COMP-3.
+      *       규모기준한도(3개년)
+           03  WK-SCAL-BASE-CLAM-3     PIC S9(018) COMP-3.
+      *       기준한도(3개년)
+           03  WK-BASE-CLAM-3          PIC S9(018) COMP-3.
+
+211007*       영업이익x0.7
+           03  WK-YYI-AMT              PIC S9(018) COMP-3.
+      *       이자수익x0.7
+           03  WK-IJS-AMT              PIC S9(018) COMP-3.
+      *       감가상각비
+           03  WK-GGS-AMT              PIC S9(018) COMP-3.
+      *       금융비용
+           03  WK-GBY-AMT              PIC S9(018) COMP-3.
+      *       단기차입금
+           03  WK-DCI-AMT              PIC S9(018) COMP-3.
+      *       업체총차입금
+           03  WK-UCC-AMT              PIC S9(018) COMP-3.
+      *       총자산x0.7
+           03  WK-JSC-AMT              PIC S9(018) COMP-3.
+      *       매출액x0.7
+           03  WK-MCA-AMT              PIC S9(018) COMP-3.
+      *       자기자본x0.7
+           03  WK-JJB-AMT              PIC S9(018) COMP-3.
+
+211007*   영업이익(3개년)x0.7
+           03  WK-YYI-AMT-3            PIC S9(018) COMP-3.
+      *   이자수익(3개년)x0.7
+           03  WK-IJS-AMT-3            PIC S9(018) COMP-3.
+      *   감가상각비(3개년)
+           03  WK-GGS-AMT-3            PIC S9(018) COMP-3.
+      *   금융비용(3개년)
+           03  WK-GBY-AMT-3            PIC S9(018) COMP-3.
+      *   단기차입금(3개년)
+           03  WK-DCI-AMT-3            PIC S9(018) COMP-3.
+      *   업체총차입금(3개년)
+           03  WK-UCC-AMT-3            PIC S9(018) COMP-3.
+      *   총자산(3개년)x0.7
+           03  WK-JSC-AMT-3            PIC S9(018) COMP-3.
+      *   매출액(3개년)x0.7
+           03  WK-MCA-AMT-3            PIC S9(018) COMP-3.
+      *   자기자본(3개년)x0.7
+           03  WK-JJB-AMT-3            PIC S9(018) COMP-3.
+
+211007*    DB항목추가
+
+      *        TE산업분류코드
+           03  WK-TE-IDSTRY-CLSFI-CD   PIC  X(003).
+      *        자기자본산업적용비율
+           03  WK-ONCP-I-APLY-RATO     PIC S9(004)V9(4) COMP-3.
+      *        매출액산업적용비율
+           03  WK-SALEPR-I-APLY-RATO   PIC S9(004)V9(4) COMP-3.
+      *        총자산산업적용비율
+           03  WK-TOTAL-AI-APLY-RATO   PIC S9(004)V9(4) COMP-3.
+      *        차입금자본가중치값
+           03  WK-AMBR-CAPTL-WGHT-VAL  PIC S9(004)V9(4) COMP-3.
+      *        Y3차입자본가중치값
+           03  WK-Y-3A-CAPTL-WGHT-VAL  PIC S9(004)V9(4) COMP-3.
+
+      *        매출가중치값
+           03  WK-ASALE-WGHT-VAL       PIC S9(004)V9(4) COMP-3.
+      *        매출기준금액
+           03  WK-ASALE-BSAMT          PIC S9(015) COMP-3.
+      *        Y3매출기준금액
+           03  WK-Y-3-ASALE-BSAMT      PIC S9(015) COMP-3.
+      *        Y3평균매출액비율
+           03  WK-Y-3-AVG-SALEPR-RATO  PIC S9(004)V9(4) COMP-3.
+      *        차입자산비율가중치값
+           03  WK-BRRW-AR-WGHT-VAL     PIC S9(004)V9(4) COMP-3.
+      *        Y3차입자산비율가중값
+           03  WK-Y-3BA-RATO-WGHT-VAL  PIC S9(004)V9(4) COMP-3.
+      *       자산기준금액
+           03  WK-ASST-BSAMT           PIC S9(015) COMP-3.
+      *        Y3자산기준금액
+           03  WK-Y-3-ASST-BSAMT       PIC S9(015) COMP-3.
+
+      *       신차입금자기자본비율
+           03  WK-NEW-AMBR-ONCP-RATO   PIC S9(004)V9(4) COMP-3.
+      *        Y3신차입금자기자본율
+           03  WK-Y-3N-AMBR-ONCP-RATO  PIC S9(004)V9(4) COMP-3.
+      *       신차입금총자산비율
+           03  WK-NEW-AT-ASST-RATO     PIC S9(004)V9(4) COMP-3.
+      *        Y3신차입금총자산비율
+           03  WK-Y-3NAT-ASST-RATO     PIC S9(004)V9(4) COMP-3.
+
+      *    DISPLAY
+           03  WK-DIS-1                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-2                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-3                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-4                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-5                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-6                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-7                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-8                PIC ---,---,---,---,--9.999.
+           03  WK-DIS-8                PIC ---,---,---,---,--9.999.
+
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+       EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+       01  WK-HOST-IN.
+      *        그룹회사코드
+           03  WK-H-I-GROUP-CO-CD           PIC  X(00003).
+      *        기준일
+           03  WK-H-I-BASE-DD               PIC  X(00002).
+      *        기준년월
+           03  WK-H-I-BASE-YM               PIC  X(00006).
+      *        기준년월일
+           03  WK-H-I-BASE-YMD              PIC  X(00008).
+       EXEC  SQL  END    DECLARE            SECTION  END-EXEC.
+      *-----------------------------------------------------------------
+      * SQL CURSOR DECLARE
+      *-----------------------------------------------------------------
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@1 입력값 CHECK(SYSIN)
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@1 SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@1 업무처리
+           PERFORM  S3000-PROCESS-RTN
+              THRU  S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-AREA
+                         WK-SYSIN
+                         XBJISTDT-CA
+
+      *@1  JCL SYSIN ACCEPT
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD014 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *-----------------------------------------------------------------
+      *@1 공통영역기준일자 SET
+      *-----------------------------------------------------------------
+      *@2 입력파라미터 조립
+      *@ (그룹회사코드,작업실행일)
+
+      *   그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *   작업실행일
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *@2 프로그램호출:공통영역기준일자 SET
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  XBJISTDT-R-STAT = ZEROS
+           THEN
+               CONTINUE
+           ELSE
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+
+      *@1  FILE OPEN
+           PERFORM  S1100-FILE-OPEN-RTN
+              THRU  S1100-FILE-OPEN-EXT
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   FILE OPEN
+      *-----------------------------------------------------------------
+       S1100-FILE-OPEN-RTN.
+
+      *@1  INPUT FILE OPEN
+           OPEN  INPUT  IN-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1  OUTPUT FILE OPEN
+           OPEN  OUTPUT  OT-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-F-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S1100-FILE-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값 CHECK(SYSIN)
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@1 그룹회사구분코드 미입력시 에러
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업실행일 미입력시 에러
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업명 미입력시 에러
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 처리회차 미입력시 에러
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 배치작업구분 미입력시 에러
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업자ID 미입력시 에러
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 자료기준년월일
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-HOST-IN
+
+      *@1  HOST INPUT에 값 SET
+      *@(그룹회사구분코드,기준일,기준년월,기준년월일)
+
+      *    그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-H-I-GROUP-CO-CD
+
+      *    기준일
+           MOVE  WK-SYSIN-BASE-YMD(7:2)
+             TO  WK-H-I-BASE-DD
+
+      *    기준년월
+           MOVE  WK-SYSIN-BASE-YMD(1:6)
+             TO  WK-H-I-BASE-YM
+
+      *    기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  WK-H-I-BASE-YMD
+           .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  READ FILE
+           PERFORM  S3100-READ-FILE-RTN
+              THRU  S3100-READ-FILE-EXT
+
+      *@1 그룹별최고한도조회
+           PERFORM  S3200-KJL0049-SELECT-RTN
+              THRU  S3200-KJL0049-SELECT-EXT
+
+      *@1  END OF FILE일때까지 처리
+           PERFORM  UNTIL  EOF-Y
+
+      *@2          기준한도산출기본자료추출
+                    PERFORM  S3300-DATA-SELECT-RTN
+                       THRU  S3300-DATA-SELECT-EXT
+
+      *@2           DATA MOVE
+                    PERFORM  S3400-DATA-MOVE-RTN
+                       THRU  S3400-DATA-MOVE-EXT
+
+      *@2           DATA WRITE
+                    PERFORM  S3500-DATA-WRITE-RTN
+                       THRU  S3500-DATA-WRITE-EXT
+
+      *@2           READ FILE
+                    PERFORM  S3100-READ-FILE-RTN
+                       THRU  S3100-READ-FILE-EXT
+           END-PERFORM
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *    READ FILE
+      *-----------------------------------------------------------------
+       S3100-READ-FILE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-AREA
+
+      *@1  READ FILE
+           READ  IN-FILE               AT  END
+            SET  EOF-Y                 TO  TRUE
+           END-READ
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  WK-IN-F-ST
+               WHEN  ZERO
+               WHEN  CO-CHA-04
+                     ADD   CO-NUM-1    TO  WK-AC-READ-CNT
+               WHEN  CO-CHA-10
+                     SET   EOF-Y       TO  TRUE
+               WHEN  OTHER
+                     MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+                     MOVE  WK-IN-F-ST  TO  XZUGEROR-I-MSG(34:2)
+                     #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *@1 십만건마다 DISPLAY
+           IF  FUNCTION MOD(WK-AC-READ-CNT, 100000) = CO-NUM-0
+               #USRLOG 'WK-AC-READ-CNT : ' WK-AC-READ-CNT
+           END-IF
+           .
+       S3100-READ-FILE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  기준한도산출기본자료추출
+      *-----------------------------------------------------------------
+       S3300-DATA-SELECT-RTN.
+
+      *   고객식별자(계열기업군코드)
+           MOVE  IN-AFFLT-CORP-GROUP-CD
+             TO  WK-CUST-IDNFR
+      *   한신평재무업종구분
+           MOVE  IN-F-BZTYP-DSTCD
+             TO  WK-F-BZTYP-DSTCD
+      *   영업신용등급
+           IF  IN-CMGR-CRTDSCD = SPACE
+               MOVE '000'              TO  WK-LAST-CRTDSCD
+           ELSE
+               MOVE  IN-CMGR-CRTDSCD   TO  WK-LAST-CRTDSCD
+           END-IF
+
+      *   한신평산업코드(표준산업분류코드）
+           MOVE  IN-IDSTRY-CD          TO  WK-NEW-SI-CLSFI-CD
+
+
+      *@1 신용등급별지원비율/단기차입금상환비율조회
+           PERFORM  S3120-KJL0045-SELECT-RTN
+              THRU  S3120-KJL0045-SELECT-EXT
+
+      *@1 업종가중평균이자율등각종이율산출
+           PERFORM  S3130-KJL0047-SELECT-RTN
+              THRU  S3130-KJL0047-SELECT-EXT
+
+211007*@1 TE산업분류별 (자기자본,매출액,총자산) 비율 조회
+           PERFORM  S3130-KJL0046-SELECT-RTN
+              THRU  S3130-KJL0046-SELECT-EXT
+
+      *@1 그룹기준한도산출
+           PERFORM  S3160-HANDO-GROUP-CALU-RTN
+              THRU  S3160-HANDO-GROUP-CALU-EXT
+
+           .
+       S3300-DATA-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  신용등급별지원비율/단기차입금상환비율조회
+      *-----------------------------------------------------------------
+       S3120-KJL0045-SELECT-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 신용등급별지원비율/단기차입금상환비율조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,기준년월,한도기업구분,
+      *@             내부신용평가등급구분
+      *@2 출력항목:지원비율,상환예상비율
+      *@2 테이블명:신용등급별가중치(THKJL0045)
+           EXEC SQL
+             SELECT  VALUE(지원비율,0) , VALUE(상환예상비율,0)
+               INTO  :WK-SPORT-RATO
+                  ,  :WK-RPAY-ANTICI-RATO
+               FROM  DB2DBA.THKJL0045
+              WHERE  그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                AND  기준년월     = :WK-H-I-BASE-YM
+                AND  한도기업구분 = '2'
+                AND  내부신용평가등급구분= :WK-LAST-CRTDSCD
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE ZERO         TO  WK-SPORT-RATO
+                     MOVE ZERO         TO  WK-RPAY-ANTICI-RATO
+               WHEN  OTHER
+                     MOVE 'KJL0045'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'SELECT시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S3120-KJL0045-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업종가중평균이자율등각종이율산출
+      *-----------------------------------------------------------------
+       S3130-KJL0047-SELECT-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 업종가중평균율,차입금매출액비율,
+      *@  차입금자기자본율,차입금총자산비율 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,기준년월,신표준산업분류코드
+      *@2 출력항목:업종가중평균율,차입금매출액비율,
+      *@             차입금자기자본율,차입금총자산비율
+      *@2 테이블명:표준산업코드목록(THKJL0044),
+      *@             한은업종가중치(THKJL0047)
+           EXEC SQL
+             SELECT  VALUE(B.업종가중평균율,0)
+                  ,  VALUE(B.차입금매출액비율,0)
+                  ,  VALUE(B.차입금자기자본율,0)
+                  ,  VALUE(B.차입금총자산비율,0)
+               INTO  :WK-BZTYP-WGHTG-AVG-RT
+                  ,  :WK-AMBR-SALEPR-RATO
+                  ,  :WK-AMBR-ONCP-RT
+                  ,  :WK-AMBR-T-ASST-RATO
+               FROM  DB2DBA.THKJL0044 A
+                  ,  DB2DBA.THKJL0047 B
+              WHERE  A.그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                AND  A.기준년월     = :WK-H-I-BASE-YM
+                AND  A.신표준산업분류코드 = :WK-NEW-SI-CLSFI-CD
+                AND  A.그룹회사코드 = B.그룹회사코드
+                AND  A.기준년월     = B.기준년월
+                AND  A.한은매칭코드 = B.한은매칭코드
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE ZERO         TO  WK-BZTYP-WGHTG-AVG-RT
+                     MOVE ZERO         TO  WK-AMBR-SALEPR-RATO
+                     MOVE ZERO         TO  WK-AMBR-ONCP-RT
+                     MOVE ZERO         TO  WK-AMBR-T-ASST-RATO
+               WHEN  OTHER
+                     MOVE 'KJL0047'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'SELECT시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3130-KJL0047-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+211007*@  TE산업분류별 (자기자본, 매출액, 총자산) 비율 조회
+      *   T90 : 그룹
+      *-----------------------------------------------------------------
+       S3130-KJL0046-SELECT-RTN.
+
+           EXEC SQL
+             SELECT  B."TE산업분류코드"
+                  ,  VALUE(B."TE자기자본비율",0)
+                  ,  VALUE(B."TE매출액비율",0)
+                  ,  VALUE(B."TE총자산비율",0)
+               INTO  :WK-TE-IDSTRY-CLSFI-CD
+                  ,  :WK-ONCP-I-APLY-RATO
+                  ,  :WK-SALEPR-I-APLY-RATO
+                  ,  :WK-TOTAL-AI-APLY-RATO
+               FROM  DB2DBA.THKJL0046 B
+              WHERE  B.그룹회사코드     = :WK-H-I-GROUP-CO-CD
+                AND  B.기준년월         = :WK-H-I-BASE-YM
+                AND  B."TE산업분류코드" = 'T90'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE ZERO         TO  WK-ONCP-I-APLY-RATO
+                     MOVE ZERO         TO  WK-SALEPR-I-APLY-RATO
+                     MOVE ZERO         TO  WK-TOTAL-AI-APLY-RATO
+               WHEN  OTHER
+                     MOVE 'KJL0046'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'SELECT시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3130-KJL0046-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+211007*@  그룹기준한도산출
+      *-----------------------------------------------------------------
+       S3160-HANDO-GROUP-CALU-RTN.
+
+      *-----------------------------------------------------------------
+      * 그룹의 경우 영업이익, 이자수익, 총자산, 매출액,
+      * 자기자본은 70%로 감액 적용(1개년,3개년 동일)
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+211007*   영업이익x0.7
+           COMPUTE   WK-YYI-AMT  =  IN-YYI-AMT * 0.7
+      *   이자수익x0.7
+           COMPUTE   WK-IJS-AMT  =  IN-IJS-AMT * 0.7
+      *   총자산x0.7
+           COMPUTE   WK-JSC-AMT  =  IN-JSC-AMT * 0.7
+      *   매출액x0.7
+           COMPUTE   WK-MCA-AMT  =  IN-MCA-AMT * 0.7
+      *   자기자본x0.7
+           COMPUTE   WK-JJB-AMT  =  IN-JJB-AMT * 0.7
+
+      *   단기차입금상환예상액
+           COMPUTE   WK-DCI-AMT
+                 =   IN-DCI-AMT * (WK-RPAY-ANTICI-RATO / 100)
+
+      *                                                   ----3개년---
+
+      *   영업이익(3개년) x 0.7
+           COMPUTE  WK-YYI-AMT-3
+                 =  FUNCTION MEAN(IN-YYI-AMT-2, IN-YYI-AMT-1,
+                                  IN-YYI-AMT) * 0.7
+
+      *   이자수익(3개년) x 0.7
+           COMPUTE  WK-IJS-AMT-3
+                 =  FUNCTION MEAN(IN-IJS-AMT-2, IN-IJS-AMT-1,
+                                  IN-IJS-AMT) * 0.7
+
+      *   총자산(3개년) x 0.7
+           COMPUTE  WK-JSC-AMT-3
+                 =  FUNCTION MEAN(IN-JSC-AMT-2, IN-JSC-AMT-1,
+                                  IN-JSC-AMT) * 0.7
+
+      *   매출액(3개년) x 0.7
+           COMPUTE  WK-MCA-AMT-3
+                 =  FUNCTION MEAN(IN-MCA-AMT-2, IN-MCA-AMT-1,
+                                  IN-MCA-AMT) * 0.7
+
+      *   자기자본(3개년)x 0.7
+           COMPUTE  WK-JJB-AMT-3
+                 =  FUNCTION MEAN(IN-JJB-AMT-2, IN-JJB-AMT-1,
+                                  IN-JJB-AMT) * 0.7
+
+      *   감가상각비(3개년)
+           COMPUTE  WK-GGS-AMT-3
+                 =  FUNCTION MEAN(IN-GGS-AMT-2, IN-GGS-AMT-1,
+                                  IN-GGS-AMT)
+      *   금융비용(3개년)
+           COMPUTE  WK-GBY-AMT-3
+                 =  FUNCTION MEAN(IN-GBY-AMT-2, IN-GBY-AMT-1,
+                                  IN-GBY-AMT)
+
+      *   총차입금(3개년)
+           COMPUTE  WK-UCC-AMT-3
+                 =  FUNCTION MEAN(IN-UCC-AMT-2, IN-UCC-AMT-1,
+                                  IN-UCC-AMT)
+
+
+      *   단기차입금상환예상액(3개년)
+           COMPUTE  WK-DCI-AMT-3
+                 =  FUNCTION MEAN(IN-DCI-AMT-2, IN-DCI-AMT-1,
+                                  IN-DCI-AMT)
+                 * (WK-RPAY-ANTICI-RATO / 100)
+
+      *-----------------------------------------------------------------
+211007*@1 캐쉬클러우기준액계산
+      *@  = (((영업이익+수입이자+감가상각비) -
+      *@      (금융비용+차입금상환예상액) ) /가중평균이자율)
+      *@  가중평균이자율 = 0
+      *@  =  ((영업이익+수입이자+감가상각비) -
+      *@      (금융비용+차입금상환예상액) )
+      *-----------------------------------------------------------------
+
+      *                                                   ----1개년---
+
+           IF  WK-BZTYP-WGHTG-AVG-RT = ZERO
+               COMPUTE  WK-CSFW-BSAMT
+                     = ((WK-YYI-AMT
+                     +   WK-IJS-AMT
+                     +   IN-GGS-AMT )
+                     -  (IN-GBY-AMT + WK-DCI-AMT))
+
+           ELSE
+               COMPUTE  WK-CSFW-BSAMT
+                     = (((WK-YYI-AMT
+                     +    WK-IJS-AMT
+                     +    IN-GGS-AMT )
+                     -   (IN-GBY-AMT + WK-DCI-AMT))
+                     /  ( WK-BZTYP-WGHTG-AVG-RT / 100))
+
+           END-IF
+
+           IF  WK-CSFW-BSAMT < ZERO
+               MOVE  ZERO              TO  WK-CSFW-BSAMT
+           END-IF
+
+      *                                                   ----3개년---
+
+           IF  WK-BZTYP-WGHTG-AVG-RT = ZERO
+               COMPUTE  WK-CSFW-BSAMT-3
+                     = ((WK-YYI-AMT-3
+                     +   WK-IJS-AMT-3
+                     +   WK-GGS-AMT-3 )
+                     -  (WK-GBY-AMT-3 + WK-DCI-AMT-3))
+
+           ELSE
+               COMPUTE  WK-CSFW-BSAMT-3
+                     = (((WK-YYI-AMT-3
+                     +    WK-IJS-AMT-3
+                     +    WK-GGS-AMT-3 )
+                     -   (WK-GBY-AMT-3 + WK-DCI-AMT-3))
+                     /  ( WK-BZTYP-WGHTG-AVG-RT / 100))
+
+           END-IF
+
+           IF  WK-CSFW-BSAMT-3 < ZERO
+               MOVE  ZERO              TO  WK-CSFW-BSAMT-3
+           END-IF
+
+
+211007*-----------------------------------------------------------------
+      *@1 차입금자기자본비율가중치(차입금자본가중치값)
+      *@
+      *@  차입금= 0 & 자기자본 >  0
+      *@   & 업종평균차입금자기자본율 = 0경우 1
+      *@  차입금= 0 & 자기자본 >  0
+      *@   & 업종평균차입금자기자본율 > 0경우 1.3
+      *@  차입금= 0 & 자기자본 <= 0 인 경우 1
+      *@  차입금> 0 & 자기자본 <= 0 인 경우 0.7
+      *@  그 외 나머지
+      *@  {(업종평균차입금자기자본율)÷(총차입금÷자기자본 )}
+      *@  단,  최소 0.7 , 최고 1.3을 넘지 않음
+      *-----------------------------------------------------------------
+
+      *                                                   ----1개년---
+211029*   총차입금자기자본비율
+           IF WK-JJB-AMT = ZERO
+               MOVE ZERO
+                 TO WK-NEW-AMBR-ONCP-RATO
+           ELSE
+               COMPUTE  WK-NEW-AMBR-ONCP-RATO
+                     =  IN-UCC-AMT / WK-JJB-AMT
+           END-IF
+
+
+           EVALUATE  TRUE
+               WHEN  (IN-UCC-AMT = 0  AND  WK-JJB-AMT > 0 )
+                         AND WK-AMBR-ONCP-RT = 0
+                     MOVE  1.0  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  (IN-UCC-AMT = 0  AND  WK-JJB-AMT > 0 )
+                         AND WK-AMBR-ONCP-RT > 0
+                     MOVE  1.3  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  (IN-UCC-AMT > 0  AND  WK-JJB-AMT > 0 )
+                         AND WK-AMBR-ONCP-RT = 0
+                     MOVE  1.0  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  IN-UCC-AMT = 0  AND  WK-JJB-AMT <= 0
+                     MOVE  1.0  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  IN-UCC-AMT > 0  AND  WK-JJB-AMT <= 0
+                     MOVE  0.7  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  WK-NEW-AMBR-ONCP-RATO = ZERO
+                     MOVE  1.3  TO  WK-AMBR-CAPTL-WGHT-VAL
+
+               WHEN  OTHER
+                     COMPUTE  WK-AMBR-CAPTL-WGHT-VAL
+                     =   FUNCTION MIN(
+                         FUNCTION MAX(
+                         ((WK-AMBR-ONCP-RT / 100 )
+                         / WK-NEW-AMBR-ONCP-RATO)
+                         , 0.7000 ), 1.3000 )
+
+           END-EVALUATE
+
+      *                                                   ----3개년---
+211029*   총차입금자기자본비율
+           IF WK-JJB-AMT-3 = ZERO
+               MOVE ZERO
+                 TO WK-Y-3N-AMBR-ONCP-RATO
+           ELSE
+               COMPUTE  WK-Y-3N-AMBR-ONCP-RATO
+                     =  WK-UCC-AMT-3 / WK-JJB-AMT-3
+           END-IF
+
+           EVALUATE  TRUE
+               WHEN  (WK-UCC-AMT-3 = 0  AND  WK-JJB-AMT-3 > 0 )
+                         AND WK-AMBR-ONCP-RT = 0
+                     MOVE  1.0  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 = 0  AND  WK-JJB-AMT-3 > 0 )
+                         AND WK-AMBR-ONCP-RT > 0
+                     MOVE  1.3  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 > 0  AND  WK-JJB-AMT-3 > 0 )
+                         AND WK-AMBR-ONCP-RT = 0
+                     MOVE  1.0  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  WK-UCC-AMT-3 = 0  AND  WK-JJB-AMT-3 <= 0
+                     MOVE  1.0  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  WK-UCC-AMT-3 > 0  AND  WK-JJB-AMT-3 <= 0
+                     MOVE  0.7  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  WK-Y-3N-AMBR-ONCP-RATO = ZERO
+                     MOVE  1.3  TO  WK-Y-3A-CAPTL-WGHT-VAL
+
+               WHEN  OTHER
+                     COMPUTE  WK-Y-3A-CAPTL-WGHT-VAL
+                     =   FUNCTION MIN(
+                         FUNCTION MAX(
+                         ((WK-AMBR-ONCP-RT / 100 )
+                         / WK-Y-3N-AMBR-ONCP-RATO)
+                         , 0.7000 ), 1.3000 )
+
+            END-EVALUATE
+
+
+211007*-----------------------------------------------------------------
+      *@   자기자본기준액 = 자기자본 ×산업분류별자기자본비율
+      *@                                 × 차입자본가중치
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-ONCP-BSAMT
+                 =  WK-JJB-AMT    * ( WK-ONCP-I-APLY-RATO / 100 )
+                                  *   WK-AMBR-CAPTL-WGHT-VAL
+
+           IF  WK-ONCP-BSAMT < ZERO
+               MOVE  ZERO              TO  WK-ONCP-BSAMT
+           END-IF
+
+      *                                                   ----3개년---
+           COMPUTE  WK-ONCP-BSAMT-3
+                 =  WK-JJB-AMT-3  * ( WK-ONCP-I-APLY-RATO / 100 )
+                                  *   WK-Y-3A-CAPTL-WGHT-VAL
+
+           IF  WK-ONCP-BSAMT-3 < ZERO
+               MOVE  ZERO              TO  WK-ONCP-BSAMT-3
+           END-IF
+
+      *---삭제--------------------------------------------------------
+      *@1 상환능력기준한도계산
+      *@  = MIN(MIN(캐쉬플러우기준액,자기자본기준액)
+      *@           *신용등급별지원비율,그룹별최고한도)
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      *@1 상환능력기준한도계산
+      *@  = MIN((캐쉬플러우기준액X 0.4 + 자기자본기준액X 0.2)
+      *@          *신용등급별지원비율),그룹별최고한도)
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-SOLVN-BASE-CLAM
+                 =  FUNCTION MIN((((WK-CSFW-BSAMT * 0.4 ) +
+                                   (WK-ONCP-BSAMT * 0.2))
+                                   * (WK-SPORT-RATO / 100))
+                                  , WK-ONCP-BSAMT-GROUP)
+
+           IF  WK-SOLVN-BASE-CLAM < ZERO
+               MOVE  ZERO              TO  WK-SOLVN-BASE-CLAM
+           END-IF
+
+      *                                                   ----3개년---
+           COMPUTE  WK-SOLVN-BASE-CLAM-3
+                 =  FUNCTION MIN((((WK-CSFW-BSAMT-3 * 0.4) +
+                                   (WK-ONCP-BSAMT-3 * 0.2))
+                                   * (WK-SPORT-RATO / 100))
+                                  , WK-ONCP-BSAMT-GROUP)
+
+           IF  WK-SOLVN-BASE-CLAM-3 < ZERO
+               MOVE  ZERO              TO  WK-SOLVN-BASE-CLAM
+           END-IF
+
+
+211007*-----------------------------------------------------------------
+      *@1 매출가중치 (1개년, 3개년 동일)
+      *@   3년 평균 매출액 *0.7  = 0 인 경우 0.7
+      *@   나머지 3년평균매출액비율=당기매출액/ 3년평균매출액
+      *@   단,  최소 0.7 , 최고 1.3을 넘지 않음
+      *-----------------------------------------------------------------
+      *                                                 ----1/3개년---
+
+      *@   매출액가중치
+           IF  WK-MCA-AMT-3 = ZERO
+               MOVE  0.7      TO  WK-ASALE-WGHT-VAL
+           ELSE
+
+               COMPUTE  WK-ASALE-WGHT-VAL
+                     =  FUNCTION MIN(
+                        FUNCTION MAX(
+                        ( WK-MCA-AMT / WK-MCA-AMT-3 )
+                        , 0.7000 ), 1.3000 )
+
+               COMPUTE  WK-Y-3-AVG-SALEPR-RATO
+                     =  FUNCTION MIN(
+                        FUNCTION MAX(
+                        ( WK-MCA-AMT / WK-MCA-AMT-3 )
+                        , 0.7000 ), 1.3000 )
+           END-IF
+
+211007*----------------------------------------------------------------
+      *@  매출액기준액
+      *@   = 매출액 × 산업분류별매출액비율 × 매출가중치
+      *@  매출액기준액이 마이너스인 경우 '0' 적용
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-ASALE-BSAMT  =  WK-MCA-AMT
+                                    * (WK-SALEPR-I-APLY-RATO / 100)
+                                    *  WK-ASALE-WGHT-VAL
+
+           IF  WK-ASALE-BSAMT < ZERO
+               MOVE  ZERO              TO  WK-ASALE-BSAMT
+           END-IF
+
+      *                                                   ----3개년---
+           COMPUTE  WK-Y-3-ASALE-BSAMT =  WK-MCA-AMT-3
+                                    *  (WK-SALEPR-I-APLY-RATO / 100)
+                                    *  WK-ASALE-WGHT-VAL
+
+           IF  WK-Y-3-ASALE-BSAMT < ZERO
+               MOVE  ZERO              TO  WK-Y-3-ASALE-BSAMT
+           END-IF
+
+211007*-----------------------------------------------------------------
+      *@  차입금총자산비율가중치
+      *@  업체총차입금= 0 & 총자산 > 0
+      *@   & 업종평균차입금총자산비율=0 경우 1
+      *@  업체총차입금= 0 & 총자산 >
+      *@   & 업종평균차입금총자산비율> 0경우 1.3
+      *@  업체총차입금= 0 & 총자산 <= 0 경우 1
+      *@  업체총차입금> 0 & 총자산 <= 0 경우 0.7
+      *@  그 외 나머지
+      *@  {업종평균차입금총자산비율÷(업체총차입금÷총자산)}
+      *@  단,  최소 0.7 , 최고 1.3을 넘지 않음
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+211029*   총차입금총자산비율
+           IF WK-JSC-AMT = ZERO
+               MOVE ZERO
+                 TO WK-NEW-AT-ASST-RATO
+           ELSE
+               COMPUTE  WK-NEW-AT-ASST-RATO
+                     =  IN-UCC-AMT / WK-JSC-AMT
+           END-IF
+
+           EVALUATE  TRUE
+               WHEN  (IN-UCC-AMT = 0  AND  WK-JSC-AMT >  0)
+                         AND WK-AMBR-T-ASST-RATO = 0
+                     MOVE  1.0  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  (IN-UCC-AMT = 0  AND  WK-JSC-AMT >  0)
+                         AND WK-AMBR-T-ASST-RATO > 0
+                     MOVE  1.3  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  (IN-UCC-AMT > 0  AND  WK-JSC-AMT >  0)
+                         AND WK-AMBR-T-ASST-RATO = 0
+                     MOVE  1.0  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  IN-UCC-AMT = 0   AND  WK-JSC-AMT <= 0
+                     MOVE  1.0  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  IN-UCC-AMT > 0   AND  WK-JSC-AMT <= 0
+                     MOVE  0.7  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  WK-NEW-AT-ASST-RATO = ZERO
+                     MOVE  1.3  TO  WK-BRRW-AR-WGHT-VAL
+
+               WHEN  OTHER
+                     COMPUTE  WK-BRRW-AR-WGHT-VAL
+                     =  FUNCTION MIN(
+                        FUNCTION MAX(
+                        ((WK-AMBR-T-ASST-RATO / 100)
+                        / WK-NEW-AT-ASST-RATO)
+                        , 0.7000 ), 1.3000 )
+
+           END-EVALUATE
+
+      *                                                   ----3개년---
+211029*    Y3총차입금총자산비율
+           IF WK-JSC-AMT-3 = ZERO
+               MOVE ZERO
+                 TO WK-Y-3NAT-ASST-RATO
+           ELSE
+               COMPUTE  WK-Y-3NAT-ASST-RATO
+                     =  WK-UCC-AMT-3 / WK-JSC-AMT-3
+           END-IF
+
+           EVALUATE  TRUE
+               WHEN  (WK-UCC-AMT-3 = 0 ) AND  (WK-JSC-AMT-3 > 0 )
+                         AND WK-AMBR-T-ASST-RATO = 0
+                     MOVE  1.0  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 = 0 ) AND  (WK-JSC-AMT-3 > 0 )
+                         AND WK-AMBR-T-ASST-RATO > 0
+                     MOVE  1.3  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 > 0 ) AND  (WK-JSC-AMT-3 > 0 )
+                         AND WK-AMBR-T-ASST-RATO = 0
+                     MOVE  1.0  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 = 0 ) AND  (WK-JSC-AMT-3 <= 0 )
+                     MOVE  1.0  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  (WK-UCC-AMT-3 > 0 ) AND  (WK-JSC-AMT-3 <= 0 )
+                     MOVE  0.7  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  WK-Y-3NAT-ASST-RATO = ZERO
+                     MOVE  1.3  TO  WK-Y-3BA-RATO-WGHT-VAL
+
+               WHEN  OTHER
+                     COMPUTE  WK-Y-3BA-RATO-WGHT-VAL
+                     =  FUNCTION MIN(
+                        FUNCTION MAX(
+                        ((WK-AMBR-T-ASST-RATO / 100)
+                        / WK-Y-3NAT-ASST-RATO)
+                        , 0.7000 ), 1.3000 )
+
+           END-EVALUATE
+
+211007*-----------------------------------------------------------------
+      *@  자산기준액 = 총자산 × 산업분류별총자산비율
+      *@              × 차입자산가중치
+      *@  자산기준액이 마이너스인 경우 '0' 적용
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-ASST-BSAMT
+                 =  WK-JSC-AMT
+                 * (WK-TOTAL-AI-APLY-RATO / 100 )
+                 *  WK-BRRW-AR-WGHT-VAL
+
+           IF  WK-ASST-BSAMT < ZERO
+               MOVE  ZERO        TO  WK-ASST-BSAMT
+           END-IF
+
+      *                                                   ----3개년---
+           COMPUTE  WK-Y-3-ASST-BSAMT
+                 =  WK-JSC-AMT-3
+                 * (WK-TOTAL-AI-APLY-RATO / 100 )
+                 *  WK-Y-3BA-RATO-WGHT-VAL
+
+           IF  WK-Y-3-ASST-BSAMT < ZERO
+               MOVE  ZERO        TO  WK-Y-3-ASST-BSAMT
+           END-IF
+
+
+211007*-----------------------------------------------------------------
+      *@  규모기준한도 = {(매출액기준액×0.1) + (자산기준액×0.3)}
+      *@               × 신용등급지원비율
+      *@  규모기준한도가 마이너스인 경우는 '0'을 적용하고,
+      *@  그룹최고한도를 초과할 수 없음
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-SCAL-BASE-CLAM
+           =  FUNCTION MIN(
+              ((WK-ASALE-BSAMT * 0.1) + (WK-ASST-BSAMT * 0.3))
+              *  (WK-SPORT-RATO / 100), WK-ONCP-BSAMT-GROUP )
+
+           IF  WK-SCAL-BASE-CLAM < ZERO
+               MOVE  ZERO        TO  WK-SCAL-BASE-CLAM
+           END-IF
+
+      *                                                   ----3개년---
+           COMPUTE  WK-SCAL-BASE-CLAM-3
+           =  FUNCTION MIN(
+              ((WK-Y-3-ASALE-BSAMT * 0.1) + (WK-Y-3-ASST-BSAMT * 0.3))
+              *  (WK-SPORT-RATO / 100), WK-ONCP-BSAMT-GROUP )
+
+           IF  WK-SCAL-BASE-CLAM-3 < ZERO
+               MOVE  ZERO        TO  WK-SCAL-BASE-CLAM-3
+           END-IF
+
+      *-----------------------------------------------------------------
+      *@1 기준한도계산
+      *@   = 상환능력기준한도 + 규모기준한도
+      *@  그룹최고한도를 초과할 수 없음
+      *-----------------------------------------------------------------
+      *                                                   ----1개년---
+           COMPUTE  WK-BASE-CLAM
+                 =  FUNCTION MIN(
+                    ( WK-SOLVN-BASE-CLAM + WK-SCAL-BASE-CLAM )
+                    , WK-ONCP-BSAMT-GROUP )
+
+      *                                                   ----3개년---
+           COMPUTE  WK-BASE-CLAM-3
+                 =  FUNCTION MIN(
+                    ( WK-SOLVN-BASE-CLAM-3 + WK-SCAL-BASE-CLAM-3 )
+                    , WK-ONCP-BSAMT-GROUP )
+
+           .
+        S3160-HANDO-GROUP-CALU-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *@ 그룹별최고한도조회
+      *-----------------------------------------------------------------
+       S3200-KJL0049-SELECT-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 자기자본기준금액(그룹별최고한도액)조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,기준년월
+      *@2 출력항목:자기자본기준금액
+      *@2 테이블명:TE자기자본기본(THKJL0049)
+
+      * 자기자본기준금액（그룹별최고한도액）
+           EXEC SQL
+             SELECT  VALUE(자기자본기준금액, 0)
+               INTO  :WK-ONCP-BSAMT-GROUP
+               FROM  DB2DBA.THKJL0049
+              WHERE  그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                AND  기준년월     = :WK-H-I-BASE-YM
+                AND  자기자본구분 = '1'
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     COMPUTE  WK-ONCP-BSAMT-GROUP
+                           =  WK-ONCP-BSAMT-GROUP * 0.25
+               WHEN  CO-NOT-FOUND
+                     MOVE  ZERO        TO  WK-ONCP-BSAMT-GROUP
+               WHEN  OTHER
+                     MOVE 'KJL0049'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'SELECT시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S3200-KJL0049-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DATA MOVE
+      *-----------------------------------------------------------------
+       S3400-DATA-MOVE-RTN.
+
+      *   초기화
+           INITIALIZE    OT-REC
+
+      *@1 출력데이터조립:그룹회사코드,차주번호,기준년월,
+      *@업종평균적용년,내부신용평가등급구분,신용평가년월일,
+      *@신용평가유효년월일,신용등급지원비율,전전년사업이익,
+      *@전년사업이익,기준년사업이익,영업이익,이자수익,
+      *@감가상각비,금융비용,단기차입금,단기차입금상환금액,
+      *@업종가중평균율,업체총차입금,총자산,매출액,
+      *@현금흐름기준금액,전전년자기자본금,전년자기자본금,
+      *@기준년자기자본금,금융자기자본비율,차입금자기자본율,
+      *@자기자본기준금액,상환능력기준한도,차입금매출액비율,
+      *@차입금총자산비율,규모기준한도,기준한도,외화기준한도,
+      *@시스템최종처리일시,시스템최종사용자번호
+
+      *   그룹회사코드
+           MOVE  WK-H-I-GROUP-CO-CD
+             TO  RJL0001-GROUP-CO-CD
+
+      *   고객식별자(계열기업군코드)
+           MOVE  IN-AFFLT-CORP-GROUP-CD
+             TO  RJL0001-CUST-IDNFR
+
+      *   기준년월
+           MOVE  WK-H-I-BASE-YMD
+             TO  RJL0001-BASE-YM
+
+      *   신표준산업분류코드
+           MOVE  IN-IDSTRY-CD
+             TO  RJL0001-NEW-SI-CLSFI-CD
+
+      *   한신평재무업종구분
+           MOVE  IN-F-BZTYP-DSTCD
+             TO  RJL0001-KIS-F-BZTYP-DSTCD
+
+      *   결산년월<-결산작업년도 + 01
+           STRING  IN-STLACC-YR '01'
+           DELIMITED BY SIZE INTO  RJL0001-STLACC-YM
+
+      *   업종평균적용년
+           MOVE  IN-STLACC-YR
+             TO  RJL0001-BZTYP-AVG-APLY-YR
+
+      *   내부신용평가등급구분<-그룹사신용등급구분 3자리로
+      *   해당무일경우 '000' 세팅함.
+           IF  IN-CMGR-CRTDSCD = SPACE
+               MOVE '000'
+                 TO  RJL0001-INTNL-CV-GRD-DSTCD
+           ELSE
+               MOVE  IN-CMGR-CRTDSCD
+                 TO  RJL0001-INTNL-CV-GRD-DSTCD
+           END-IF
+
+      *   신용평가년월일
+           MOVE  SPACE
+             TO  RJL0001-CRDT-VALUA-YMD
+
+      *   신용평가유효년월일
+           MOVE  SPACE
+             TO  RJL0001-CRDT-VALUA-VALD-YMD
+
+      *   신용등급지원비율
+           MOVE  WK-SPORT-RATO
+             TO  RJL0001-CRDRAT-SPORT-RATO
+
+      *   전전년사업이익
+           MOVE  ZERO
+             TO  RJL0001-BF-PYY-BIZ-PRFT
+
+      *   전년사업이익
+           MOVE  ZERO
+             TO  RJL0001-PYY-BIZ-PRFT
+
+      *   기준년사업이익
+           MOVE  ZERO
+             TO  RJL0001-BASE-YR-BIZ-PRFT
+
+      *   영업이익
+           MOVE  IN-YYI-AMT
+             TO  RJL0001-OPRFT
+
+      *   이자수익
+           MOVE  IN-IJS-AMT
+             TO  RJL0001-INT-ERN
+
+      *   감가상각비
+           MOVE  IN-GGS-AMT
+             TO  RJL0001-DPRC-CST
+
+      *   금융비용
+           MOVE  IN-GBY-AMT
+             TO  RJL0001-FNCS
+
+      *   단기차입금
+           MOVE  IN-DCI-AMT
+             TO  RJL0001-SHTRM-AMBR
+
+      *   단기차입금상환금액
+           MOVE  WK-DCI-AMT
+             TO  RJL0001-SHTRM-AMBR-RPAYAMT
+
+      *   업종가중평균율
+           MOVE  WK-BZTYP-WGHTG-AVG-RT
+             TO  RJL0001-BZTYP-WGHTG-AVG-RT
+
+      *   업체총차입금
+           MOVE  IN-UCC-AMT
+             TO  RJL0001-ENTP-TOTAL-AMBR
+
+      *   총자산
+           MOVE  IN-JSC-AMT
+             TO  RJL0001-TOTAL-ASST
+
+      *   매출액
+           MOVE  IN-MCA-AMT
+             TO  RJL0001-SALEPR
+
+      *   현금흐름기준금액
+           MOVE  WK-CSFW-BSAMT
+             TO  RJL0001-CSFW-BSAMT
+
+      *   전전년자기자본금
+170818     MOVE  IN-JJB-AMT-2
+             TO  RJL0001-BF-PYY-ONCP-AMT
+
+      *   전년자기자본금
+170818     MOVE  IN-JJB-AMT-1
+             TO  RJL0001-PYY-ONCP-AMT
+
+      *   기준년자기자본금
+           MOVE  IN-JJB-AMT
+             TO  RJL0001-BASE-YR-ONCP-AMT
+
+      *   차입금자기자본율
+           MOVE  WK-AMBR-ONCP-RT
+             TO  RJL0001-AMBR-ONCP-RT
+
+      *   자기자본기준금액
+           MOVE  WK-ONCP-BSAMT
+             TO  RJL0001-ONCP-BSAMT
+
+      *   상환능력기준한도
+           MOVE  WK-SOLVN-BASE-CLAM
+             TO  RJL0001-SOLVN-BASE-CLAM
+
+      *   차입금매출액비율
+           MOVE  WK-AMBR-SALEPR-RATO
+             TO  RJL0001-AMBR-SALEPR-RATO
+
+      *   차입금총자산비율
+           MOVE  WK-AMBR-T-ASST-RATO
+             TO  RJL0001-AMBR-T-ASST-RATO
+
+      *   규모기준한도
+           MOVE  WK-SCAL-BASE-CLAM
+             TO  RJL0001-SCAL-BASE-CLAM
+
+      *   기준한도
+           MOVE  WK-BASE-CLAM
+             TO  RJL0001-BASE-CLAM
+
+      *   외화기준한도
+           MOVE  ZERO
+             TO  RJL0001-FC-BASE-CLAM
+
+      *   시스템최종처리일시
+           MOVE  BICOM-TRAN-START-YMS
+             TO  RJL0001-SYS-LAST-PRCSS-YMS
+
+      *   시스템최종사용자번호
+           MOVE  BICOM-USER-EMPID
+             TO  RJL0001-SYS-LAST-UNO
+
+170615*   전전년영업이익
+           MOVE  IN-YYI-AMT-2
+             TO  RJL0001-BF-PYY-OPRFT
+      *   전년영업이익
+           MOVE  IN-YYI-AMT-1
+             TO  RJL0001-PYY-OPRFT
+      *   전전년이자수익
+           MOVE  IN-IJS-AMT-2
+             TO  RJL0001-BF-PYY-INT-ERN
+      *   전년이자수익
+           MOVE  IN-IJS-AMT-1
+             TO  RJL0001-PYY-INT-ERN
+      *   전전년감가상각비
+           MOVE  IN-GGS-AMT-2
+             TO  RJL0001-BF-PYY-DPRC-CST
+      *   전년감가상각비
+           MOVE  IN-GGS-AMT-1
+             TO  RJL0001-PYY-DPRC-CST
+      *   전전년금융비용
+           MOVE  IN-GBY-AMT-2
+             TO  RJL0001-BF-PYY-FNCS
+      *   전년금융비용
+           MOVE  IN-GBY-AMT-1
+             TO  RJL0001-PYY-FNCS
+      *   전전년단기차입금
+           MOVE  IN-DCI-AMT-2
+             TO  RJL0001-BF-PYY-SHTRM-AMBR
+      *   전년단기차입금
+           MOVE  IN-DCI-AMT-1
+             TO  RJL0001-PYY-SHTRM-AMBR
+      *    Y3단기차입금상환금액
+           MOVE  WK-DCI-AMT-3
+             TO  RJL0001-Y-3S-AMBR-RPAYAMT
+      *   전전년업체총차입금
+           MOVE  IN-UCC-AMT-2
+             TO  RJL0001-BF-PE-TOTAL-AMBR
+      *   전년업체총차입금
+           MOVE  IN-UCC-AMT-1
+             TO  RJL0001-PYY-ENTP-TOTAL-AMBR
+      *   전전년매출액
+           MOVE  IN-MCA-AMT-2
+             TO  RJL0001-BF-PYY-SALEPR
+      *   전년매출액
+           MOVE  IN-MCA-AMT-1
+             TO  RJL0001-PYY-SALEPR
+      *    Y3현금흐름기준금액
+           MOVE  WK-CSFW-BSAMT-3
+             TO  RJL0001-Y-3-CSFW-BSAMT
+      *    Y3자기자본기준금액
+           MOVE  WK-ONCP-BSAMT-3
+             TO  RJL0001-Y-3-ONCP-BSAMT
+      *    Y3상환능력기준한도
+           MOVE  WK-SOLVN-BASE-CLAM-3
+             TO  RJL0001-Y-3-SOLVN-BASE-CLAM
+      *   기준전전년총자산
+           MOVE  IN-JSC-AMT-2
+             TO  RJL0001-BASE-BP-TOTAL-ASST
+      *   기준전년총자산
+           MOVE  IN-JSC-AMT-1
+             TO  RJL0001-BASE-PYY-TOTAL-ASST
+      *    Y3규모기준한도금액
+           MOVE  WK-SCAL-BASE-CLAM-3
+             TO  RJL0001-Y-3-SCAL-BASE-CLAM
+170615*    Y3기준한도금액
+           MOVE  WK-BASE-CLAM-3
+             TO  RJL0001-Y-3-BASE-CLAM
+
+211007*    TE산업분류코드
+           MOVE  WK-TE-IDSTRY-CLSFI-CD
+             TO  RJL0001-TE-IDSTRY-CLSFI-CD
+
+      *   자기자본산업적용비율
+           MOVE  WK-ONCP-I-APLY-RATO
+             TO  RJL0001-ONCP-I-APLY-RATO
+
+      *   매출액산업적용비율
+           MOVE  WK-SALEPR-I-APLY-RATO
+             TO  RJL0001-SALEPR-I-APLY-RATO
+
+      *   총자산산업적용비율
+           MOVE  WK-TOTAL-AI-APLY-RATO
+             TO  RJL0001-TOTAL-AI-APLY-RATO
+
+      *   차입금자본가중치값
+           COMPUTE  RJL0001-AMBR-CAPTL-WGHT-VAL
+                 =  WK-AMBR-CAPTL-WGHT-VAL * 100
+
+      *    Y3차입자본가중치값
+           COMPUTE  RJL0001-Y-3A-CAPTL-WGHT-VAL
+                 =  WK-Y-3A-CAPTL-WGHT-VAL * 100
+
+      *    Y3평균매출금액
+           MOVE  WK-MCA-AMT-3
+             TO  RJL0001-Y-3-AVG-ASALE-AMT
+
+      *    Y3평균매출액비율
+           COMPUTE  RJL0001-Y-3-AVG-SALEPR-RATO
+                 =  FUNCTION MAX(
+                    FUNCTION MIN(
+                    WK-Y-3-AVG-SALEPR-RATO * 100 , 999.99), -999.99)
+
+      *   매출가중치값
+           COMPUTE  RJL0001-ASALE-WGHT-VAL
+                 =  WK-ASALE-WGHT-VAL * 100
+
+      *   매출기준금액
+           MOVE  WK-ASALE-BSAMT
+             TO  RJL0001-ASALE-BSAMT
+
+      *    Y3매출기준금액
+           MOVE  WK-Y-3-ASALE-BSAMT
+             TO  RJL0001-Y-3-ASALE-BSAMT
+
+      *   차입자산비율가중치값
+           COMPUTE  RJL0001-BRRW-AR-WGHT-VAL
+                 =  WK-BRRW-AR-WGHT-VAL * 100
+
+      *   자산기준금액
+           MOVE  WK-ASST-BSAMT
+             TO  RJL0001-ASST-BSAMT
+
+      *    Y3차입자산비율가중값
+           COMPUTE  RJL0001-Y-3BA-RATO-WGHT-VAL
+                 =  WK-Y-3BA-RATO-WGHT-VAL * 100
+
+      *    Y3자산기준금액
+           MOVE  WK-Y-3-ASST-BSAMT
+             TO  RJL0001-Y-3-ASST-BSAMT
+
+
+      *    신차입금자기자본비율
+           COMPUTE  RJL0001-NEW-AMBR-ONCP-RATO
+                 =  FUNCTION MAX(
+                    FUNCTION MIN(
+                    WK-NEW-AMBR-ONCP-RATO * 100  , 999.99), -999.99)
+
+      *    Y3신차입금자기자본율
+           COMPUTE  RJL0001-Y-3N-AMBR-ONCP-RATO
+                 =  FUNCTION MAX(
+                    FUNCTION MIN(
+                    WK-Y-3N-AMBR-ONCP-RATO * 100 , 999.99), -999.99)
+
+      *    신차입금총자산비율
+           COMPUTE  RJL0001-NEW-AT-ASST-RATO
+                 =  FUNCTION MAX(
+                    FUNCTION MIN(
+                    WK-NEW-AT-ASST-RATO * 100    , 999.99), -999.99)
+
+      *    Y3신차입금총자산비율
+           COMPUTE  RJL0001-Y-3NAT-ASST-RATO
+                 =  FUNCTION MAX(
+                    FUNCTION MIN(
+                    WK-Y-3NAT-ASST-RATO * 100    , 999.99), -999.99)
+
+           .
+       S3400-DATA-MOVE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   DATA WRITE
+      *-----------------------------------------------------------------
+       S3500-DATA-WRITE-RTN.
+
+      *@1  DATA WRITE
+           WRITE OT-REC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-F-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE WRITE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           ADD   CO-NUM-1              TO  WK-AC-WRITE-CNT
+           .
+       S3500-DATA-WRITE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@1  INPUT FILE CLOSE
+           CLOSE     IN-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1  OUTPUT FILE CLOSE
+           CLOSE     OT-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-F-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-OT-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* IN-FILE         COUNT  = ' WK-AC-READ-CNT
+           #USRLOG '* WRITE           COUNT  = ' WK-AC-WRITE-CNT
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD014 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

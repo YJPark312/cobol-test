@@ -1,0 +1,61 @@
+      *===========================================================
+      *  프로그램명    : QJL1291
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL1291
+      *  사용예        : 01  XQJL1291-CA.
+      *                      COPY  XQJL1291.
+      *  최종변경일시  : 2018년07월24일17시32분24초
+      *===========================================================
+           03  XQJL1291-IN.
+      *            그룹회사코드
+               05  XQJL1291-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            전년월
+               05  XQJL1291-I-BASE-YM1
+                                          PIC  X(00006).
+      *            기준년월
+               05  XQJL1291-I-BASE-YM2
+                                          PIC  X(00006).
+      *            전일
+               05  XQJL1291-I-BASE-DD1
+                                          PIC  X(00002).
+      *            기준일
+               05  XQJL1291-I-BASE-DD2
+                                          PIC  X(00002).
+      *            조회구분
+               05  XQJL1291-I-INQURY-DSTIC
+                                          PIC  X(00001).
+      *            변동금액구분
+               05  XQJL1291-I-FLXBL-AMT-DSTIC
+                                          PIC  X(00001).
+      *            고객식별자
+               05  XQJL1291-I-CUST-IDNFR
+                                          PIC  X(00010).
+           03  XQJL1291-OUT.
+      *            채무자명
+               05  XQJL1291-O-DBTRZ-NAME
+                           OCCURS  00101  PIC  X(00052).
+      *            차주고객식별자
+               05  XQJL1291-O-BRWR-CUST-IDNFR
+                           OCCURS  00101  PIC  X(00010).
+      *            전일자TE
+               05  XQJL1291-O-LIMT-BASE-TE-AMT1
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            기준일TE
+               05  XQJL1291-O-LIMT-BASE-TE-AMT2
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            TE변동금액
+               05  XQJL1291-O-LIMT-BASE-TE-AMT3
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            전일자대분류업종
+               05  XQJL1291-O-LAG-CLSFI-BZTYP-CD1
+                           OCCURS  00101  PIC  X(00036).
+      *            기준일대분류업종
+               05  XQJL1291-O-LAG-CLSFI-BZTYP-CD2
+                           OCCURS  00101  PIC  X(00036).
+      *            고객관리부점
+               05  XQJL1291-O-CUST-MGTBRN
+                           OCCURS  00101  PIC  X(00030).
+      *===========================================================
+      *  XQJL1291   C O P Y B O O K   E N D
+      *===========================================================

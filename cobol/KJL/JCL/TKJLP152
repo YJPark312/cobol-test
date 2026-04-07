@@ -1,0 +1,89 @@
+//TKJLP152 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0152 년도말 채무자고객기본 TABLE LOAD
+//*********************************************************************
+//LOAD20  EXEC DSNUPROC,PARM='DAPG,KJL0152',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC16 DD  DSN=KJL.PT.PIN.LOAD.KJL0152,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC16 INTO TABLE
+      DB2DBA.THKJL0152
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월"                           POSITION(       4         )
+   CHAR(                      6)                ,
+   "고객식별자"                         POSITION(      10         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      20         )
+   CHAR(                     13)                ,
+   "차주번호구분"                       POSITION(      33         )
+   CHAR(                      1)                ,
+   "신표준산업분류코드"                 POSITION(      34         )
+   CHAR(                      5)                ,
+   "내부신용평가등급구분"               POSITION(      39         )
+   CHAR(                      4)                ,
+   "신용평가년월일"                     POSITION(      43         )
+   CHAR(                      8)                ,
+   "신용평가유효년월일"                 POSITION(      51         )
+   CHAR(                      8)                ,
+   "고객관리부점코드"                   POSITION(      59         )
+   CHAR(                      4)                ,
+   "TE기업규모구분"                     POSITION(      63         )
+   CHAR(                      1)                ,
+   "TEPEER구분"                         POSITION(      64         )
+   CHAR(                      5)                ,
+   "대분류업종코드"                     POSITION(      69         )
+   CHAR(                      3)                ,
+   "산업평가등급구분"                   POSITION(      72         )
+   CHAR(                      4)                ,
+   "채무자명"                           POSITION(      76         )
+   CHAR(                     52)                ,
+   "계열기업군코드"                     POSITION(     128         )
+   CHAR(                      6)                ,
+   "계열기업군명"                       POSITION(     134         )
+   CHAR(                     42)                ,
+   "대표사업자번호"                     POSITION(     176         )
+   CHAR(                     10)                ,
+   "매출액"                             POSITION(     186:     193)
+   DECIMAL                                      ,
+   "총자산"                             POSITION(     194:     201)
+   DECIMAL                                      ,
+   "한도고객구분"                       POSITION(     202         )
+   CHAR(                      1)                ,
+   "모기업법인등록번호"                 POSITION(     203         )
+   CHAR(                     13)                ,
+   "모기업ISO국가코드"                POSITION(     216         )
+   CHAR(                      2)                ,
+   "연합회차주번호"                     POSITION(     218         )
+   CHAR(                      6)                ,
+   "고객ID구분"                       POSITION(     224         )
+   CHAR(                      2)                ,
+   "한도그룹번호"                       POSITION(     226         )
+   CHAR(                      6)                ,
+   "그룹사신용등급구분"                 POSITION(     232         )
+   CHAR(                      3)                ,
+   "차주대표자명"                       POSITION(     235         )
+   CHAR(                     52)                ,
+   "시스템최종처리일시"                 POSITION(     287         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     307         )
+   CHAR(                      7)                ,
+   "모기업법인고객식별자"               POSITION(     314         )
+   CHAR(                     10)
+   )
+/*
+//

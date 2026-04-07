@@ -1,0 +1,1255 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB028 (DC계열사등록)
+      *@처리유형  : DC
+      *@처리개요  : 그룹에 속한 계열사를 관리하는 프
+      *@            : 로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *이동구:20081203: 신규작성
+      *김진태:20090320: 프로그램수정
+      *김진태:20091006: 최종처리일시／최종사용자번호삭제
+      *김진태:20091006: CJIDT04 => CJIDT17
+      *김진태:20091211: 에러메세지정비
+      *김진태:20100108: 확정거래된계열사일경우비정상종료후단말처리
+      *박주희:20170804: 계열사관리제외대상등록
+      *박정수:20220324: 계열사 등록 로직 변경
+      * YBH    :20230427: 금감원기준삭제 NOTFOUND 정상처리
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      ** 그룹사기본      : THKJL0013                     : R
+      ** 계열사기본      : THKJL0014                     : CRUD
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB028.
+       AUTHOR.                         이동구.
+       DATE-WRITTEN.                   08/12/03.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      * 에러메세지
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3800023             PIC  X(008) VALUE 'B3800023'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200220             PIC  X(008) VALUE 'B4200220'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+           03  CO-B4200231             PIC  X(008) VALUE 'B4200231'.
+      * 조치메세지
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB028'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+
+           03  CO-CHA-Y                PIC  X(001) VALUE '1'.
+           03  CO-CHA-N                PIC  X(001) VALUE '0'.
+           03  CO-CHA-I                PIC  X(001) VALUE 'I'.
+           03  CO-CHA-U                PIC  X(001) VALUE 'U'.
+           03  CO-CHA-X                PIC  X(001) VALUE 'X'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-BIT                  PIC  X(001).
+220324     03  WK-SKIP                 PIC  X(001).
+           03  WK-LEDGR-EXST-YN        PIC  X(001).
+           03  WK-STAT                 PIC  X(002).
+           03  WK-BASE-YMD.
+               05  WK-BASE-YM.
+                   07  WK-BASE-YY      PIC  X(004).
+                   07  WK-BASE-MM      PIC  X(002).
+               05  WK-BASE-DD          PIC  X(002).
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO  INTERFACE PARAMETER
+           COPY  YCDBIOCA.
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+220324*그룹사기본　테이블(KEY)
+       01  TKJL0013-KEY.
+           COPY  TKJL0013.
+220324*그룹사기본　테이블(RECORD)
+       01  TRJL0013-REC.
+           COPY  TRJL0013.
+      *계열사기본　테이블(KEY)
+       01  TKJL0014-KEY.
+           COPY  TKJL0014.
+      *계열사기본　테이블(RECORD)
+       01  TRJL0014-REC.
+           COPY  TRJL0014.
+
+170804*계열사관리제외대상　테이블(KEY)
+       01  TKJL0024-KEY.
+           COPY  TKJL0024.
+      *계열사관리제외대상　테이블(RECORD)
+       01  TRJL0024-REC.
+           COPY  TRJL0024.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *일자산출PARAMETER
+       01  XCJIDT17-CA.
+           COPY  XCJIDT17.
+      *계열사관리조회
+       01  XQJL0283-CA.
+           COPY  XQJL0283.
+      *금감원주채무계열확정여부조회
+       01  XQJL0284-CA.
+           COPY  XQJL0284.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01 XDJLB028-CA.
+           COPY  XDJLB028.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB028-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@WK-AREA및　프로그램파라미터　초기화
+
+           INITIALIZE WK-AREA
+      *               DBIO
+                      YCDBIOCA-CA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@출력영역및　결과코드　초기화
+           INITIALIZE XDJLB028-OUT
+                      XDJLB028-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@입력값검증
+      *@처리구분＇０２＇　：　등록／수정
+      *@　　　　＇０４＇　：　삭제
+      *@　　　　＇０５＇　：　확정
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@필수입력파라미터체크
+      *@처리구분이　＇등록＇，＇삭제＇，＇확정＇　이외는 ERROR
+           IF XDJLB028-I-PRCSS-DSTIC = CO-CHA-02 OR
+                                       CO-CHA-04 OR
+                                       CO-CHA-05
+              CONTINUE
+           ELSE
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@계열적용구분
+           IF XDJLB028-I-AFFLT-APLY-DSTCD = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@계열코드
+           IF XDJLB028-I-AFFLT-C-GROUP-CD = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@채무자번호
+           IF XDJLB028-I-BRWR-NO = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@채무자명
+           IF XDJLB028-I-DBTR-NAME = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@기업규모
+           IF XDJLB028-I-CORP-SCAL = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@자동갱신여부
+           IF XDJLB028-I-MODFI-YN = SPACE
+      *@에러메세지 : 필수항목미입력오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@   계열구분이　금감원주채무계열일경우는
+      *@   확정된거래인지를　체크한다　　　　　
+           IF XDJLB028-I-AFFLT-APLY-DSTCD = CO-CHA-2
+      *@      확정거래 CHECK ROUTINE
+              PERFORM S3001-QJL0284-CALL-RTN
+                 THRU S3001-QJL0284-CALL-EXT
+           END-IF
+
+      *@   등록（수정），삭제，확정　분기
+           EVALUATE XDJLB028-I-PRCSS-DSTIC
+      *@  등록（수정）
+           WHEN CO-CHA-02
+      *             등록（수정）
+                    PERFORM S3100-INSERT-PROC-RTN
+                       THRU S3100-INSERT-PROC-EXT
+220324*             금감원 등록(수정)
+                    PERFORM S4000-INSERT-PROC-RTN
+                       THRU S4000-INSERT-PROC-EXT
+
+      *       총자산기준만 제외대상 등록/삭제 함
+               IF XDJLB028-I-AFFLT-APLY-DSTCD = CO-CHA-1
+      *             계열사관리　제외대상　삭제
+170804             PERFORM S3400-DELETE-PROC-RTN
+170804                THRU S3400-DELETE-PROC-EXT
+               END-IF
+      *@  삭제
+           WHEN CO-CHA-04
+      *             삭제
+                    PERFORM S3200-DELETE-PROC-RTN
+                       THRU S3200-DELETE-PROC-EXT
+220324*             금감원 삭제
+                    PERFORM S4100-DELETE-PROC-RTN
+                       THRU S4100-DELETE-PROC-EXT
+
+
+      *       총자산기준만 제외대상 등록/삭제 함
+               IF XDJLB028-I-AFFLT-APLY-DSTCD = CO-CHA-1
+      *             계열사관리　제외대상　등록
+                    PERFORM S3500-INSERT-PROC-RTN
+                       THRU S3500-INSERT-PROC-EXT
+               END-IF
+      *@   확정
+           WHEN CO-CHA-05
+      *             확정
+                    PERFORM S3300-CONFIRM-PROC-RTN
+                       THRU S3300-CONFIRM-PROC-EXT
+      *@  기타
+           WHEN OTHER
+                CONTINUE
+           END-EVALUATE
+
+      *@   처리결과 MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  금감원주채무계열　확정여부　체크
+      *-----------------------------------------------------------------
+       S3001-QJL0284-CALL-RTN.
+
+      *@   전월추출
+           PERFORM S3111-CALL-XCJIDT17-RTN
+              THRU S3111-CALL-XCJIDT17-EXT
+
+      *@   변수초기화
+           INITIALIZE XQJL0284-IN
+
+      *@   호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0284-I-GROUP-CO-CD
+      *@   전월
+           MOVE WK-BASE-YM
+             TO XQJL0284-I-BF-MONTH
+
+      *@   프로그램 호출
+           #DYSQLA QJL0284 XQJL0284-CA
+
+      *@   호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@에러인경우에러처리
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   확정된거래면　등록／수정／삭제／확정　불가
+           IF XQJL0284-O-CHECK = CO-CHA-X
+              MOVE CO-STAT-ABNORMAL
+                TO WK-STAT
+      *@확정거래된계열사일경우비정상종료후단말처리
+              PERFORM S9000-FINAL-RTN
+                 THRU S9000-FINAL-EXT
+           END-IF
+           .
+       S3001-QJL0284-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@  그룹사기본(THKJL0013) 조회
+      *-----------------------------------------------------------------
+       S3010-THKJL0013-SELECT-RTN.
+
+      *@   변수초기화
+           INITIALIZE TKJL0013-KEY
+                      TRJL0013-REC
+      *@   전월추출
+           PERFORM S3111-CALL-XCJIDT17-RTN
+              THRU S3111-CALL-XCJIDT17-EXT
+
+      *    금감원 계열사 등록 스킵위한 변수
+           MOVE '0'
+             TO WK-SKIP
+
+      *@      변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0013-PK-GROUP-CO-CD
+      *@   기준년월
+           MOVE WK-BASE-YMD
+             TO KJL0013-PK-BASE-YM
+      *@   계열적용구분
+           MOVE CO-CHA-2
+             TO KJL0013-PK-AFFLT-APLY-DSTCD
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO KJL0013-PK-AFFLT-CORP-GROUP-CD
+
+           #DYDBIO SELECT-CMD-Y TKJL0013-PK TRJL0013-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *총자산 계열사는 등록
+                   MOVE '1'
+                     TO WK-SKIP
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3010-THKJL0013-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신규등록처리　프로세스
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *@    계열사기본(THKJL0014)검색
+           PERFORM S3110-THKJL0014-SELECT-RTN
+              THRU S3110-THKJL0014-SELECT-EXT
+
+      *@    등록／수정　분기
+           EVALUATE WK-BIT
+               WHEN CO-CHA-U
+      *@            UPDATE CALL ROUTINE
+                    PERFORM S3120-THKJL0014-UPDATE-RTN
+                       THRU S3120-THKJL0014-UPDATE-EXT
+               WHEN CO-CHA-I
+      *@            INSERT CALL ROUTINE
+                    PERFORM S3130-THKJL0014-INSERT-RTN
+                       THRU S3130-THKJL0014-INSERT-EXT
+               WHEN OTHER
+                    CONTINUE
+           END-EVALUATE
+           .
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사기본(THKJL0014)검색
+      *-----------------------------------------------------------------
+       S3110-THKJL0014-SELECT-RTN.
+
+      *@      변수초기화
+           INITIALIZE TKJL0014-KEY
+                      TRJL0014-REC
+      *@      변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0014-PK-GROUP-CO-CD
+170201*@   고객식별자
+           MOVE XDJLB028-I-BRWR-NO
+             TO KJL0014-PK-CUST-IDNFR
+      *@   계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO KJL0014-PK-AFFLT-APLY-DSTCD
+      *@   계열적용구분에따라기준년월셋팅
+      *@   계열적용구분　１　：　당월
+      *@   계열적용구분　２　：　전월
+           IF XDJLB028-I-AFFLT-APLY-DSTCD = CO-CHA-1
+      *       거래기준년월일
+              MOVE BICOM-TRAN-BASE-YMD
+                TO WK-BASE-YMD
+           ELSE
+      *       전월
+              PERFORM S3111-CALL-XCJIDT17-RTN
+                 THRU S3111-CALL-XCJIDT17-EXT
+           END-IF
+      *@   기준년월
+           MOVE WK-BASE-YM
+             TO KJL0014-PK-BASE-YM
+      *@      프로그램　호출
+           #DYDBIO SELECT-CMD-Y TKJL0014-PK TRJL0014-REC
+      *@      호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    MOVE CO-CHA-U
+                      TO WK-BIT
+               WHEN COND-DBIO-MRNF
+                    MOVE CO-CHA-I
+                      TO WK-BIT
+               WHEN OTHER
+      *@에러인경우에러처리
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3110-THKJL0014-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  일자산출－전월
+      *-----------------------------------------------------------------
+       S3111-CALL-XCJIDT17-RTN.
+
+      *@   변수초기화
+           INITIALIZE XCJIDT17-IN
+      *@   변수 MOVE
+           MOVE BICOM-TRAN-BASE-YMD(1:6) TO XCJIDT17-I-YMD(1:6)
+           MOVE CO-CHA-01                TO XCJIDT17-I-YMD(7:2)
+           MOVE CO-CHA-1                 TO XCJIDT17-I-DSTCD
+      *@   프로그램　호출
+           #DYCALL CJIDT17 YCCOMMON-CA XCJIDT17-CA
+      *@   호출결과확인
+           IF  XCJIDT17-R-STAT = ZEROS
+               MOVE XCJIDT17-O-BF-YMD TO WK-BASE-YMD
+           ELSE
+               #ERROR XCJIDT17-R-ERRCD
+                      XCJIDT17-R-TREAT-CD
+                      XCJIDT17-R-STAT
+           END-IF
+           .
+       S3111-CALL-XCJIDT17-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사기본(THKJL0014)수정
+      *-----------------------------------------------------------------
+       S3120-THKJL0014-UPDATE-RTN.
+
+      *@입력파라미터조립
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO RJL0014-AFFLT-CORP-GROUP-CD
+      *@기업규모구분
+           MOVE XDJLB028-I-CORP-SCAL
+             TO RJL0014-CORP-SCAL-DSTCD
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0014-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0014-REGI-YMD
+      *@변경여부
+           MOVE XDJLB028-I-MODFI-YN
+             TO RJL0014-MODFI-YN
+      *@채무자명
+           MOVE XDJLB028-I-DBTR-NAME
+             TO RJL0014-DBTRZ-NAME
+
+      *@   프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 UPDATE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3120-THKJL0014-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사기본(THKJL0014)등록
+      *-----------------------------------------------------------------
+       S3130-THKJL0014-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  RJL0014-GROUP-CO-CD
+      *@기준년월
+           MOVE WK-BASE-YM              TO  RJL0014-BASE-YM
+170201*@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  RJL0014-CUST-IDNFR
+      *@계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO RJL0014-AFFLT-APLY-DSTCD
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO RJL0014-AFFLT-CORP-GROUP-CD
+      *@기업규모구분
+           MOVE XDJLB028-I-CORP-SCAL    TO  RJL0014-CORP-SCAL-DSTCD
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID        TO  RJL0014-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD     TO  RJL0014-REGI-YMD
+      *@변경여부
+           MOVE XDJLB028-I-MODFI-YN
+             TO RJL0014-MODFI-YN
+      *@채무자명
+           MOVE XDJLB028-I-DBTR-NAME   TO  RJL0014-DBTRZ-NAME
+
+      *@   프로그램　호출
+           #DYDBIO INSERT-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3130-THKJL0014-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  삭제처리　프로세스
+      *-----------------------------------------------------------------
+       S3200-DELETE-PROC-RTN.
+
+      *@    기준년월　찾기
+           PERFORM S3210-INPUT-DATA-CHECK-RTN
+              THRU S3210-INPUT-DATA-CHECK-EXT
+      *@    THKJL0014 DELETE
+           PERFORM S3230-DEL-THKJL0014-RTN
+              THRU S3230-DEL-THKJL0014-EXT
+           .
+       S3200-DELETE-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열적용구분에　따라　전월추출
+      *-----------------------------------------------------------------
+       S3210-INPUT-DATA-CHECK-RTN.
+
+      *@계열적용구분（전월추출）
+           IF XDJLB028-I-AFFLT-APLY-DSTCD = CO-CHA-1
+              MOVE BICOM-TRAN-BASE-YMD
+                TO WK-BASE-YMD
+           ELSE
+      *       전월추출
+              PERFORM S3111-CALL-XCJIDT17-RTN
+                 THRU S3111-CALL-XCJIDT17-EXT
+           END-IF
+           .
+       S3210-INPUT-DATA-CHECK-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사기본(THKJL0014)삭제처리
+      *-----------------------------------------------------------------
+       S3230-DEL-THKJL0014-RTN.
+
+      *@입력파라미터조립
+      *@변수초기화
+           INITIALIZE TKJL0014-KEY
+                      TRJL0014-REC
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  KJL0014-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE WK-BASE-YM              TO  KJL0014-PK-BASE-YM
+170201*@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  KJL0014-PK-CUST-IDNFR
+      *@계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO KJL0014-PK-AFFLT-APLY-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      *@원장에데이터가없을경우
+      *@에러메세지 : 원장없음오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@프로그램호출
+           #DYDBIO DELETE-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3230-DEL-THKJL0014-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  확정처리　프로세스
+      *-----------------------------------------------------------------
+       S3300-CONFIRM-PROC-RTN.
+
+      *@   전월추출
+           PERFORM S3111-CALL-XCJIDT17-RTN
+              THRU S3111-CALL-XCJIDT17-EXT
+
+      *@   CURSOR OPEN
+           PERFORM S3310-SQLIO-OPEN-RTN
+              THRU S3310-SQLIO-OPEN-EXT
+
+           MOVE CO-CHA-Y
+             TO WK-LEDGR-EXST-YN
+
+      *@   LOOP
+           PERFORM UNTIL WK-LEDGR-EXST-YN = CO-CHA-N
+      *@     데이터를　읽음(FETCH)
+              PERFORM S3320-SQLIO-FETCH-RTN
+                 THRU S3320-SQLIO-FETCH-EXT
+           END-PERFORM
+
+      *@   CURSOR CLOSE
+           PERFORM S3330-SQLIO-CLOSE-RTN
+              THRU S3330-SQLIO-CLOSE-EXT
+           .
+       S3300-CONFIRM-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR OPEN ROUTINE
+      *-----------------------------------------------------------------
+       S3310-SQLIO-OPEN-RTN.
+
+      *@   초기화
+           INITIALIZE XQJL0283-IN
+
+      *@   그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0283-I-GROUP-CO-CD
+      *@   전월
+           MOVE WK-BASE-YM
+             TO XQJL0283-I-BF-MONTH
+
+      *@   계열코드 조회
+           #DYSQLA QJL0283 OPEN XQJL0283-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@커서오픈에러인경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3310-SQLIO-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR FETCH ROUTINE
+      *-----------------------------------------------------------------
+       S3320-SQLIO-FETCH-RTN.
+
+      *@   FETCH
+           #DYSQLA QJL0283 FETCH XQJL0283-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          데이터존재여부표시
+                   MOVE CO-CHA-Y TO WK-LEDGR-EXST-YN
+      *@          계열사기본(THKJL0014)수정
+                   PERFORM S3321-THKJL0014-UPDATE-RTN
+                      THRU S3321-THKJL0014-UPDATE-EXT
+               WHEN COND-DBSQL-MRNF
+      *@          데이터존재여부표시
+                   MOVE CO-CHA-N TO WK-LEDGR-EXST-YN
+               WHEN OTHER
+      *@커서패치에러인경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3320-SQLIO-FETCH-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CLOSE
+      *-----------------------------------------------------------------
+       S3330-SQLIO-CLOSE-RTN.
+
+      *@   CLOSE
+           #DYSQLA QJL0283 CLOSE XQJL0283-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@커서클로우즈에러인경우
+      *@에러메세지 : 테이블 CLOSE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200231 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3330-SQLIO-CLOSE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사기본(THKJL0014)수정
+      *-----------------------------------------------------------------
+       S3321-THKJL0014-UPDATE-RTN.
+
+      *-------------------------------
+      *@UPDATE전에LOCK SELECT검색
+      *-------------------------------
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > DBSQL-SELECT-CNT
+
+      *@입력파라미터조립
+      *@그룹사코드
+               MOVE XQJL0283-O-GROUP-CO-CD(WK-I)
+                 TO KJL0014-PK-GROUP-CO-CD
+      *@기준년월
+               MOVE XQJL0283-O-BASE-YM(WK-I)
+                 TO KJL0014-PK-BASE-YM
+170201*@고객식별자
+               MOVE XQJL0283-O-CUST-IDNFR(WK-I)
+                 TO KJL0014-PK-CUST-IDNFR
+      *@계열적용구분
+               MOVE XQJL0283-O-AFFLT-APLY-DSTCD(WK-I)
+                 TO KJL0014-PK-AFFLT-APLY-DSTCD
+
+      *@DBIO CALL
+               #DYDBIO SELECT-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@변경여부
+               MOVE CO-CHA-1 TO RJL0014-MODFI-YN
+
+      *@UPDATE DBIO CALL
+               #DYDBIO UPDATE-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@결과확인
+               IF COND-DBIO-OK
+                  CONTINUE
+               ELSE
+      *@원장에러인경우에러처리
+      *@에러메세지 : 테이블 UPDATE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                  #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+
+           END-PERFORM
+           .
+       S3321-THKJL0014-UPDATE-EXT.
+           EXIT.
+170804*-----------------------------------------------------------------
+      *@  계열사관리제외대상　삭제처리　프로세스
+      *-----------------------------------------------------------------
+       S3400-DELETE-PROC-RTN.
+
+      *@    THKJL0024 DELETE
+           PERFORM S3410-DEL-THKJL0024-RTN
+              THRU S3410-DEL-THKJL0024-EXT
+           .
+       S3400-DELETE-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사관리제외대상　삭제처리
+      *-----------------------------------------------------------------
+       S3410-DEL-THKJL0024-RTN.
+
+      *@입력파라미터조립
+      *@변수초기화
+           INITIALIZE TKJL0024-KEY
+                      TRJL0024-REC
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  KJL0024-PK-GROUP-CO-CD
+      *@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  KJL0024-PK-CUST-IDNFR
+      *@계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO KJL0024-PK-AFFLT-APLY-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0024-PK TRJL0024-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@프로그램호출
+               #DYDBIO DELETE-CMD-Y TKJL0024-PK TRJL0024-REC
+
+      *@호출결과확인
+               EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+                        CONTINUE
+                   WHEN OTHER
+                        #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3410-DEL-THKJL0024-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@  신규등록처리　프로세스(금감원)
+      *-----------------------------------------------------------------
+       S4000-INSERT-PROC-RTN.
+
+      *@    그룹사기본(THKJL0013)검색
+           PERFORM S3010-THKJL0013-SELECT-RTN
+              THRU S3010-THKJL0013-SELECT-EXT
+
+           IF WK-SKIP = '0'
+      *@    계열사기본(THKJL0014)검색
+               PERFORM S4010-THKJL0014-SELECT-RTN
+                  THRU S4010-THKJL0014-SELECT-EXT
+
+      *@    등록／수정　분기
+               EVALUATE WK-BIT
+                   WHEN CO-CHA-U
+      *@                UPDATE CALL ROUTINE
+                        PERFORM S4020-THKJL0014-UPDATE-RTN
+                           THRU S4020-THKJL0014-UPDATE-EXT
+                   WHEN CO-CHA-I
+      *@                INSERT CALL ROUTINE
+                        PERFORM S4030-THKJL0014-INSERT-RTN
+                           THRU S4030-THKJL0014-INSERT-EXT
+                   WHEN OTHER
+                        CONTINUE
+               END-EVALUATE
+           END-IF
+           .
+       S4000-INSERT-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@  계열사기본(THKJL0014)검색
+      *-----------------------------------------------------------------
+       S4010-THKJL0014-SELECT-RTN.
+
+      *@      변수초기화
+           INITIALIZE TKJL0014-KEY
+                      TRJL0014-REC
+      *@      변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0014-PK-GROUP-CO-CD
+      *@   고객식별자
+           MOVE XDJLB028-I-BRWR-NO
+             TO KJL0014-PK-CUST-IDNFR
+      *@   계열적용구분
+           MOVE CO-CHA-2
+             TO KJL0014-PK-AFFLT-APLY-DSTCD
+      *@   계열적용구분에따라기준년월셋팅
+      *@   계열적용구분　２　：　전월
+      *    전월
+           PERFORM S3111-CALL-XCJIDT17-RTN
+              THRU S3111-CALL-XCJIDT17-EXT
+
+      *@   기준년월
+           MOVE WK-BASE-YM
+             TO KJL0014-PK-BASE-YM
+      *@      프로그램　호출
+           #DYDBIO SELECT-CMD-Y TKJL0014-PK TRJL0014-REC
+      *@      호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    MOVE CO-CHA-U
+                      TO WK-BIT
+               WHEN COND-DBIO-MRNF
+                    MOVE CO-CHA-I
+                      TO WK-BIT
+               WHEN OTHER
+      *@에러인경우에러처리
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4010-THKJL0014-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+220324*@  계열사기본(THKJL0014)수정
+      *-----------------------------------------------------------------
+       S4020-THKJL0014-UPDATE-RTN.
+
+      *@입력파라미터조립
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO RJL0014-AFFLT-CORP-GROUP-CD
+      *@기업규모구분
+           MOVE XDJLB028-I-CORP-SCAL
+             TO RJL0014-CORP-SCAL-DSTCD
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0014-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0014-REGI-YMD
+      *@변경여부
+           MOVE XDJLB028-I-MODFI-YN
+             TO RJL0014-MODFI-YN
+      *@채무자명
+           MOVE XDJLB028-I-DBTR-NAME
+             TO RJL0014-DBTRZ-NAME
+
+      *@   프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 UPDATE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4020-THKJL0014-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+220324*@  계열사기본(THKJL0014)등록
+      *-----------------------------------------------------------------
+       S4030-THKJL0014-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  RJL0014-GROUP-CO-CD
+      *@기준년월
+           MOVE WK-BASE-YM              TO  RJL0014-BASE-YM
+      *@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  RJL0014-CUST-IDNFR
+      *@계열적용구분
+           MOVE CO-CHA-2
+             TO RJL0014-AFFLT-APLY-DSTCD
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO RJL0014-AFFLT-CORP-GROUP-CD
+      *@기업규모구분
+           MOVE XDJLB028-I-CORP-SCAL    TO  RJL0014-CORP-SCAL-DSTCD
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID        TO  RJL0014-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD     TO  RJL0014-REGI-YMD
+      *@변경여부
+           MOVE XDJLB028-I-MODFI-YN
+             TO RJL0014-MODFI-YN
+      *@채무자명
+           MOVE XDJLB028-I-DBTR-NAME   TO  RJL0014-DBTRZ-NAME
+
+      *@   프로그램　호출
+           #DYDBIO INSERT-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S4030-THKJL0014-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@  삭제처리　프로세스(금감원)
+      *-----------------------------------------------------------------
+       S4100-DELETE-PROC-RTN.
+      *@    기준년월　찾기
+               PERFORM S4110-INPUT-DATA-CHECK-RTN
+                  THRU S4110-INPUT-DATA-CHECK-EXT
+      *@    THKJL0014 DELETE
+               PERFORM S4120-DEL-THKJL0014-RTN
+                  THRU S4120-DEL-THKJL0014-EXT
+           .
+       S4100-DELETE-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+220324*@  계열적용구분에　따라　전월추출
+      *-----------------------------------------------------------------
+       S4110-INPUT-DATA-CHECK-RTN.
+
+      *@계열적용구분（전월추출）
+      *       전월추출
+              PERFORM S3111-CALL-XCJIDT17-RTN
+                 THRU S3111-CALL-XCJIDT17-EXT
+           .
+       S4110-INPUT-DATA-CHECK-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+220324*@  계열사기본(THKJL0014)삭제처리
+      *-----------------------------------------------------------------
+       S4120-DEL-THKJL0014-RTN.
+
+      *@입력파라미터조립
+      *@변수초기화
+           INITIALIZE TKJL0014-KEY
+                      TRJL0014-REC
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  KJL0014-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE WK-BASE-YM              TO  KJL0014-PK-BASE-YM
+      *@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  KJL0014-PK-CUST-IDNFR
+      *@계열적용구분
+           MOVE CO-CHA-2
+             TO KJL0014-PK-AFFLT-APLY-DSTCD
+
+      *@프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+
+230427*@프로그램호출
+               #DYDBIO DELETE-CMD-Y TKJL0014-PK TRJL0014-REC
+
+      *@호출결과확인
+               EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+           WHEN COND-DBIO-MRNF
+                CONTINUE
+
+           WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S4120-DEL-THKJL0014-EXT.
+           EXIT.
+
+170804*-----------------------------------------------------------------
+      *@  계열사　관리제외대상등록(THKJL0024)
+      *-----------------------------------------------------------------
+       S3500-INSERT-PROC-RTN.
+
+      *@    계열사제외대상기본(THKJL0024)검색
+           PERFORM S3510-THKJL0024-SELECT-RTN
+              THRU S3510-THKJL0024-SELECT-EXT
+
+      *@    등록／수정　분기
+           EVALUATE WK-BIT
+               WHEN CO-CHA-I
+      *@            INSERT CALL ROUTINE
+                    PERFORM S3520-THKJL0024-INSERT-RTN
+                       THRU S3520-THKJL0024-INSERT-EXT
+               WHEN OTHER
+                    CONTINUE
+           END-EVALUATE
+           .
+       S3500-INSERT-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사관리제외대상(THKJL0024)검색
+      *-----------------------------------------------------------------
+       S3510-THKJL0024-SELECT-RTN.
+
+      *@      변수초기화
+           INITIALIZE TKJL0024-KEY
+                      TRJL0024-REC
+      *@      변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0024-PK-GROUP-CO-CD
+      *@   고객식별자
+           MOVE XDJLB028-I-BRWR-NO
+             TO KJL0024-PK-CUST-IDNFR
+      *@   계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO KJL0024-PK-AFFLT-APLY-DSTCD
+      *@   프로그램　호출
+           #DYDBIO SELECT-CMD-Y TKJL0024-PK TRJL0024-REC
+      *@      호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+                    MOVE CO-CHA-I
+                      TO WK-BIT
+               WHEN OTHER
+      *@에러인경우에러처리
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3510-THKJL0024-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  계열사관리제외대상(THKJL0024)등록
+      *-----------------------------------------------------------------
+       S3520-THKJL0024-INSERT-RTN.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD       TO  RJL0024-GROUP-CO-CD
+      *@고객식별자
+           MOVE XDJLB028-I-BRWR-NO      TO  RJL0024-CUST-IDNFR
+      *@계열적용구분
+           MOVE XDJLB028-I-AFFLT-APLY-DSTCD
+             TO RJL0024-AFFLT-APLY-DSTCD
+      *@계열기업군코드
+           MOVE XDJLB028-I-AFFLT-C-GROUP-CD
+             TO RJL0024-AFFLT-CORP-GROUP-CD
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID        TO  RJL0024-REGI-EMPID
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD     TO  RJL0024-REGI-YMD
+
+      *@프로그램　호출
+           #DYDBIO INSERT-CMD-Y TKJL0024-PK TRJL0024-REC
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3520-THKJL0024-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@  종료처리
+
+      *@   처리결과
+           MOVE WK-STAT
+             TO XDJLB028-O-PRCSS-RSULT
+
+      *@    프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+           #OKEXIT  CO-STAT-OK.
+           .
+       S9000-FINAL-EXT.
+           EXIT.

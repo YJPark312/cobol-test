@@ -1,0 +1,808 @@
+      *=================================================================
+      *@업무명    : KLA     (프레임워크)
+      *@프로그램명: QJL0401 (SQLIO 프로그램)
+      *@처리유형  : SQLIO
+      *@처리개요  : 사용자가 정의한 SQL 처리
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 :일자  : 변　경　내　용
+      * -------:--------:-----------------------------------------------
+      *큐로컴:20080401:커스터마이징
+      *송재복:20100303:에러처리를 DBIO와 같은 방법으로 변경
+      *=================================================================
+      ******************************************************************
+      **
+      **  프로그램명 :국가코드조회
+      **
+      ******************************************************************
+      **
+      **  서브프로그램     : 설명
+      **  ----------------   -------------------------------------------
+      **
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                           : CRUD
+      **  ----------------   ----------------------------------   ------
+      *@테이블           : THKJL0056 국별부점별한도기본
+      **
+      **
+      ******************************************************************
+      **
+      **  COPY BOOK        : 설명
+      **  ----------------   -------------------------------------------
+      **  < 테이블 & 테이블키 & 파일 >----------------------------
+      **  YCDBSQLA      : SQLIO 처리를 위한 공통정보
+      **
+      **  < 인터페이스 >----------------------------------------------
+      **
+      **  < 입출력 >--------------------------------------------------
+      **
+      **----------------------------------------------------------------
+      ** 일자       : 작성자     : 사유
+      ** ----------   ----------   -------------------------------------
+      ** 2010-04-29 : KB         : 소스생성
+      **            :            :
+      ******************************************************************
+       IDENTIFICATION                       DIVISION.
+      ******************************************************************
+       PROGRAM-ID.                          QJL0401.
+       AUTHOR.                              KB.
+       INSTALLATION.                        KB.
+       DATE-WRITTEN.                        2010-04-29-15.25.23.184443.
+       SECURITY.
+      ******************************************************************
+       ENVIRONMENT                          DIVISION.
+      ******************************************************************
+      *=================================================================
+       CONFIGURATION                        SECTION.
+      *=================================================================
+       SOURCE-COMPUTER.                     IBM.
+       OBJECT-COMPUTER.                     IBM.
+      *
+      ******************************************************************
+       DATA                                 DIVISION.
+      ******************************************************************
+      *=================================================================
+       WORKING-STORAGE                      SECTION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *  상수영역
+      *-----------------------------------------------------------------
+       77  CONT-PROGRAM-ID                  PIC  X(08)  VALUE "QJL0401".
+       77  CONT-OK                          PIC  X(02)  VALUE "00".
+       77  CONT-DUPM                        PIC  X(02)  VALUE "01".
+       77  CONT-MRNF                        PIC  X(02)  VALUE "02".
+       77  CONT-SQLER                       PIC  X(02)  VALUE "09".
+       77  CONT-ABNORMAL                    PIC  X(02)  VALUE "98".
+       77  CONT-SYSERROR                    PIC  X(02)  VALUE "99".
+       77  CONT-Y                           PIC  X(01)  VALUE "Y".
+       77  CONT-N                           PIC  X(01)  VALUE "N".
+       77  CONT-EOF                         PIC  9(05)  VALUE 100.
+       77  CONT-ARR-CNT                     PIC  9(05)  VALUE 00300.
+      *
+       77  ERROR-TEXT-LEN                   PIC S9(009) COMP VALUE +72.
+       01  ERROR-MESSAGE.
+           03  ERROR-LEN                    PIC S9(004) COMP VALUE +720.
+           03  ERROR-TEXT                   PIC  X(072) OCCURS 10 TIMES
+                                            INDEXED BY ERR-IDX.
+      *
+      *-----------------------------------------------------------------
+      *  변수영역
+      *-----------------------------------------------------------------
+       01  WORK.
+           03  WORK-OPEN-FLAG-C             PIC  X(01).
+      *
+           03  WORK-SELECT-REQ              PIC S9(09)  COMP.
+           03  WORK-SELECT-CNT              PIC S9(09)  COMP.
+           03  WORK-DIAG-ERRORS             PIC S9(09)  COMP.
+           03  WORK-ERROR-CNT               PIC S9(09)  COMP.
+           03  WORK-DB2-RERURN-SQLCODE      PIC S9(09)  COMP.
+           03  WORK-DB2-SERCH-SQLCODE       PIC S9(09)  COMP.
+           03  WORK-DB2-ROW-NUMBER          PIC S9(09)  COMP-3.
+           03  WORK-DB2-MESSAGE-ID          PIC  X(10).
+       01  WORK-DIAG-MESSAGE.
+           03  WORK-MESSAGE-TEXT.
+               49  WORK-MSG-LEN             PIC S9(04)  COMP.
+               49  WORK-MSG-TXT             PIC  X(200).
+
+       01  ST-AREA.
+           03  BSGDISP-TEXT                 PIC  X(200).
+           03  WORK-DECIMAL                 PIC +9(18).
+           03  WORK-DECIMAL-P               PIC 9.9(10).
+           03  EDIT-ERROR-CNT               PIC  9(005).
+           03  EDIT-DB2-RERURN-SQLCODE      PIC +9(005).
+           03  EDIT-DB2-ROW-NUMBER          PIC  9(005).
+
+      *-----------------------------------------------------------------
+      *--  SQL CALL AREA
+      *-----------------------------------------------------------------
+           EXEC SQL INCLUDE SQLCA           END-EXEC.
+
+      *-----------------------------------------------------------------
+      *--  인터페이스영역
+      *-----------------------------------------------------------------
+      *
+       01  BSGERORCA.
+           03  BSGEROR-PARA                 PIC  X(05).
+      *
+      *=================================================================
+       LINKAGE                              SECTION.
+      *=================================================================
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *-----------------------------------------------------------------
+      *  PCO 변수영역
+      *-----------------------------------------------------------------
+           COPY YCDBSQLA.
+
+      *-----------------------------------------------------------------
+      *  PCO 카피북
+      *-----------------------------------------------------------------
+       01  SQL-TABLE.
+           COPY  XQJL0401.
+
+           REPLACE   ==(COM)== BY ==COM==.
+       01  YCCSICOM-CA.
+           COPY    YCCSICOM.
+       01  YCCBICOM-CA.
+           COPY    YCCBICOM.
+      *01  YCCBOCOM-CA.
+      *    COPY    YCCBOCOM.
+           REPLACE   OFF.
+
+      ******************************************************************
+       PROCEDURE                           DIVISION
+                                           USING     YCCOMMON-CA
+                                                     YCDBSQLA-CA
+                                                     SQL-TABLE.
+      ******************************************************************
+      *
+       S0000-START-RTN.
+
+           SET     ADDRESS OF YCCSICOM-CA  TO  COMM-SICOM-ADDR
+           SET     ADDRESS OF YCCBICOM-CA  TO  COMM-BICOM-ADDR
+      *    SET     ADDRESS OF YCCBOCOM-CA  TO  COMM-BOCOM-ADDR
+           PERFORM S0000-MAIN-RTN        THRU  S0000-MAIN-EXT
+           .
+       S0000-START-EXT.
+           EXIT.
+
+      *
+       S0000-MAIN-RTN.
+      *
+           MOVE  "14"                       TO YCFCTLAR-USR-LOG-CD
+      *
+           PERFORM S0100-INITIAL-RTN      THRU S0100-INITIAL-EXT
+      *
+           PERFORM S0500-CHECK-RTN        THRU S0500-CHECK-EXT
+      *
+      * SQLIO-FUNCTION OF YCDBSQLA
+           EVALUATE  TRUE
+               WHEN  COND-DBSQL-SELECT
+                     PERFORM S1000-SELECT-RTN THRU S1000-SELECT-EXT
+      *
+               WHEN  COND-DBSQL-OPEN
+                     PERFORM S1100-DECARE-RTN THRU S1100-DECARE-EXT
+                     PERFORM S1200-OPEN-RTN   THRU S1200-OPEN-EXT
+      *
+               WHEN  COND-DBSQL-FETCH
+                     PERFORM S1300-FETCH-RTN  THRU S1300-FETCH-EXT
+      *
+               WHEN  COND-DBSQL-CLOSE
+                     PERFORM S1400-CLOSE-RTN  THRU S1400-CLOSE-EXT
+      *
+               WHEN  OTHER
+      *{E} SQLIO입력항목 검증오류입니다(SQLIO-FUNCTION)
+                     MOVE  "S9000050"     TO   XZUGEROR-I-ERRCD
+      *{E} SQLIO-FUNCTION코드 오류 입니다.(@1@)
+                     MOVE
+           "SQLIO입력항목 검증오류입니다(SQLIO-FUNCTION)"
+                                          TO   XZUGEROR-I-MSG
+                     PERFORM  S9100-ERROR-END-RTN
+                        THRU  S9100-ERROR-END-EXT
+           END-EVALUATE
+      *
+           PERFORM S9000-NOMAL-END-RTN    THRU S9000-NOMAL-END-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 시작전 기본설정 및 초기화
+      *  처리기능 : 프로그램초기화
+      *-----------------------------------------------------------------
+       S0100-INITIAL-RTN.
+      *
+           MOVE  "S0100"                    TO   BSGEROR-PARA
+
+           INITIALIZE                            WORK
+                                                 XQJL0401-OUT
+                                                 DBSQL-OUT
+                                                 DBSQL-RESULT
+                                                 BSGDISP-TEXT
+                                                 XZUGEROR-CA
+                                                 WORK-DIAG-MESSAGE
+      *
+           MOVE  CONT-ABNORMAL              TO   DBSQL-STAT
+      *
+           MOVE  ZERO                       TO   SQLCODE
+      *
+           MOVE  SPACE                      TO   SQLERRMC
+      *
+           IF    DBSQL-SELECT-REQ-X  =  SPACE OR ZERO OR LOW-VALUE
+           THEN
+                 MOVE  CONT-ARR-CNT         TO   WORK-SELECT-REQ
+           ELSE
+                 MOVE  DBSQL-SELECT-REQ     TO   WORK-SELECT-REQ
+           END-IF
+      *
+           .
+       S0100-INITIAL-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 입력정보 및 기본정보 검증
+      *  처리기능 : 기본항목검증
+      *-----------------------------------------------------------------
+       S0500-CHECK-RTN.
+      *
+           MOVE  "S0500"                    TO   BSGEROR-PARA
+      *
+      * SQLIO-FUNCTION OF YCDBSQLA
+           EVALUATE  TRUE
+               WHEN  COND-DBSQL-SELECT
+               WHEN  COND-DBSQL-OPEN
+                     CONTINUE
+               WHEN  OTHER
+                     GO TO S0500-CHECK-EXT
+           END-EVALUATE
+      *
+           IF  DBSQL-CALL-PGM-ID = SPACE
+           THEN
+      *{E} DBSQL-CALL-PGM-ID 미입력.
+               MOVE  "S9000051"             TO   XZUGEROR-I-ERRCD
+               MOVE
+           "DBSQL-CALL-PGM-ID 미입력"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN THRU S9100-ERROR-END-EXT
+           END-IF
+
+           IF  DBSQL-PROGRAM-ID  = SPACE
+           THEN
+      *{E} DBSQL-PROGRAM-ID 미입력.
+               MOVE  "S9000052"             TO   XZUGEROR-I-ERRCD
+               MOVE
+           "DBSQL-PROGRAM-ID 미입력"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN THRU S9100-ERROR-END-EXT
+           END-IF
+
+      * PCOCPY-키 입력 검증
+      *("S9000053":"입력항목에 데이터 미입력 오류")
+      *
+      *
+           IF  DBSQL-SELECT-REQ > CONT-ARR-CNT
+           THEN
+      *
+           PERFORM  S8100-FIELD-DISPLAY-RTN THRU S8100-FIELD-DISPLAY-EXT
+      *
+      *{E} DBSQL-SELECT-REQ 최대건수 초과.
+               MOVE  "S9000054"             TO   XZUGEROR-I-ERRCD
+               MOVE
+           "DBSQL-SELECT-REQ 최대건수 초과"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN THRU S9100-ERROR-END-EXT
+           END-IF
+           .
+       S0500-CHECK-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-SELECT일때 실행된다.
+      *  처리기능 : DBPCO-SELECT
+      *-----------------------------------------------------------------
+       S1000-SELECT-RTN.
+      *
+           IF  CONT-ARR-CNT  =  1
+           THEN
+              PERFORM S3000-SELECT-RTN  THRU S3000-SELECT-EXT
+           ELSE
+              PERFORM S1100-DECARE-RTN  THRU S1100-DECARE-EXT
+              PERFORM S1200-OPEN-RTN    THRU S1200-OPEN-EXT
+              PERFORM S1300-FETCH-RTN   THRU S1300-FETCH-EXT
+              PERFORM S1400-CLOSE-RTN   THRU S1400-CLOSE-EXT
+           END-IF
+           .
+       S1000-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-OPEN일때 실행된다.
+      *  처리기능 : CURSOR DECLARE
+      *-----------------------------------------------------------------
+       S1100-DECARE-RTN.
+
+           MOVE  "S1100"                    TO   BSGEROR-PARA
+
+           EXEC  SQL
+           DECLARE SQL_C CURSOR WITH HOLD
+                                WITH ROWSET POSITIONING FOR
+       SELECT "ISO국가코드", 영문국가명
+         FROM DB2DBA.THKJL0056
+        WHERE 그룹회사코드 = :XQJL0401-I-GROUP-CO-CD
+          AND 기준년월 = SUBSTR(:XQJL0401-I-TRAN-BASE-YMD,1,6)
+          AND "ISO국가코드"
+       LIKE RTRIM(:XQJL0401-I-ISO-NATNL-CD) || '%'
+          AND LOWER(영문국가명)
+       LIKE LOWER(RTRIM(:XQJL0401-I-ENG-NATNL-NAME)) || '%'
+      *
+           END-EXEC
+
+           IF  SQLCODE NOT = ZERO
+               PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+           END-IF
+           .
+       S1100-DECARE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-OPEN일때 실행된다.
+      *  처리기능 : CURSOR OPEN
+      *-----------------------------------------------------------------
+       S1200-OPEN-RTN.
+
+           MOVE  "S1200"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8100-FIELD-DISPLAY-RTN THRU S8100-FIELD-DISPLAY-EXT
+      *
+           EXEC SQL
+                OPEN   SQL_C
+           END-EXEC
+      *
+           IF  SQLCODE                      =    -502
+           THEN
+               EXEC SQL CLOSE SQL_C END-EXEC
+               EXEC SQL OPEN  SQL_C END-EXEC
+           END-IF
+      *
+           IF  SQLCODE NOT = ZERO
+               PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+           END-IF
+
+           MOVE  "Y"                        TO   WORK-OPEN-FLAG-C
+           .
+       S1200-OPEN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-FETCH일때 실행된다.
+      *  처리기능 : CURSOR FETCH
+      *-----------------------------------------------------------------
+       S1300-FETCH-RTN.
+
+           MOVE  "S1300"                    TO   BSGEROR-PARA
+
+           EXEC SQL
+              FETCH NEXT ROWSET FROM SQL_C
+              FOR  :WORK-SELECT-REQ  ROWS
+              INTO
+                  :XQJL0401-O-ISO-NATNL-CD
+                 ,:XQJL0401-O-ENG-NATNL-NAME
+      *
+           END-EXEC
+
+      *
+           EVALUATE  SQLCODE
+               WHEN  0
+                     CONTINUE
+               WHEN  +354
+                     MOVE  SQLCODE          TO   DBSQL-SQLCODE
+                     MOVE  SQLERRD(3)       TO   WORK-SELECT-CNT
+                     PERFORM S8400-DIAG-ERR-RTN THRU S8400-DIAG-ERR-EXT
+                     MOVE  WORK-SELECT-CNT  TO   SQLERRD(3)
+                     MOVE  ZERO             TO   SQLCODE
+                     CONTINUE
+               WHEN  +100
+                     IF SQLERRD(3)  =   ZERO
+                     THEN
+                       PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+                     ELSE
+                       MOVE  ZERO TO SQLCODE
+                     END-IF
+               WHEN  OTHER
+                     PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+           END-EVALUATE
+      *
+           MOVE  SQLERRD(3)                 TO   DBSQL-SELECT-CNT
+           MOVE  SQLCODE                    TO   DBSQL-SQLCODE
+           .
+       S1300-FETCH-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-CLOSE일때 실행된다.
+      *  처리기능 : CURSOR CLOSE
+      *-----------------------------------------------------------------
+       S1400-CLOSE-RTN.
+
+           MOVE  "S1400"                    TO   BSGEROR-PARA
+
+           EXEC SQL
+                CLOSE  SQL_C
+           END-EXEC
+
+           IF  SQLCODE NOT = ZERO
+               PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+           END-IF
+           .
+       S1400-CLOSE-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *  수행조건 : DBPCO-SELECT일때 실행된다.
+      *  처리기능 : 단건 SELECT
+      *-----------------------------------------------------------------
+       S3000-SELECT-RTN.
+
+           MOVE  "S3000"                    TO   BSGEROR-PARA
+
+           PERFORM  S8100-FIELD-DISPLAY-RTN THRU S8100-FIELD-DISPLAY-EXT
+
+
+
+           IF  SQLCODE NOT = ZERO
+               PERFORM S9200-SQL-ERR-RTN    THRU S9200-SQL-ERR-EXT
+           END-IF
+           MOVE  1                          TO   DBSQL-SELECT-CNT
+           .
+       S3000-SELECT-EXT.
+           EXIT.
+      *================================================================*
+      * 디스플레이 처리 유틸리티 호출
+      *================================================================*
+       S8000-BSGDISP-RTN.
+
+               #USRLOG BSGDISP-TEXT
+           .
+       S8000-BSGDISP-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 내부에서 오류발생시 실행됨
+      *  처리기능 : 프로그램명과 기능, 거래코드를 DISPLAY한다.
+      *-----------------------------------------------------------------
+       S8100-FIELD-DISPLAY-RTN.
+      *
+           IF  COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+           THEN
+               MOVE  SPACE                      TO   BSGDISP-TEXT
+
+               STRING  "호출프로그램명 {"       DELIMITED BY SIZE
+                       DBSQL-CALL-PGM-ID        DELIMITED BY SIZE
+                       "} DBSQL-PROGRAM-ID {"   DELIMITED BY SIZE
+                       DBSQL-PROGRAM-ID         DELIMITED BY SIZE
+                       "} DBSQL-FUNCTION {"     DELIMITED BY SIZE
+                       DBSQL-FUNCTION           DELIMITED BY SIZE
+                       "} ARR-CNT {"            DELIMITED BY SIZE
+                       CONT-ARR-CNT             DELIMITED BY SIZE
+                       "} REQ-CNT {"            DELIMITED BY SIZE
+                       DBSQL-SELECT-REQ         DELIMITED BY SIZE
+                       "}"                      DELIMITED BY SIZE
+                 INTO  BSGDISP-TEXT
+               END-STRING
+
+               PERFORM  S8000-BSGDISP-RTN     THRU   S8000-BSGDISP-EXT
+           END-IF
+
+           IF  COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+           THEN
+
+           MOVE "XQJL0401-I-GROUP-CO-CD        = "
+             TO  BSGDISP-TEXT(1:32)
+           MOVE  XQJL0401-I-GROUP-CO-CD
+             TO  BSGDISP-TEXT(33:)
+           PERFORM  S8000-BSGDISP-RTN THRU S8000-BSGDISP-EXT
+           MOVE "XQJL0401-I-TRAN-BASE-YMD      = "
+             TO  BSGDISP-TEXT(1:32)
+           MOVE  XQJL0401-I-TRAN-BASE-YMD
+             TO  BSGDISP-TEXT(33:)
+           PERFORM  S8000-BSGDISP-RTN THRU S8000-BSGDISP-EXT
+           MOVE "XQJL0401-I-ISO-NATNL-CD       = "
+             TO  BSGDISP-TEXT(1:32)
+           MOVE  XQJL0401-I-ISO-NATNL-CD
+             TO  BSGDISP-TEXT(33:)
+           PERFORM  S8000-BSGDISP-RTN THRU S8000-BSGDISP-EXT
+           MOVE "XQJL0401-I-ENG-NATNL-NAME     = "
+             TO  BSGDISP-TEXT(1:32)
+           MOVE  XQJL0401-I-ENG-NATNL-NAME
+             TO  BSGDISP-TEXT(33:)
+           PERFORM  S8000-BSGDISP-RTN THRU S8000-BSGDISP-EXT
+
+
+           END-IF
+           .
+       S8100-FIELD-DISPLAY-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 내부에서 오류발생시 실행됨
+      *  처리기능 : S8100-FIELD-DISPLAY-RTN보다 상세한 정보제공.
+      *-----------------------------------------------------------------
+       S8200-RESULT-DISPLAY-RTN.
+      *
+           IF  COMM-SQL-II-OUTPT-DSTCD     =    "1" OR "9"
+           THEN
+               MOVE  SPACE                      TO   BSGDISP-TEXT
+
+               STRING "검색건수="               DELIMITED BY SIZE
+                      DBSQL-SELECT-CNT          DELIMITED BY SIZE
+                      "/SQLCODE="               DELIMITED BY SIZE
+                      DBSQL-SQLCODE             DELIMITED BY SIZE
+                      "/결과코드="              DELIMITED BY SIZE
+                      DBSQL-STAT                DELIMITED BY SIZE
+                 INTO  BSGDISP-TEXT
+               END-STRING
+      *
+               PERFORM  S8000-BSGDISP-RTN     THRU   S8000-BSGDISP-EXT
+           END-IF
+           .
+       S8200-RESULT-DISPLAY-EXT.
+           EXIT.
+
+       S8300-SQL-MSG-RTN.
+           CALL    'DSNTIAR'    USING    SQLCA
+                                         ERROR-MESSAGE
+                                         ERROR-TEXT-LEN
+           END-CALL
+           PERFORM VARYING ERR-IDX FROM 1 BY 1
+             UNTIL ERR-IDX > 10
+                   MOVE '14'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  ERROR-TEXT(ERR-IDX)   DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-PERFORM
+           .
+       S8300-SQL-MSG-EXT.
+           EXIT.
+      *
+       S8400-DIAG-ERR-RTN.
+      *
+           EXEC SQL
+                GET DIAGNOSTICS :WORK-DIAG-ERRORS = NUMBER
+           END-EXEC
+      *
+           IF  WORK-DIAG-ERRORS > 1
+           THEN
+               PERFORM S8410-DIAG-MSG-RTN THRU S8410-DIAG-MSG-EXT
+               IF  WORK-DB2-SERCH-SQLCODE NOT = ZERO
+               THEN
+                   MOVE  DBSQL-SQLCODE         TO SQLCODE
+                   PERFORM S9200-SQL-ERR-RTN THRU S9200-SQL-ERR-EXT
+               END-IF
+           END-IF
+           .
+       S8400-DIAG-ERR-EXT.
+           EXIT.
+      *
+       S8410-DIAG-MSG-RTN.
+           PERFORM  VARYING WORK-ERROR-CNT FROM 1 BY 1
+                      UNTIL WORK-ERROR-CNT > WORK-DIAG-ERRORS
+             EXEC SQL
+                  GET DIAGNOSTICS CONDITION :WORK-ERROR-CNT
+                      :WORK-DB2-RERURN-SQLCODE = DB2_RETURNED_SQLCODE,
+                      :WORK-DB2-MESSAGE-ID     = DB2_MESSAGE_ID,
+                      :WORK-MESSAGE-TEXT       = MESSAGE_TEXT,
+                      :WORK-DB2-ROW-NUMBER     = DB2_ROW_NUMBER
+             END-EXEC
+      *
+             IF  WORK-DB2-MESSAGE-ID NOT = SPACE
+             THEN
+                 IF  WORK-DB2-ROW-NUMBER > ZERO
+                 THEN
+                     MOVE WORK-DB2-RERURN-SQLCODE
+                                              TO WORK-DB2-SERCH-SQLCODE
+                 END-IF
+                 MOVE WORK-ERROR-CNT          TO EDIT-ERROR-CNT
+                 MOVE WORK-DB2-RERURN-SQLCODE TO EDIT-DB2-RERURN-SQLCODE
+                 MOVE WORK-DB2-ROW-NUMBER     TO EDIT-DB2-ROW-NUMBER
+      *
+                 MOVE SPACE                   TO BSGDISP-TEXT
+      *
+                 STRING "ERR-CNT="              DELIMITED BY SIZE
+                        EDIT-ERROR-CNT          DELIMITED BY SIZE
+                        "/SQLCODE="             DELIMITED BY SIZE
+                        EDIT-DB2-RERURN-SQLCODE DELIMITED BY SIZE
+                        "/ROW-NUM="             DELIMITED BY SIZE
+                        EDIT-DB2-ROW-NUMBER     DELIMITED BY SIZE
+                        "/MSG-ID="              DELIMITED BY SIZE
+                        WORK-DB2-MESSAGE-ID     DELIMITED BY SIZE
+                   INTO BSGDISP-TEXT
+                 END-STRING
+      *
+                 PERFORM  S8000-BSGDISP-RTN     THRU S8000-BSGDISP-EXT
+      *
+                 MOVE  SPACE                    TO   BSGDISP-TEXT
+      *
+                 STRING "MSG-TXT="              DELIMITED BY SIZE
+      *                 WORK-MSG-TXT(1:WORK-MSG-LEN)
+                        WORK-MSG-TXT
+                                                DELIMITED BY SIZE
+                   INTO  BSGDISP-TEXT
+                 END-STRING
+      *
+                 PERFORM  S8000-BSGDISP-RTN     THRU S8000-BSGDISP-EXT
+             END-IF
+      *
+           END-PERFORM
+      *
+           .
+       S8410-DIAG-MSG-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램을 정상적으로 종료함
+      *  처리기능 : 처리결과를 정상으로 MOVE한후 종료
+      *-----------------------------------------------------------------
+       S9000-NOMAL-END-RTN.
+      *
+           MOVE  CONT-OK                    TO   DBSQL-STAT
+                                                 XZUGEROR-I-STAT
+
+           MOVE  CONT-ARR-CNT               TO   DBSQL-ARRAY-CNT
+      *
+           MOVE  ZERO                       TO   SQLCODE
+      *
+           PERFORM  S8200-RESULT-DISPLAY-RTN
+              THRU  S8200-RESULT-DISPLAY-EXT
+
+           IF      COMM-START-EIO-DSTCD = '9'
+           THEN
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END OK :'
+                           'STAT=' XZUGEROR-I-STAT    DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+      *
+           GOBACK
+           .
+       S9000-NOMAL-END-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 내부에서 에러발생시 처리함
+      *  처리기능 : 에러에 관련된 정보를 ZUGERORCA에 MOVE후
+      *             ZUGEROR을 호출하고 에러정보를 DISPLAY한다.
+      *-----------------------------------------------------------------
+       S9100-ERROR-END-RTN.
+      *
+           MOVE  CONT-PROGRAM-ID            TO   XZUGEROR-I-PGM-ID
+           MOVE  "UKLA0002"                 TO   XZUGEROR-I-TREAT-CD
+      *
+           MOVE  CONT-SYSERROR              TO   DBSQL-STAT
+                                                 XZUGEROR-I-STAT
+      *
+           MOVE  "ZUGEROR"                  TO   YCFCTLAR-CALL-LOG
+           CALL  YCFCTLAR-CALL-LOG       USING   YCCOMMON-CA
+                                                 XZUGEROR-CA
+           END-CALL
+      *
+           IF  BSGDISP-TEXT NOT = SPACE
+           THEN
+               #USRLOG "ERR-TXT : " BSGDISP-TEXT
+           END-IF
+      *
+           IF  XZUGEROR-I-MSG NOT = SPACE
+           THEN
+               #USRLOG "XZUGEROR-MSG : " XZUGEROR-I-MSG
+           END-IF
+      *
+           PERFORM  S8200-RESULT-DISPLAY-RTN
+              THRU  S8200-RESULT-DISPLAY-EXT
+      *
+           IF      COMM-START-EIO-DSTCD = '9'
+           THEN
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE XZUGEROR-I-LINE     TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END ER :'
+                           'STAT=' XZUGEROR-I-STAT  DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+
+           GOBACK
+           .
+       S9100-ERROR-END-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 내부에서 SQL 에러발생시 처리함
+      *  처리기능 : 에러에 관련된 정보를 ZUGERORCA에 MOVE후
+      *             ZUGEROR을 호출하고 에러정보를 DISPLAY한다.
+      *-----------------------------------------------------------------
+       S9200-SQL-ERR-RTN.
+      *
+           MOVE  CONT-PROGRAM-ID            TO   XZUGEROR-I-PGM-ID
+      *
+           MOVE  SQLCODE                    TO   DBSQL-SQLCODE
+                                                 XZUGEROR-I-SQL-CD
+      *
+           EVALUATE  SQLCODE
+               WHEN  +100
+                     MOVE  CONT-MRNF        TO   DBSQL-STAT
+                     MOVE  "NO DATA FOUND"  TO   XZUGEROR-I-MSG
+               WHEN  OTHER
+                     IF DBSQL-SQLCODE(4:1) = "9" OR DBSQL-SQLCODE = -805
+                     THEN
+                         MOVE CONT-SYSERROR TO   DBSQL-STAT
+                     ELSE
+                         MOVE CONT-SQLER    TO   DBSQL-STAT
+                     END-IF
+                     MOVE  "D9900000"       TO   XZUGEROR-I-ERRCD
+                     MOVE  XZUGEROR-I-SQL-CD(2:)
+                                            TO   XZUGEROR-I-ERRCD(4:)
+           END-EVALUATE
+      *
+           MOVE  ZERO                       TO   XZUGEROR-I-LINE
+           MOVE  "UKLA0002"                 TO   XZUGEROR-I-TREAT-CD
+           MOVE  SPACE                      TO   XZUGEROR-I-MULT
+                                                 XZUGEROR-I-TBL-ID
+                                                 XZUGEROR-I-FUNC-CD
+           MOVE  DBSQL-STAT                 TO   XZUGEROR-I-STAT
+      *
+           IF  DBSQL-STAT               =    CONT-MRNF OR
+               DBSQL-STAT               =    CONT-DUPM
+           THEN
+                CONTINUE
+           ELSE
+      *
+      *        MOVE  DBSQL-PROGRAM-ID       TO   XZUGEROR-I-TBL-ID
+               MOVE  DBSQL-CALL-PGM-ID      TO   XZUGEROR-I-TBL-ID
+               MOVE  DBSQL-SQLCODE          TO   XZUGEROR-I-SQL-CD
+      *
+               MOVE    "ZUGEROR"            TO   YCFCTLAR-CALL-LOG
+               CALL    YCFCTLAR-CALL-LOG USING   YCCOMMON-CA
+                                                 XZUGEROR-CA
+               END-CALL
+
+               IF  XZUGEROR-I-SQL-CD NOT = -805
+               THEN
+                   PERFORM  S8300-SQL-MSG-RTN THRU   S8300-SQL-MSG-EXT
+               END-IF
+           END-IF
+      *
+           PERFORM  S8200-RESULT-DISPLAY-RTN
+              THRU  S8200-RESULT-DISPLAY-EXT
+      *
+           IF  WORK-OPEN-FLAG-C   =   "Y"
+           THEN
+               EXEC SQL
+                    CLOSE  SQL_C
+               END-EXEC
+           END-IF
+      *
+           IF      COMM-START-EIO-DSTCD = '9'
+           THEN
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE XZUGEROR-I-LINE     TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END ER :'
+                           'STAT=' XZUGEROR-I-STAT  DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+
+           GOBACK
+           .
+       S9200-SQL-ERR-EXT.
+           EXIT.
+      *
+      *
+      ******************************************************************
+      **      Q J L 0 4 0 1       P R O G R A M   E N D
+      ******************************************************************

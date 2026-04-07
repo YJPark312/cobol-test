@@ -1,0 +1,1144 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020030
+      *@프로그램명: DJL4092 (기업및그룹한도신청및승인조회)          00030030
+      *@처리유형  : DC                                                00040030
+      *@처리개요  : 기준한도조회（개별기업／그룹）                  00050030
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   변　경　이　력                00070030
+      *-----------------------------------------------------------------00080001
+      *@성명 : 일자 : 변　경　내　용                              00090030
+      * ----------------------------------------------------------------00100001
+      *김진태:20090424: 신규작성                                    00110030
+      *김진태:20091015: CJIDT03 => JICOM-BF-BZOPR-YMD                 00110030
+      *김진태:20091026: 에러메세지정비                              00110030
+      * YBH    :20170201: KB-PIN전환(2차)
+      * YBH    :20170706:  3개년 재무제표실적에 의한
+      *                   기준한도 산출
+      * YBH    :20211029: 프로세스 개선
+      * YBH    :20211223: (구)화면항목 추가
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00150030
+      **  ------------------------- ------------------------------------00160001
+      **  기준한도기초자료        : THKJL0001            : R          00170030
+      **  기준한도수정이력        : THKJL0004            : R          00170030
+      **  표준산업코드목록        : THKJL0044            : R          00170030
+      ******************************************************************00240001
+       IDENTIFICATION                  DIVISION.                        00250001
+      *=================================================================00260001
+       PROGRAM-ID.                     DJL4092.                         00270001
+       AUTHOR.                         김진태.                        00280030
+       DATE-WRITTEN.                   09/04/23.                        00290001
+      *=================================================================00300001
+       ENVIRONMENT                     DIVISION.                        00310001
+      *=================================================================00320001
+       CONFIGURATION                   SECTION.                         00330001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00340001
+       DATA                            DIVISION.                        00350001
+      *=================================================================00360001
+       WORKING-STORAGE                 SECTION.                         00370001
+      *-----------------------------------------------------------------00380001
+      *CONSTANT ERROR AREA                                              00390001
+      *-----------------------------------------------------------------00400001
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00460001
+      * CONSTANT AREA                                                   00470001
+      *-----------------------------------------------------------------00480001
+       01  CO-AREA.                                                     00490001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4092'.     00500001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00510001
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00520001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00530001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00540001
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00550001
+                                                                        00560001
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00650069
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.          00650069
+      *-----------------------------------------------------------------00740001
+      * WORKING AREA                                                    00750001
+      *-----------------------------------------------------------------00760001
+       01  WK-AREA.                                                     00770001
+           03  FILLER                  PIC  X(005).
+      *-----------------------------------------------------------------00850001
+      * PGM INTERFACE PARAMETER                                         00860001
+      *-----------------------------------------------------------------00870001
+      *기준한도기초자료조회                                           00990030
+       01  XQJL0093-CA.                                                 01000001
+           COPY    XQJL0093.                                            01010001
+      *기준한도수정자료조회                                           01020030
+       01  XQJL0094-CA.                                                 01030001
+           COPY    XQJL0094.                                            01040001
+      *-----------------------------------------------------------------01860001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01870001
+      *-----------------------------------------------------------------01880001
+      * SQLIO INTERFACE COPYBOOK
+           COPY    YCDBSQLA.                                            01890001
+      * DBIO  INTERFACE COPYBOOK
+      *-----------------------------------------------------------------01910001
+      * TABLE ACCESS INTERFACE PARAMETER                                01920001
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01930001
+      *-----------------------------------------------------------------01940001
+      * DBIO ACCESS KEY관리                                           01950030
+      *-----------------------------------------------------------------01960001
+      * KEY COPYBOOK
+      * RECORD COPYBOOK
+      *-----------------------------------------------------------------02210001
+       LINKAGE                         SECTION.                         02220001
+      *-----------------------------------------------------------------02230001
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.                                                 02240001
+           COPY    YCCOMMON.                                            02250001
+      * DC COPYBOOK
+       01  XDJL4092-CA.                                                 02260001
+           COPY    XDJL4092.                                            02270001
+      *=================================================================02280001
+       PROCEDURE                       DIVISION                         02290001
+                                       USING       YCCOMMON-CA          02300001
+                                                   XDJL4092-CA          02310001
+                                                   .                    02320001
+      *=================================================================02330001
+      *-----------------------------------------------------------------02340001
+      *@  처리메인                                                    02350030
+      *-----------------------------------------------------------------02360001
+       S0000-MAIN-RTN.                                                  02370001
+                                                                        02380001
+      *@  초기화                                                      02390030
+           PERFORM S1000-INITIALIZE-RTN                                 02400001
+              THRU S1000-INITIALIZE-EXT                                 02410001
+                                                                        02420001
+      *@  입력값　CHECK                                               02430030
+           PERFORM S2000-VALIDATION-RTN                                 02440001
+              THRU S2000-VALIDATION-EXT                                 02450001
+                                                                        02460001
+      *@  업무처리                                                    02470030
+           PERFORM S3000-PROCESS-RTN                                    02480001
+              THRU S3000-PROCESS-EXT                                    02490001
+                                                                        02500001
+      *@  처리종료                                                    02510030
+           PERFORM S9000-FINAL-RTN                                      02520001
+              THRU S9000-FINAL-EXT                                      02530001
+           .                                                            02540001
+       S0000-MAIN-EXT.                                                  02550001
+           EXIT.                                                        02560001
+      *-----------------------------------------------------------------02570001
+      *@  초기화                                                      02580030
+      *-----------------------------------------------------------------02590001
+       S1000-INITIALIZE-RTN.                                            02600001
+                                                                        02610001
+      *@   WK-AREA 및　프로그램파라미터　초기화                       02620030
+           INITIALIZE WK-AREA                                           02630001
+      * DBIO
+      * SQLIO
+                      YCDBSQLA-CA                                       02650001
+                                                                        02660001
+      *@  출력영역　및　결과코드　초기화                              02670030
+           INITIALIZE XDJL4092-OUT                                      02680001
+                      XDJL4092-RETURN                                   02690001
+           .                                                            02700001
+       S1000-INITIALIZE-EXT.                                            02710001
+           EXIT.                                                        02720001
+      *-----------------------------------------------------------------02730001
+      *@  입력값검증                                                  02740030
+      *-----------------------------------------------------------------02750001
+       S2000-VALIDATION-RTN.                                            02760001
+                                                                        02770001
+      *@처리구분체크
+           IF XDJL4092-I-PRCSS-DSTIC = CO-CHA-01 OR
+                                       CO-CHA-02
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@고객구분
+           IF XDJL4092-I-CUST-DSTIC = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@채무자번호
+           IF XDJL4092-I-KB-PIN = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            02880001
+       S2000-VALIDATION-EXT.                                            02890001
+           EXIT.                                                        02900001
+      *-----------------------------------------------------------------03120001
+      *@  업무처리                                                    03130030
+      *-----------------------------------------------------------------03140001
+       S3000-PROCESS-RTN.                                               03150001
+
+      *@1  기준한도조회
+      *@   기준한도기초자료조회
+           PERFORM S3200-QJL0093-CALL-RTN
+              THRU S3200-QJL0093-CALL-EXT
+
+      *@   신청번호가없을경우
+      *@   기준한도기초자료를수정액에MOVE
+           IF XDJL4092-I-PRCSS-DSTIC = CO-CHA-01
+      *@      SQLIO CALL
+              PERFORM S3210-QJL0093-MOVE-RTN
+                 THRU S3210-QJL0093-MOVE-EXT
+      *@   차주／그룹번호　＋　신청번호　조회
+           ELSE
+      *@   기준한도수정자료조회
+              PERFORM S3300-QJL0094-CALL-RTN
+                 THRU S3300-QJL0094-CALL-EXT
+           END-IF
+           .                                                            03380001
+       S3000-PROCESS-EXT.                                               03390001
+           EXIT.                                                        03400001
+      *-----------------------------------------------------------------
+      *@  기준한도기초자료조회
+      *-----------------------------------------------------------------
+       S3200-QJL0093-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XQJL0093-IN
+
+      *@   변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0093-I-GROUP-CO-CD
+170201*@   고객식별자
+           MOVE XDJL4092-I-KB-PIN
+             TO XQJL0093-I-KB-PIN
+      *@   기준년월
+           MOVE JICOM-BF-BZOPR-YMD(1:6)
+             TO XQJL0093-I-BASE-YM
+
+      *@   SQLIO CALL
+           #DYSQLA QJL0093 XQJL0093-CA
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@   출력변수 MOVE
+
+      *@   신용등급
+           MOVE XQJL0093-O-INTNL-CV-GRD-DSTCD
+             TO XDJL4092-O-CRDRAT
+170706*@   전전년결산년월
+           MOVE XQJL0093-O-BF-PYY-STLACC-YM
+             TO XDJL4092-O-BF-PYY-STLACC-YM
+      *@   전년결산년월
+           MOVE XQJL0093-O-PYY-STLACC-YM
+             TO XDJL4092-O-PYY-STLACC-YM
+      *@   결산년월
+           MOVE XQJL0093-O-STLACC-YM
+             TO XDJL4092-O-STLACC-YM
+      *@   표준산업분류코드
+           MOVE XQJL0093-O-NEW-SI-CLSFI-CD
+             TO XDJL4092-O-STND-I-CLSFI-CD
+      *@   표준산업분류코드명
+           MOVE XQJL0093-O-STND-IDSTRY-CD-NAME
+             TO XDJL4092-O-STND-IC-CD-NAME
+211029*    TE산업분류코드
+           MOVE XQJL0093-O-TE-IDSTRY-CLSFI-CD
+             TO XDJL4092-O-TE-IDSTRY-CLSFI-CD
+211029*    TE산업분류코드명
+           MOVE XQJL0093-O-TE-I-CLSFI-CD-NAME
+             TO XDJL4092-O-TE-I-CLSFI-CD-NAME
+      *@   업종평균기준년
+           MOVE XQJL0093-O-BZTYP-AVG-APLY-YR
+             TO XDJL4092-O-BZTYP-AVG-BASE-YR
+      *@   신용등급별지원비율
+           MOVE XQJL0093-O-CRDRAT-SPORT-RATO
+             TO XDJL4092-O-CRDRAT-P-SPORT-RATO
+      *@   전전년영업이익
+           MOVE XQJL0093-O-BF-PYY-OPRFT
+             TO XDJL4092-O-BF-PYY-OPRFT
+      *@   전년영업이익
+           MOVE XQJL0093-O-PYY-OPRFT
+             TO XDJL4092-O-PYY-OPRFT
+      *@   영업이익
+           MOVE XQJL0093-O-OPRFT
+             TO XDJL4092-O-OPRFT
+      *@   전전년수입이자
+           MOVE XQJL0093-O-BF-PYY-INT-ERN
+             TO XDJL4092-O-BF-PYY-IMPRT-INT
+      *@   전년수입이자
+           MOVE XQJL0093-O-PYY-INT-ERN
+             TO XDJL4092-O-PYY-IMPRT-INT
+      *@   수입이자
+           MOVE XQJL0093-O-INT-ERN
+             TO XDJL4092-O-IMPRT-INT
+      *@   전전년감가상각비
+           MOVE XQJL0093-O-BF-PYY-DPRC-CST
+             TO XDJL4092-O-BF-PYY-DPRC-CST
+      *@   전년감가상각비
+           MOVE XQJL0093-O-PYY-DPRC-CST
+             TO XDJL4092-O-PYY-DPRC-CST
+      *@   감가상각비
+           MOVE XQJL0093-O-DPRC-CST
+             TO XDJL4092-O-DPRC-CST
+      *@   전전년금융비용
+           MOVE XQJL0093-O-BF-PYY-FNCS
+             TO XDJL4092-O-BF-PYY-FNCS
+      *@   전년금융비용
+           MOVE XQJL0093-O-PYY-FNCS
+             TO XDJL4092-O-PYY-FNCS
+      *@   금융비용
+           MOVE XQJL0093-O-FNCS
+             TO XDJL4092-O-FNCS
+      *@   전전년단기차입금
+           MOVE XQJL0093-O-BF-PYY-SHTRM-AMBR
+             TO XDJL4092-O-BF-PYY-SHTRM-AMBR
+      *@   전년단기차입금
+           MOVE XQJL0093-O-PYY-SHTRM-AMBR
+             TO XDJL4092-O-PYY-SHTRM-AMBR
+      *@   단기차입금
+           MOVE XQJL0093-O-SHTRM-AMBR
+             TO XDJL4092-O-SHTRM-AMBR
+      *@   차입금상환예상액
+           MOVE XQJL0093-O-SHTRM-AMBR-RPAYAMT
+             TO XDJL4092-O-AMBR-R-ANTICI-AMT
+170706*@   Y3차입금상환예상액
+           MOVE XQJL0093-O-Y-3S-AMBR-RPAYAMT
+             TO XDJL4092-O-Y-3S-AMBR-RPAYAMT
+      *@   가중평균이자율
+           MOVE XQJL0093-O-BZTYP-WGHTG-AVG-RT
+             TO XDJL4092-O-WGHTG-AVGZ-IRT
+211029*    전전년금융총비용비율
+           MOVE XQJL0093-O-BF-PDFT-CST-RATO
+             TO XDJL4092-O-BF-PFT-CST-RATO
+211029*    전년금융총비용비율
+           MOVE XQJL0093-O-PYY-FT-CST-RATO
+             TO XDJL4092-O-PYY-FT-CST-RATO
+211029*    금융총비용비율
+           MOVE XQJL0093-O-FINAC-T-CST-RATO
+             TO XDJL4092-O-FINAC-T-CST-RATO
+211029*    금융비용가중치값
+           MOVE XQJL0093-O-FNCS-WGHT-VAL
+             TO XDJL4092-O-FNCS-WGHT-VAL
+211029*    Y3금융비용가중치값
+           MOVE XQJL0093-O-Y-3-FNCS-WGHT-VAL
+             TO XDJL4092-O-Y-3-FNCS-WGHT-VAL
+      *@   캐쉬플로우기준액
+           MOVE XQJL0093-O-CSFW-BSAMT
+             TO XDJL4092-O-CSFW-BASE-AMT
+170706*@   Y3캐쉬플로우기준액
+           MOVE XQJL0093-O-Y-3-CSFW-BSAMT
+             TO XDJL4092-O-Y-3-CSFW-BSAMT
+      *@   전전년자기자본금
+           MOVE XQJL0093-O-BF-PYY-ONCP-AMT
+             TO XDJL4092-O-BF-PYY-ONCP-AMT
+      *@   전년자기자본금
+           MOVE XQJL0093-O-PYY-ONCP-AMT
+             TO XDJL4092-O-PYY-ONCP-AMT
+      *@   자기자본
+           MOVE XQJL0093-O-BASE-YR-ONCP-AMT
+             TO XDJL4092-O-ONCP
+211029*    자기자본산업적용비율
+           MOVE XQJL0093-O-ONCP-I-APLY-RATO
+             TO XDJL4092-O-ONCP-I-APLY-RATO
+      *@   업종평균（차입금／자기자본）비율
+           MOVE XQJL0093-O-AMBR-ONCP-RT
+             TO XDJL4092-O-AMBR-ONCP-RT
+      *@   전전년업체총차입금
+           MOVE XQJL0093-O-BF-PE-TOTAL-AMBR
+             TO XDJL4092-O-BF-PE-TOTAL-AMBR
+      *@   전년업체총차입금
+           MOVE XQJL0093-O-PYY-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-PYY-ENTP-TOTAL-AMBR
+      *@   총차입금
+           MOVE XQJL0093-O-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-TOTAL-AMBR
+211029*    총차입금자기자본비율(신차입금자기자본비율)
+           MOVE XQJL0093-O-NEW-AMBR-ONCP-RATO
+             TO XDJL4092-O-TOTAL-A-ONCP-RATO
+211029*    Y3총차입금자기자본비율(Y3신차입금자기자본율)
+           MOVE XQJL0093-O-Y-3N-AMBR-ONCP-RATO
+             TO XDJL4092-O-Y-3T-AMBR-ONCP-RATO
+211029*    차입금자본가중치값
+           MOVE XQJL0093-O-AMBR-CAPTL-WGHT-VAL
+             TO XDJL4092-O-AMBR-CAPTL-WGHT-VAL
+211029*    Y3차입자본가중치값
+           MOVE XQJL0093-O-Y-3M-CAPTL-WGHT-VAL
+             TO XDJL4092-O-Y-3A-CAPTL-WGHT-VAL
+      *@   자기자본기준액
+           MOVE XQJL0093-O-ONCP-BSAMT
+             TO XDJL4092-O-ONCP-BASE-AMT
+170706*@   Y3자기자본기준금액
+           MOVE XQJL0093-O-Y-3-ONCP-BSAMT
+             TO XDJL4092-O-Y-3-ONCP-BSAMT
+      *@   상환능력기준한도
+           MOVE XQJL0093-O-SOLVN-BASE-CLAM
+             TO XDJL4092-O-SOLVN-BASE-LIMT
+170706*@   Y3상환능력기준한도
+           MOVE XQJL0093-O-Y-3-SOLVN-BASE-CLAM
+             TO XDJL4092-O-Y-3-SOLVN-BASE-CLAM
+      *@   전전년매출액
+           MOVE XQJL0093-O-BF-PYY-SALEPR
+             TO XDJL4092-O-BF-PYY-SALEPR
+      *@   전년매출액
+           MOVE XQJL0093-O-PYY-SALEPR
+             TO XDJL4092-O-PYY-SALEPR
+      *@   매출액
+           MOVE XQJL0093-O-SALEPR
+             TO XDJL4092-O-SALEPR
+211029*    매출액산업적용비율
+           MOVE XQJL0093-O-SALEPR-I-APLY-RATO
+             TO XDJL4092-O-SALEPR-I-APLY-RATO
+211029*    Y3평균매출금액
+           MOVE XQJL0093-O-Y-3-AVG-ASALE-AMT
+             TO XDJL4092-O-Y-3-AVG-ASALE-AMT
+211029*    Y3평균매출액비율
+           MOVE XQJL0093-O-Y-3-AVG-SALEPR-RATO
+             TO XDJL4092-O-Y-3-AVG-SALEPR-RATO
+211029*    매출가중치값
+           MOVE XQJL0093-O-ASALE-WGHT-VAL
+             TO XDJL4092-O-ASALE-WGHT-VAL
+211029*    전전년매출채권회전률
+           MOVE XQJL0093-O-BF-PAB-ROTAT-RATO
+             TO XDJL4092-O-BF-PAB-ROTAT-RATO
+211029*    전년매출채권회전비율
+           MOVE XQJL0093-O-PYY-AB-ROTAT-RATO
+             TO XDJL4092-O-PYY-AB-ROTAT-RATO
+211029*    매출채권회전비율
+           MOVE XQJL0093-O-ASALE-B-ROTAT-RATO
+             TO XDJL4092-O-ASALE-B-ROTAT-RATO
+211029*    매출채권회전가중치값
+           MOVE XQJL0093-O-ASALE-BRR-WGHT-VAL
+             TO XDJL4092-O-ASALE-BR-WGHT-VAL
+211029*    Y3매출채권회전가중값
+           MOVE XQJL0093-O-Y-3ABRR-WGHT-VAL
+             TO XDJL4092-O-Y-3ABR-WGHTG-VAL
+211029*    매출기준금액
+           MOVE XQJL0093-O-ASALE-BSAMT
+             TO XDJL4092-O-ASALE-BSAMT
+211029*    Y3매출기준금액
+           MOVE XQJL0093-O-Y-3-ASALE-BSAMT
+             TO XDJL4092-O-Y-3-ASALE-BSAMT
+      *@   기준전전년총자산
+           MOVE XQJL0093-O-BASE-BP-TOTAL-ASST
+             TO XDJL4092-O-BASE-BP-TOTAL-ASST
+      *@   기준전년총자산
+           MOVE XQJL0093-O-BASE-PYY-TOTAL-ASST
+             TO XDJL4092-O-BASE-PYY-TOTAL-ASST
+      *@   총자산
+           MOVE XQJL0093-O-TOTAL-ASST
+             TO XDJL4092-O-TOTAL-ASST
+211029*    총자산산업적용비율
+           MOVE XQJL0093-O-TOTAL-AI-APLY-RATO
+             TO XDJL4092-O-TOTAL-AI-APLY-RATO
+      *@   업종평균（차입금／총자산）비율
+           MOVE XQJL0093-O-AMBR-T-ASST-RATO
+             TO XDJL4092-O-AMBR-T-ASST-RATO
+211029*    총차입금총자산비율(신차입금총자산비율)
+           MOVE XQJL0093-O-NEW-AT-ASST-RATO
+             TO XDJL4092-O-TOTAL-AT-ASST-RATO
+211029*    Y3총차입금총자산비율(Y3신차입금총자산비율)
+           MOVE XQJL0093-O-Y-3NAT-ASST-RATO
+             TO XDJL4092-O-Y-3TAT-ASST-RATO
+211029*    전전년현금성자산금액
+           MOVE XQJL0093-O-BF-PC-INCLIN-ASAM
+             TO XDJL4092-O-BF-PC-INCLIN-ASAM
+211029*    전년현금성자산금액
+           MOVE XQJL0093-O-PYY-CSH-INCLIN-ASAM
+             TO XDJL4092-O-PYY-CSH-INCLIN-ASAM
+211029*    현금성자산금액
+           MOVE XQJL0093-O-CSH-INCLIN-ASAM
+             TO XDJL4092-O-CSH-INCLIN-ASAM
+211029*    평균현금성자산금액
+           MOVE XQJL0093-O-AVG-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AVG-CSH-INCLIN-ASAM
+211029*    평균총자산금액
+           MOVE XQJL0093-O-AVG-TOTAL-ASAM
+             TO XDJL4092-O-AVG-TOTAL-ASAM
+211029*    평균현금성자산비율
+           MOVE XQJL0093-O-AVG-CI-ASST-RATO
+             TO XDJL4092-O-AVG-CI-ASST-RATO
+211029*    차입자산비율가중치값
+           MOVE XQJL0093-O-BRRW-AR-WGHT-VAL
+             TO XDJL4092-O-BRRW-AR-WGHT-VAL
+211029*    Y3차입자산비율가중값
+           MOVE XQJL0093-O-Y-3BA-RATO-WGHT-VAL
+             TO XDJL4092-O-Y-3BA-RATO-WGHT-VAL
+211029*    현금성자산가중치값
+           MOVE XQJL0093-O-CSH-IAR-WGHT-VAL
+             TO XDJL4092-O-CSH-I-ASST-WGHT-VAL
+211029*    자산기준금액
+           MOVE XQJL0093-O-ASST-BSAMT
+             TO XDJL4092-O-ASST-BSAMT
+211029*    Y3자산기준금액
+           MOVE XQJL0093-O-Y-3-ASST-BSAMT
+             TO XDJL4092-O-Y-3-ASST-BSAMT
+      *@   규모기준한도
+           MOVE XQJL0093-O-SCAL-BASE-CLAM
+             TO XDJL4092-O-SCAL-BASE-LIMT
+      *@   Y3규모기준한도금액
+           MOVE XQJL0093-O-Y-3-SCAL-BASE-CLAM
+             TO XDJL4092-O-Y-3-SCAL-BASE-CLAM
+      *@   기준한도
+           MOVE XQJL0093-O-BASE-CLAM
+             TO XDJL4092-O-BASE-LIMT
+      *@   Y3기준한도금액
+           MOVE XQJL0093-O-Y-3-BASE-CLAM
+             TO XDJL4092-O-Y-3-BASE-CLAM
+
+      *    기준액은 캐쉬플로우기준액 쪽의 매출액과 같은값
+211223*@   기준전 전전년매출액((구)규모전전년매출액)
+           MOVE XQJL0093-O-BF-PYY-SALEPR
+             TO XDJL4092-O-BASE-BB-PYY-SALEPR
+211223*@   기준전   전년매출액((구)규모　전년매출액)
+           MOVE XQJL0093-O-PYY-SALEPR
+             TO XDJL4092-O-BASE-BF-PYY-SALEPR
+211223*@   기준전     년매출액((구)규모    매출액)
+           MOVE XQJL0093-O-SALEPR
+             TO XDJL4092-O-BASE-PYY-SALEPR
+211223*@   차입금매출액비율((구)규모업종평균비율)
+           MOVE XQJL0093-O-AMBR-SALEPR-RATO
+             TO XDJL4092-O-AMBR-SALEPR-RATO
+           .
+
+       S3200-QJL0093-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  기준한도기초자료MOVE
+      *-----------------------------------------------------------------
+       S3210-QJL0093-MOVE-RTN.
+
+      *@   출력변수 MOVE
+      *@   기준한도수정액이저장않되어있으면
+      *@   기준한도기초자료를수정액에그대로 MOVE
+
+      *@   신용등급
+           MOVE XQJL0093-O-INTNL-CV-GRD-DSTCD
+             TO XDJL4092-O-AMND-CRDRAT
+170706*@   전전년결산년월
+           MOVE XQJL0093-O-BF-PYY-STLACC-YM
+             TO XDJL4092-O-AMND-BP-STLACC-YM
+      *@   전년결산년월
+           MOVE XQJL0093-O-PYY-STLACC-YM
+             TO XDJL4092-O-AMND-PYY-STLACC-YM
+      *@   결산년월
+           MOVE XQJL0093-O-STLACC-YM
+             TO XDJL4092-O-AMND-STLACC-YM
+      *@   표준산업분류코드
+           MOVE XQJL0093-O-NEW-SI-CLSFI-CD
+             TO XDJL4092-O-AMND-SI-CLSFI-CD
+      *@   표준산업분류코드명
+           MOVE XQJL0093-O-STND-IDSTRY-CD-NAME
+             TO XDJL4092-O-AMND-SIC-CD-NAME
+211029*    TE산업분류코드
+           MOVE XQJL0093-O-TE-IDSTRY-CLSFI-CD
+             TO XDJL4092-O-AMND-TI-CLSFI-CD
+211029*    TE산업분류코드명
+           MOVE XQJL0093-O-TE-I-CLSFI-CD-NAME
+             TO XDJL4092-O-AMND-TIC-CD-NAME
+      *@   업종평균기준년
+           MOVE XQJL0093-O-BZTYP-AVG-APLY-YR
+             TO XDJL4092-O-AMND-B-AVG-BASE-YR
+      *@   신용등급별지원비율
+           MOVE XQJL0093-O-CRDRAT-SPORT-RATO
+             TO XDJL4092-O-AMND-CP-SPORT-RATO
+      *@   전전년영업이익
+           MOVE XQJL0093-O-BF-PYY-OPRFT
+             TO XDJL4092-O-AMND-BF-PYY-OPRFT
+      *@   전년영업이익
+           MOVE XQJL0093-O-PYY-OPRFT
+             TO XDJL4092-O-AMND-PYY-OPRFT
+      *@   영업이익
+           MOVE XQJL0093-O-OPRFT
+             TO XDJL4092-O-AMND-OPRFT
+      *@   전전년수입이자
+           MOVE XQJL0093-O-BF-PYY-INT-ERN
+             TO XDJL4092-O-AMND-BP-IMPRT-INT
+      *@   전년수입이자
+           MOVE XQJL0093-O-PYY-INT-ERN
+             TO XDJL4092-O-AMND-PYY-IMPRT-INT
+      *@   수입이자
+           MOVE XQJL0093-O-INT-ERN
+             TO XDJL4092-O-AMND-IMPRT-INT
+      *@   전전년감가상각비
+           MOVE XQJL0093-O-BF-PYY-DPRC-CST
+             TO XDJL4092-O-AMND-B-PYY-DPRC-CST
+      *@   전년감가상각비
+           MOVE XQJL0093-O-PYY-DPRC-CST
+             TO XDJL4092-O-AMND-PYY-DPRC-CST
+      *@   감가상각비
+           MOVE XQJL0093-O-DPRC-CST
+             TO XDJL4092-O-AMND-DPRC-CST
+      *@   전전년금융비용
+           MOVE XQJL0093-O-BF-PYY-FNCS
+             TO XDJL4092-O-AMND-BF-PYY-FNCS
+      *@   전년금융비용
+           MOVE XQJL0093-O-PYY-FNCS
+             TO XDJL4092-O-AMND-PYY-FNCS
+      *@   금융비용
+           MOVE XQJL0093-O-FNCS
+             TO XDJL4092-O-AMND-FNCS
+      *@   전전년단기차입금
+           MOVE XQJL0093-O-BF-PYY-SHTRM-AMBR
+             TO XDJL4092-O-AMND-BP-SHTRM-AMBR
+      *@   전년단기차입금
+           MOVE XQJL0093-O-PYY-SHTRM-AMBR
+             TO XDJL4092-O-AMND-PYY-SHTRM-AMBR
+      *@   단기차입금
+           MOVE XQJL0093-O-SHTRM-AMBR
+             TO XDJL4092-O-AMND-SHTRM-AMBR
+      *@   차입금상환예상액
+           MOVE XQJL0093-O-SHTRM-AMBR-RPAYAMT
+             TO XDJL4092-O-AMND-AR-ANTICI-AMT
+170706*@   Y3차입금상환예상액
+           MOVE XQJL0093-O-Y-3S-AMBR-RPAYAMT
+             TO XDJL4092-O-AMND-Y3ARA-AMT
+      *@   가중평균이자율
+           MOVE XQJL0093-O-BZTYP-WGHTG-AVG-RT
+             TO XDJL4092-O-AMND-WGHTG-AVG-IRT
+211029*    전전년금융총비용비율
+           MOVE XQJL0093-O-BF-PDFT-CST-RATO
+             TO XDJL4092-O-AMND-BPFT-CST-RATO
+211029*    전년금융총비용비율
+           MOVE XQJL0093-O-PYY-FT-CST-RATO
+             TO XDJL4092-O-AMND-PFT-CST-RATO
+211029*    금융총비용비율
+           MOVE XQJL0093-O-FINAC-T-CST-RATO
+             TO XDJL4092-O-AMND-FTZ-CST-RATO
+211029*    금융비용가중치값
+           MOVE XQJL0093-O-FNCS-WGHT-VAL
+             TO XDJL4092-O-AMND-FNCS-WGHT-VAL
+211029*    Y3금융비용가중치값
+           MOVE XQJL0093-O-Y-3-FNCS-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3F-WGHT-VAL
+      *@   캐쉬플로우기준액
+           MOVE XQJL0093-O-CSFW-BSAMT
+             TO XDJL4092-O-AMND-CSFW-BASE-AMT
+170706*@   Y3캐쉬플로우기준액
+           MOVE XQJL0093-O-Y-3-CSFW-BSAMT
+             TO XDJL4092-O-AMND-Y3C-BASE-AMT
+      *@   전전년자기자본금
+           MOVE XQJL0093-O-BF-PYY-ONCP-AMT
+             TO XDJL4092-O-AMND-B-PYY-ONCP-AMT
+      *@   전년자기자본금
+           MOVE XQJL0093-O-PYY-ONCP-AMT
+             TO XDJL4092-O-AMND-PYY-ONCP-AMT
+      *@   자기자본
+           MOVE XQJL0093-O-BASE-YR-ONCP-AMT
+             TO XDJL4092-O-AMND-ONCP
+211029*    자기자본산업적용비율
+           MOVE XQJL0093-O-ONCP-I-APLY-RATO
+             TO XDJL4092-O-AMND-OI-APLY-RATO
+      *@   업종평균（차입금／자기자본）비율
+           MOVE XQJL0093-O-AMBR-ONCP-RT
+             TO XDJL4092-O-AMND-AMBR-ONCP-RT
+      *@   전전년업체총차입금
+           MOVE XQJL0093-O-BF-PE-TOTAL-AMBR
+             TO XDJL4092-O-AMND-BPE-TOTAL-AMBR
+      *@   전년업체총차입금
+           MOVE XQJL0093-O-PYY-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-AMND-PE-TOTAL-AMBR
+      *@   총차입금
+           MOVE XQJL0093-O-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-AMND-TOTAL-AMBR
+211029*    총차입금자기자본비율(신차입금자기자본비율)
+           MOVE XQJL0093-O-NEW-AMBR-ONCP-RATO
+             TO XDJL4092-O-AMND-TA-ONCP-RATO
+211029*    Y3총차입금자기자본비율(Y3신차입금자기자본율)
+           MOVE XQJL0093-O-Y-3N-AMBR-ONCP-RATO
+             TO XDJL4092-O-AMND-Y3TA-ONCP-RATO
+211029*    차입금자본가중치값
+           MOVE XQJL0093-O-AMBR-CAPTL-WGHT-VAL
+             TO XDJL4092-O-AMND-AC-WGHT-VAL
+211029*    Y3차입자본가중치값
+           MOVE XQJL0093-O-Y-3M-CAPTL-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3BC-WGHT-VAL
+      *@   자기자본기준액
+           MOVE XQJL0093-O-ONCP-BSAMT
+             TO XDJL4092-O-AMND-ONCP-BASE-AMT
+170706*@   Y3자기자본기준금액
+           MOVE XQJL0093-O-Y-3-ONCP-BSAMT
+             TO XDJL4092-O-AMND-Y-3-ONCP-BSAMT
+      *@   상환능력기준한도
+           MOVE XQJL0093-O-SOLVN-BASE-CLAM
+             TO XDJL4092-O-AMND-S-BASE-LIMT
+170706*@   Y3상환능력기준한도
+           MOVE XQJL0093-O-Y-3-SOLVN-BASE-CLAM
+             TO XDJL4092-O-AMND-Y3S-BASE-LIMT
+      *@   전전년매출액
+           MOVE XQJL0093-O-BF-PYY-SALEPR
+             TO XDJL4092-O-AMND-BF-PYY-SALEPR
+      *@   전년매출액
+           MOVE XQJL0093-O-PYY-SALEPR
+             TO XDJL4092-O-AMND-PYY-SALEPR
+      *@   매출액
+           MOVE XQJL0093-O-SALEPR
+             TO XDJL4092-O-AMND-SALEPR
+211029*    매출액산업적용비율
+           MOVE XQJL0093-O-SALEPR-I-APLY-RATO
+             TO XDJL4092-O-AMND-SI-APLY-RATO
+211029*    Y3평균매출금액
+           MOVE XQJL0093-O-Y-3-AVG-ASALE-AMT
+             TO XDJL4092-O-AMND-Y3A-ASALE-AMT
+211029*    Y3평균매출액비율
+           MOVE XQJL0093-O-Y-3-AVG-SALEPR-RATO
+             TO XDJL4092-O-AMND-Y3AS-RATO
+211029*    매출가중치값
+           MOVE XQJL0093-O-ASALE-WGHT-VAL
+             TO XDJL4092-O-AMND-ASALE-WGHT-VAL
+211029*    전전년매출채권회전률
+           MOVE XQJL0093-O-BF-PAB-ROTAT-RATO
+             TO XDJL4092-O-AMND-BPAB-ROTAT-RT
+211029*    전년매출채권회전비율
+           MOVE XQJL0093-O-PYY-AB-ROTAT-RATO
+             TO XDJL4092-O-AMND-PAB-ROTAT-RATO
+211029*    매출채권회전비율
+           MOVE XQJL0093-O-ASALE-B-ROTAT-RATO
+             TO XDJL4092-O-AMND-AB-ROTAT-RATO
+211029*    매출채권회전가중치값
+           MOVE XQJL0093-O-ASALE-BRR-WGHT-VAL
+             TO XDJL4092-O-AMND-ABR-WGHT-VAL
+211029*    Y3매채권회전가중치값
+           MOVE XQJL0093-O-Y-3ABRR-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3ABR-WGHT-VAL
+211029*    매출기준금액
+           MOVE XQJL0093-O-ASALE-BSAMT
+             TO XDJL4092-O-AMND-ASALE-BSAMT
+211029*    Y3매출기준금액
+           MOVE XQJL0093-O-Y-3-ASALE-BSAMT
+             TO XDJL4092-O-AMND-Y3-ASALE-BSAMT
+      *@   기준전전년총자산
+           MOVE XQJL0093-O-BASE-BP-TOTAL-ASST
+             TO XDJL4092-O-AMND-BBP-TOTAL-ASST
+      *@   기준전년총자산
+           MOVE XQJL0093-O-BASE-PYY-TOTAL-ASST
+             TO XDJL4092-O-AMND-BP-TOTAL-ASST
+      *@   총자산
+           MOVE XQJL0093-O-TOTAL-ASST
+             TO XDJL4092-O-AMND-TOTAL-ASST
+211029*    총자산산업적용비율
+           MOVE XQJL0093-O-TOTAL-AI-APLY-RATO
+             TO XDJL4092-O-AMND-TAI-APLY-RATO
+      *@   업종평균（차입금／총자산）비율
+           MOVE XQJL0093-O-AMBR-T-ASST-RATO
+             TO XDJL4092-O-AMND-AT-ASST-RATO
+211029*    총차입금총자산비율(신차입금총자산비율)
+           MOVE XQJL0093-O-NEW-AT-ASST-RATO
+             TO XDJL4092-O-AMND-TAT-ASST-RATO
+211029*    Y3총차입금총자산비율(Y3신차입금총자산비율)
+           MOVE XQJL0093-O-Y-3NAT-ASST-RATO
+             TO XDJL4092-O-AMND-Y3TATA-RATO
+211029*    수정전전년현금성자산금액
+           MOVE XQJL0093-O-BF-PC-INCLIN-ASAM
+             TO XDJL4092-O-AMND-BPCI-ASAM
+211029*    수정전년현금성자산금액
+           MOVE XQJL0093-O-PYY-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-PC-INCLIN-ASAM
+211029*    수정현금성자산금액
+           MOVE XQJL0093-O-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-C-INCLIN-ASAM
+211029*    평균현금성자산금액
+           MOVE XQJL0093-O-AVG-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-AC-INCLIN-ASAM
+211029*    평균총자산금액
+           MOVE XQJL0093-O-AVG-TOTAL-ASAM
+             TO XDJL4092-O-AMND-AVG-TOTAL-ASAM
+211029*    평균현금성자산비율
+           MOVE XQJL0093-O-AVG-CI-ASST-RATO
+             TO XDJL4092-O-AMND-ACI-ASST-RATO
+211029*    차입자산비율가중치값
+           MOVE XQJL0093-O-BRRW-AR-WGHT-VAL
+             TO XDJL4092-O-AMND-BAR-WGHT-VAL
+211029*    Y3차입자산비율가중값
+           MOVE XQJL0093-O-Y-3BA-RATO-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3BARW-VAL
+211029*    현금성자산가중치값
+           MOVE XQJL0093-O-CSH-IAR-WGHT-VAL
+             TO XDJL4092-O-AMND-CIA-WGHT-VAL
+211029*    자산기준금액
+           MOVE XQJL0093-O-ASST-BSAMT
+             TO XDJL4092-O-AMND-ASST-BSAMT
+211029*    Y3자산기준금액
+           MOVE XQJL0093-O-Y-3-ASST-BSAMT
+             TO XDJL4092-O-AMND-Y-3-ASST-BSAMT
+      *@   규모기준한도
+           MOVE XQJL0093-O-SCAL-BASE-CLAM
+             TO XDJL4092-O-AMND-SCAL-BASE-LIMT
+      *@   Y3규모기준한도금액
+           MOVE XQJL0093-O-Y-3-SCAL-BASE-CLAM
+             TO XDJL4092-O-AMND-Y3S-BASE-CLAM
+      *@   기준한도
+           MOVE XQJL0093-O-BASE-CLAM
+             TO XDJL4092-O-AMND-BASE-LIMT
+      *@   Y3기준한도금액
+           MOVE XQJL0093-O-Y-3-BASE-CLAM
+             TO XDJL4092-O-AMND-Y-3-BASE-CLAM
+
+      *    수정액은 신청번호가 없기에 실제론 사용안함
+211223*@   기준전 전전년매출액((구)규모전전년매출액)
+           MOVE XQJL0093-O-BF-PYY-SALEPR
+             TO XDJL4092-O-AMND-BBB-PYY-SALEPR
+211223*@   기준전   전년매출액((구)규모　전년매출액)
+           MOVE XQJL0093-O-PYY-SALEPR
+             TO XDJL4092-O-AMND-BB-PYY-SALEPR
+211223*@   기준전     년매출액((구)규모    매출액)
+           MOVE XQJL0093-O-SALEPR
+             TO XDJL4092-O-AMND-B-BF-YR-SALEPR
+211223*@   차입금매출액비율((구)규모업종평균비율)
+           MOVE XQJL0093-O-AMBR-SALEPR-RATO
+             TO XDJL4092-O-AMND-A-SALEPR-RATO
+           .
+
+       S3210-QJL0093-MOVE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  기준한도수정자료조회
+      *-----------------------------------------------------------------
+       S3300-QJL0094-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XQJL0094-IN
+      *@   변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0094-I-GROUP-CO-CD
+      *@   한도신청번호
+           MOVE XDJL4092-I-APLCN-NO
+             TO XQJL0094-I-LIMT-APLCN-NO
+
+      *@   SQLIO CALL
+           #DYSQLA QJL0094 XQJL0094-CA
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@            DATA MOVE
+                    PERFORM S3310-QJL0094-MOVE-RTN
+                       THRU S3310-QJL0094-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+      *@   저장된수정정보가없으면기초자료를 MOVE
+                    PERFORM S3210-QJL0093-MOVE-RTN
+                       THRU S3210-QJL0093-MOVE-EXT
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3300-QJL0094-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  기준한도수정자료MOVE
+      *-----------------------------------------------------------------
+       S3310-QJL0094-MOVE-RTN.
+
+      *@   출력변수 MOVE
+
+      *@   신용등급
+           MOVE XQJL0094-O-INTNL-CV-GRD-DSTCD
+             TO XDJL4092-O-AMND-CRDRAT
+170706*@   전전년결산년월
+           MOVE XQJL0094-O-BF-PYY-STLACC-YM
+             TO XDJL4092-O-AMND-BP-STLACC-YM
+      *@   전년결산년월
+           MOVE XQJL0094-O-PYY-STLACC-YM
+             TO XDJL4092-O-AMND-PYY-STLACC-YM
+      *@   결산년월
+           MOVE XQJL0094-O-STLACC-YM
+             TO XDJL4092-O-AMND-STLACC-YM
+      *@   표준산업분류코드
+           MOVE XQJL0094-O-NEW-SI-CLSFI-CD
+             TO XDJL4092-O-AMND-SI-CLSFI-CD
+      *@   표준산업분류코드명
+           MOVE XQJL0094-O-STND-IDSTRY-CD-NAME
+             TO XDJL4092-O-AMND-SIC-CD-NAME
+211029*    TE산업분류코드
+           MOVE XQJL0094-O-TE-IDSTRY-CLSFI-CD
+             TO XDJL4092-O-AMND-TI-CLSFI-CD
+211029*    TE산업분류코드명
+           MOVE XQJL0094-O-TE-I-CLSFI-CD-NAME
+             TO XDJL4092-O-AMND-TIC-CD-NAME
+      *@   업종평균기준년
+           MOVE XQJL0094-O-BZTYP-AVG-APLY-YR
+             TO XDJL4092-O-AMND-B-AVG-BASE-YR
+      *@   신용등급별지원비율
+           MOVE XQJL0094-O-CRDRAT-SPORT-RATO
+             TO XDJL4092-O-AMND-CP-SPORT-RATO
+      *@   전전년영업이익
+           MOVE XQJL0094-O-BF-PYY-OPRFT
+             TO XDJL4092-O-AMND-BF-PYY-OPRFT
+      *@   전년영업이익
+           MOVE XQJL0094-O-PYY-OPRFT
+             TO XDJL4092-O-AMND-PYY-OPRFT
+      *@   영업이익
+           MOVE XQJL0094-O-OPRFT
+             TO XDJL4092-O-AMND-OPRFT
+      *@   전전년수입이자
+           MOVE XQJL0094-O-BF-PYY-INT-ERN
+             TO XDJL4092-O-AMND-BP-IMPRT-INT
+      *@   전년수입이자
+           MOVE XQJL0094-O-PYY-INT-ERN
+             TO XDJL4092-O-AMND-PYY-IMPRT-INT
+      *@   수입이자
+           MOVE XQJL0094-O-INT-ERN
+             TO XDJL4092-O-AMND-IMPRT-INT
+      *@   전전년감가상각비
+           MOVE XQJL0094-O-BF-PYY-DPRC-CST
+             TO XDJL4092-O-AMND-B-PYY-DPRC-CST
+      *@   전년감가상각비
+           MOVE XQJL0094-O-PYY-DPRC-CST
+             TO XDJL4092-O-AMND-PYY-DPRC-CST
+      *@   감가상각비
+           MOVE XQJL0094-O-DPRC-CST
+             TO XDJL4092-O-AMND-DPRC-CST
+      *@   전전년금융비용
+           MOVE XQJL0094-O-BF-PYY-FNCS
+             TO XDJL4092-O-AMND-BF-PYY-FNCS
+      *@   전년금융비용
+           MOVE XQJL0094-O-PYY-FNCS
+             TO XDJL4092-O-AMND-PYY-FNCS
+      *@   금융비용
+           MOVE XQJL0094-O-FNCS
+             TO XDJL4092-O-AMND-FNCS
+      *@   전전년단기차입금
+           MOVE XQJL0094-O-BF-PYY-SHTRM-AMBR
+             TO XDJL4092-O-AMND-BP-SHTRM-AMBR
+      *@   전년단기차입금
+           MOVE XQJL0094-O-PYY-SHTRM-AMBR
+             TO XDJL4092-O-AMND-PYY-SHTRM-AMBR
+      *@   단기차입금
+           MOVE XQJL0094-O-SHTRM-AMBR
+             TO XDJL4092-O-AMND-SHTRM-AMBR
+      *@   차입금상환예상액
+           MOVE XQJL0094-O-SHTRM-AMBR-RPAYAMT
+             TO XDJL4092-O-AMND-AR-ANTICI-AMT
+170706*@   Y3차입금상환예상액
+           MOVE XQJL0094-O-Y-3S-AMBR-RPAYAMT
+             TO XDJL4092-O-AMND-Y3ARA-AMT
+      *@   가중평균이자율
+           MOVE XQJL0094-O-BZTYP-WGHTG-AVG-RT
+             TO XDJL4092-O-AMND-WGHTG-AVG-IRT
+211029*    전전년금융총비용비율
+           MOVE XQJL0094-O-BF-PDFT-CST-RATO
+             TO XDJL4092-O-AMND-BPFT-CST-RATO
+211029*    전년금융총비용비율
+           MOVE XQJL0094-O-PYY-FT-CST-RATO
+             TO XDJL4092-O-AMND-PFT-CST-RATO
+211029*    금융총비용비율
+           MOVE XQJL0094-O-FINAC-T-CST-RATO
+             TO XDJL4092-O-AMND-FTZ-CST-RATO
+211029*    금융비용가중치값
+           MOVE XQJL0094-O-FNCS-WGHT-VAL
+             TO XDJL4092-O-AMND-FNCS-WGHT-VAL
+211029*    Y3금융비용가중치값
+           MOVE XQJL0094-O-Y-3-FNCS-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3F-WGHT-VAL
+      *@   캐쉬플로우기준액
+           MOVE XQJL0094-O-CSFW-BSAMT
+             TO XDJL4092-O-AMND-CSFW-BASE-AMT
+170706*@   Y3캐쉬플로우기준액
+           MOVE XQJL0094-O-Y-3-CSFW-BSAMT
+             TO XDJL4092-O-AMND-Y3C-BASE-AMT
+      *@   전전년자기자본금
+           MOVE XQJL0094-O-BF-PYY-ONCP-AMT
+             TO XDJL4092-O-AMND-B-PYY-ONCP-AMT
+      *@   전년자기자본금
+           MOVE XQJL0094-O-PYY-ONCP-AMT
+             TO XDJL4092-O-AMND-PYY-ONCP-AMT
+      *@   자기자본
+           MOVE XQJL0094-O-BASE-YR-ONCP-AMT
+             TO XDJL4092-O-AMND-ONCP
+211029*    자기자본산업적용비율
+           MOVE XQJL0094-O-ONCP-I-APLY-RATO
+             TO XDJL4092-O-AMND-OI-APLY-RATO
+      *@   업종평균（차입금／자기자본）비율
+           MOVE XQJL0094-O-AMBR-ONCP-RT
+             TO XDJL4092-O-AMND-AMBR-ONCP-RT
+      *@   전전년업체총차입금
+           MOVE XQJL0094-O-BF-PE-TOTAL-AMBR
+             TO XDJL4092-O-AMND-BPE-TOTAL-AMBR
+      *@   전년업체총차입금
+           MOVE XQJL0094-O-PYY-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-AMND-PE-TOTAL-AMBR
+      *@   총차입금
+           MOVE XQJL0094-O-ENTP-TOTAL-AMBR
+             TO XDJL4092-O-AMND-TOTAL-AMBR
+211029*    총차입금자기자본비율(신차입금자기자본비율)
+           MOVE XQJL0094-O-NEW-AMBR-ONCP-RATO
+             TO XDJL4092-O-AMND-TA-ONCP-RATO
+211029*    Y3총차입금자기자본비율(Y3신차입금자기자본율)
+           MOVE XQJL0094-O-Y-3N-AMBR-ONCP-RATO
+             TO XDJL4092-O-AMND-Y3TA-ONCP-RATO
+211029*    차입금자본가중치값
+           MOVE XQJL0094-O-AMBR-CAPTL-WGHT-VAL
+             TO XDJL4092-O-AMND-AC-WGHT-VAL
+211029*    Y3차입자본가중치값
+           MOVE XQJL0094-O-Y-3M-CAPTL-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3BC-WGHT-VAL
+      *@   자기자본기준액
+           MOVE XQJL0094-O-ONCP-BSAMT
+             TO XDJL4092-O-AMND-ONCP-BASE-AMT
+170706*@   Y3자기자본기준금액
+           MOVE XQJL0094-O-Y-3-ONCP-BSAMT
+             TO XDJL4092-O-AMND-Y-3-ONCP-BSAMT
+      *@   상환능력기준한도
+           MOVE XQJL0094-O-SOLVN-BASE-CLAM
+             TO XDJL4092-O-AMND-S-BASE-LIMT
+170706*@   Y3상환능력기준한도
+           MOVE XQJL0094-O-Y-3-SOLVN-BASE-CLAM
+             TO XDJL4092-O-AMND-Y3S-BASE-LIMT
+      *@   전전년매출액
+           MOVE XQJL0094-O-BF-PYY-SALEPR
+             TO XDJL4092-O-AMND-BF-PYY-SALEPR
+      *@   전년매출액
+           MOVE XQJL0094-O-PYY-SALEPR
+             TO XDJL4092-O-AMND-PYY-SALEPR
+      *@   매출액
+           MOVE XQJL0094-O-SALEPR
+             TO XDJL4092-O-AMND-SALEPR
+211029*    매출액산업적용비율
+           MOVE XQJL0094-O-SALEPR-I-APLY-RATO
+             TO XDJL4092-O-AMND-SI-APLY-RATO
+211029*    Y3평균매출금액
+           MOVE XQJL0094-O-Y-3-AVG-ASALE-AMT
+             TO XDJL4092-O-AMND-Y3A-ASALE-AMT
+211029*    Y3평균매출액비율
+           MOVE XQJL0094-O-Y-3-AVG-SALEPR-RATO
+             TO XDJL4092-O-AMND-Y3AS-RATO
+211029*    매출가중치값
+           MOVE XQJL0094-O-ASALE-WGHT-VAL
+             TO XDJL4092-O-AMND-ASALE-WGHT-VAL
+211029*    전전년매출채권회전률
+           MOVE XQJL0094-O-BF-PAB-ROTAT-RATO
+             TO XDJL4092-O-AMND-BPAB-ROTAT-RT
+211029*    전년매출채권회전비율
+           MOVE XQJL0094-O-PYY-AB-ROTAT-RATO
+             TO XDJL4092-O-AMND-PAB-ROTAT-RATO
+211029*    매출채권회전비율
+           MOVE XQJL0094-O-ASALE-B-ROTAT-RATO
+             TO XDJL4092-O-AMND-AB-ROTAT-RATO
+211029*    매출채권회전가중치값
+           MOVE XQJL0094-O-ASALE-BRR-WGHT-VAL
+             TO XDJL4092-O-AMND-ABR-WGHT-VAL
+211029*    Y3매채권회전가중치값
+           MOVE XQJL0094-O-Y-3ABRR-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3ABR-WGHT-VAL
+211029*    매출기준금액
+           MOVE XQJL0094-O-ASALE-BSAMT
+             TO XDJL4092-O-AMND-ASALE-BSAMT
+211029*    Y3매출기준금액
+           MOVE XQJL0094-O-Y-3-ASALE-BSAMT
+             TO XDJL4092-O-AMND-Y3-ASALE-BSAMT
+      *@   기준전전년총자산
+           MOVE XQJL0094-O-BASE-BP-TOTAL-ASST
+             TO XDJL4092-O-AMND-BBP-TOTAL-ASST
+      *@   기준전년총자산
+           MOVE XQJL0094-O-BASE-PYY-TOTAL-ASST
+             TO XDJL4092-O-AMND-BP-TOTAL-ASST
+      *@   총자산
+           MOVE XQJL0094-O-PYY-TOTAL-ASST
+             TO XDJL4092-O-AMND-TOTAL-ASST
+211029*    총자산산업적용비율
+           MOVE XQJL0094-O-TOTAL-AI-APLY-RATO
+             TO XDJL4092-O-AMND-TAI-APLY-RATO
+      *@   업종평균（차입금／총자산）비율
+           MOVE XQJL0094-O-AMBR-T-ASST-RATO
+             TO XDJL4092-O-AMND-AT-ASST-RATO
+211029*    총차입금총자산비율(신차입금총자산비율)
+           MOVE XQJL0094-O-NEW-AT-ASST-RATO
+             TO XDJL4092-O-AMND-TAT-ASST-RATO
+211029*    Y3총차입금총자산비율(Y3신차입금총자산비율)
+           MOVE XQJL0094-O-Y-3NAT-ASST-RATO
+             TO XDJL4092-O-AMND-Y3TATA-RATO
+211029*    수정전전년현금성자산금액
+           MOVE XQJL0094-O-BF-PC-INCLIN-ASAM
+             TO XDJL4092-O-AMND-BPCI-ASAM
+211029*    수정전년현금성자산금액
+           MOVE XQJL0094-O-PYY-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-PC-INCLIN-ASAM
+211029*    수정현금성자산금액
+           MOVE XQJL0094-O-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-C-INCLIN-ASAM
+211029*    평균현금성자산금액
+           MOVE XQJL0094-O-AVG-CSH-INCLIN-ASAM
+             TO XDJL4092-O-AMND-AC-INCLIN-ASAM
+211029*    평균총자산금액
+           MOVE XQJL0094-O-AVG-TOTAL-ASAM
+             TO XDJL4092-O-AMND-AVG-TOTAL-ASAM
+211029*    평균현금성자산비율
+           MOVE XQJL0094-O-AVG-CI-ASST-RATO
+             TO XDJL4092-O-AMND-ACI-ASST-RATO
+211029*    차입자산비율가중치값
+           MOVE XQJL0094-O-BRRW-AR-WGHT-VAL
+             TO XDJL4092-O-AMND-BAR-WGHT-VAL
+211029*    Y3차입자산가중치값
+           MOVE XQJL0094-O-Y-3BA-RATO-WGHT-VAL
+             TO XDJL4092-O-AMND-Y3BARW-VAL
+211029*    현금성자산가중치값
+           MOVE XQJL0094-O-CSH-IAR-WGHT-VAL
+             TO XDJL4092-O-AMND-CIA-WGHT-VAL
+211029*    자산기준금액
+           MOVE XQJL0094-O-ASST-BSAMT
+             TO XDJL4092-O-AMND-ASST-BSAMT
+211029*    Y3자산기준금액
+           MOVE XQJL0094-O-Y-3-ASST-BSAMT
+             TO XDJL4092-O-AMND-Y-3-ASST-BSAMT
+      *@   규모기준한도
+           MOVE XQJL0094-O-SCAL-BASE-CLAM
+             TO XDJL4092-O-AMND-SCAL-BASE-LIMT
+      *@   Y3규모기준한도금액
+           MOVE XQJL0094-O-Y-3-SCAL-BASE-CLAM
+             TO XDJL4092-O-AMND-Y3S-BASE-CLAM
+      *@   기준한도
+           MOVE XQJL0094-O-BASE-CLAM
+             TO XDJL4092-O-AMND-BASE-LIMT
+      *@   Y3기준한도금액
+           MOVE XQJL0094-O-Y-3-BASE-CLAM
+             TO XDJL4092-O-AMND-Y-3-BASE-CLAM
+
+
+211223*@   기준전 전전년매출액((구)규모전전년매출액)
+           MOVE XQJL0094-O-BASE-BB-PYY-SALEPR
+             TO XDJL4092-O-AMND-BBB-PYY-SALEPR
+211223*@   기준전   전년매출액((구)규모　전년매출액)
+           MOVE XQJL0094-O-BASE-BF-PYY-SALEPR
+             TO XDJL4092-O-AMND-BB-PYY-SALEPR
+211223*@   기준전     년매출액((구)규모    매출액)
+           MOVE XQJL0094-O-BASE-PYY-SALEPR
+             TO XDJL4092-O-AMND-B-BF-YR-SALEPR
+211223*@   차입금매출액비율((구)규모업종평균비율)
+           MOVE XQJL0094-O-AMBR-SALEPR-RATO
+             TO XDJL4092-O-AMND-A-SALEPR-RATO
+           .
+
+       S3310-QJL0094-MOVE-EXT.
+           EXIT.
+                                                                        01810024
+      *-----------------------------------------------------------------32250001
+      *@  처리종료                                                    32260030
+      *-----------------------------------------------------------------32270001
+       S9000-FINAL-RTN.                                                 32280001
+      *@3 종료처리                                                    32290030
+                                                                        32300001
+      *@3.1 프로그램 종료                                           32310030
+      *@처리내용 : 프로그램을 정상 종료 함                    32320030
+                                                                        32330001
+           #OKEXIT  CO-STAT-OK                                          32340001
+           .                                                            32350001
+       S9000-FINAL-EXT.                                                 32360001
+           EXIT.                                                        32370001

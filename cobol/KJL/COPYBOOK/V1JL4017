@@ -1,0 +1,42 @@
+      *================================================================*
+      *@ NAME : V1JL4017                                               *
+      *@ DESC : 피어코드별TE현황조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2016-01-18 16:35:17                          *
+      *  생성일시     : 2016-01-18 16:35:21                          *
+      *  전체길이     : 00087607 BYTES                               *
+      *================================================================*
+      *--     PEER코드명
+           07  V1JL4017-PEER-CD-NAME             PIC  X(102).
+      *--     출력라인수1
+ROWCNT     07  V1JL4017-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4017-GRID1                    OCCURS 0 TO 000500
+               DEPENDING ON V1JL4017-OUTPT-LINE-CNT1.
+      *--       PEER구분코드1
+             09  V1JL4017-PEER-DSTCD1            PIC  X(010).
+      *--       PEER코드명1
+             09  V1JL4017-PEER-CD-NAME1          PIC  X(102).
+      *--       대상업체건수1
+             09  V1JL4017-TAGET-ENTP-NOITM1      PIC  9(015).
+      *--       명목액기준한도금액1
+             09  V1JL4017-TTL-AMT-BASE-CLAM1     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액1
+             09  V1JL4017-TTL-AMT-BASE-BAL1      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액1
+             09  V1JL4017-TE-LIMT-AUC1           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  1  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4017-PEER-CD-NAME         ;PEER코드명
+      *L  V1JL4017-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4017-GRID1                ;그리드1
+      *X  V1JL4017-PEER-DSTCD1          ;PEER구분코드1
+      *X  V1JL4017-PEER-CD-NAME1        ;PEER코드명1
+      *N  V1JL4017-TAGET-ENTP-NOITM1    ;대상업체건수1
+      *S  V1JL4017-TTL-AMT-BASE-CLAM1   ;명목액기준한도금액1
+      *S  V1JL4017-TTL-AMT-BASE-BAL1    ;명목액기준잔액1
+      *S  V1JL4017-TE-LIMT-AUC1         ;토탈익스포져한도환산금액1

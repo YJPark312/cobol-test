@@ -1,0 +1,84 @@
+//TKJLP027 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0027 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0027',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0027,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0027
+    (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준일"                             POSITION(       4         )
+   CHAR(                      2)                ,
+   "기준년월"                           POSITION(       6         )
+   CHAR(                      6)                ,
+   "담보보증고객식별자"                 POSITION(      12         )
+   CHAR(                     10)                ,
+   "계약식별자"                         POSITION(      22         )
+   CHAR(                     25)                ,
+   "담보보증차주번호"                   POSITION(      47         )
+   CHAR(                     13)                ,
+   "보증인고객구분"                     POSITION(      60         )
+   CHAR(                      2)                ,
+   "차주번호"                           POSITION(      62         )
+   CHAR(                     13)                ,
+   "채무자구분"                         POSITION(      75         )
+   CHAR(                      2)                ,
+   "담보구분"                           POSITION(      77         )
+   CHAR(                      3)                ,
+   "상품대분류코드"                     POSITION(      80         )
+   CHAR(                      2)                ,
+   "상품중분류코드"                     POSITION(      82         )
+   CHAR(                      2)                ,
+   "상품템플릿코드"                     POSITION(      84         )
+   CHAR(                      3)                ,
+   "상품번호"                           POSITION(      87         )
+   CHAR(                      5)                ,
+   "대출자격구분"                       POSITION(      92         )
+   CHAR(                      3)                ,
+   "간접중분류구분"                     POSITION(      95         )
+   CHAR(                      2)                ,
+   "과목코드"                           POSITION(      97         )
+   CHAR(                      3)                ,
+   "통화코드"                           POSITION(     100         )
+   CHAR(                      3)                ,
+   "통화설정금액"                       POSITION(     103:     112)
+   DECIMAL                                      ,
+   "원화환산금액"                       POSITION(     113:     120)
+   DECIMAL                                      ,
+   "간접명목금액"                       POSITION(     121:     128)
+   DECIMAL                                      ,
+   "간접익스포져금액"                   POSITION(     129:     136)
+   DECIMAL                                      ,
+   "관련테이블명"                       POSITION(     137         )
+   CHAR(                     12)                ,
+   "담보계약식별자"                     POSITION(     149         )
+   CHAR(                     25)                ,
+   "담보계약계좌번호"                   POSITION(     174         )
+   CHAR(                     20)                ,
+   "시스템최종처리일시"                 POSITION(     194         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     214         )
+   CHAR(                      7)                ,
+   "그룹내간접여부"                     POSITION(     221         )
+   CHAR(                      1)                ,
+   "담보고객식별자"                     POSITION(     222         )
+   CHAR(                     10)
+   )
+//

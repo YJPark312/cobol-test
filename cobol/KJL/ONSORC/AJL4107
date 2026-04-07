@@ -1,0 +1,297 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4107 (AS(EAD)TE한도관리대상조회)
+      *@처리유형  : AS
+      *@처리개요  : (EAD)TE한도관리대상조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081126: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091205: PC 삭제
+      *백현정:20101120: EAD신규
+      * HYH    :20161024: 관리한도유효년월일 추가
+      * HYH    :20210930: 관리부점정보 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4107.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/11/26.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4107 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리PC  INTERFACE
+       01  XDJL4107-CA.
+           COPY  XDJL4107.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4107-CA.
+           COPY  YNJL4107.
+      *    AS COPYBOOK
+       01  YPJL4107-CA.
+           COPY  YPJL4107.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4107-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL4107-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4107-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4107-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4107-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL4107-CALL-RTN
+              THRU S3100-DJL4107-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4107-CALL-RTN.
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,영업점코드,고객구분,
+      *@설정상태,조회기준일자,TE금액1,TE금액2)
+
+      *    처리구분
+           MOVE YNJL4107-PRCSS-DSTIC
+             TO XDJL4107-I-PRCSS-DSTIC
+      *    영업점코드
+           MOVE YNJL4107-BRNCD
+             TO XDJL4107-I-BRNCD
+      *    고객구분
+           MOVE YNJL4107-CUST-DSTIC
+             TO XDJL4107-I-CUST-DSTIC
+      *    설정상태
+           MOVE YNJL4107-STUP-STUS
+             TO XDJL4107-I-STUP-STUS
+      *    조회기준일자
+           MOVE YNJL4107-BASE-YMD
+             TO XDJL4107-I-BASE-YMD
+      *    TE금액1
+           MOVE YNJL4107-AMT1
+             TO XDJL4107-I-AMT1
+      *    TE금액2
+           MOVE YNJL4107-AMT2
+             TO XDJL4107-I-AMT2
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4107 YCCOMMON-CA XDJL4107-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL4107-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4107-OK
+              CONTINUE
+           ELSE
+               #ERROR XDJL4107-R-ERRCD
+                      XDJL4107-R-TREAT-CD
+                      XDJL4107-R-STAT
+           END-IF
+           .
+       S3100-DJL4107-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력 조립
+           MOVE XDJL4107-O-BRN-NAME
+             TO YPJL4107-BRN-NAME
+
+           MOVE XDJL4107-O-OUTPT-LINE-CNT1
+             TO YPJL4107-OUTPT-LINE-CNT1
+
+      *@4.2 그리드1 조립
+      *@실행조건:WK-I > YPJL4107-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립 =
+      *@SET(채무자번호,채무자명,기업규모,TE관리한도,
+      *@명목액기준한도,명목액기준잔액,한도기준TE,잔액기준TE
+      *@한도소진율)
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4107-OUTPT-LINE-CNT1
+      *        채무자번호(그룹코드)
+               MOVE XDJL4107-O-BRWR-NO(WK-I)
+                 TO YPJL4107-BRWR-NO  (WK-I)
+      *        채무자명(그룹코드)
+               MOVE XDJL4107-O-DBTRZ-NAME(WK-I)
+                 TO YPJL4107-DBTRZ-NAME  (WK-I)
+      *        기업규모
+               MOVE XDJL4107-O-CORP-SCAL(WK-I)
+                 TO YPJL4107-CORP-SCAL  (WK-I)
+      *        TE관리한도(A)
+               MOVE XDJL4107-O-MGT-CLAM(WK-I)
+                 TO YPJL4107-MGT-CLAM  (WK-I)
+      *        명목액기준한도
+               MOVE XDJL4107-O-TTL-AMT-BASE-CLAM(WK-I)
+                 TO YPJL4107-TTL-AMT-BASE-CLAM(WK-I)
+      *        명목액기준잔액
+               MOVE XDJL4107-O-TTL-AMT-BASE-BAL(WK-I)
+                 TO YPJL4107-TTL-AMT-BASE-BAL(WK-I)
+      *        한도기준TE금액
+               MOVE XDJL4107-O-LIMT-BASE-TE-AMT(WK-I)
+                 TO YPJL4107-LIMT-BASE-TE-AMT(WK-I)
+      *        한도소진율(B/A)
+               MOVE XDJL4107-O-LIMT-EXHS-RT(WK-I)
+                 TO YPJL4107-LIMT-EXHS-RT(WK-I)
+161024*       신용평가유효년월일
+               MOVE XDJL4107-O-CRDT-VALUA-VALD-YMD(WK-I)
+                 TO YPJL4107-CRDT-VALUA-VALD-YMD(WK-I)
+161024*        관리한도유효년월일
+               MOVE XDJL4107-O-MGT-LIMT-VALD-YMD(WK-I)
+                 TO YPJL4107-MGT-LIMT-VALD-YMD(WK-I)
+210930*        관리부점코드
+               MOVE XDJL4107-O-MGT-BRNCD(WK-I)
+                 TO YPJL4107-MGT-BRNCD(WK-I)
+210930*        관리부점명
+               MOVE XDJL4107-O-MGT-BRN-NAME(WK-I)
+                 TO YPJL4107-MGT-BRN-NAME(WK-I)
+
+           END-PERFORM
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL04107000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK.
+
+       S9000-FINAL-EXT.
+           EXIT.

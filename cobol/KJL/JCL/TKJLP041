@@ -1,0 +1,55 @@
+//TKJLP041 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0041 거액신용공여명세 TABLE LOAD
+//*********************************************************************
+//LOAD20  EXEC DSNUPROC,PARM='DAPG,KJL0041',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC16 DD  DSN=KJL.PT.PIN.LOAD.KJL0041,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC16 INTO TABLE
+      DB2DBA.THKJL0041
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "고객식별자"                         POSITION(      12         )
+   CHAR(                     10)                ,
+   "한도기업구분"                       POSITION(      22         )
+   CHAR(                      1)                ,
+   "회계구분"                           POSITION(      23         )
+   CHAR(                      1)                ,
+   "차주번호"                           POSITION(      24         )
+   CHAR(                     13)                ,
+   "KB신용공여금액"                     POSITION(      37:      44)
+   DECIMAL                                      ,
+   "FS신용공여금액"                     POSITION(      45:      52)
+   DECIMAL                                      ,
+   "제외대상금액"                       POSITION(      53:      60)
+   DECIMAL                                      ,
+   "자기자본기준년월"                   POSITION(      61         )
+   CHAR(                      6)                ,
+   "자기자본기준금액"                   POSITION(      67:      74)
+   DECIMAL                                      ,
+   "자기자본초과금액"                   POSITION(      75:      82)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(      83         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     103         )
+   CHAR(                      7)
+   )
+/*
+//

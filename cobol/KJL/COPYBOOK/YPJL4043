@@ -1,0 +1,201 @@
+      *================================================================*
+      *@ NAME : YPJL4043                                               *
+      *@ DESC : AS보고서조회 COPYBOOK                                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-02-25 16:15:43                          *
+      *  생성일시     : 2020-02-25 16:15:51                          *
+      *  전체길이     : 00124425 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4043-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+           07  YPJL4043-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     출력라인수4
+           07  YPJL4043-OUTPT-LINE-CNT4          PIC  9(005).
+      *--     출력라인수5
+           07  YPJL4043-OUTPT-LINE-CNT5          PIC  9(005).
+      *--     출력라인수6
+           07  YPJL4043-OUTPT-LINE-CNT6          PIC  9(005).
+      *--     그리드1
+           07  YPJL4043-GRID1                    OCCURS 000100 TIMES.
+      *--       지역
+             09  YPJL4043-LIMT-MGT-ARA-DSTCD1    PIC  X(001).
+      *--       국가수
+             09  YPJL4043-NATNL-CNT1             PIC  9(003).
+      *--       한도(A)
+             09  YPJL4043-WHOL-MGT-CLAM1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져(B)
+             09  YPJL4043-USD-CLAM1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율(B/A)
+             09  YPJL4043-LIMT-EXHS-RT1          PIC  9(003)V9(02).
+      *--       한도여유액(A-B)
+             09  YPJL4043-LIMT-SEXTR-AMT1        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드2
+           07  YPJL4043-GRID2                    OCCURS 000100 TIMES.
+      *--       공통한도대상여부
+             09  YPJL4043-NATNL-W-CM-LIMT-YN2    PIC  X(001).
+      *--       당행국가신용등급
+             09  YPJL4043-OWBNK-NC-GRD-DSTCD2    PIC  X(004).
+      *--       국가수
+             09  YPJL4043-NATNL-CNT2             PIC  9(003).
+      *--       한도
+             09  YPJL4043-WHOL-MGT-CLAM2         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국가전체공통한도금액
+             09  YPJL4043-NATNL-WHOL-CM-CLAM2    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             09  YPJL4043-LIMT-USE-AMT2          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             09  YPJL4043-LIMT-EXHS-RT2          PIC  9(003)V9(02).
+      *--       한도여유액
+             09  YPJL4043-LIMT-SEXTR-AMT2        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드4
+           07  YPJL4043-GRID4                    OCCURS 000300 TIMES.
+      *--       ISO국가코드
+             09  YPJL4043-ISO-NATNL-CD4          PIC  X(002).
+      *--       국가
+             09  YPJL4043-ENG-NATNL-NAME4        PIC  X(052).
+      *--       SP
+             09  YPJL4043-SNP-GRD-DSTCD4         PIC  X(002).
+      *--       Moodys
+             09  YPJL4043-MODYS-GRD-DSTCD4       PIC  X(002).
+      *--       Fitch
+             09  YPJL4043-FITCH-GRD-DSTCD4       PIC  X(002).
+      *--       당행국가신용등급
+             09  YPJL4043-OWBNK-NC-GRD-DSTCD4    PIC  X(004).
+      *--       국가위험수준구분
+             09  YPJL4043-NATNL-R-LVEL-DSTCD4    PIC  X(001).
+      *--       한도
+             09  YPJL4043-WHOL-MGT-CLAM4         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             09  YPJL4043-USD-CLAM4              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             09  YPJL4043-LIMT-EXHS-RT4          PIC  9(003)V9(02).
+      *--       한도여유액
+             09  YPJL4043-LIMT-SEXTR-AMT4        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말익스포져
+             09  YPJL4043-LSMN-BAL4              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말대비
+             09  YPJL4043-FLXBL-AMT4             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드5
+           07  YPJL4043-GRID5                    OCCURS 000300 TIMES.
+      *--       ISO국가코드
+             09  YPJL4043-ISO-NATNL-CD5          PIC  X(002).
+      *--       국가
+             09  YPJL4043-ENG-NATNL-NAME5        PIC  X(052).
+      *--       SP
+             09  YPJL4043-SNP-GRD-DSTCD5         PIC  X(002).
+      *--       Moodys
+             09  YPJL4043-MODYS-GRD-DSTCD5       PIC  X(002).
+      *--       Fitch
+             09  YPJL4043-FITCH-GRD-DSTCD5       PIC  X(002).
+      *--       당행국가신용등급
+             09  YPJL4043-OWBNK-NC-GRD-DSTCD5    PIC  X(004).
+      *--       국가위험수준구분
+             09  YPJL4043-NATNL-R-LVEL-DSTCD5    PIC  X(001).
+      *--       한도
+             09  YPJL4043-WHOL-MGT-CLAM5         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             09  YPJL4043-USD-CLAM5              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             09  YPJL4043-LIMT-EXHS-RT5          PIC  9(003)V9(02).
+      *--       한도여유액
+             09  YPJL4043-LIMT-SEXTR-AMT5        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말익스포져
+             09  YPJL4043-LSMN-BAL5              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말대비
+             09  YPJL4043-FLXBL-AMT5             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드6
+           07  YPJL4043-GRID6                    OCCURS 000300 TIMES.
+      *--       상품명
+             09  YPJL4043-PRDCT-NAME6            PIC  X(020).
+      *--       전월말익스포져
+             09  YPJL4043-LSMN-BAL6              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말
+             09  YPJL4043-LSMN-MGIVST-RATO6      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             09  YPJL4043-TDD-BAL6               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       비중(B)
+             09  YPJL4043-TDD-MGIVST-RATO6       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전월말
+             09  YPJL4043-INCRDC6                PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  4  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4043-OUTPT-LINE-CNT1      ;출력라인수1
+      *N  YPJL4043-OUTPT-LINE-CNT2      ;출력라인수2
+      *N  YPJL4043-OUTPT-LINE-CNT4      ;출력라인수4
+      *N  YPJL4043-OUTPT-LINE-CNT5      ;출력라인수5
+      *N  YPJL4043-OUTPT-LINE-CNT6      ;출력라인수6
+      *A  YPJL4043-GRID1                ;그리드1
+      *X  YPJL4043-LIMT-MGT-ARA-DSTCD1  ;지역
+      *N  YPJL4043-NATNL-CNT1           ;국가수
+      *S  YPJL4043-WHOL-MGT-CLAM1       ;한도(A)
+      *S  YPJL4043-USD-CLAM1            ;익스포져(B)
+      *N  YPJL4043-LIMT-EXHS-RT1        ;한도소진율(B/A)
+      *S  YPJL4043-LIMT-SEXTR-AMT1      ;한도여유액(A-B)
+      *A  YPJL4043-GRID2                ;그리드2
+      *X  YPJL4043-NATNL-W-CM-LIMT-YN2  ;공통한도대상여부
+      *X  YPJL4043-OWBNK-NC-GRD-DSTCD2  ;당행국가신용등급
+      *N  YPJL4043-NATNL-CNT2           ;국가수
+      *S  YPJL4043-WHOL-MGT-CLAM2       ;한도
+      *S  YPJL4043-NATNL-WHOL-CM-CLAM2  ;국가전체공통한도금액
+      *S  YPJL4043-LIMT-USE-AMT2        ;익스포져
+      *N  YPJL4043-LIMT-EXHS-RT2        ;한도소진율
+      *S  YPJL4043-LIMT-SEXTR-AMT2      ;한도여유액
+      *A  YPJL4043-GRID4                ;그리드4
+      *X  YPJL4043-ISO-NATNL-CD4        ;ISO국가코드
+      *X  YPJL4043-ENG-NATNL-NAME4      ;국가
+      *X  YPJL4043-SNP-GRD-DSTCD4       ;SP
+      *X  YPJL4043-MODYS-GRD-DSTCD4     ;Moodys
+      *X  YPJL4043-FITCH-GRD-DSTCD4     ;Fitch
+      *X  YPJL4043-OWBNK-NC-GRD-DSTCD4  ;당행국가신용등급
+      *X  YPJL4043-NATNL-R-LVEL-DSTCD4  ;국가위험수준구분
+      *S  YPJL4043-WHOL-MGT-CLAM4       ;한도
+      *S  YPJL4043-USD-CLAM4            ;익스포져
+      *N  YPJL4043-LIMT-EXHS-RT4        ;한도소진율
+      *S  YPJL4043-LIMT-SEXTR-AMT4      ;한도여유액
+      *S  YPJL4043-LSMN-BAL4            ;전월말익스포져
+      *S  YPJL4043-FLXBL-AMT4           ;전월말대비
+      *A  YPJL4043-GRID5                ;그리드5
+      *X  YPJL4043-ISO-NATNL-CD5        ;ISO국가코드
+      *X  YPJL4043-ENG-NATNL-NAME5      ;국가
+      *X  YPJL4043-SNP-GRD-DSTCD5       ;SP
+      *X  YPJL4043-MODYS-GRD-DSTCD5     ;Moodys
+      *X  YPJL4043-FITCH-GRD-DSTCD5     ;Fitch
+      *X  YPJL4043-OWBNK-NC-GRD-DSTCD5  ;당행국가신용등급
+      *X  YPJL4043-NATNL-R-LVEL-DSTCD5  ;국가위험수준구분
+      *S  YPJL4043-WHOL-MGT-CLAM5       ;한도
+      *S  YPJL4043-USD-CLAM5            ;익스포져
+      *N  YPJL4043-LIMT-EXHS-RT5        ;한도소진율
+      *S  YPJL4043-LIMT-SEXTR-AMT5      ;한도여유액
+      *S  YPJL4043-LSMN-BAL5            ;전월말익스포져
+      *S  YPJL4043-FLXBL-AMT5           ;전월말대비
+      *A  YPJL4043-GRID6                ;그리드6
+      *X  YPJL4043-PRDCT-NAME6          ;상품명
+      *S  YPJL4043-LSMN-BAL6            ;전월말익스포져
+      *S  YPJL4043-LSMN-MGIVST-RATO6    ;전월말 비중(A)
+      *S  YPJL4043-TDD-BAL6             ;익스포져
+      *S  YPJL4043-TDD-MGIVST-RATO6     ;비중(B)
+      *S  YPJL4043-INCRDC6              ;전월말 대비 비중 증감

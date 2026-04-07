@@ -1,0 +1,72 @@
+      *================================================================*
+      *@ NAME : XDJLB041                                               *
+      *@ DESC : DC국가별정보관리 COPYBOOK                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-02-13 13:59:01                          *
+      *  생성일시     : 2020-02-13 13:59:03                          *
+      *  전체길이     : 00000091 BYTES                               *
+      *================================================================*
+           03  XDJLB041-RETURN.
+             05  XDJLB041-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB041-OK            VALUE  '00'.
+                 88  COND-XDJLB041-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB041-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB041-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB041-ERROR         VALUE  '09'.
+                 88  COND-XDJLB041-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB041-SYSERROR      VALUE  '99'.
+             05  XDJLB041-R-LINE                 PIC  9(006).
+             05  XDJLB041-R-ERRCD                PIC  X(008).
+             05  XDJLB041-R-TREAT-CD             PIC  X(008).
+             05  XDJLB041-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB041-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB041-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준년월
+             05  XDJLB041-I-BASE-YM              PIC  X(006).
+      *--       국가코드
+             05  XDJLB041-I-ISO-NATNL-CD         PIC  X(002).
+      *--       국가명
+             05  XDJLB041-I-ENG-NATNL-NAME       PIC  X(052).
+      *--       Total관리한도
+             05  XDJLB041-I-WHOL-MGT-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       SP
+             05  XDJLB041-I-SNP-GRD-DSTCD        PIC  X(002).
+      *--       Moodys
+             05  XDJLB041-I-MODYS-GRD-DSTCD      PIC  X(002).
+      *--       Fitch
+             05  XDJLB041-I-FITCH-GRD-DSTCD      PIC  X(002).
+      *--       당행국가신용등급구분
+             05  XDJLB041-I-OWBNK-NC-GRD-DSTCD   PIC  X(004).
+      *--       한도관리지역구분
+             05  XDJLB041-I-LIMT-MGT-AREA-DSTCD  PIC  X(001).
+      *--       국가전체공통한도여부
+             05  XDJLB041-I-NATNL-W-CMN-LIMT-YN  PIC  X(001).
+      *--       국가위험수준구분
+             05  XDJLB041-I-NATNL-R-LVEL-DSTCD   PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB041-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB041-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  4  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB041-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB041-I-BASE-YM            ;조회기준년월
+      *X  XDJLB041-I-ISO-NATNL-CD       ;국가코드
+      *X  XDJLB041-I-ENG-NATNL-NAME     ;국가명
+      *S  XDJLB041-I-WHOL-MGT-CLAM      ;Total관리한도
+      *X  XDJLB041-I-SNP-GRD-DSTCD      ;SP
+      *X  XDJLB041-I-MODYS-GRD-DSTCD    ;Moodys
+      *X  XDJLB041-I-FITCH-GRD-DSTCD    ;Fitch
+      *X  XDJLB041-I-OWBNK-NC-GRD-DSTCD ;당행국가신용등급구분
+      *X  XDJLB041-I-LIMT-MGT-AREA-DSTCD;한도관리지역구분
+      *X  XDJLB041-I-NATNL-W-CMN-LIMT-YN
+      * 국가전체공통한도여부
+      *X  XDJLB041-I-NATNL-R-LVEL-DSTCD ;국가위험수준구분
+      *X  XDJLB041-O-PRCSS-RSULT        ;처리결과

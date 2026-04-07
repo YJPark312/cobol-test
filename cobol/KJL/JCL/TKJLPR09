@@ -1,0 +1,73 @@
+//TKJLPR09 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR009 TABLE LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJLR009',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJLR009,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJLR009
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "통합트레이드번호"                   POSITION(      12         )
+   CHAR(                     14)                ,
+   "통합인스트루먼트번호"               POSITION(      26         )
+   CHAR(                     12)                ,
+   "통합계정과목코드"                   POSITION(      38         )
+   CHAR(                     13)                ,
+   "종목번호"                           POSITION(      51         )
+   CHAR(                     12)                ,
+   "종목명"                             POSITION(      63         )
+   CHAR(                     42)                ,
+   "계약금액"                           POSITION(     105:     114)
+   DECIMAL                                      ,
+   "매입약정금액"                       POSITION(     115:     124)
+   DECIMAL                                      ,
+   "인출금액"                           POSITION(     125:     134)
+   DECIMAL                                      ,
+   "미인출금액"                         POSITION(     135:     144)
+   DECIMAL                                      ,
+   "난외금액"                           POSITION(     145:     154)
+   DECIMAL                                      ,
+   "신규년월일"                         POSITION(     155         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(     163         )
+   CHAR(                      8)                ,
+   "종료년월일"                         POSITION(     171         )
+   CHAR(                      8)                ,
+   "관리부점코드"                       POSITION(     179         )
+   CHAR(                      4)                ,
+   "매입약정거래번호"                   POSITION(     183         )
+   CHAR(                     14)                ,
+   "CMBS북번호"                         POSITION(     197         )
+   CHAR(                     11)                ,
+   "CMBS딜러명"                         POSITION(     208         )
+   CHAR(                     42)                ,
+   "고객식별자"                         POSITION(     250         )
+   CHAR(                     10)                ,
+   "법인등록번호"                       POSITION(     260         )
+   CHAR(                     13)                ,
+   "시스템최종처리일시"                 POSITION(     273         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     293         )
+   CHAR(                      7)
+   )
+/*
+//

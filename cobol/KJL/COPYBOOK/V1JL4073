@@ -1,0 +1,60 @@
+      *================================================================*
+      *@ NAME : V1JL4073                                               *
+      *@ DESC : 국외영업점편중모니터링                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-23 15:29:30                          *
+      *  생성일시     : 2020-03-23 15:29:36                          *
+      *  전체길이     : 00039605 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+ROWCNT     07  V1JL4073-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4073-GRID1                    OCCURS 0 TO 000300
+               DEPENDING ON V1JL4073-OUTPT-LINE-CNT1.
+      *--       기준년월일
+             09  V1JL4073-BASE-YMD               PIC  X(008).
+      *--       관리부점코드
+             09  V1JL4073-MGT-BRNCD              PIC  X(004).
+      *--       부점명
+             09  V1JL4073-BRN-NAME               PIC  X(022).
+      *--       대분류업종코드
+             09  V1JL4073-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  V1JL4073-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       산업별토탈익스포져금액
+             09  V1JL4073-IDSTRY-PER-TE-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       비중
+             09  V1JL4073-WGHTZ                  PIC  9(003)V9(01).
+      *--       편중관리익스포져금액
+             09  V1JL4073-LNUP-MGT-EXPSR-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       투자비중
+             09  V1JL4073-INVST-WGHT             PIC  9(003)V9(01).
+      *--       편중관리대상여부
+             09  V1JL4073-LNUP-MGT-TAGET-YN      PIC  X(001).
+      *--       편중관리비율
+             09  V1JL4073-LNUP-MGT-CST-RT        PIC  9(003)V9(02).
+      *--       관리비중초과여부
+             09  V1JL4073-MGT-WGHT-EXCS-YN       PIC  X(001).
+      *--       여유액
+             09  V1JL4073-SEXTR-AMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  0  7  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4073-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4073-GRID1                ;그리드1
+      *X  V1JL4073-BASE-YMD             ;기준년월일
+      *X  V1JL4073-MGT-BRNCD            ;관리부점코드
+      *X  V1JL4073-BRN-NAME             ;부점명
+      *X  V1JL4073-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4073-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *S  V1JL4073-IDSTRY-PER-TE-AMT    ;산업별토탈익스포져금액
+      *N  V1JL4073-WGHTZ                ;비중
+      *S  V1JL4073-LNUP-MGT-EXPSR-AMT   ;편중관리익스포져금액
+      *N  V1JL4073-INVST-WGHT           ;투자비중
+      *X  V1JL4073-LNUP-MGT-TAGET-YN    ;편중관리대상여부
+      *N  V1JL4073-LNUP-MGT-CST-RT      ;편중관리비율
+      *X  V1JL4073-MGT-WGHT-EXCS-YN     ;관리비중초과여부
+      *S  V1JL4073-SEXTR-AMT            ;여유액

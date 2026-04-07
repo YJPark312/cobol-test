@@ -1,0 +1,81 @@
+//TKJLPR07 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR007 파생상품차주별현황 TABLE LOAD
+//*********************************************************************
+//LOAD16  EXEC DSNUPROC,PARM='DAPG,KJLR007',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC16 DD  DSN=KJL.PT.PIN.LOAD.KJLR007,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC16 INTO TABLE
+   DB2DBA.THKJLR007
+   (
+   "그룹회사코드"                  POSITION(       1         )
+   CHAR(                      3)           ,
+   "기준년월일"                    POSITION(       4         )
+   CHAR(                      8)           ,
+   "고객식별자"                    POSITION(      12         )
+   CHAR(                     10)           ,
+   "고객관리번호"                  POSITION(      22         )
+   CHAR(                      5)           ,
+   "차주번호"                      POSITION(      27         )
+   CHAR(                     13)           ,
+   "차주명"                        POSITION(      40         )
+   CHAR(                     42)           ,
+   "네팅여부"                      POSITION(      82         )
+   CHAR(                      1)           ,
+   "총거래한도"                    POSITION(      83:      90)
+   DECIMAL                                 ,
+   "담보거래한도"                  POSITION(      91:      98)
+   DECIMAL                                 ,
+   "신용거래한도"                  POSITION(      99:     106)
+   DECIMAL                                 ,
+   "한도유효년월일"                POSITION(     107         )
+   CHAR(                      8)           ,
+   "면제여부"                      POSITION(     115         )
+   CHAR(                      1)           ,
+   "거래건수"                      POSITION(     116:     120)
+   DECIMAL                                 ,
+   "위험가중자산금액"              POSITION(     121:     128)
+   DECIMAL                                 ,
+   "담보평가금액"                  POSITION(     129:     136)
+   DECIMAL                                 ,
+   "외환총한도소진율"              POSITION(     137:     141)
+   DECIMAL                                 ,
+   "신용한도소진율"                POSITION(     142:     146)
+   DECIMAL                                 ,
+   "담보소진율"                    POSITION(     147:     151)
+   DECIMAL                                 ,
+   "최근신규년월일"                POSITION(     152         )
+   CHAR(                      8)           ,
+   "최근한도년월일"                POSITION(     160         )
+   CHAR(                      8)           ,
+   "초과신규여부1"                 POSITION(     168         )
+   CHAR(                      1)           ,
+   "초과신규여부2"                 POSITION(     169         )
+   CHAR(                      1)           ,
+   "초과신규여부3"                 POSITION(     170         )
+   CHAR(                      1)           ,
+   "관련부점코드"                  POSITION(     171         )
+   CHAR(                      4)           ,
+   "ISO국가코드"                   POSITION(     175         )
+   CHAR(                      2)           ,
+   "시스템최종처리일시"            POSITION(     177         )
+   CHAR(                     20)           ,
+   "시스템최종사용자번호"          POSITION(     197         )
+   CHAR(                      7)
+   )
+/*
+//

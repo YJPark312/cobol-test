@@ -1,0 +1,1601 @@
+
+=== Table 1 ===
+개발가이드
+표준 프레임워크
+
+=== Table 2 ===
+작성자 | 김영탁
+작성 상태 | 작성중
+최종 개정일 | 2026-01-07
+
+=== Table 3 ===
+일자 | 버전 | 주요 내용 | 작성자 | 승인자
+2025-04-07 | 0.10 | n-KESA 2.0 초안 작성 | 김영탁 | 지민수
+2025-04-22 | 0.11 | DBIO, BatchStep 내용추가 | 김영탁 | 지민수
+2025-07-07 | 0.12 | V3 Inbound처리 내용추가 | 김영탁 | 지민수
+2025-10-17 | 0.13 | 배치 관련 내용 업데이트 | 김영탁 | 지민수
+2025-12-04 | 0.14 | 일자전환 관련 저장소 명칭 추가 | 김영탁 | 지민수
+2025-12-10 | 0.15 | dbSelectPage, SQLExceptionUtils 내용정정 | 김영탁 | 지민수
+2025-12-15 | 0.16 | 배치 nKESA 2.0 변경 사항 작성 | 장요재 | 지민수
+2025-12-15 | 0.16 | 배치 인계인수 후 보완사항 작성 | 장요재 | 지민수
+2025-12-16 | 0.17 | 보상거래 내용 수정 | 김영탁 | 지민수
+2025-12-18 | 0.18 | 배치 인계인수 후 배치스탭 호출 메서드 및 변경로그 사용 주의사항 추가 | 장요재 | 지민수
+2025-12-19 | 0.19 | 센터컷 관련 입력테이블 배치 사용 시 DBIO 사용 불가 내용 추가 | 장요재 | 지민수
+2025-12-22 | 0.20 | v3예제 보완, 보상패턴 내용수정 | 김영탁 | 지민수
+2026-01-07 | 0.60 | nKESA 2.0 버전 일반서버업무, 계정성 업무에 따른 설명 추가 | 지민수 | 지민수
+2026-01-12 | 0.70 | callSharedMethodByRequiresNew 삭제 및 가이드 보완 | 장요재 | 지민수
+2026-03-12 | 0.71 | 3.17.3.3. 방화벽 신청 목록 업데이트 | 김미현 | 지민수
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+
+=== Table 4 ===
+역할 | 명칭 | 약어 | 처리내용
+처리 유닛 | ProcessUnit | PU | 서비스 처리 Flow 관리 담당
+기능 유닛 | FunctionUnit | FU | 단위 비즈니스 로직 / 공통 로직 / 선후처리 담당
+데이터 유닛 | DataUnit | DU | 데이터 조회전용(SELECT) 담당 DB테이블에 대한 R 처리 DB테이블에 대한 목록 조회 처리
+DBIO 유닛 | DBIO Unit | DBIO | 단건 데이터의 INSERT, SELECT, UPDATE, DELETE SQL 처리 담당 DB테이블에 대한 C/R/U/D 처리
+
+=== Table 5 ===
+기능 | 지원 상세
+단건 C/U/D 작업 | 테이블 단위 단건 CUD 작업 Operation을 제공 보정로그 적재를 위해 반드시 CUD 작업은 DBIO를 통해 작성 필수 런타임 시점 제어: 오류처리
+단건 Lock R(조회) 작업 단건 R(조회) 작업 | 단건 락 조회 Operation을 제공 단건 일반 조회 작업 Operation을 제공
+보정로그 적재 | 일자전환(24*365) 지원기능 시점정보 확보를 위한 보정로그 적재
+변경로그(CHGLOG) 파일 적재 | 변경로그 적재 기능 배치에서만 처리되는 기능으로 배치 처리시 특정 Flag = Y 시 변경로그 적재 금융감독원 권고사항에 따른 Batch 작업에서 원장변경 수행 시 변경 전/후 정보의 변경로그로 파일로 적재
+
+=== Table 6 ===
+약어 | 처리내용
+PM | 온라인 서비스의 시작점으로, 화면에서 각 서비스요청은 거래코드를 통해서 하나의 PM으로 매핑됨
+FM | 기능 단위로써 여러 공통로직을 담당함.  프레임워크 선후처리의 등록 단위.  배치에서 호출 가능.  타 컴포넌트 호출시 호출의 단위
+DM | 조회 위주의 SELECT SQL을 실행하는 단위(단, 일반서버 업무인 경우 CUD 처리 제한없음)
+DBM | 단건의 CRUD SQL을 실행하는 단위
+
+=== Table 7 ===
+public IDataSet methodName(IDataSet requestData, IOnlineContext onlineCtx) { IDataSet responseData = new DataSet(); ... return responseData; }
+
+=== Table 8 ===
+구분 | 구분 | 온라인 | 배치
+어플리케이션 계층 구조 | 어플리케이션 계층 구조 | PU, FU, DU, DBIO의 계층구조 | 최대 2계층 구조로 배치 유닛/스탭 프로그램으로 구성
+컴포넌트 | 컴포넌트 | 있음 (어플리케이션 별) | 배치 유닛 프로그램 = 1 Class 배치 스탭 프로그램 = n Class
+컴포넌트 | Unit | 있음 (PU, FU, DU, DBIO) 1 Class = 1 Unit | N/A
+컴포넌트 | Method | 하나의 unit 에 여러 개의 메소드 | 1개 클래스에 1개 메인 메소드
+SQL 사용방법 | SQL 사용방법 | 개발도구의 SQL 설계기 이용 | 동일
+자료구조 | 자료구조 | IDataSet, IRecordSet, IRecord | 동일
+XSQL 파일 | XSQL 파일 | DU : XSQL = 1:1 DBIO:XSQL = 1:1 | 배치 프로그램: XSQL = 1:1  (BU, BS 개별 XSQL 사용)
+Commit 수행 | Commit 수행 | Container 에서 자동 Commit 수행 | 프로그램에서 수동으로 Commit 수행.
+JVM 기동 방식 | JVM 기동 방식 | WAS 에서 동작 | SpringBoot JVM에서 동작 Job 마다 JVM 프로세스 실행
+XA 트랜잭션 | XA 트랜잭션 | WAS 에서 XA 트랜잭션 지원 | XA 불가. 단일 JDBC 트랜잭션 가능.  단, 멀티 DataSource 조회는 가능.
+
+=== Table 9 ===
+구분 | 업무 | 구분 | 소스저장소 명
+n-KESA 1.0 | 서버업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-njava
+n-KESA 1.0 | 서버업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-nbatch
+n-KESA 1.0 | 서버업무 | 설정 파일관리 저장소, 프로파일 CM(변경관리용) 프로젝트 | 어플리케이션코드-nconfig
+n-KESA 2.0 | 계정계 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-core-n2java
+n-KESA 2.0 | 계정계 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-core-n2batch
+n-KESA 2.0 | 계정계 업무 | 설정 파일관리 저장소, 프로파일 CM(변경관리용) 프로젝트 | 어플리케이션코드-core-n2config
+n-KESA 2.0 | 공통성 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-comm-n2java
+n-KESA 2.0 | 공통성 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-comm-n2batch
+n-KESA 2.0 | 공통성 업무 | 설정 파일관리 저장소, 프로파일 CM(변경관리용) 프로젝트 | 어플리케이션코드-comm-n2config
+n-KESA 2.0 | 서버 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-server-n2java
+n-KESA 2.0 | 서버 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-server-n2batch
+n-KESA 2.0 | 서버 업무 | 설정 파일관리 저장소, 프로파일 CM(변경관리용) 프로젝트 | 어플리케이션코드-server-n2config
+
+=== Table 10 ===
+구분 | 업무 | 일자전환 | 정기 배포 | 긴급 배포 | 예약 배포 | 즉시 배포 | 업무예시
+n-KESA 1.0 | 서버업무 | X |  | O | O | O | 일반업무
+n-KESA 2.0 | 계정계 업무 | O | O | O |  |  | 일반업무
+n-KESA 2.0 | 공통성 업무 | O / X | O | O | O | O | kji,sqc
+n-KESA 2.0 | 서버 업무 | X |  | O | O | O | 일반업무
+
+=== Table 11 ===
+[기본패키지].[어플리케이션 코드].[컴포넌트아이디]
+
+=== Table 12 ===
+PU(대문자) + [명사형]
+
+=== Table 13 ===
+FU(대문자) + [명사형]
+
+=== Table 14 ===
+DU(대문자) + [테이블명] + [A-Z]
+
+=== Table 15 ===
+DU(대문자) + [화면아이디] + [A-Z]
+
+=== Table 16 ===
+DBIO_(대문자) + [테이블명] + [A-Z]
+
+=== Table 17 ===
+pm(소문자) + [거래코드 (10)]
+
+=== Table 18 ===
+BNE0000401 | BNE0000401 | BNE0000401
+어플리케이션코드 | 대문자 3자리 | BNE
+거래구분코드 | 숫자 2자리 | 00
+거래구분식별번호 | 숫자 3자리 | 004
+단축거래 구분코드 | 숫자 1자리 | 0
+거래식별번호 | 숫자 1자리 | 1
+
+=== Table 19 ===
+[동사형] + [명사형]
+
+=== Table 20 ===
+[동사형] 또는 [동사형] + [명사형]
+
+=== Table 21 ===
+[동사형] - insert, select, selectForUpdate, update, delete
+
+=== Table 22 ===
+행위 | FM | DM | DBM
+등록 | register~ |  | insert~
+수정 | modify~ |  | update~
+삭제 | delete~ |  | delete~
+단건 조회 | get~ | select~ | select~, selectForUpdate~
+다건 조회 | getList~ | selectList~ | 
+여부 조회 | is~ |  | 
+유효성 검증 | validate~ |  | 
+계산 | calculate~, add~, subtract~ |  | 
+건수 체크 | getNoOf~ |  | 
+관리 | manage~ |  | 
+
+=== Table 23 ===
+DU(대문자) + [테이블명] + [A-Z]
+
+=== Table 24 ===
+[동사형] 또는 [동사형] + [명사형]
+
+=== Table 25 ===
+[기본패키지].[어플리케이션 코드].[컴포넌트아이디].consts
+
+=== Table 26 ===
+C(대문자) + 명사형 + Consts
+
+=== Table 27 ===
+대문자 + 대문자 or 숫자 or ‘_’
+
+=== Table 28 ===
+XIO_(EAI서비스코드 또는 MCI 거래코드)
+
+=== Table 29 ===
+구분 | 업무 | 소스저장소 명
+n-KESA 1.0 | 서버업무 | 어플리케이션코드-nbatch
+n-KESA 2.0 | 계정계 업무 | 어플리케이션코드-core-n2batch
+n-KESA 2.0 | 공통성 업무 | 어플리케이션코드-comm-n2batch
+n-KESA 2.0 | 서버 업무 | 어플리케이션코드-server-n2batch
+
+=== Table 30 ===
+[기본패키지명] + [어플리케이션코드] + [하위패키지] + [배치패키지식별자]
+
+=== Table 31 ===
+항목 | 내용 | 필수여부
+기본패키지명 | com.kbstar | 필수
+어플리케이션 코드 | 3자리 구성, 개발도구에 등록 되어있는 정보 선택 | 필수
+하위패키지 | 명사형으로 작성(필요한 경우 [명사형]+[명사형]+[…] 로 구성가능)  명사형 작성 시, 메타 데이터 시스템의 영문 단어의 소문자 조합으로 작성  예) com.kbstar.bne.ppsncustcnegocnsel.batch:  상담/오퍼링 개인고객섭외상담관리 배치 프로그램 | 필수
+배치 패키지 식별자 | batch, fio, xsql로 프레임워크에서 자동생성 예) com.kbstar.bne.common.batch:  상담/오퍼링 배치 프로그램 | 자동생성
+
+=== Table 32 ===
+BU(대문자) + [명사형]
+
+=== Table 33 ===
+BU(대문자) + [명사형] + BS(대문자) + [명사형]
+
+=== Table 34 ===
+JOB구분코드(소문자 m:자동화, t:수시) 1자리+어플리케이션코드(소문자 AppCode) 3자리+업무에서 임의채번 4자리(소문자 영문 or 숫자) + .sh
+
+=== Table 35 ===
+BU(대문자) + [명사형]
+
+=== Table 36 ===
+BU(대문자) + [명사형] + BS(대문자) + [명사형] or BS(대문자) + [명사형]
+
+=== Table 37 ===
+[동사형] 또는 [동사형] + [명사형]
+
+=== Table 38 ===
+FIO(대문자) + 배치유닛명 + 일련번호(2)
+
+=== Table 39 ===
+(1) 어플리케이션 코드 |  | ② 파일생성주기 |  | ③ User Defined Name |  | ④ 파일 송수신구분 |  | ⑤ 일련번호 |  | ⑥ 생얼일자 |  | ⑦ 확장자
+예) SQC | _ | D | _ | TSCRL30 | _ | FROMCRM | _ | 001 | _ | 20190524 | _ | .TXT
+
+=== Table 40 ===
+/fsfile/어플리케이션 코드/
+
+=== Table 41 ===
+① 메뉴바 | Eclipse 기본 메뉴와 NEXCORE 메뉴로 구성
+② 툴바 | Eclipse 기본 툴바와 NEXCORE 툴바로 구성
+③ 퍼스펙티브 | NEXCORE 퍼스펙티브
+④ 탐색기 | NEXCORE 탐색기와 Eclipse 기본탐색기(Project Explorer, Package Explorer 등) 구성
+⑤ 편집기(설계기) | NEXCORE의 컴포넌트 편집기, 유닛 편집기, 메소드 테스트 편집기, SQL 편집기, 배치 프로그램 편집기, 배치 테스트 편집기, Flow Viewer 등
+⑥ 뷰 | Eclipse 기본 뷰와 NEXCORE의 설정, Code Assist, IO Assist, DB Assist, DBIO생성, SQL 실행결과로 구성
+
+=== Table 42 ===
+업무 | 구분 | 소스저장소 명
+계정계 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-core-n2java
+계정계 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-core-n2batch
+공통성 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-comm-n2java
+공통성 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-comm-n2batch
+서버 업무 | 온라인 프로그램 저장소 프로젝트 | 어플리케이션코드-server-n2java
+서버 업무 | 배치 프로그램 저장소 프로젝트 | 어플리케이션코드-server-n2batch
+
+=== Table 43 ===
+ | NEXCORE 프레임워크 view 하위에 패키지, 컴포넌트, 유닛, XSQL 등의 논리 단위로 Java 프로그램들을 표현
+ | eclipse 기본 view  JAVA프로젝트의 기본 파일 단위로 view JAVA 이외의 uio , xsql, xio 등은 텍스트 파일 형태로 표시
+
+=== Table 44 ===
+Workspace 기준으로 한 위치 | 의미
+runtime | 런타임 프로젝트 루트 * NEXCORE_HOME 으로 지정
+runtime/batch | 배치 공통 클래스, 설정 및 라이브러리 저장소
+runtime/build | 배포와 관련된 라이브러리 및 스크립트 저장소
+runtime/nkesa.war | 응용이 위치하는 곳, web 모듈 저장소
+runtime/nkesa.war/WEB-INF | 공통 클래스, 설정 및 라이브러리 저장소
+applications | 어플리케이션의 실행 파일 디렉토리 * 컴포넌트의 클래스들, 메타정보, SQL 등
+
+=== Table 45 ===
+ | 설계 산출물 항목 | 산출물 명 | 내보내기 | 가져오기
+온라인 프로그램 | 프로그램 설계서 | AP코드_프로그램설계서(PU) | O | O
+온라인 프로그램 | 프로그램 설계서 | AP코드_프로그램설계서(FU) | O | O
+온라인 프로그램 | 프로그램 설계서 | AP코드_프로그램설계서(DU) | O | O
+온라인 프로그램 | 프로그램 설계서 | AP코드_프로그램설계서(DBIO) | O | X
+온라인 프로그램 | 프로그램 목록 | AP코드_프로그램목록 | O | X
+배치 프로그램 | 배치 프로그램 설계서 | AP코드_배치프로그램설계서 | O | O
+배치 프로그램 | 프로그램 목록 | AP코드_배치프로그램목록 | O | X
+
+=== Table 46 ===
+[기본항목] 영역 | 프로그램 설계의 기본이 되는  클래스, 메소드 항목 등 정의
+[처리항목] 영역 | 해당 프로그램이 어떤 기능을 수행하는지 처리 순서, 기능, 조건, 로직 등 정의
+[보조항목] 영역 | 처리항목 설계에 필요한 추가적인 프로그램호출, 에러처리 항목 등 정의
+
+=== Table 47 ===
+항목명 | 설명 | 소스 전환 | 필수 여부 | 주의사항 및 예제
+①구현클래스명(영문) | 설계 대상 클래스(유닛)의 영문명을 기입 | 자바 클래스 파일 생성 | O | 이미 생성된 클래스가 있을 경우 import 불가
+②구현클래스명(한글) | 설계 대상 클래스(유닛)의 한글명을 기입 | 클래스 @BizUnit | O | 
+③메소드명(영문) | 구현 클래스 메소드의 영문명을 기입 | 메소드 생성 | O | 
+④메소드명(한글) | 구현 클래스 메소드의 한글명을 기입 | 메소드 @BizMethod | O | 
+⑤메소드 접근제한자 | 해당 메소드의 접근제한자를 기입 | 메소드 접근제한자 | X | private인 경우만 기입
+⑤메소드 접근제한자 | 해당 메소드의 접근제한자를 기입 | 메소드 접근제한자 | X | (기본값 public)
+⑥거래코드 | PM인경우 거래코드(10자리)를 기입함 |  | X | 거래코드와 PM은 1:1매핑
+⑥거래코드 | PM인경우 거래코드(10자리)를 기입함 |  | X | PU만 해당
+
+=== Table 48 ===
+항목명 | 설명 | 소스 전환 | 필수 여부 | 주의사항 및 예제
+① 처리순서 | 처리기능에 대한 처리 순서(일련번호)를 기입함. | 자바 Doc 주석의 @처리순서 | O | 예) 1, 1.1, 1.2, 2, 3 …
+② 처리기능 | 해당프로그램이 어떤 기능을 수행하는지 간략하게 기술함. | 자바 Doc 주석의 @처리기능 | O | 참고) 1. 입력데이터 검증 2. 유효성검증 3. 제어로직 4. 처리로직 5. 데이터 처리 6. 정보전달객체 생성 7. 컴포넌트 호출 8. 시스템 인터페이스 컴포넌트 호출 9. 출력메시지 처리참고
+③ 처리조건 | 처리기능이 특정조건하에 실행 된다면 해당 조건 기술함 | 자바 Doc 주석의 @처리조건 | X | 예) if 입금은행 = 타행
+④ 처리로직 | 처리 기능이 어떻게 수행되는지 내부 수행 로직을 기술함 | 자바 Doc 주석의 @처리로직 | X | 
+
+=== Table 49 ===
+항목명 | 설명 | 소스 전환 | 필수 여부 | 비고
+①관련테이블명 |  | 자바 Doc 주석의 | X | DU만 작성
+②테이블접근유형 | 테이블 접근 유형을 기입함. | @테이블(이름/접근유형) | X | C / R / U / D 중 R 유형 택1
+③호출프로그램유형 | 구현 클래스 메소드의 영문명을 기입 | 자바 Doc 주석의 | X | PM / FM / DM /XSQL 중 택1
+④호출프로그램명(영문) | 호출 프로그램의 영문명을 기입 | @프로그램호출(유형/Class/Method) | X | 
+⑤호출메소드명(영문) | 호출 메소드의 영문명을 기입 |  | X | 
+⑥에러메시지 | 에러원인 항목 또는 에러 사유를 서술식으로 기술 | 자바 Doc 주석의 @에러메시지 | X | 
+⑦조치메시지 | 에러를 해결하기 위한 조치 방법을 서술식으로 기술 | 자바 Doc 주석의 @조치메시지 | X | 
+⑧사용자맞춤메시지 | 사용자에게 부가적으로 상세하게 전달하는 내용을 기술 | 자바 Doc 주석의 @사용자메시지 | X | 
+⑨비고 | 프로그램 설계 및 구현 관련 협의 사항 및 고려사항을 기술 | 자바 Doc 주석의 @비고 | X | 
+
+=== Table 50 ===
+ProcessUnit | com.kbstar.sqc.base.ProcessUnit
+FunctionUnit | com.kbstar.sqc.base.FunctionUnit
+DataUnit | com.kbstar.sqc.base.DataUnit
+DBIO Unit | com.kbstar.sqc.base.DBIO
+
+=== Table 51 ===
+아이콘 | 기능 | 설명
+ | 필드 추가 | 선택 한 노드에 필드를 추가
+ | 레코드셋 추가 | 선택 한 노드에 레코드셋을 추가
+ | 데이터셋 추가 | 선택 한 노드에 데이터셋을 추가. 데이터셋 안에 데이터셋을 넣을 수는 있으나 반드시 필요한 경우에만 사용하시며, 대부분의 경우는 데이터셋 안에는 필드, 레코드셋으로만 구성하십시요
+ | include | 공통부 XIO 파일을 include
+ | 삭제 (또는 Delete) | 선택한 레코드셋, 레코드셋 필드, 필드를 삭제
+ | 위로 | 선택한 데이터셋, 레코드셋, 필드를 한 칸 위로 이동
+ | 아래로 | 선택한 데이터셋, 레코드셋, 필드를 한 칸 아래로 이동
+
+=== Table 52 ===
+항목명 | 설명
+항목 ID | 카멜 표기법으로 작성합니다. [IO Assist]  [IO Dictionary] 를 이용하면 쉽게 메타의 영문 단어, 속성을 조회할 수 있습니다. 그러나 전문의 항목 ID는 메타 관리 대상이 아니므로 용어가 없을 경우 적절히 단어의 조합으로 작성하거나 임의의 영문 단어를 사용하면 됩니다
+항목명 | 한글명 입력
+데이터유형 | string, int, long, double, 등의 데이터 타입을 정의
+길이 | 전문상의 길이 (byte수) 를 정의함. 이 값을 -1로 주면 아래의 길이참조 에서 지정한 필드 값에서 길이를 취함
+길이참조 | 레코드셋의 경우 레코드건수 정보를 담고있는 필드ID 를 설정함.
+패딩 | left, right. 데이터의 길이가 설계상의 길이보다 작아 패딩 문자가 포함된 경우 여기 지정된 방향으로 패딩되어 있으므로 아래 정의하는 패딩문자를 잘라냄 (trim)
+패딩문자 | 패딩시 사용할 문자. 0x20 = 공백, 0x30 : 숫자 0.  JSON 전문에서는 패딩이적용되지 않습니다.
+
+=== Table 53 ===
+항목명 | 설명
+항목 ID | 카멜 표기법으로 작성합니다. [IO Assist]  [IO Dictionary] 를 이용하면 쉽게 메타의 영문 단어, 속성을 조회할 수 있습니다. 그러나 전문의 항목 ID는 메타 관리 대상이 아니므로 용어가 없을 경우 적절히 단어의 조합으로 작성하거나 임의의 영문 단어를 사용하면 됩니다
+항목명 | 한글명 입력
+데이터유형 | string, int, long, double, 등의 데이터 타입을 정의
+길이 | 전문상의 길이 (byte수) 를 정의함. 이 값을 -1로 주면 아래의 길이참조 에서 지정한 필드 값에서 길이를 취함
+길이참조 | 레코드셋의 경우 가변 건수일 경우 레코드 건수 정보를 담고있는 필드ID 를 설정함.
+패딩 | left, right. 데이터의 길이가 설계상의 길이보다 작을 경우 패딩 문자로 패딩을 하여 여기에서 패딩 방향을 설정함
+패딩문자 | 패딩시 사용할 문자. 0x20 = 공백, 0x30 : 숫자 0 JSON 전문에서는 패딩이 적용되지 않습니다
+
+=== Table 54 ===
+CRUD | 유형 | 선택
+CUD | 단건의 INSERT, UPDATE, DELETE | DBIO
+R > SELECT | 다건조회, 테이블 JOIN 등 복잡한 SQL작성 | DU
+R > SELECT | 단건조회 | DBIO, DU
+R > SELECT | 단건의 테이블 ROW LOCK | DBIO
+R > SELECT | 다건의 테이블 ROW LOCK | DU
+
+=== Table 55 ===
+바인드 변수 | KB Meta에 등록되어있는 서버변수명(영문명)을 camel 표기법으로 사용
+결과 컬럼명 | 서버 변수명을 표기하되 DBMS 특성 상 반드시 큰따옴표로 감싸야 컬럼명 대소문자가 유지되며 리턴되는 RecordSet 의 key 값의 camel 표기법에 맞게 매핑이 됩니다.
+바인드 변수 타입 | DB2인 경우 바인드변수 사용시 #acno:VARCHAR# 와 같이 바인드 변수의 타입을 명시해 주어야 합니다. 타입을 지정하지 않은 상황에서 바인드 변수 값이 null 이 되면 다음과 같이 SQLException 이 발생합니다. (DB2 만 해당되며, Oracle 에서는 에러 발생하지 않습니다.  오류) com.ibm.db2.jcc.am.SqlException: [jcc][10271][10295][4.25.13] 0은(는)  인식되지 않는 JDBC 유형입니다. ERRORCODE=-4228, SQLSTATE=null
+
+=== Table 56 ===
+StringUtils.isEmpty() | null, “” (empty string) 일 경우 true
+StringUtils.isBlank() | null, “” (empty string), “ “(한칸 공백), “     “ (공백 문자열) 일 경우 모두 true
+StringUtil.equals() | 두 문자열을 비교할 때 모두 null 일 때도 같은 값으로 사용
+
+=== Table 57 ===
+잘못된 실수 연산 예 | 올바른 실수 연산 예
+double a = 0.1; double b = 0.01; double c = a – b;  System.out.println (“result : “ + c);  ▶ 실행결과 result : 0.09000000000000001 | BigDecimal a = BigDecimal.valueOf (0.1); BigDecimal b = BigDecimal.valueOf (0.01); BigDecimal c = a.subtract(b);  System.out.println (“result : “ + c.doubleValue();  ▶ 실행결과 result : 0.09
+
+=== Table 58 ===
+잘못된 BigDecimal 객체 생성 예 | 올바른 BigDecimal 객체 생성 예
+BigDecimal a = new BigDecimal (0.1); BigDecimal b = new BigDecimal (0.01); BigDecimal c = a.subtract(b);  System.out.println(“result : “+c.doubleValue());  ▶ 실행결과 result : 0.09000000000000001 | BigDecimal a = BigDecimal.valueOf (0.1); BigDecimal b = new BigDecimal (“0.01”); BigDecimal c = a.subtract(b);  System.out.println (“result : “ + c.doubleValue());  ▶ 실행결과 result : 0.09
+
+=== Table 59 ===
+라운딩 모드 | 의미 | 예제) 양수 (scale=0 일때) | 예제) 음수
+RoundingMode.UP | 올림. 0 에서 멀어지는 방향 | 12.3  13 | -12.3  -13
+RoundingMode.DOWN | 내림. 0 으로 가까워지는 방향 | 12.3  12 | -12.3  -12
+RoundingMode.CEILING | 큰 값 쪽으로 이동 (올림). 양수일때 올림. 음수일때 내림 | 12.3  13 | -12.3  -12
+RoundingMode.FLOOR | 작은 값 쪽 이동 (내림).  양수일때 내림. 음수일때 올림 | 12.3  12 | -12.3  -13
+RoundingMode.HALF_UP | 반올림.  0.5 이상시 (>=) 올림, 그외 내림 | 12.3  12 | -12.3  -12
+RoundingMode.HALF_UP | 반올림.  0.5 이상시 (>=) 올림, 그외 내림 | 12.5  13 | -12.5  -13
+RoundingMode.HALF_UP | 반올림.  0.5 이상시 (>=) 올림, 그외 내림 | 12.6  13 | -12.6  -13
+RoundingMode.HALF_DOWN | 반올림.  0.5 초과시 (>) 올림, 그외 내림 | 12.3  12 | -12.3  -12
+RoundingMode.HALF_DOWN | 반올림.  0.5 초과시 (>) 올림, 그외 내림 | 12.5  12 | -12.5  -12
+RoundingMode.HALF_DOWN | 반올림.  0.5 초과시 (>) 올림, 그외 내림 | 12.6  13 | -12.6  -13
+
+=== Table 60 ===
+System.exit() 호출 | 어떠한 이유로도 component가 전체 시스템을 종료시켜서는 안된다
+java.lang.Runtime 객체 사용 | 성능상으로도 좋지 않으며 임의의 Process를 생성해서는 안된다.
+java.lang.Thread의 상속 | Java™ 언어는 다중 상속을 지원하지 않는다. Thread를 상속하지 않고도 java.lang.Runnable interface를 이용하여 얼마든지 Thread를 생성할 수 있고, start되지 않는 Thread의 instance는 심각한 메모리 손실을 초래하므로 금지해야 한다.
+System.out/System.err 사용 | 어떠한 이유로도 System.out/System.err을 통한 직접적인 출력은 허용되지 않는다. 반드시 logger를 사용하자.
+printStackTrace() 사용 | 어떠한 이유로도 직접적인 printStackTrace()의 직접적인 호출은 금한다. Logger의 debug와 error method를 사용한다
+Password 노출 금지 | 모든 password는 source code혹은 preferences xml에 직접 노출해서는 안된다. 반드시 com.kbstar.ksa.infra.cipher.Password를 사용하여 encode해서 넣는다
+DataSet 내  Field, RecordSet, Record  클래스의 toString()  직접 사용금지 | record.toString() 와 같은 형태로 획득한 값 직접 사용금지 (*로그 기록간 사용은 허용) DataSet 클래스 내부의 toString() 은 로그기록시 성능 이슈 또는 어떤 이유로도 내부적인 변환 및 재가공 처리가 일어 날 수 있음.
+
+=== Table 61 ===
+String의 + 연산 금지 | String은 immutable 객체이므로 + 연산을 1번할 때마다 새로운 instance가 1개씩 생성된다. 따라서 여러 번 + 연산을 하게 되면 메모리 사용량이 기하급수적으로 증가하므로 피해야 한다.
+크기를 설정하지 않은 StringBuffer의 사용 | String의 + 연산을 피하기 위해 쉽게 선택하는 방법은 StringBuffer를 사용하는 것 이지만, 그 크기를 미리 지정하지 않으면 전혀 차이가 없다. 정확한 크기를 예상할 수 없다면 넉넉하게 설정하여 사용하면 된다.
+static Map/List의 사용 | static으로 선언된 Map/List는 해당 class의 instance가 소멸되더라도 그 내용이 항상 남아있게 된다. Singleton/Multition이 아닌 경우 사용해서는 안 된다
+Unit CALL DEPTH 최대값 | 유닛의 CALL DEPTH 최대값 (30)을 넘어서는 안된다
+
+=== Table 62 ===
+Runtime.gc() 호출 금지 | garbage collection은 사용자가 임으로 제어해서는 안된다. Java™ Virtual Machine은 full gc가 일어나는동안 정지된다.
+for 루프의 조건에  method 호출 금지 | for (int i=0; i<map.size(); i++) 처럼 조건에 method 호출을 사용하게 되면 매번 해당 method를 호출하게 되므로 속도가 저하된다. 반드시 다른 변수에 저장한 다음 사용한다.
+Map/List의 초기화에  크기를 지정 | Map/List의 instance는 저장 용량이 일정한 수준에 이르게 되면 추가로 메모리를 할당하게 되어 있다. 하지만 그 크기를 미리 지정하지 않는다면 객체가 추가될 때 마다 매번 메모리 할당이 일어나게 되므로 속도를 저하시킨다. 적절한 초기 크기와 증가 값을 지정한다.
+
+=== Table 63 ===
+addOutFormInfo(String formId, String formType, String copies, String elctrFxdDstCd, String fCopies, String bCopies,IOnlineContext onlineCtx)
+
+=== Table 64 ===
+화면 매체 구분 코드 | 화면 매체 구분 명
+V0 | 공통 출력부
+V1 | 화면
+V2 | 통장
+V3 | 전표
+V4 | 영수증
+V5 | 장표
+V6 | 임의 장표
+V7 | EAI 개설
+V8 | 강제 메시지
+
+=== Table 65 ===
+메소드 | 설명
+encryptText(String planText) | 개인정보 텍스트 암호화
+decyptText(String encryptedText) | 개인정보 텍스트 복호화
+encryptBytes(byte[] plainBytes) | 개인정보 byte 암호화
+decyptBytes (byte[] encryptedBytes) | 개인정보 byte 복호화
+encryptFile(String plainFile, String encryptedFile) | 개인정보 파일 암호화
+decyptFile(String encryptedFilePath, String plainFile) | 개인정보 파일 복호화
+encryptTextHash(int algorithm, String plainText) | 개인정보 텍스트 단방향 암호화
+encryptTextHmac(String plainText) | Hmac 텍스트 단방향 암호화
+
+=== Table 66 ===
+상수 | 설명
+ENCORDING_UTF8 | 텍스트 암/복호화에 필요한 인코딩 : UTF-8
+ENCORDING_EUCKR | 텍스트 암/복호화에 필요한 인코딩 : EUC-KR
+ALGORITHM_SHA1 | 텍스트 단방향 암호화에 필요한 알고리즘 : SHA1
+ALGORITHM_SHA256 | 텍스트 단방향 암호화에 필요한 알고리즘 : SHA256
+
+=== Table 67 ===
+메소드 | 설명
+encryptTextForKBGroup(String serviceID, String plainText) | 지주 계열사 텍스트 암호화
+decryptTextForKBGroup(String serviceID, String encryptedText) | 지주 계열사 텍스트 복호화
+
+=== Table 68 ===
+메소드 | 설명
+scpHostEncode(String planText, int encoding) | 전문 양방향 암호화
+scpHostDecode(String encryptedText, int encoding) | 전문 양방향 복호화
+scpHostCfhash(String planText) | 전문 단방향 암호화 (HEXA 인코딩)
+
+=== Table 69 ===
+상수 | 설명
+SCPECOD_ASCII | 전문 암/복호화에 필요한 인코딩 : ASCII
+SCPECOD_EBCDIC | 전문 암/복호화에 필요한 인코딩 : EBCDIC
+
+=== Table 70 ===
+메소드 | 설명
+static String getRuntimeId() | 프레임워크 런타임 ID. WAS인스턴스 ID 와 같은 값
+static String getRuntimeMode() | 환경 구분 코드 리턴. {L/D/S/O}
+
+=== Table 71 ===
+메소드 | 설명
+String getProperty( String appCode,  String fileName,  String key,  boolean reloadIfModified) | Key값으로 프로퍼티 조회
+Properties getProperties( String appCode,  String fileName,  bolean reloadIfModified) | 프로퍼티파일에 기술된 전체 프로퍼티들을 읽는다.
+
+=== Table 72 ===
+로그 레벨 | 메소드 정의 | 용도
+ERROR | error (Object message) error (Object message, Throwable t) | 처리 중 발생한 에러 메시지 기록
+WARN | warn (Object message) warn (Object message, Throwable t) | 에러는 아니지만 경고성 메시지 기록
+INFO | info (Object message) info (Object message, Throwable t) | 업무상 필요하다고 판단되는 정보성 메시지 기록
+DEBUG | debug (Object message) debug (Object message, Throwable t) | 개발 중 디버깅 용도의 메시지 기록
+
+=== Table 73 ===
+구분 | 파일명
+로컬 PC | C:\NKESA_IDE\logs\runtime\localhost\YYYYMMDD\online-[거래ID]-YYYYMMDD.log
+서버 | /fslog/${WAS_DOMAIN}/sqc/runtime/{NEXCORE_ID}/YYYYMMDD/online-[거래ID]-YYYYMMDD.log
+
+=== Table 74 ===
+레벨 | 의미 | 로그 주체 | 상세설명
+Q | 메소드 시작 | 프레임워크 | 메소드의 시작시 프레임워크에서 로그
+S | 메소드 정상 종료 | 프레임워크 | 메소드의 정상 종료시 프레임워크에서 로그
+F | 메소드 에러 종료 | 프레임워크 | 메소드의 에러 종료시 프레임워크에서 로그
+D | Debug | 업무, 프레임워크 | log.debug() 메소드로 남긴 로그
+I | Info | 업무, 프레임워크 | log.info() 메소드로 남긴 로그
+W | Warn | 업무, 프레임워크 | log.warn() 메소드로 남긴 로그
+E | Error | 업무, 프레임워크 | log.error() 메소드로 남긴 로그
+
+=== Table 75 ===
+로그종류 | 설명 | 비고
+전문로그 | MCI, EAI, nKESA 간 송수신한 모든 전문이 저장됨 입력/출력 전문 | 
+거래로그 | nKESA 내에서 거래당 저장되는 로그.  IQ 전문의 개별부를 파싱한 입력 DataSet, PM 실행후의 결과 DataSet, CommonArea 정보 저장됨 연동거래시 연동 횟수만큼 저장됨 | 운영에서는 과도한게 로그가 많이 발생하여 Off 한 상태임
+에러로그 | 에러 발생시 거래로그는 롤백되며, 거래 상세 정보가 거래로그 단위로 에러로그 테이블에 저장됨 | 
+
+=== Table 76 ===
+작업 구분 | 메소드
+단건 조회 | IRecord dbSelectSingle(String stmtName, Object param, IOnlineContext onlineCtx);
+다건 조회 | IRecordSet dbSelect(String stmtName, Object param, IOnlineContext onlineCtx);
+다건 조회 | IRecordSet dbSelect(String stmtName, Object param, IRecordResolver recordResolver, IOnlineContext onlineCtx);
+다건 페이징 조회 | IRecordSet dbSelectPage (String stmtName, Object param, int pageNo, int rowPerPage, IOnlineContext onlineCtx);
+다건 페이징 조회 | IRecordSet dbSelectPage (String stmtName, Object param, int pageNo, int rowPerPage, IRecordResolver recordResolver, IOnlineContext onlineCtx)
+
+=== Table 77 ===
+등록 | int dbInsert(String stmtName, Object param, IOnlineContext onlineCtx);
+등록&PK리턴 | Object dbInsertAndReturnPK(String stmtName, Object param, IOnlineContext onlineCtx);
+변경 | int dbUpdate(String stmtName, Object param, IOnlineContext onlineCtx);
+삭제 | int dbDelete(String stmtName, Object param, IOnlineContext onlineCtx);
+
+=== Table 78 ===
+stmtName | 작성한 SQL의 SQL ID  예) insert
+param | 입력 바인드 변수 값들을 담고 있는 객체 IDataSet, Map, IRecord 등 입력가능 SQL에서 작성한 바인드 변수 명에 해당하는 key-value가 param 객체 안에 들어 있어야 함
+
+=== Table 79 ===
+컬럼ID | 데이터타입 | 컬럼명
+sysLastPrcssYMS | CHAR(20) | 시스템최종처리일시
+sysLastUno | CHAR(7) | 시스템최종사용자번호
+
+=== Table 80 ===
+바인드 변수값 | 설명 | 비고
+sysLastPrcssYMS | 시스템최종처리일시, String 타입 - 매 쿼리 실행 시의 시스템시각으로 자동 측정 및 처리.  - 동일 트랜잭션 내에서도 각 쿼리에 전달되는 시각이 다름. | 
+sysLastUno | 시스템최종사용자번호, String 타입 | 
+groupCoCd | 그룹회사코드. String 타입. BICOM 의 그룹회사코드값 자동 바인드 이 값은 어플리케이션에서 sqlin.put(“groupCoCd”,”KB1”) 로 넣을 경우 KB1 값이 우선하여 적용됩니다. | 
+시스템최종처리일시 | 시스템최종처리일시, String 타입 - 매 쿼리 실행 시의 시스템시각으로 자동 측정 및 처리.  - 동일 트랜잭션 내에서도 각 쿼리에 전달되는 시각이 다름. | 금융복합, 계좌통합, 부동산, 통합인증
+시스템최종사용자번호 | 시스템최종사용자번호, String 타입 | 금융복합, 계좌통합, 부동산, 통합인증
+그룹회사코드 | 그룹회사코드. String 타입. BICOM 의 그룹회사코드값 자동 바인드 이 값은 어플리케이션에서 sqlin.put(“groupCoCd”,”KB1”) 로 넣을 경우 KB1 값이 우선하여 적용됩니다. | 금융복합, 계좌통합, 부동산, 통합인증
+
+=== Table 81 ===
+상황 | 사용 | 이유
+단일 UPDATE | X | 단순 UPDATE 선잠금 불필. UPDATE 순간 X-lock 획득됨 예) 단순 UPDATE UPDATE account SET balance = balance - 100 WHERE id = :id;
+SELECT후 나중에 UPDATE | O | SELECT 시점에 경쟁쓰기 차단 필요 예) 읽고-계산-쓰기 - FOR UPDATE SELECT balance FROM account WHERE id = :id FOR UPDATE; UPDATE account SET balance = balance - :amt WHERE id = :id;
+외부호출 후 UPDATE | O | 가능 하나 지양  긴시간 Lock유지의 위험성
+두 행 이상 순차 UPDATE | O | 가능 하나 주의 필요  Lock 순서 표준화 및 데드락 방지 필요
+검증 후 UPDATE | O | 검증 결과의 원자성 필요
+연속조작 DELETE/INSERT | O | 첫 단계에서 작업대상 행 고정 필요
+낙관적 Lock 사용 | X | Version 컬럼으로 충돌감지 가능 예) 낙관적 Lock  계정계 아닌 단위 시스템에서 사용 UPDATE order SET status = :toStatus, version = version+1  WHERE id = :id AND version = :currentVersion;
+
+=== Table 82 ===
+ | 비관적 Lock (Perssimistic Lock) | 낙관적 Lock (Optimistic Lock)
+의도 | 다른 사람이 데이터를 바꿀수 있으니  내가 쓰기전에 미리 잠가두자 | 동시에 쓰기작업이 수행될 일은 드물다  일단 읽고 나중에 충돌여부를 확인하자
+장점 | 충돌이 애초에 안 생김 계정계 시스템에서는 계좌 잔액처럼 충돌 확률이 높은 데이터에는 비관적 Lock이 더 안전한 방식 계정계 시스템 거래는 DBIO 에서 제공되는 For UPDATE 통해 비관적 Lock을 사용하도록 가이드 | DB에서 실제 Lock을 잡지 않음 동시 수정이 자주 일어나지 않는 시스템에서 동시성을  크게 높아짐
+단점 | Lock 유지 시간이 길어질수록  동시성이 떨어지고 데드락 위험이 커짐 | 대신 버전(version) 컬럼이나 타임스탬프 컬럼을 이용해 충돌을 감지해야 함
+처리 방법 | DBMS 의 SELECT … FOR UPDATE 기능을 사용하여 선잠금 | 조회시 현재버전까지 읽음 SELECT balance, version FROM account WHERE id =123; 업데이트시, 조건에 버전 포함 UPDATE account SET balance = balance -100, version = version +1 WHERE id = 123 AND version = 5; 업데이트 결과에 따른 처리 성공  버전이 맞으면 정상 갱신 실패  다른 트랜잭션이 먼저 업데이트 하면 version=6으로 바뀜 충돌발생. 재시도 or 실패 처리
+
+=== Table 83 ===
+케이스 | 사유
+UPDATE 후 FOR UPDATE 재실행 | 불필요한 경합
+긴 로직 동안 선잠금 유지 | 대기 시간 증가
+PK 외 조건으로 범위 확장된 선잠금 | 불필요한 범위 잠금
+다중행 UPDATE | 데드락 위험 (교착상태)  예) 두 트랜잭션이 서로 다른 순서로 여러행을 잠글 때 발생 Tx1: SELECT ... WHERE id = 1 FOR UPDATE; 	 row1 Lock Tx2: SELECT ... WHERE id = 2 FOR UPDATE; 	 row2 Lock  Tx1: UPDATE … WHERE id=2;     row2 Lock 요청(Tx2가 보유중 -> 대기)  Tx2: UPDATE … WHERE id=1;     row1 Lock 요청(Tx1가 보유중 -> 대기)  해결방법  항상 동일한 순서로 행을 잠금도록 처리  예) PK기준 작은값  큰값으로 잠금처리 Tx1: SELECT ... WHERE id = 1 FOR UPDATE; 	 row1 Lock Tx1: SELECT ... WHERE id = 2 FOR UPDATE; 	 row2 Lock  Tx2: SELECT ... WHERE id = 1 FOR UPDATE;  row1 Lock 요청 (Tx1가 보유중 -> 대기)  (Tx1이 끝나고 락이 해제되면 Tx2 진행)
+
+=== Table 84 ===
+1 | PK 기반 단건 UPDATE에는 FOR UPDATE 금지
+2 | 읽고-검증-쓰기 템플릿에만 선잠금 허용
+3 | Lock 순서 표준화  다중 행은 PK 오름차순 선잠금
+4 | 외부 I/O는 Lock 이전/커밋 이후 수행
+5 | 낙관적 Lock 계정계 시스템은 사용불가  DBIO 를 통한 CUD 만을 사용 하도록 통제함. 반영로그/보정로그 처리를 위한 CUD 통제를 따르기에 코어현대화(계정성 업무)에서는 낙관적 락처리는 사용불가 일자전환 연계가 필요없고 계정계 시스템이 아닌 단위 시스템에서는 낙관적 락처리는 허용 가능
+
+=== Table 85 ===
+예외 | 발생 주체 | 설명
+BootupFailedException | FW 코어 | 프레임워크 부트 실패 상태에서 서비스 요청할 때 발생하는 예외
+SystemRuntimeException | FW 코어 | 프레임워크 내부 발생 예외. 설정이나 DB 파라미터등 환경 문제일 수 있습니다.
+DataException | FW 코어 | SQL 처리 중 발생하는 예외
+BizInturruptedException | FW 코어 | 타임아웃 등으로 서비스 처리 중단 요청시 발생 예외
+FwInternalException | FW 확장 | n-KESA 내부에서 발생하는 시스템 에러
+FwUsageException | FW 확장 | n-KESA API 사용이 잘못된경우 발생
+FwConfigException | FW 확장 | n-KESA 환경 설정이 잘못된 경우 발생
+FwEaiCommException | FW 확장 | EAI 통신 에러
+FwTelegramException | FW 확장 | 전문 처리중 에러
+FwViolationException | FW 확장 | 전문상 GUID, 거래코드등 길이 에러
+CenterCutException | FW 확장 | 센터컷 처리중 에러
+NDMException | FW 확장 | NDM 처리중 에러
+BusinessException | Application | 업무에서 예외 발생시 생성함.
+
+=== Table 86 ===
+예외 | 설명
+단일에러 | 프로그램에서 에러가 발생하면 바로거래를 종료하는 일반적인 에러 유형
+멀티에러 | 창구거래에서 처리되는 에러유형 입력데이터 정당성 체크시 발생 여러 개의 에러 발생 원인을 사용자에게 일괄제공
+
+=== Table 87 ===
+new BusinessException(String errorCode, String processCode)
+new BusinessException(String errorCode, String processCode, Throwable cause)
+new BusinessException(String errorCode, String processCode, String customMsg)
+new BusinessException(String errorCode, String processCode, String customMsg, Throwable cause)
+
+=== Table 88 ===
+인자항목 | 한글명 | 필수여부
+errorCode | 에러메시지 코드 | 필수
+processCode | 조치메시지 코드 | 필수
+customMsg | 사용자 맞춤 메시지 | 생략가능
+cause | 최초 에러 원인객체 | 존재시 필수
+
+=== Table 89 ===
+인자항목 | 한글명 | 비고
+ReturnStatus | 응답상태 | 에러메시지/조치코드 외 에러를 Catch하는 업무모듈에 전달하고 싶은 코드성 정보
+
+=== Table 90 ===
+/* 조치메시지, 출력맞춤메시지 는 필요없는 경우 삭제하십시요 */ throw new BusinessException("Bxxxxxxx", "U조치메시지", " 출력맞춤메시지 ", e);
+
+=== Table 91 ===
+역할 | NEXCORE 제공 API | 트랜잭션 | 트랜잭션 | 처리패턴 | 처리패턴
+역할 | NEXCORE 제공 API | 단일 | 신규 | 동기 | 비동기
+공유 메소드 | callSharedMethodByDirect  (String compId, String unitMethodId, IDataSet requestData, IOnlineContext onlineCtx) | O |  | O | 
+공유 메소드 | callSharedMethodByRequiresNew  (String compId, String unitMethodId, IDataSet requestData, IOnlineContext onlineCtx) |  | O | O | 
+연동 거래 | callServiceByRequired  (String tranCd, IDataSet requestData, IOnlineContext onlineCtx) | O |  | O | 
+
+=== Table 92 ===
+메소드 | 설명
+callSharedMethodByDirect | 해당 FM 을 직접 호출함
+callSharedMethodByRequiresNew | 해당 FM 을 별도 트랜잭션으로 호출함.  피호출 FM의 정상 여부가 주트랜잭션에 영향을 주지 않음.
+
+=== Table 93 ===
+API | 설명
+IDataSet callServiceByRequired( 	String tranCd,  	IDataSet requestData, 	IOnlineContext onlineCtx) | 동기식 연동 거래 호출. tranCd : 거래코드 requestData : IDataSet타입의 요청데이터  수동거래에서 리턴하는 DataSet 이 callService 의 리턴값으로 리턴됨 nKESA1.0의 callService 메소드가 deprecated 되었으며, callServiceRequired 메소드 사용을 권장.
+String callAsyncServiceNow( 	String tranCd, 	IDataSet requestData, 	IOnlineContext onlineCtx ) | 비동기식 연동거래 호출. 기동 거래와 분리된 별도의 쓰레드 또는 인스턴스 또는 서버에서 실행됨. 호출 즉시 큐에 요청이 들어가 실행을 준비함. 리턴값 : 비동기 호출 키
+String callAsyncServiceAfterCommit( 	String tranCd, 	IDataSet requestData, 	IOnlineContext onlineCtx ) | 비동기식 연동거래 호출. 기동 거래와 분리된 별도의 쓰레드 또는 인스턴스 또는 서버에서 실행됨. 기동 거래가 정상 commit 된 후에 수동 거래 실행됨. 기동 거래 에러 발생시 수동 거래도 실행 취소됨. 리턴값 : 비동기 호출 키
+String callAsyncServiceAfterRollback( 	String tranCd, 	IDataSet requestData, 	IOnlineContext onlineCtx ) | 비동기식 연동거래 호출. 기동 거래와 분리된 별도의 쓰레드 또는 인스턴스 또는 서버에서 실행됨. 기동 거래가 에러 Rollbak 된 후에 수동 거래 실행됨. 리턴값 : 비동기 호출 키
+String reserveCallTimerService( 	String tranCd, 	int delaySeconds, 	IDataSet requestData, 	IOnlineContext onlineCtx ) | 본 서비스와 독립적으로 피연동 서비스를 지연시간 대기 후 실행하도록 호출 - 비동기 연동거래 키값이 리턴됩니다. - 대외 async 거래후 응답전문 미수신시 Timeout 처리를 위해 사용됩니다. tranCd : 거래코드 delaySeconds : 지연시간(초) requestData : IDataSet타입의 요청데이터 onlineCtx : 요청 컨텍스트 정보 리턴값 : 타이머거래 호출 예약ID
+@Deprecated  boolean cancelCallTimerService ( 	String timerReserveId,  	IOnlineContext onlineCtx ) | 지연시간 대기중인 타이머 연동거래 실행을 취소 - 리턴값이 boolean이며, true는 취소성공이고, false는 취소실패(수행중, 수행완료)입니다. [파라미터]  timerReserveId: 타이머거래 호출 예약ID onlineCtx : 요청 컨텍스트 정보
+
+=== Table 94 ===
+함수 | 설명
+ResponseContext callRemoteService ( 	String tranCd,  	IDataSet requestData,  	IOnlineContext onlineCtx) | 어플리케이션 코드별로 단일 WAS 인스턴스에 배포된 경우
+ResponseContext callRemoteService ( 	String bizSystemGubunCode,  	String tranCd,  	IDataSet requestDatta,  	IOnlineContext onlineCtx) | 여러 WAS 인스턴스에 배포되어 있는 경우. 별도의 구분코드값 명시
+
+=== Table 95 ===
+리턴 타입 | Get 메소드 | 설명
+KBMessag | getKBMessage() | 응답 전문의 헤더부, 공통부를 담고 있는 KBMessage 객체 조회
+IDataSet | getOutData() | 응답 전문 개별부 DataSet 객체 변환
+List<OutFormType> | getOutForms() | 응답 전문의 Form 데이터 조회
+OutDataCommon | getOutDataCommon() | 출려 공통부 데이터 조회
+
+=== Table 96 ===
+타입 | 연계 타입 설명 | 전문 정의
+REQ1 | 소스 시스템  EAI 요청하는 전문 | 소스가 nKESA 인 경우 XIO 전문 생성
+REQ2 | EAI  타겟 시스템 전달하는 전문 | 타켓이 nKESA 인 경우 PM 의 Input 에 정의
+RES1 | EAI  타겟 시스템 응답하는 전문 | 타켓이 nKESA 인 경우 PM 의 Output 에 정의
+RES2 | 소스 시스템  EAI 응답하는 전문 | 소스가 nKESA 인 경우,  Sync 인 경우 XIO 전문 생성. Async 인 경우 PM 의 Input 에 정의
+
+=== Table 97 ===
+EAITransformer 클래스의 메소드 | 설명
+ByteArrayWrap convertToEAIMessage( 	KBMessage kbm,  	IDataSet dataset,  	String xioId,  	boolean isInData, 	IOnlineContext onlineCtx ) | EAI 전송 송신 메시지로 변환
+ByteArrayWrap convertToEAIMessage( 	KBMessage kbm,  	IDataSet dataset,  	String xioId,  	String encoding, 	boolean isInData, 	IOnlineContext onlineCtx ) | 위와 동일하며 encoding 을 별도로 선택 가능함 “euc-kr”, “UTF-8” 중 선택
+IDataSet convertEAIIndividualToDataSet( 	IOutboundResponse eaiRecv,  	String xioId,  	IOnlineContext onlineCtx ) | 동기 방식 EAI 호출 후 리턴 받은 전문 중 개별부 (Individual/OutData) 데이터를 IDataSet 으로 변환함.
+
+=== Table 98 ===
+ByteArrayWrap transformByteArrayForXio ( 	String xioId,  	IDataSet dataset,  	IOnlineContext onlineCtx ) | EAI 전송 송신 메시지로 변환
+ByteArrayWrap transformByteArrayForXio ( 	String xioId,  	IDataSet dataset, String encoding 	IOnlineContext onlineCtx ) | 위와 동일하며 encoding 값을 추가로 넣는다
+
+=== Table 99 ===
+영역 | 메소드 | 설명
+HeaderType | String getStndCicsTrncd() | CICS트랜잭션코드
+HeaderType | String getStndIntnlSTelgmLen() | 내부표준전문길이
+HeaderType | String getStndTranBaseYmd() | 거래입력년월일
+HeaderType | String getStndGuIdNo() | GUID번호. 36 자리.
+HeaderType | String getStndGuIdNo33() | GUID번호 중 고정부 33 자리
+HeaderType | String getStndGuIdNoPathNo() | GUID번호 중 경로일련번호 3자리
+HeaderType | String getStndTelgmDmndDstcd() | 전문요청구분코드
+HeaderType | String getStndTelgmFmatDstcd() | 전문형식구분코드
+HeaderType | String getStndTelgmValdYmd() | 전문유효년월일
+HeaderType | String getStndTelgmVsnno() | 전문버전번호
+HeaderType | int    getStndGnrzToutCrtcNmvl() | 총괄타임아웃임계치수
+HeaderType | String getStndSysidName() | SYSID명
+HeaderType | String getStndOgtranRChnlDstcd() | 원거래중계채널구분코드
+HeaderType | String getStndPrcssTCicsTrncd() | 처리대상CICS트랜잭션코드
+HeaderType | String getStndTranPGroupCoCd() | 거래처리그룹회사코드
+HeaderType | String getStndSpareArea() | 예비AREA
+CommonType/ TranInfo | String getStndGroupCoCd() | 그룹회사코드
+CommonType/ TranInfo | String getStndTelgmRecvTranCd() | 전문수신거래코드
+CommonType/ TranInfo | String getStndPrcssRtdTranCd() | 처리결과전문수신거래코드
+CommonType/ TranInfo | String getStndScrenNo() | 화면번호
+CommonType/ TranInfo | String getStndOsidInstiCd() | 대외기관코드
+CommonType/ TranInfo | String getStndTranSerno() | 거래일련번호
+CommonType/ TranInfo | String getStndInoPartlDstcd() | 인터페이스시스템구분코드
+CommonType/ TranInfo | String getStndCmpxTranDmndDstcd() | 복합거래요청구분코드
+CommonType/ TranInfo | String getStndSysOperEvirnDstcd() | 시스템운영환경구분코드
+CommonType/ TranInfo | String getStndItsmMoniTagetYn() | ITSM모니터링대상여부
+CommonType/ TranInfo | String getStndTranPtrnDstcd() | 거래유형구분코드
+CommonType/ TranInfo | String getStndRbndTranYn() | 리바운드거래여부
+CommonType/ TranInfo | String getStndTermlWaitRqstYn() | 단말대기요구여부
+CommonType/ TranInfo | String getStndOgtranRstrYn() | 원거래복원여부
+CommonType/ TranInfo | String getStndOgtranGuIdNo() | 원거래GUID번호
+CommonType/ ChnlInfoType | String getStndBnkCd() | 은행코드
+CommonType/ ChnlInfoType | String getStndTranBrncd() | 거래부점코드
+CommonType/ ChnlInfoType | String getStndFeePrcssBrncd() | 수수료처리부점코드
+CommonType/ ChnlInfoType | String getStndRelayChnlDstcd() | 중계채널구분코드
+CommonType/ ChnlInfoType | String getStndChnlDstcd() | 채널구분코드
+CommonType/ ChnlInfoType | String getStndChnlDBzwkDstcd() | 채널세부업무구분코드
+CommonType/ ChnlInfoType | String getStndMdiaDstcd() | 매체구분코드
+CommonType/ ChnlInfoType | String getStndLangDstcd() | 언어구분코드
+CommonType/ ChnlInfoType | String getStndTrmno() | 단말번호
+CommonType/ ChnlInfoType | String getStndUserEmpid() | 사용자직원번호
+CommonType/ ChnlInfoType | String getStndTermlOprtrno() | 단말조작자번호
+CommonType/ ChnlInfoType | String getStndTermlSpvsrNo() | 단말책임자번호
+CommonType/ ChnlInfoType | String getStndN1StSpvsrBrncd() | 1차책임자부점코드
+CommonType/ ChnlInfoType | String getStndN2NdSpvsrBrncd() | 2차책임자부점코드
+CommonType/ ChnlInfoType | String getStndN2NdSpvsrTrmno() | 2차책임자단말번호
+CommonType/ InMsgInfoType | String getStndInptMsgPtrnDstcd() | 입력메시지유형구분코드
+CommonType/ InMsgInfoType | String getStndInptMsgCtnnYn() | 입력메시지계속여부
+CommonType/ InMsgInfoType | String getStndInptMsgSerno() | 입력메시지일련번호
+CommonType/ InMsgInfoType | String getStndInptMsgWritYms() | 입력메시지작성일시
+CommonType/ AthorInfoType | String getStndAthorFnshDstcd() | 승인완료구분코드
+CommonType/ AthorInfoType | String getStndSpvsrAthorDstcd() | 책임자승인구분코드
+CommonType/ AthorInfoType | String getStndN1StSpvsrEmpid() | 1차책임자직원번호
+CommonType/ AthorInfoType | String getStndN2NdSpvsrEmpid() | 2차책임자직원번호
+CommonType/ AthorInfoType | int    getStndSpvsrAResnNoitm() | 책임자승인사유건수
+CommonType/ AthorInfoType | List<String> getStndSpvsrAthorResnCdList() | 책임자승인사유코드 상세
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_1() | 책임자승인사유코드1
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_2() | 책임자승인사유코드2
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_3() | 책임자승인사유코드3
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_4() | 책임자승인사유코드4
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_5() | 책임자승인사유코드5
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_6() | 책임자승인사유코드6
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_7() | 책임자승인사유코드7
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_8() | 책임자승인사유코드8
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_9() | 책임자승인사유코드9
+CommonType/ AthorInfoType | String getStndSpvsrAthorResnCd_10() | 책임자승인사유코드10
+CommonType/ EntrBnkBzwkCmnType | String getStndClsngAfYn() | 마감후여부
+CommonType/ EntrBnkBzwkCmnType | String getStndLsdtTranYn() | 전일자거래여부
+CommonType/ EntrBnkBzwkCmnType | String getStndIdtrek() | 카드거래처리년월일
+CommonType/ EntrBnkBzwkCmnType | String getStndBzoprDdDstcd() | 영업일구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndSodBbrnPtrnDstcd() | SOD영업점유형구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndSodUserPtrnDstcd() | SOD사용자유형구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndInotAbilYn() | 입출가능여부
+CommonType/ EntrBnkBzwkCmnType | String getStndNoRtaUserYn() | 무자원대체가능사용자여부
+CommonType/ EntrBnkBzwkCmnType | String getStndTranDscnDmndYn() | 거래중단요청여부
+CommonType/ EntrBnkBzwkCmnType | String getStndCallgPgmName() | 호출프로그램명
+CommonType/ EntrBnkBzwkCmnType | String getStndRecvLuName() | 수신LU명
+CommonType/ EntrBnkBzwkCmnType | String getStndCnclDstcd() | 취소구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndCnclPtrnDstcd() | 취소유형구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndTranCcResnDstcd() | 거래취소정정사유구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndTranCcResnCtnt() | 거래취소정정사유내용
+CommonType/ EntrBnkBzwkCmnType | String getStndOgtranYms() | 원거래일시
+CommonType/ EntrBnkBzwkCmnType | String getStndCnclRstrInfoCtnt() | 취소복원정보내용
+CommonType/ EntrBnkBzwkCmnType | String getStndDscnTranDstcd() | 중단거래구분코드
+CommonType/ EntrBnkBzwkCmnType | String getStndIdiviDataEdtYn() | 개별데이터편집여부
+CommonType/ EntrBnkBzwkCmnType | String getStndOpbrnCd() | 개설부점코드
+CommonType/ EntrBnkBzwkCmnType | String getStndCncutIScopAddr() | 센터컷인터페이스영역주소
+CommonType/ OutMsgInfoType | String getStndOutptDPtrnDstcd() | 출력데이터유형구분코드
+CommonType/ OutMsgInfoType | String getStndOutptMsgPtrnDstcd() | (대량입출력)출력메시지유형구분코드
+CommonType/ OutMsgInfoType | String getStndOutptMsgCtnnYn() | (대량입출력)출력메시지계속여부
+CommonType/ OutMsgInfoType | String getStndOutptMsgSerno() | (대량입출력)출력메시지일련번호
+CommonType/ OutMsgInfoType | String getStndOutptMsgWritYms() | 출력메시지작성일시
+CommonType/ OutMsgInfoType | String getStndBrnClsngYn() | 부점마감여부
+CommonType/ ErrInfoType | String getStndErrcd() | 에러코드
+CommonType/ ErrInfoType | String getStndTreatCd() | 조치코드
+CommonType/ ErrInfoType | String getStndCncutDscnRqstYn() | 센터컷중단요구여부
+CommonType/ SupplInfoType | String getStndFworkCiScopAddr() | 프레임워크제어정보영역주소
+CommonType/ SupplInfoType | String getStndIntfacSendTranCd() | 인터페이스송신거래코드
+CommonType/ SupplInfoType | String getStndCnclEcludYn() | 취소제외여부
+CommonType/ SupplInfoType | String getStndTrsmtRqstId() | 전송요구ID
+CommonType/ SupplInfoType | String getStndCnclAbilYn() | 취소가능여부
+CommonType/ SupplInfoType | String getStndOutptMdiaEdtNo() | 출력매체편집번호
+CommonType/ SupplInfoType | String getStndAtmCshRetunDstcd() | 자동화기기현금반환구분코드
+CommonType/ SupplInfoType | String getStndSendEaiSvcName() | 송신EAI서비스명
+CommonType/ SupplInfoType | String getStndLuSndrcvTypDstcd() | LU송수신타입구분
+CommonType/ SupplInfoType | String getStndDteCAllowTranYn() | 일자전환허용거래
+CommonType/ SupplInfoType | String getStndIpAddr() | IP 주소
+CommonType/ SupplInfoType | String getStndChcmnLen() | 채널공통부의 길이정보
+CommonType/ SupplInfoType | String getStndSpareArea() | 예비AREA2
+CommonType/ SupplInfoType | String getStndTestCasId() | 테스트사례ID
+CommonType/ SupplInfoType | String getStndInptMdiaPartlLen() | 입력매체부길이
+
+=== Table 100 ===
+메소드 | 타입 | 항목
+kbmsg.getHeaderType().setStndCicsTrncd() | String | CICS트랜잭션코드
+생성 주체 :  MainFrame으로 요청하는 경우에만 SET하고 이외의 경우에는 초기화 정보를 기록한다.  체계 : 업무구분코드 (2자리) + 단축형거래구분코드 (1자리) + 고유번호 (1자리) | 생성 주체 :  MainFrame으로 요청하는 경우에만 SET하고 이외의 경우에는 초기화 정보를 기록한다.  체계 : 업무구분코드 (2자리) + 단축형거래구분코드 (1자리) + 고유번호 (1자리) | 생성 주체 :  MainFrame으로 요청하는 경우에만 SET하고 이외의 경우에는 초기화 정보를 기록한다.  체계 : 업무구분코드 (2자리) + 단축형거래구분코드 (1자리) + 고유번호 (1자리)
+kbmsg.getHeaderType().setStndTelgmDmndDstcd() | String | 전문요청구분코드
+거래전문의 요청/응답 구분 | 거래전문의 요청/응답 구분 | 거래전문의 요청/응답 구분
+kbmsg.getCommonType().getTranInfoType() .setStndTelgmRecvTranCd() | String | 전문수신거래코드
+거래에 대한 이벤트를 구분하는 코드 체계 : | 거래에 대한 이벤트를 구분하는 코드 체계 : | 거래에 대한 이벤트를 구분하는 코드 체계 :
+kbmsg.getCommonType().getTranInfoType() .setStndPrcssRtdTranCd() | String | 처리결과전문수신거래코드
+요청한 거래가 처리 후 다시 이벤트되는 코드 EAI는 응답전문을 작성시 처리결과전문수신거래코드(응답거래코드)를 전문수신거래코드(거래코드)로 치환하여 전송한다.  체계 : CICS트랜코드(4) + 어플리케이션(3) + 거래구분(2) + 거래보조일련번호(3) + 단축거래구분(1) + 일련번호(1)  ※주의:  처리결과를 수신할 거래코드가 없는 동기 거래이면, CICS트랜코드(4) + 어플리케이션(3) 까지는 필히 작성을 해야한다. | 요청한 거래가 처리 후 다시 이벤트되는 코드 EAI는 응답전문을 작성시 처리결과전문수신거래코드(응답거래코드)를 전문수신거래코드(거래코드)로 치환하여 전송한다.  체계 : CICS트랜코드(4) + 어플리케이션(3) + 거래구분(2) + 거래보조일련번호(3) + 단축거래구분(1) + 일련번호(1)  ※주의:  처리결과를 수신할 거래코드가 없는 동기 거래이면, CICS트랜코드(4) + 어플리케이션(3) 까지는 필히 작성을 해야한다. | 요청한 거래가 처리 후 다시 이벤트되는 코드 EAI는 응답전문을 작성시 처리결과전문수신거래코드(응답거래코드)를 전문수신거래코드(거래코드)로 치환하여 전송한다.  체계 : CICS트랜코드(4) + 어플리케이션(3) + 거래구분(2) + 거래보조일련번호(3) + 단축거래구분(1) + 일련번호(1)  ※주의:  처리결과를 수신할 거래코드가 없는 동기 거래이면, CICS트랜코드(4) + 어플리케이션(3) 까지는 필히 작성을 해야한다.
+kbmsg.getCommonType().getTranInfoType() .setStndOsidInstiCd() | String | 대외기관코드
+전문(거래)를 처리해야 할 대상이 금융결제원/대외기관/제휴기관인 경우 대외기관 코드이다. | 전문(거래)를 처리해야 할 대상이 금융결제원/대외기관/제휴기관인 경우 대외기관 코드이다. | 전문(거래)를 처리해야 할 대상이 금융결제원/대외기관/제휴기관인 경우 대외기관 코드이다.
+kbmsg.getCommonType().getTranInfoType() .setStndCmpxTDmndDstcd() | String | 복합거래요청구분코드
+하나의 거래에서 복합거래를 요청할 경우 복합거래요청구분코드를 기록한다. 요청 거래를 채널통합서버(MCI/EAI)에서 복합거래(워크플로우) 처리를 요청할 경우 정보를 기록한다. | 하나의 거래에서 복합거래를 요청할 경우 복합거래요청구분코드를 기록한다. 요청 거래를 채널통합서버(MCI/EAI)에서 복합거래(워크플로우) 처리를 요청할 경우 정보를 기록한다. | 하나의 거래에서 복합거래를 요청할 경우 복합거래요청구분코드를 기록한다. 요청 거래를 채널통합서버(MCI/EAI)에서 복합거래(워크플로우) 처리를 요청할 경우 정보를 기록한다.
+kbmsg.getCommonType().getTranInfoType() .setStndTranSerno() | String | 거래일련번호
+내부채널에서 발생한 거래인 경우 거래 발생 채널에서 채번함을 원칙으로 한다.(업무개시후부터 1씩 증가) 대외기관과의 송수신 전문인 경우 대외 전문 일련번호 정보를 기록한다. | 내부채널에서 발생한 거래인 경우 거래 발생 채널에서 채번함을 원칙으로 한다.(업무개시후부터 1씩 증가) 대외기관과의 송수신 전문인 경우 대외 전문 일련번호 정보를 기록한다. | 내부채널에서 발생한 거래인 경우 거래 발생 채널에서 채번함을 원칙으로 한다.(업무개시후부터 1씩 증가) 대외기관과의 송수신 전문인 경우 대외 전문 일련번호 정보를 기록한다.
+kbmsg.getCommonType().getTranInfoType() .setStndInoPartlDstcd() | String | 인터페이스시스템구분코드
+내부 인터페이스 거래는 어플리케이션에서 SET한다. 예) EAI를 통해 인터페이스 송수신 하는 경우 | 내부 인터페이스 거래는 어플리케이션에서 SET한다. 예) EAI를 통해 인터페이스 송수신 하는 경우 | 내부 인터페이스 거래는 어플리케이션에서 SET한다. 예) EAI를 통해 인터페이스 송수신 하는 경우
+kbmsg.getCommonType().getSupplInfoType() .setStndTrsmtRqstId() | String | 전송요구ID
+Time Delay방식 전문전송시 프레임워크에서 사용하는 고유번호이다. 프레임워크에서 callDelayAsyncService 호출 후 리턴되는 값으로 사용한다 | Time Delay방식 전문전송시 프레임워크에서 사용하는 고유번호이다. 프레임워크에서 callDelayAsyncService 호출 후 리턴되는 값으로 사용한다 | Time Delay방식 전문전송시 프레임워크에서 사용하는 고유번호이다. 프레임워크에서 callDelayAsyncService 호출 후 리턴되는 값으로 사용한다
+kbmsg.getCommonType().getSupplInfoType() .setStndSendEaiSvcName() | String | 송신EAI서비스명
+시스템 인터페이스를 통하여 EAI로 전문전송을 요청할때  EAI의 전송정보를 특정하기 위해 EAI 서비스명으로 사용한다. | 시스템 인터페이스를 통하여 EAI로 전문전송을 요청할때  EAI의 전송정보를 특정하기 위해 EAI 서비스명으로 사용한다. | 시스템 인터페이스를 통하여 EAI로 전문전송을 요청할때  EAI의 전송정보를 특정하기 위해 EAI 서비스명으로 사용한다.
+
+=== Table 101 ===
+메소드 | 설명
+ByteArrayWrap(byte[] bytes) | 생성자. bytes 전체를 사용
+ByteArrayWrap(byte[] bytes, int offset, int length) | 생성자. bytes 중 offset 부터 length 만큼 사용
+byte[] getByteArray() | 내부 bytes를 그대로 리턴
+int getOffset() | 생성자에 명시한 offset 리턴
+int getLength() | 생성자에 명시한 length 리턴
+byte getByte(int index) | bytes의 사용 부분 (offset 부터 length만큼) 중 index 위치의 값 리턴
+String getString(int offset, int length) | bytes의 사용 부분 중 offset에서 length 만큼만 String 으로 변환하여 리턴
+String getString(int offset, int length, String charset) | bytes의 사용 부분 중 offset에서 length 만큼만 String 으로 변환하여 리턴. charset 으로 변환
+byte[] getByteArray(int offset, int length) | bytes의 사용 부분 중 offset에서 length 만큼 잘라 새로운 byte[] 에 담아 리턴
+ByteArrayWrap reuse(int offset, int length) | bytes의 사용 부분 중 offset, length 를 적용하여 새 ByteArrayWrap 를 리턴. bytes 는 재사용
+ByteArrayWrap clone() | bytes의 사용 부분 만큼 byte[]를 생성하고 복제한 후 ByteArrayWrap 를 만들어 리턴.
+ByteArrayWrap merge(ByteArrayWrap input) | this의 length 와 input 의 length를 더하여 새로운 byte[] 를 만들어 값을 복제한 후 ByteArrayWrap 으로 리턴
+String toString() | 사용 부분을 String 으로 변환하여 리턴
+String toString(String charset) | 사용 부분을 charset 으로 String 변환하여 리턴
+
+=== Table 102 ===
+사용예 | 원본 | 결과값
+getString(2,3) |  | “CDE”
+toString() |  | “ABCDEFG”
+getByteArray() | 원본 유지 | 
+getByteArray(2,3) | 복제본 생성 | 
+reuse(2,3) | 원본 유지 | 
+merge(getByteArray(2,3)) | 복제본 생성 | 
+
+=== Table 103 ===
+전문항목 | 설명
+stndCicsTrncd | CICS트랜잭션코드 기존 ‘CICS 4자리’코드 -> [CICS 앞2자리 + E$] 로 작성 예) ‘XXE$’, ‘FAE$’
+stndPrcssTCicsTrncd | 처리대상 CICS트랜잭션 코드 기존 ‘공백’ -> [CICS코드 4자리] 로 작성 예) ‘XXXX’, ‘FA01’
+
+=== Table 104 ===
+메소드 | 설명
+IOutboundResponse callOutbound( 	IOutboundTarget kind,  	IOutboundHeader header,  	ByteArrayWrap requestData,  	IOnlineContext onlineCtx ) | 기본 타임아웃 적용 (기본 타임아웃 별도 정의) 하여 EAI 동기 호출
+IOutboundResponse callOutbound( 	IOutboundTarget kind,  	IOutboundHeader header,  	ByteArrayWrap requestData,  	int timeoutSeconds,  	IOnlineContext onlineCtx ) | Sync timeout(초단위) 를 지정하여 동기 호출
+
+=== Table 105 ===
+kind | EAI 종류를 구분하는 구분값 명시
+header | EAI 전송 전문의 헤더 값 객체
+requestData | EAI 전송할 헤더 포함 전문 전체 byte[].  (JSON 또는 XML)
+timeoutSecond | 타임아웃. 이 시간이 지나면 Exception 발생함
+
+=== Table 106 ===
+메소드 | 설명
+void sendOutboundNow( 	IOutboundTarget kind,  	IOutboundHeader header,  	ByteArrayWrap requestData,  	IOnlineContext onlineCtx ) | 즉시 전송  sendOutboundNow 메소드 호출 시점에 즉시 전송
+void sendOutboundAfterCommit( 	IOutboundTarget kind,  	IOutboundHeader header,  	ByteArrayWrap requestData,  	IOnlineContext onlineCtx ) | 정상 commit 후 전송.   sendOutboundAfterCommit 호출시 내부에 저장한 후 정상 트랜잭션 커밋되면 전송함. 후처리에서 에러 발생하여 트랜잭션 롤백되면 전문 전송되지 않음
+
+=== Table 107 ===
+메소드 | 설명
+ByteArrayWrap sendAsyncResponseNow ( 	AsyncResponseHeader arh,  	IDataSet responseData,  	IOnlineContext onlineCtx ) | 비동기 응답 전문 헤더. 응답 전문 개별부 데이터.
+
+=== Table 108 ===
+메소드 | 설명
+KBMessage getEAIResponseKBMessage(     IOnlineContext onlineCtx ) | EAI 응답 거래인 경우 전문 헤더 객체 리턴
+
+=== Table 109 ===
+IR방식 | SAF 방식
+ | 
+nKESA 온라인 거래에서 한번 호출한 후 한번 응답 거래 수신함. | nKESA 온라인 거래에서 여러 번 송신하고 그에 따른 응답을 여러 번 수신함
+GUID 고정부(33) 가 유지되며 경로번호 만 증가함 +10 증가함 | EAI 송신마다 GUID 고정부를 재채번하며, 원거래 GUID 에 최초 nKESA 온라인 거래의 GUID를 set 함
+EAI 전송 후 MCI 로 DUMMY리턴을 하여 단말이 계속 응답을 기다리게 함 (단말대기요구여부). 통합단말 입장에서는 한번의 요청/응답만 존재함 | EAI 송신한 후 단말로 일반 응답을 내려줘 단말 락을 해제한 후, EAI 응답 전문 수신시 원 거래 GUID 최초 단말 정보를 획득한 후 별도 전문으로 응답을 전송함.
+sendOutbound 를 한 번만 할 수 있음. 두 번 이상 하면 에러 발생 | sendOutbound 를 최대 999건 까지 할 수 있음
+
+=== Table 110 ===
+사용위치 | 메소드 | 설명
+요청PM | IOutboundResponse getAsyncOutboundResponse( 	IOutboundHeader outboundHeader,  	int timeoutSeconds,  	IOnlineContext onlineCtx ) | EAI 송신후 응답 대기 메소드. 응답 전문이 수신되어 응답 처리 되기를 기다림.  Timeout 초 만큼 대기후 응답없으면 에러 발생 outboutHeader 에 최초 비동기 전문 송신한 객체를 설정함. 응답 전문
+응답PM | void notifyWaitingOutboundSender( 	IDataSet dataset,  	IOnlineContext onlineCtx ) | EAI 응답 수신하면  대기하고 있는 요청PM(송신 측 쓰레드)에 값 전달 응답 받은 개별부 데이터 (dataset), 전문헤더(onlineCtx) 를 송신측에 전달함 EAI 응답 전문이 에러전문일 경우 에러 정보도 개별부 dataset 에 포함되어 있으므로 그 값을 판단하여 전달함
+
+=== Table 111 ===
+메소드 | 설명
+void setAtmErrorMsg( 	String errCd,        /* 에러코드 */ 	String treatCd,      /* 조치코드 */ 	String errPgmName, /* 에러프로그램명 */ 	int errSituNo,       /* 에러 위치 */ 	String errmsgOutptCstzMsgCtnt, /* 맞춤메시지 */ 	IOnlineContext onlineCtx ) | 자동화기기로 별도의 에러전문 설정
+
+=== Table 112 ===
+MCI 패턴 | 설명
+비동기 응답 | EAI 비동기 연계 거래를 호출하는 경우, EAI 비동기 응답 거래에서 최초 단말로 응답 전문을 전송하는 패턴. “비동기 응답”이 원인(요청)있는 BID임 최초 원거래는 헤더에 단말대기요구여부를 “1” 로 세트하여 MCI 응답을 하면 MCI 는 해당 전문을 단말로 전송하지 않으므로, 단말은 계속 응답 대기를 하고 있으며, EAI 응답을 받은 거래에서 MCI 비동기 응답을 할 때 단말에 최종 응답 전문이 내려감
+BIDMESSAGE | 서버에서 단말로 메시지를 전송하는 패턴.  BIDMESSAGE는 원인없는 BID임. 원인없는 BID는 알림창과 같이 서버에서 단말로 단방향으로 전문 전송시 필요함
+PUSHMESSAGE | 마케팅플랫폼의 싱글뷰, 미니싱글뷰 를 구현하기 위한 타입임  BID 와 유사하나 BID 와 구분하기 위해 별도로 PUSHMESSAGE 라고 명명함 요청/응답 형태가 아닌 nKESA 에서 단말로 전문 전송하여 싱글뷰 화면이 표시되게함
+
+=== Table 113 ===
+메소드 | 설명
+ByteArrayWrap sendAsyncResponseNow( 	AsyncResponseHeader arh,  	IDataSet responseData,  	IOnlineContext onlineCtx ) | 비동기 응답 전문 헤더. 응답 전문 개별부 데이터. 원전문의 헤더가 복원되어 그 값으로 리턴됨. 응답메시지결과코드, 송수신 구분 값 등 일부  항목만 응답전문 규칙에 맞게 변경되어 전송됨.  dummyReturn : true,  dummyReturnReleaseOnFail : false 로 설정됨
+ByteArrayWrap sendAsyncResponseNow( 	AsyncResponseHeader arh,  	IDataSet responseData,  	String 거래코드, 	boolean dummyReturn, 	boolean dummyReturnReleaseOnFail, 	IOnlineContext onlineCtx ) | 응답 전문의 전문수신거래코드 값을 변경가능  dummyReturn : 현재 거래는 dummy 리턴함.  EAI 비동기 수신거래의 경우 EAI로 개별부 없는 헤더만 전송함 dummyReturnReleaseOnFail : 후처리에서 에러 발생시 dummy 리턴을 취소하고 정상에러 응답을 할지 여부
+
+=== Table 114 ===
+메소드 | 설명
+ByteArrayWrap sendBidMessage(  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	IOnlineContext onlineCtx ) | 입력된 응답 전문의 헤더와 개별부를 사용하여 전문을 조립합니다. GUID는 새로 채번되며, 일부 항목은 응답전문 규칙에 맞게 채워져서 전송됨.  dummy관련 값은 아래 기본값으로 설정됨 dummyReturn : false,  dummyReturnReleaseOnFail : false
+ByteArrayWrap sendBidMessage(  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	boolean dummyReturn,  	boolean dummyReturnReleaseOnFail, 	IOnlineContext onlineCtx ) | 아래 인자를 추가로 셋업가능함  txid: BID거래의 거래코드 dummyReturn : 현재 거래는 dummy 리턴함.  dummyReturnReleaseOnFail : 후처리에서 에러 발생시 dummy 리턴을 취소하고 정상에러 응답을 할지 여부
+
+=== Table 115 ===
+메소드 | 설명
+void addBidMsg(  	String empId,  	String bigMessageContent,  	String bidMessageLinkedScreen,  	String bigMessageLinkedData ) | 단말사번(empId), 전송할내용, 타겟화면번호를 입력
+
+=== Table 116 ===
+메소드 | 설명
+ByteArrayWrap sendSingleViewPushMessage(  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txId,   	IOnlineContext onlineCtx ) | 입력된 응답 전문 헤더, 응답 전문 개별부를 사용하여 전문을 조립합니다. GUID는 새로 채번되며, 일부 항목은 응답전문 규칙에 맞게 채워져서 전송됨.  단말대기여부 ⇒ 대기하지 않음(0)으로 셋업됨 싱글뷰를 처리하는 PM자체의 응답은 더미응답으로 셋업됨  dummy관련 값은 아래 기본값으로 설정됨 dummyReturn : false,  dummyReturnReleaseOnFail : false
+ByteArrayWrap sendSingleViewPushMessage(  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txId,  	boolean dummyReturn,  	boolean dummyReturnReleaseOnFail,   	IOnlineContext onlineCtx ) | 아래 인자를 추가로 셋업가능함  txid: PUSH거래의 거래코드 dummyReturn : 현재 거래는 dummy 리턴함. dummyReturnReleaseOnFail : 후처리에서 에러 발생시 dummy 리턴을 취소하고 정상에러 응답을 할지 여부
+
+=== Table 117 ===
+메소드 | 설명
+ByteArrayWrap sendMiniSingleViewPushMessage(  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txId,  	IOnlineContext onlineCtx ) | 입력된 응답 전문 헤더, 응답 전문 개별부를 사용하여 전문을 조립합니다. GUID는 새로 채번되며, 일부 항목은 응답전문 규칙에 맞게 채워져서 전송됨.  dummy관련 값은 아래 기본값으로 설정됨 dummyReturn : false,  dummyReturnReleaseOnFail : false
+ByteArrayWrap sendMiniSingleViewPushMessage( 	BidPushMessageHeader oh,  	IDataSet responseData,  	String txId,  	boolean dummyReturn,  	boolean dummyReturnReleaseOnFail,   	IOnlineContext onlineCtx) | 아래 인자를 추가로 셋업가능함  txid: PUSH거래의 거래코드 dummyReturn : 현재 거래는 dummy 리턴함. dummyReturnReleaseOnFail : 후처리에서 에러 발생시 dummy 리턴을 취소하고 정상에러 응답을 할지 여부
+
+=== Table 118 ===
+선처리 | 패키지	: com.kbstar.### 컴포넌트	: bfafprcss FU.FM	: FUFworkBfAf.bfPrcss()
+후처리 | 패키지	: com.kbstar.### 컴포넌트	: bfafprcss FU.FM	: FUFworkBfAf.afPrcss()
+에러후처리 | 패키지	: com.kbstar.### 컴포넌트	: bfafprcss FU.FM	: FUFworkBfAf.errAfPrcss()
+
+=== Table 119 ===
+메소드 | 설명
+void setDscnTranInfo(     String dscnTranDstcd,      String bfTdkInfoCtnt,      IOnlineContext onlineCtx) | dscnTranDstcd : 중단거래구분코드. 표준전문 전행업무공통부 참조 "0" : 일반거래, "1" : 중단거래, "2" : 중단거래(Auto) 차회 요청에 대하여 다음 조작자 개입여부를 판단하기 위해 사용한다. bfTdkInfoCtnt : 전거래중단키정보내용 [Next Key 정보] (업무팀에서는 200 Byte 안에서 사용.)  다음 회차에서 복원되어 제공받아야 할 Next Key 내용 이 값이 다음 회차 조회시 BOCOM 에 복원되어 ca.getBoCom().getBfTdkInfoCtnt() 로 조회 가능함
+
+=== Table 120 ===
+메소드 | 설명
+public static <T> T  get(String cacheName, Object key, Class<T> type) | cacheName으로 접근한 캐시에서 key를 이용하여 value를 가져온다. 캐시 대상이 없다면 null을 반환한다.
+public static boolean  put(String cacheName, Object key, Object value) | cacheName으로 접근한 캐시에서 key에 대한 value를 지정한다. 캐시값 지정 여부를 반환한다.
+public static boolean  evict(String cacheName, Object key) | cacheName으로 접근한 캐시에서 key를 삭제한다. key의 삭제 여부를 반환한다.
+public static boolean clear(String cacheName) | cacheName으로 접근한 캐시를 초기화한다. 캐시의 초기화 여부를 반환한다.
+public static Cache getCache(String cacheName) | cacheName으로 접근한 캐시를 Spring Cache 형태로 반환한다.
+
+=== Table 121 ===
+공유메소드 입력 값 | 속성 | 길이(byte) | 필수 | 비고
+srvCode | 서버코드 | 6 | Y | 별도 부여
+recipient | 수신 직원번호 | 7 | Y | 직원번호
+send | 발신 직원번호 | 7 | Y | 직원번호
+title | 쪽지 제목 | 40 | Y | [업무명(서버등록명 자동입력)]+제목
+body | 쪽지 본문 | 2000 | Y | 
+saveOption | 저장여부 | 1 | N | 기본값 0(저장) 시스템쪽지의 경우 기본값 0으로 지정되어 저장됨
+senderAlias | 별칭 | 10 | N | 보낸사람 이름으로 표기 될 별칭 없을경우 발신 직원명으로 지정됨
+
+=== Table 122 ===
+code | returnValue | description
+0 | OK | 정상 처리됨
+32 | WRONG_PARAM_ERR | 파라미터 유효성 검증 오류
+33 | SRV_CODE_EMPTY_ERR | 서버코드가 없습니다.
+34 | RECIPIENT_EMPTY_ERR | 수신 직원번호가 없습니다.
+35 | SEND_EMPTY_ERR | 발신 직원번호가 없습니다.
+36 | TITLE_EMPTY_ERR | 쪽지 제목이 없습니다.
+37 | BODY_EMPTY_ERR | 쪽지 본문이 없습니다.
+38 | SYSTEM_NOT_FOUND_ERR | 등록된 시스템 정보가 없습니다.
+48 | SEND_IP_UNREGIST_ERR | 등록된 발신자 정보가 없습니다.
+64 | ETC_ERR | 기타 예외 메시지 출력
+
+=== Table 123 ===
+메소드 | 설명
+public static InputStream openInputStream( 	File file) | 파일 읽기를 위한 FileInputStream 생성 5M 이상의 파일을 읽으려고하는 경우 에러 발생
+public static OutputStream openOutputStream( 	File file) | 파일 쓰기를 위한 FileOutputStream 생성 신규파일 생성 / 동일파일 존재 시 덮어쓰기 쓰기 중 5M를 넘기면 에러발생
+public static OutputStream openOutputStream( 	File file,  	Boolean append) | 파일 쓰기를 위한 FileOutputStream 생성 기존파일에 append로 쓰기 쓰기 중 5M를 넘기면 에러발생
+public static BufferedInputStream  	openBufferedInputStream(File file) | 메모리 버퍼(8K)를 적용하여 InputStream 생성. 대량 파일 읽기 성능 향상 5M 이상의 파일을 읽으려고 하는 경우 에러 발생
+public static BufferedOutputStream  	openBufferedOutputStream(File file) | 메모리 버퍼(8K)를 적용하여 OutputStream 생성. 대량 파일 쓰기 성능 향상. 신규파일 생성 / 동일파일 존재 시 덮어쓰기 쓰기 중 5M를 넘기면 에러발생
+public static BufferedOutputStream 	openBufferedOutputStream( 		File file, Boolean append) | 메모리 버퍼(8K)를 적용하여 OutputStream 생성. 대량 파일 쓰기 성능 향상. 기존파일에 apeend로 쓰기 쓰기 중 5M를 넘기면 에러발생
+
+=== Table 124 ===
+The K 표준전문 V2.0 | 표준전문 V3.0
+{     "Header":{        "StndGuIdNo":"XXXXXXXXXXXXXXXXXXXXX", …     } "Common":{ "TranInfo":      { "K":"V"... } "ChnlInfo":      { "K":"V"... } "InMsgInfo":     { "K":"V"... } "AthorInfo":     { "K":"V"... } "EntrBnkBzwkCmn":{ "K":"V"... } "OutMsgInfo":    { "K":"V"... } "ErrInfo":       { "K":"V"... } "SpareArea":     { "K":"V"... } "StndInptMdiaPartlInfo":{ "K":"V"... } } "Individual":{         "InData":{             //개별부 항목         }     } } | {     "Header":{        "StndGuIdNo":"XXXXXXXXXXXXXXXXXXXXX",        "StndSysOperEvirnDstcd":"X",        …        "StndInptMsgWritYms":"XXXXXXXXXXXXXXX"     }     "Individual":{         "InData":{             //개별부 항목         }     } }
+고정된 key:value 형태 value가 없는 경우, null 혹은 “”로 세팅된다. | 필요한 항목만 Header에 세팅한다. 단, V2.0과 key명은 동일하게 설정한다
+
+=== Table 125 ===
+UNIT 메소드 | 거래코드 단위(PM)에만 설정가능. (FM/DM에 설정 불가)
+사용 가능 HTTP Method | @GetMapping, @PostMaping, @DeleteMapping, @PutMaping, @RequestMaping 중복 설정 허용
+호출URI 경로 설정 | 
+어노테이션 주의사항 | @GetMapping, @PostMaping, @DeleteMapping, @PutMaping, @RequestMaping 등의 어노테이이션은 com.kbstar.sqc.fwexten.openapi.annotation 를 import하여 사용 주의) Spring Annotation이 아님
+
+=== Table 126 ===
+함수 | 설명
+RestResponseContext callEAIApiService( String httpMethod,                     String URI,                    OutBoundHeader outboundHeader,                    IDataSet requestData,                    int timeout,                    String encoding,                    IOnlineContext onlineCtx) | V3 전문으로 EAI와 통신할 때 사용함
+
+=== Table 127 ===
+리턴 타입 | Get 메소드 | 설명
+KBMessag | getKBMessage() | 응답 전문의 헤더부, 공통부를 담고 있는 KBMessage 객체 조회
+IDataSet | getOutData() | 응답 전문 개별부 DataSet 객체 변환
+List<OutFormType> | getOutForms() | 응답 전문의 Form 데이터 조회
+OutDataCommon | getOutDataCommon() | 출려 공통부 데이터 조회
+
+=== Table 128 ===
+구분 | 목적지 | 목적지 | 목적지
+(내부API G/W) | 개발 | 10.138.70.42 | dev-apim-api.kbonecloud.com
+(내부API G/W) | 스테이징 | 10.138.70.42 | stg-apim-api.kbonecloud.com
+(내부API G/W) | 운영 | 10.136.70.35 | apim-api.kbonecloud.com
+(마이데이터 전용 내부 API G/W) | 개발 | 10.138.70.42 | dev-mydata-api.kbonecloud.com
+(마이데이터 전용 내부 API G/W) | 스테이징 | 10.138.70.42 | stg-mydata-api.kbonecloud.com
+(마이데이터 전용 내부 API G/W) | 운영 | 10.136.70.35 | mydata-api.kbonecloud.cm
+(임베디드뱅킹 전용 내부 API G/W) | 개발 | 10.38.110.109 | internal-zemfi-api.kbstar.com
+(임베디드뱅킹 전용 내부 API G/W) | 스테이징 | 10.38.110.109 | internal-yemfi-api.kbstar.com
+(임베디드뱅킹 전용 내부 API G/W) | 운영 | 10.37.10.31 | internal-emfi-api.kbstar.com
+(스타뱅킹 전용 내부 API G/W) | 개발 | 10.38.110.118 | dev-internal-msb-api.kbstar.com
+(스타뱅킹 전용 내부 API G/W) | 스테이징 | 10.38.10.180 | stg-internal-msb-api.kbstar.com
+(스타뱅킹 전용 내부 API G/W) | 운영 | 10.37.10.180 | internal-msb-api.kbstar.com
+(타사 API G/W) | 개발 | 10.138.70.42 | dev-outbound-api.kbonecloud.com
+(타사 API G/W) | 스테이징 | 10.138.70.42 | stg-outbound-api.kbonecloud.com
+(타사 API G/W) | 운영 | 10.136.70.35 | outbound-api.kbonecloud.com
+(임베디드뱅킹 전용 타사 API G/W) | 개발 | 10.38.110.109 | outbound-zemfi-api.kbstar.com
+(임베디드뱅킹 전용 타사 API G/W) | 스테이징 | 10.38.110.109 | outbound-yemfi-api.kbstar.com
+(임베디드뱅킹 전용 타사 API G/W) | 운영 | 10.37.10.31 | outbound-emfi-api.kbstar.com
+
+=== Table 129 ===
+함수 | 설명
+ResponseContext callStandardApiService ( String ClientId,                  String appCode,                 String httpMethod,                  String URI,                 Map<String,String> httpHeader,                 OutboundHeader outboundHeader,                 IDataSet requestData,                 int timeout,                 String encoding,               IOnlineContext onlineCtx) | 
+
+=== Table 130 ===
+리턴 타입 | Get 메소드 | 설명
+KBMessag kbmessage | getKBMessage() | 응답 전문의 헤더부, 공통부를 담고 있는 KBMessage 객체 조회
+IDataSet outData | getOutData() | 응답 전문 개별부 DataSet 객체 변환
+List<OutFormType> | getOutForms() | 응답 전문의 Form 데이터 조회
+OutDataCommon | getOutDataCommon() | 출력 공통부 데이터 조회
+
+=== Table 131 ===
+함수 | 설명
+RestResponseContext callRestApiService ( String ClientId,             String appCode, String httpMethod,              String URI,             Map<String, String> httpHeader,             IDataSet requestData,             Boolean isGuidRecreated,             int timeout,             String encoding,             IOnlineContext onlineCtx) | KB G/W를 경유하여 행내/대외 API 제공자와 통신할 때 사용함
+
+=== Table 132 ===
+리턴 타입 | Get 메소드 | 설명
+Map<String, List<String>> headers | getHeaders() | 응답 전문 헤더 정보
+IDataSet outData | getOutData() | 응답 전문 개별부 DataSet 객체 변환
+Int responseCode | getResponseCode() | 응답 상태코드
+
+=== Table 133 ===
+파일위치 | C:\[설치경로]\runtime\localhost\remote_download_component.properties
+미설정 시 | # 프레임워크에서 사전에 설정한 컴포넌트(ex.공통성 선후처리 모듈)만 다운로드
+설정패턴 #1 | # 필요한 컴포넌트를 명확히 아는 상황 (예시) component.downloader.includeFilePatterns=*.xxx.*|*.yyy.* (xxx, yyy는 업무코드)
+설정패턴 #2 | # 특정 컴포넌트만 제외 후 모든 컴포넌트를 받는 상황 component.downloader.includeFilePatterns=* component.downloader.excludeFilePatterns=*.xxx.* (xxx는 업무코드)
+
+=== Table 134 ===
+/fscm/XXX1_dev/src/OOO/OOO-njava
+
+=== Table 135 ===
+로그종류 | 설명 | 비고
+전문로그 | MCI, EAI, nKESA 간 송수신한 전문내역이 저장됨 입력/출력 전문 | 
+거래로그 | nKESA 내에서 거래당 저장되는 로그.  IQ 전문의 개별부를 파싱한 입력 DataSet, PM 실행후의 결과 DataSet, CommonArea 정보 저장됨 연동거래시 연동 횟수만큼 저장됨 | 운영에서는 과도한게 로그가 많이 발생하여 Off 한 상태임
+에러로그 | 에러 발생시 거래로그는 롤백되며, 거래 상세 정보가 거래로그 단위로 에러로그 테이블에 저장됨 | 
+
+=== Table 136 ===
+전문로그항목 | 설명 | 비고
+GUID | GUID 33자리 | 
+거래코드 | 거래코드 10자리 | 
+경로번호 | GUID 36 자리중 끝 3자리 | 
+입력일련 | 대량입력 거래의 경우 입력 일련번호 | 
+출려일련 | 대량출력 거래의 경우 출력 일련번호 | 
+거래명 | 거래코드의 거래명, 거래프로파일의 값 | 
+구분 | - IQ : Inbound reQuest.      > MCI/EAI 에서 수신한 요청 전문.     > nKESA 간 통신에서 다른 nKEAS로 부터 수신한 전문 - IS : Inbound reSponse     > IQ 전문 수신후 거래 실행결과를 린턴한 응답 전문 - OQ : Outbound reQuest     > EAI 로 요청전문 송신.      > MCI 로 BID, PUSH 전문 송신 - OS : Outbound reSponse     > OQ 전문 송신후 sync 리턴받은 전문 | 
+채널 | 중계채널.  MCI, EAI1 (대내), EAI2(대외), EAI3(공동망), EAI4(DMZ),  NRC (nKESA간 원격호출) NWI (nKESA Web Interface) MSA (Paas MicroService 호출) | NWI : 무인공과금, 이미지콜드 사용중 MSA : 부동산 호출시  NRC : 마케팅 – 비대면 직접
+환경 | O : 운영, S: 스테이징, D: 개발 | 
+실행시간 | IS 전문의 경우 거래 실행 시간 | 밀리초
+길이 | 저장되는 전문의 개별부 길이 | BLOB, Varbinary 로 저장
+포맷 | 전문 포멧 JSON, XML, Flat JSON_Z : JSON 전문의 압축 JSON_Z_ENC : JSON 전문압축후 암호화 | 전문 개별부에 개인정보 포함시 암호화를 해야하며, 암호화 여부를 거래 프로파일에 설정하면 전문 저장시 암호화 하여 저장함
+인코딩 | 전문 인코딩.  UTF-8, MS949, euc-kr | 
+S/A | Sync, Async 여부 | 
+노드ID | 거래가 처리된 NEXCORE 노드ID. | NEXCORE 노드 ID 값은 WAS 인스턴스와 동일. (단, 선오픈한 무인공과금, 이미지 콜드 예외)
+EAI SVCID | EAI 전송전문일 경우 EAI 서비스명. | EAI 호출시 EAI서비스명을 어플리케이션에서 전문헤더에 set 한 경우만 로깅됨
+송신 | 송신 Sender의 IP, Port | 
+수신 | 수신 Receiver 의 IP, Port | 
+로그저장시각 | Insert 시각 | 
+
+=== Table 137 ===
+src/main/java 선택 |  | 팝업메뉴 |  | 패키지 생성 |  | 담당 Application 코드를 선택 하위 패키지 입력 |  | [Finish] 버튼을 눌러 완료
+
+=== Table 138 ===
+ |  | 
+
+=== Table 139 ===
+업무 패키지 선택 |  | 팝업메뉴 |  | 배치 프로그램 생성화면 |  | 배치 프로그램 항목 입력 |  | 배치소스 및 XSQL 생성
+
+=== Table 140 ===
+*패키지 경로 | 4 depth인지 확인
+프로그램 ID | 배치 프로그램 명명규칙에 따라 입력
+프로그램명 | 배치 프로그램 한글명 입력
+실행파일명 | 명명 규칙에 따라 배치 실행 쉘 파일명 입력
+
+=== Table 141 ===
+개별 파라미터 | 각 배치 Job 마다 등록하는 파라미터
+내장 파라미터 | 프레임워크에서 자동으로 설정되는 기본 파라미터 주로 날짜, 시각 정보, 홈디렉토리 정보 등이 설정됩니다.
+전역 파라미터 | 전체 배치에 설정되는 파라미터 전역 파라미터는 프레임워크 관리콘솔에 저장되어 실행됩니다.
+
+=== Table 142 ===
+파라미터명 | 데이터 타입 | 설명
+TIME | HHMMSS | 현재시스템시각
+DATE | YYYYMMDD | 현재시스템일자
+DATETIME | YYYYMMDDHHMMSS | 현재시스템일자시각
+PROC_DATE | YYYYMMDD | 처리일.  > Control-M 의 %%$ODATE
+NEXCORE_HOME | 문자형 | 홈디렉토리. > /fsapp/xxx1_dev/sqc/runtime
+SYSTEM_ID | 문자형 | 시스템ID. > 프레임워크 구분 ID
+JOB_ID | 문자형 | Control-M 의 %%JOBNAME
+JOB_INS_ID | 문자형 | 인스턴스 ID. > JOBID + 일자 + %%ORDERID
+JOB_EXE_ID | 문자형 | JOB 실행 ID > JOB인스턴스 ID + %%RUNCOUNT
+JOBGROUP_ID | 문자형 | Control-M 의 %%APPLGROUP. (Sub Application 명)
+SHELL_NAME | 문자형 | 실행 쉘 파일명. 확장자 포함
+DATA_ROOT | 문자형 | /fsfile/*** (*** 는 쉘파일내의 appcode 3자리)
+DATA_ROOT_UP | 문자형 | /fsfile/*** (*** 는 쉘파일내의 appcode 3자리 대문자)
+
+=== Table 143 ===
+종료상태 | 배치 JVM 프로세스가 리턴하는 exit 값
+정상 | 0
+에러 | context.setReturnCode(int exit) 메소드로 set 한 값 Exception 만 throw 하고 이 값을 set 하지 않은 경우는 기본값 1 로 set
+
+=== Table 144 ===
+메소드 | 리턴값
+protected int dbInsert(String stmtName, Object param, DBSession session) protected int dbInsert(String stmtName, Object param) | 처리 건수
+protected int dbUpdate(String stmtName, Object param, DBSession session) protected int dbUpdate(String stmtName, Object param) | 처리 건수
+protected int dbDelete(String stmtName, Object param, DBSession session) protected int dbDelete(String stmtName, Object param) | 처리 건수
+
+=== Table 145 ===
+stmtName | SQL ID 입력. 예) “select”, “insert”
+param | IDataSet, Map, IRecord 등 객체
+DBSession | DBSession 미지정  주 트랜잭션으로 CRUD 수행 DBSession 지정    지정한 별도 트랜잭션으로 CRUD 수행
+
+=== Table 146 ===
+메소드 | 설명
+public final void txBegin(DBSession session) public final void txBegin() | DB 트랜잭션 시작
+public final void txCommit(DBSession session) public final void txCommit() | DB 커밋
+public final void txRollback(DBSession session) public final void txRollback() | DB 롤백
+
+=== Table 147 ===
+ | 온라인 | 배치
+데이터행 | Record | Record
+전체List 결과 | RecordSet으로 가지고 있음 JVM Heap 메모리 | Record fetch시마다 핸들러 메소드를 callback
+
+=== Table 148 ===
+출력클래스 | java.util.HashMap (hmap) | java.util.LinkedHashMap
+select 결과 컬럼 순서 보장 | X | O
+
+=== Table 149 ===
+메소드 | 설명
+protected void dbSelect( 	String stmtName,  	Object param,  	AbsRecordHandler recordHandler) | 배치에서 대량 조회 호출 Record마다 레코드 핸들러가 호출됨  주 데이터 소스를 대상으로 select 실행됨
+protected void dbSelect( 	String stmtName,  	Object param,  	AbsRecordHandler recordHandler,  	DBSession session) | 배치에서 대량 조회 호출. Record마다 레코드 핸들러가 호출됨  별도 데이터 소스를 바라보고 select 실행됨
+
+=== Table 150 ===
+public void preStartFetch() | handleRecord 가 시작되기 전 맨 처음 한번만 호출됩니다.
+public void postEndFetch() | handleRecord 가 모두 정상적으로 완료된 후 호출됩니다. handleRecord 안에서 에러 발생시에는 호출되지 않습니다
+public void onFinally() | 에러에 상관없이 마지막에 무조건 호출됩니다.
+
+=== Table 151 ===
+메소드 | 설명
+protected IRecord dbSelectSingle(String sqlId, Object param) | 단건 조회. 레코드 한건 리턴
+
+=== Table 152 ===
+메소드 | 설명
+protected IRecordSet dbSelectMulti(String sqlId, Object param) | 다건 조회. 레코드셋 리턴
+
+=== Table 153 ===
+메소드 | 설명
+protected void saveValue(String key, String value) protected void saveValue(String key, String value, DBSession session) | // 중간값 저장 메소드 Key - value 로 저장합니다.
+protected void loadValue(String key) protected void loadValue(String key, DBSession session) | // 중간값 조회 메소드 saveValue 로 저장한 값을 읽어 옵니다.
+
+=== Table 154 ===
+메소드 | 설명
+protected final DBSession dbNewSession(  	String optionString) | 주 세션 이외의 세션 정보를 만듦. (실제 DB세션을 이시점에 연결하지는 않음)
+protected final DBSession dbNewSession( 	boolean isXA,  	String optionString) | 주 세션 이외의 세션 정보를 만듦. (실제 DB세션을 이시점에 연결하지는 않음) n-KESA2.0에서는 Deprecated 되었습니다.
+
+=== Table 155 ===
+속성 | 설명 | 예제
+addBatchMode | Addbatch 모드로 동작할지 말지 설정 | setAddBatchMode(true); default : true
+commitCount | Commit 건수를 설정. 이 값이 addbatch 건수와 동일하게 설정됨 | setCommitCount(100); default : 100
+saveValueKey | 중간 값 저장을 위한 키 값 설정 | setSaveValueKey(“SUCC_POSITION”) defaut : null
+stopWhenException | 에러발생시 계속진행할지, 정지할지 결정 | setStopWhenException(false) default : true
+targetRecordRange | 대상 레코드 범위. 전체 레코드 중에서 특정 범위에 대해서만 처리하고자 할 때 범위를 지정함. 에러 재처리에 사용됨 | setTargetRecordRange(long, long)  from, to index.  맨 첫번째 레코드의 index는 1. setTargetRecordRange(List<long[]>)  list of [from, to] 대상 레코드가 여러 구간일 경우 리스트로 설정
+retryForDetailPosition | addBatch 모드일 경우는 에러 발생시 해당 블록을 재실행 하여 정확한 위치 파악. | setRetryForDetailPosition(false); default : false
+
+=== Table 156 ===
+메소드 | 설명
+protected void stopImmediately () | 핸들러 수행 즉시 종료. Fetch 가 끝나지 않은 경우도 조용히 중지시킴.
+
+=== Table 157 ===
+바인드 변수값 | 설명 | 비고
+sysLastPrcssYMS | 시스템최종처리일시, String 타입 | 
+sysLastUno | 시스템최종사용자번호, String 타입 | 
+groupCoCd | 그룹회사코드. String 타입. BICOM 의 그룹회사코드값 자동 바인드 이 값은 어플리케이션에서 sqlin.put(“groupCoCd”,”KB1”) 로 넣을 경우 KB1 값이 우선하여 적용됩니다. | 
+시스템최종처리일시 | 시스템최종처리일시, String 타입 | 금융복합, 계좌통합, 부동산, 통합인증
+시스템최종사용자번호 | 시스템최종사용자번호, String 타입 | 금융복합, 계좌통합, 부동산, 통합인증
+그룹회사코드 | 그룹회사코드. String 타입. BICOM 의 그룹회사코드값 자동 바인드 이 값은 어플리케이션에서 sqlin.put(“groupCoCd”,”KB1”) 로 넣을 경우 KB1 값이 우선하여 적용됩니다. | 금융복합, 계좌통합, 부동산, 통합인증
+
+=== Table 158 ===
+메소드 | 설명
+protected void clearDbSelectRecordHeaderCache () | 조회 결과 커럼의 헤더 정보 캐시 삭제
+
+=== Table 159 ===
+규칙 | 변환규칙 | 예제
+데이터 안에 구분자가 문자로 포함된 경우 | 해당 Cell의 시작과 끝을 Wrapper 문자로 감싼다. Wrapper 문자는 반드시 시작과 끝 쌍이 맞아야 함 | 예)   1,2,3,”한글,영어”,4,5,6
+데이터 안에 Wrapper 문자가 포함된 경우 | 해당 Cell의 시작과 끝을 Wrapper 문자로 감싼 후 데이터에 들어있는 Wrapper문자는 2개로 복제함 | 예)    가,나,다,”NEXCORE””배치프레임워크””“,라,마
+
+=== Table 160 ===
+파일에 기록된(혹은 될) 데이터 | 길이
+-1234.567 | 음수 및 부동 소수점 포함한 길이는 9
+
+=== Table 161 ===
+메소드 | 설명
+public final IFileTool getFileTool(String fioId) | 파일IO ID로 IFileTool 객체를 로드함.
+
+=== Table 162 ===
+메소드 | 설명
+protected final OutputStream fileOpenOutputStream ( 	String filename) | FileOutputStream 열기. 이 메소드를 이용해서 생성된 OutputStream 은 프로그램 종료시 자동으로 close 된다. 기본 버퍼 크기 8k 적용된다.
+protected final InputStream fileOpenInputStream ( 	String filename) | FileInputStream 열기. 이 메소드를 이용해서 생성된 InputStream 은 프로그램 종료시 자동으로 close 된다. 기본 버퍼크기 8k 적용된다.
+
+=== Table 163 ===
+/fsfile/어플리케이션 코드
+
+=== Table 164 ===
+메소드 | 설명
+String makeDataFileName( 	String appCode,  	String period,  	String userDefinName,  	String fromOrTo,  	int seq,  	String date,  	String extension) | * appCd : 어플리케이션 코드(3자리). * period : 파일생성주기 - D: 일 W : 주 M : 월, Q : 분기, H : 반기, Y : 년, T : 임시 * userDefinName: User Defined Name( Table명 등) * fromOrTo : 파일생성시 타어플리케이션 전송 시 사용하며 생략가능.  (FROM/TO + 어플리케이션 코드) * seq : 동일파일명일 경우 순번(3자리). getDataFileMaxSeq 이용 * date : 일자. YYYYMMDD * extension : 확장자. - TXT : Delimiter없는 일반 Text파일   - CSV : 하나의 Row Data가 콤마(,)로 구분된 Text파일   - DEL : 하나의 Row Data가 콤마(,) 외 다른 문자로 구분된 Text파일
+int getDataFileMaxSeq( 	String dir,  	String appCode,  	String period,  	String userDefinedNm,  	String fromOrTo,  	String date,  	String extension) | 첫번째 argument 인 dir 에 동일 패턴의 파일명 중 일련번호 최대값을 리턴함
+
+=== Table 165 ===
+메소드 | 설명
+public void setInputStream(InputStream inputStream) | InputStream 설정.
+public void setOutputStream(OutputStream outputStream) | OutputStream 설정
+public void initialize() | 생성된 IFileTool 객체를 초기화.  read/write 작업 전에 반드시 이 메소드를 호출해야 함.
+
+=== Table 166 ===
+메소드 | 설명
+public void writeRecordToOut(IRecord rec) | Record 하나씩 OutputStream 으로 write 함. 대용량 dbSelect 후에 writeToStream 시에는 RowHandler 가 사용되므로 writeRecordSet()를 할 수 없고 writeRecordToOut()를 해야한다.
+public void writeRecordSetToOut(IRecordSet rs) | RecordSet 객체를 OutputStream 으로 write 함
+public void writeMapToOut(Map rec) | IRecord 객체는 컬럼을 확장할 수 없는 제약이 있으므로, IRecord 에 추가 컬럼이 필요한 경우 Map 객체로 변환하여 사용할 수 있음. 이때 Map 객체를 바로 파일로 Write 할 때 사용함.
+
+=== Table 167 ===
+메소드 | 설명
+public void readRecordSetFromInputStream( 	AbsRecordHandler recordHandler) | InputStream 으로부터 Record 를 읽어 매 Record 마다 recordHandler를 호출함..
+
+=== Table 168 ===
+메소드 | 설명
+public void start() | Executor 실행 시작시 처음 호출함.  이 안에서 preStartFetch() 실행됨
+public void execute(IRecord record) | 매 Record 마다 호출. 이 안에서 RecordHandler 의 handleRecord() 호출됨
+public void end() | 이 안에서 postEndFetch() 실행됨
+
+=== Table 169 ===
+정책 | 설명
+파일 로그 | fwk 로그와 배치 업무 로그로 나누어 저장함
+DB 로그 | 배치 쓰레드 단위로 선처리, 후처리에서 DB 로깅. 이 내역은 관리콘솔의 배치 실행로그에서 조회 가능.
+Job Instance 별 로그 | Job Instance 마다 별도의 로그 파일을 가짐. 동일 Instance 를 여러 번 재처리할 경우에는 동일 로그 파일에 로그가 저장됩니다. Control-M 에서 Order 된 Job 을 rerun 할 경우 동일 Instance 인 것이고, 새로 Order 하면 별도의 instance 가 됩니다.
+쓰레드별 로그 | 병렬 쓰레드로 실행되는 경우 쓰레드 별로 별도 로그 파일에 기록됩니다.
+로그레벨 지원 | 로그 레벨에 따라 DEBUG, INFO, WARNING, ERROR, FATAL 로 구분됨 배치 프로파일에서 로그 레벨 설정 가능
+
+=== Table 170 ===
+JOB_ID + YYYYMMDD (ODATE) (재처리 로직이 필요없는 경우) JOB_ID + YYYYMMDD (ODATE) + “L001” (재처리 로직이 필요한 경우)
+
+=== Table 171 ===
+JOB_ID + YYYYMMDD (Control-M ODATE) + “C”+Control-M Order ID (5자리)
+
+=== Table 172 ===
+클래스명(패키지 제외) + “T”+ 일련번호 (3자리)
+
+=== Table 173 ===
+메소드 | 설명
+public void setProgressTotal(long total) | 전체 일의 양 (전체 처리 건수 또는 백분률) 을 설정함.
+public void setProgressCurrent(long current) | 현재 처리한 일의 양 (처리 건수 또는 백분률) 을 설정함.
+public long getProgressCurrent() | 현재 처리건 수를 리턴함. (처리건 수를 누적하여 계산할 경우에 현재건수를 가져올 때 사용)
+
+=== Table 174 ===
+public void handleErrorRecord(IRecord record, long position, Throwable e) {     // 에러 처리 로직 수행 ~~~~~~ // 에러 건수, 금액 증가     context.addErrorCountAmount(1, record.getLong("AMT")); // 금액 필드가 AMT 인 경우 }
+
+=== Table 175 ===
+public void handleErrorRecordBlock(List<IRecord> recordBlock, long startPosition, long endPosition, Throwable e) {     int i=0;     for (IRecord record : recordBlock) {                  Exception error = null;         try {             txBegin();             // 재처리 로직 수행             // ~~~~~~~~~~~              // 정상 건수, 금액 증가             context.addSuccessCountAmount(1, record.getLong("AMT"));             // 성공위치 저장             saveValue("SUCC_POSITION", (startPosition+i)+"");              txCommit();         }catch(DataException de){             error = de;         }catch(Exception ee) {             error = ee;         }                              if (error != null){             log.error("[재처리 실패(Exception)] ("+startPosition+"-"+endPosition+", "+i+") ("+error.toString()+") "+record.toString().trim());             txRollback();                     	             // 재처리 로직 수행                     	             // 에러 건수,금액 증가             txBegin();             context.addErrorCountAmount(1, record.getLong("AMT"));             txCommit(); // 에러 건수, 금액 DB 업데이트         }         i++;     } }
+
+=== Table 176 ===
+메소드 | 설명
+IDataSet callSharedMethodByDirect(String componentId, String unitMethodId, IDataSet requestData) IDataSet callSharedMethodByDirect(String componentId, String unitMethodId, IDataSet requestData, DBSession dbSession) | 온라인 공유 메소드를 직접 호출함.
+IDataSet callSharedMethodByRequiresNew (String componentId, String unitMethodId, IDataSet requestData) | 온라인 공유 메소드를 RequiredNew 트랜잭션으로 호출함 피호출 FM의 정상 여부가 주트랜잭션에 영향을 주지 않음.
+IDataSet callSharedMethod(String componentId, String unitMethodId, IDataSet requestData) | 온라인 공유 컴포넌트를 호출함. (nkesa1에만 존재, nkesa2에서는 deprecated)
+
+=== Table 177 ===
+메소드 | 설명
+void callBatchNow( 	String  jobId 	Map<String, String> inParam,  	IOnlineContext onlineCtx) | 배치 Job 을 지금 즉시 기동함. Job Id 단위로 기동하며 Job 파라미터를 임의로 넘겨줄 수 있음. 파라미터 값은 반드시 String 타입이어야 함.
+void callBatchAfterCommit( 	String  jobId, 	Map<String, String> inParam,  	IOnlineContext onlineCtx) | 온라인 PM 정상 commit 후, 배치 Job 기동함.
+String callBatchJobNow( 	String  jobName, 	Map<String, String> inParam,  	IOnlineContext onlineCtx) | 배치 Job 을 지금 즉시 기동함. Job Id 단위로 기동하며 Job 파라미터를 임의로 넘겨줄 수 있음. 파라미터 값은 반드시 String 타입이어야 함. (
+String callBatchJobAfterCommit( 	String  jobName, 	Map<String, String> inParam,  	IOnlineContext onlineCtx) | 온라인 PM 정상 commit 후, 배치 Job 기동함.
+
+=== Table 178 ===
+메소드 | 설명
+List<IBatchContext> runBatchStepSync((Class<? extends BatchStep> bsClass, int numberOfStep, BatchStepThreadPool batchStepThreadPool, ErrorPolicy errorPolicy, boolean mergeLogger)) | BatchStep을 동기방식으로 실행 동기방식은 실행 후 종료될때까지 기다려 리턴 됩니다.
+
+=== Table 179 ===
+매개변수 항목 | 특징
+Class<? extends BatchStep> bsClass | 호출 할 BatchStep 클래스
+int numberOfStep | 스탭 개수
+BatchStepThreadPool batchStepThreadPool | 쓰레드풀 개수(설정 시, 개수만큼 스탭이 쓰레드풀 개수만큼 동시에 수행됩니다)
+ErrorPolicy errorPolicy | 에러가 발생한 경우 처리 정책 THROW_EXCEPTION: 배치스텝에 에러가 있는 경우 exception throw NONE: 아무처리하지 않음, 리턴받은 목록에서 에러여부를 직접 판단
+boolean mergeLogger | 로그통합여부 (true: BU 로거를 공유하여 하나의 파일에 로깅, false: BU, BS 쓰레드별로 로그 파일 분리)
+
+=== Table 180 ===
+메소드 | 설명
+runBatchStepAsync(Class<? extends BatchStep> bsClass, int numberOfStep, BatchStepThreadPool batchStepThreadPool, boolean mergeLogger) | BatchStep을 비동기방식으로 실행
+
+=== Table 181 ===
+매개변수 항목 | 특징
+Class<? extends BatchStep> bsClass | 호출 할 BatchStep 클래스
+int numberOfStep | 스탭 개수
+BatchStepThreadPool batchStepThreadPool | 쓰레드풀 개수(설정 시, 개수만큼 스탭이 쓰레드풀 개수만큼 동시에 수행됩니다)
+boolean mergeLogger | 로그통합여부 (true: BU 로거를 공유하여 하나의 파일에 로깅, false: BU, BS 쓰레드별로 로그 파일 분리)
+
+=== Table 182 ===
+항목 | 특징
+Job Ins/Exe Id | 모든 쓰레드는 동일한 JobId, JobInsId, JobExeId 가 부여됨
+쓰레드ID | “P” + 숫자1 + 클래스명 + “T” + 일련번호 3자리로 생성됨  위의 예에서는 P1BUBatch01T001, P1BUBatch01T002 ~ P1BUBatch01T005
+로그 파일 | 업무 로그는 각 쓰레드별로 별도 파일에 로깅됨. fwk 로그는 하나에 BU,BS 분리 관리콘솔의 배치실행로그 이력도 쓰레드 별로 따로 저장됨
+트랜잭션 처리 | 트랜잭션은 각 쓰레드별로 개별적으로 처리해야 함
+배치 프로그램 객체 | 매 쓰레드 마다 별도로 객체가 생성되며, 개별 클래스로더로 로딩하므로 배치 프로그램 내의 멤버 필드, static 필드는 쓰레드간 공유가 불가함. 공유 Map 기능을 이용하여 공유해야함
+에러처리 (THROW_EXCEPTION) 의 경우 | 실행된 배치스텝이 1건이상 에러 발생시 throw exception
+
+=== Table 183 ===
+항목 | 특징
+Job Ins/Exe Id | 모든 쓰레드는 동일한 JobId, JobInsId, JobExeId 가 부여됨
+쓰레드ID | 클래스명 + “T” + 일련번호 3자리로 생성됨  위의 예에서는 BUBatch01T001, BUBatch01T002 ~ BUBatch01T005
+로그 파일 | 업무 로그는 각 쓰레드별로 별도 파일에 로깅됨. fwk 로그는 하나에 통합 관리콘솔의 배치실행로그 이력도 쓰레드 별로 따로 저장됨
+파라미터 | 쉘 파라미터, Control-M 파라미터, 전역파라미터는 모든 쓰레드에 동일하게 전달됨. 그외 다음 2개의 파라미터가 전달됨 THREAD_COUNT  : 전체 쓰레드 개수 THREAD_NO  : 쓰레드 번호. 1부터 시작. (1,2,3,4,5)
+트랜잭션 처리 | 트랜잭션은 각 쓰레드별로 개별적으로 처리해야 함
+배치 프로그램 객체 | 매 쓰레드 마다 별도로 객체가 생성되며, 개별 클래스로더로 로딩하므로 배치 프로그램 내의 멤버 필드, static 필드는 쓰레드간 공유가 불가함. 공유 Map 기능을 이용하여 공유해야함
+에러처리 | 한 쓰레드라도 Exception 발생시에는 JVM exit 값이 에러로 리턴됨
+
+=== Table 184 ===
+#==================================================== # 배치 프로그램 클래스명 설정 # 역할분리방식 병렬처리시에는 클래스를 2개 지정가능함 #==================================================== NC_BATCH_CLASS1=com.kbstar.edu.banking.batch.BUParlPrcssReaderMulti NC_BATCH_CLASS2=com.kbstar.edu.banking.batch.BUParlPrcssProcessorMulti[3] NC_BATCH_CLASS3= NC_BATCH_CLASS4= NC_BATCH_CLASS5=
+
+=== Table 185 ===
+메소드 | 설명
+SharedQueue createSharedQueue( 	String id,  	String desc) | 공유큐를 생성함. 기본 큐 사이즈 : 100 - id : JVM 내에서 unique ID. 큐를 여러 개 생성할때 구분하기 위한 구분자 - desc : 큐의 한글명 입력. 로그용
+SharedQueue getSharedQueue( 	String id) | 생성된 공유큐 객체를 lookup함. - id : 생성시 부여한 ID timeout 기본값 10초 적용
+SharedQueue getSharedQueue( 	String id,  	int timeoutSec) | 생성된 공유큐 객체를 lookup함. - id : 생성시 부여한 ID - timeoutSec : 타임아웃 (초단위). 배치 실행시 QueueSender, QueueReceiver 양측이 동시에 실행되므로 get 쪽에서는 create 될 때까지 잠시 대기 해야하며 그 시간에 대해 timeout 을 설정합니다. 이 시간 이후까지 큐를 가져오지 못하면 생성 과정에 문제가 발생한 것으로 판단하여 에러를 내게 됩니다.
+
+=== Table 186 ===
+메소드 | 설명
+SharedQueueSender createSender( 	IBatchContext context) | SharedQueueSender 객체 생성
+SharedQueueReceiver createReceiver( 	IBatchContext context) | SharedQueueReceiver 객체 생성
+boolean isSendFinished() | 모든 Sender 가 finish() 를 호출한 상태이면 true 리턴
+boolean isReceiveAllEnded() | 모든 Receiver 가 destroy() 를 호출한 상태이면 true 리턴.
+void waitForAllReceiveEnd() | isReceiveAllEnded() 가 true 될 때까지 this 쓰레드를 wait 함
+boolean waitForAllReceiveEnd( 	long timeoutInMillis) | isReceiveAllEnded() 가 true 될 때까지 this 쓰레드를 wait 함. timeout 시간(밀리초) 이내에 정상 종료되면 true 리턴하며, timeout 시간까지 종료되지 않으면 false 리턴함
+
+=== Table 187 ===
+메소드 | 설명
+void send(Object obj) | 큐에 데이터 put - obj : 큐에 넣을 데이터 객체
+boolean send( 	Object obj,  	long timeoutInMillis) | 큐에 데이터 put.  - obj : 큐에 넣을 데이터 객체 - timeoutInMillis : 타임아웃.  QueueReceiver 에서 처리가 늦어져 큐가 꽉찬 상태가 오래되면 timeout 시간만큼 wait 후 Exception 발생
+boolean send( 	Object obj,  	long timeoutInMillis,  	boolean 	throwExceptionWhenSendTimeout) | 큐에 데이터 put.  - obj : 큐에 넣을 데이터 객체 - timeoutInMillis : 타임아웃.  - throwExceptionWhenSendTimeout : timeout 발생시 Exception throw 할지, 조용히 false 리턴할지 선택
+boolean isFinished() | finish() 가 호출된 상태이면 true리턴
+int getSendCount() | send 한 누적 건수
+void finish() | Sender 완료 설정.
+void destroy() | Sender 삭제. SharedQueue 에서도 삭제함
+
+=== Table 188 ===
+메소드 | 설명
+Object receive() throws InterruptedException | 큐에서 데이터 하나 get
+void receive( 	AbsRecordHandler recordHandler)  throws InterruptedException | 계속해서 큐를 보고 있으며 데이터가 들어올 경우 즉시 get 하여 레코드 핸들러 수행
+int getReceiveCount() | 누적 get 건수
+boolean isReceiveEnd() | destroy() 가 호출된 상태이면 true 리턴
+void destroy() | receive 를 모두 마치고 Receiver 를 제거함.
+
+=== Table 189 ===
+메소드 | 설명
+boolean checkLoopTimeAndSleep( int sleepTimeSec,  String endTimeHHMM) | * endTimeHHMM 을 명시적으로 지정함. * 루프 조건 만족할 경우 sleepTime 만큼 sleep함 (초단위) * 24시간은 아니고, 특정 시각 까지만 돌아야하는 경우 이메소드를 사용하십시요. 예) 새벽 3시까지만 돌아야하는 경우 checkLoopTimeAndSleep(10, “0300”) * 리턴값 :  true : 아직 종료 시각이 안되었으므로 계속 루프 실행  false : 종료시각이 되었으므로 루프 종료해야함
+
+=== Table 190 ===
+MCI 패턴 구분 | 설명
+BIDMESSAGE | BID는 원인없는 BID와 원인있는 BID로 나누어집니다.  원인있는 BID는 “요청”이란 원인에 대해, “비동기응답”하는 유형입니다.  온라인프로그램만 해당하며 배치프로그램은에는 해당사항이 없습니다.  원인없는 BID는 알림창처럼 “요청”없이, 서버에서 단말로 전문을 단방향으로 전송하는 유형입니다
+
+=== Table 191 ===
+메소드 | 설명
+ByteArrayWrap sendResultMessageToIntgraTerml (  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	IOnlineContext onlineCtx ) | 입력된 응답 전문 헤더, 응답 전문 개별부를 사용하여 전문을 조립합니다. GUID는 새로 채번되며, 일부 항목은 응답전문 규칙에 맞게 채워져서 전송됨. dummy관련 값은 아래 기본값으로 설정됨 dummyReturn : false,  dummyReturnReleaseOnFail : false
+ByteArrayWrap sendResultMessageToIntgraTerml (  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	boolean dummyReturn,  	boolean dummyReturnReleaseOnFail, 	IOnlineContext onlineCtx ) | 아래 인자를 추가로 셋업가능함  txid: BID거래의 거래코드 dummyReturn : 현재 거래는 dummy 리턴함. dummyReturnReleaseOnFail : 후처리에서 에러 발생시 dummy 리턴을 취소하고 정상에러 응답을 할지 여부
+ByteArrayWrap sendBidMessage (  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	IOnlineContext onlineCtx ) | sendResultMessageToIntgraTerml 와 동일한 API입니다.
+ByteArrayWrap sendBidMessage (  	BidPushMessageHeader oh,  	IDataSet responseData,  	String txid,  	boolean dummyReturn,  	boolean dummyReturnReleaseOnFail, 	IOnlineContext onlineCtx ) | sendResultMessageToIntgraTerml 와 동일한 API입니다.
+
+=== Table 192 ===
+메소드 | 설명
+void addBidMsg(  	String empId,  	String bigMessageContent,  	String bidMessageLinkedScreen,  	String bigMessageLinkedData ) | 단말사번(empId), 전송할내용, 타겟화면번호를 입력
+
+=== Table 193 ===
+메소드 | 설명
+int callNDMShell (  	boolean isWaitForEnd 	String fileName,  	String … args) | isWaitForEnd : NDM 처리 응답 대기여부 fileName : 실행파일 명 args : NDM 쉘 전달 인자 (가변인자)
+int callNDMShell (  	String fileName,  	String … args) | 위의 메소드와 동일한 기능이며, isWaitForEnd (NDM 처리응답 대기여부) 값을 true로 전달
+
+=== Table 194 ===
+항목 | 설명
+일련번호 | 일련번호. 1부터 시작
+Timestamp | YYYYMMDDHHMMSSSSS 형태 17자리. 파일 기록 시각
+클래스명 | 로그를 기록하는 배치 클래스 또는 DU 클래스
+테이블명 | 테이블명
+Function | I : Insert, U : Update, D :Delete
+구분 | B : Before, A : After
+길이 | Data 길이 (byte수).
+Data | 전후 데이터. JSON 형태의 Key-value 데이터. 기본 : UTF-8 인코딩, 직접 남기는 경우만 설정가능
+
+=== Table 195 ===
+항목 | 설명
+isTBatch() | 수시 배치 여부를 판단하는 API (true : 수시, false: 자동화) 판단기준 : 배치 JOB_ID의 첫글자가 t 이면 수시, m이면 자동화 배치
+isFtrmBatch() | 초회차 여부를 판단하는 API (true: 초회, false: 초회 아님) 판단기준 : 배치 프로파일 속성 중 FIRST_TIME_YN(초회여부)의 값이 Y인 경우. 배치 수행 중 한번 이라도 DBIO를 이용하여 CUD가 발생한 경우에 초회여부가 N이 됩니다.
+setChgLogLoggingYn() | true: 변경로그 기록, false: 변경로그 기록하지 않음 (기본 false)
+isLoggingChglog() | 현재 설정된 변경로그 Flag 값 확인
+
+=== Table 196 ===
+메소드 | 설명
+static void openLogFile( String shellName,  String dataRootDir,  String yyyyMMdd,  Log log) | - shellName : 배치 쉘명 입력. 예) mabc0000 - dataRootDir : 디렉토리 입력. /fslog/chglog/OOO  - yyyyMMdd : 일자 입력
+static void setEncoding (String encoding) | 로그 파일 인코딩 설정. 미설정시 UTF-8 적용
+static void closeLogFile() | 로그 파일 close.
+static void logInsertAfter( Object classObject,  String tableName,  Object data) | dbInsert 메소드 뒤에 호출하여 insert After 로그 기록 - classObject : this 를 입력 - tableName : Insert 한 테이블명 입력 - data : dbInsert 에 사용한 Map, IDataSet, IRecord 객체
+static void logUpdateBefore( Object classObject,  String tableName,  Object data) | dbUpdate 변경 전값 로깅. dbUpdate 호출 전에 동일 Key 값으로 이전 값을 dbSelect 조회한 후 그 값으로 Before 로그 기록 - classObject : this 를 입력 - tableName : Update한 테이블명 입력 - data : dbUpdate 전에 dbSelect 한 결과 값
+static void logUpdateAfter( Object classObject,  String tableName,  Object data) | dbUpdate 호출 후에 Update 한 값으로 After 로그 기록 - classObject : this 를 입력 - tableName : Update한 테이블명 입력 - data : dbUpdate에 사용한 Map, IDataSet, IRecord 객체
+static void logDeleteBefore( Object classObject,  String tableName,  Object data) | dbDelete 삭제 전 값 로깅. 동일 key 값으로 dbSelect 한 후 그 값 로깅 - classObject : this 를 입력 - tableName : Delete한 테이블명 입력 - data : dbDelete 전에 dbSelect 한 결과 값
+
+=== Table 197 ===
+항목 | 설명 | 예시
+배치ID | 배치 프로파일의 키. Control-M JOBNAME 과 동일. Control-M 으로 실행하지 않는 경우는 쉘명(.sh제외) 과 동일 | BUSample01
+배치 설명 | 배치 프로그램 설명 | 
+담당자 | 배치 프로그램 담당자 | 
+커밋 주기 | 배치 프로그램내에서 이 값으로 commit 하도록 프로그램 되어있어야함 | 1000
+로그레벨 | 배치 로그 파일의 로그레벨. 프로그램 실행 전에 설정된 값으로 로거 생성되며, 실행중에는 변경해도 반영되지 않음 | DEBUG, INFO
+건수/금액 기록 여부 | 배치 실행 로그 테이블에 처리 건수, 금액 값의 로깅 여부 | 
+힙 메모리 | JVM 힙메모리 설정(입력된 숫자로 min/max가 설정) 대부분의 Job 은 이 값을 설정하지 않고 기본값이 적용되도록 합니다. | 기본값 : 128mb(개발) 192mb(운영) 256mb(센터컷운영)
+
+=== Table 198 ===
+Heap Max | 할당된 메모리
+Heap used Max | 실제 배치프로그렘에서 쓴 메모리양
+
+=== Table 199 ===
+Case | 화면 | 판단
+#1 |  | Heap used max 가  Heap max에 근접하므로 증설 필요
+#2 |  | Heap max에 비해,  Heap used max가 굉장히 작으므로 줄일 필요 있음
+
+=== Table 200 ===
+입력 데이터 생성 (1) | 업무팀에서 배치 프로그램으로 File to DB, DB to DB 패턴으로 입력데이타 테이블에 Insert.
+입력 데이터 생성 (1) | 온라인 프로그램에서 입력 데이터 테이블에 거래 입력 데이터를 Insert.  (온디맨드 배치로 센터컷 실행)
+온라인 서비스 호출 (2),(3) | CCRunner 에서 입력데이타 테이블을 조회하여 입력 전문으로 변환후 건건이 온라인 거래 호출함.
+결과 전문 처리 (4) | CCRunner 에서 응답(결과) 전문 파싱하여 처리 구분 코드와 결과 메시지를 테이블 Update함.
+
+=== Table 201 ===
+테이블 생성주체 | - 업무팀 소유의 테이블 - 업무팀 배치 프로그램에서 CRUD 가 자유로워야 함. - 주제영역 별 또는 세부 업무별로 테이블 별도 생성. - 테이블 명을 프레임워크의 센터컷 프로파일에 등록함
+테이블 구성 | - 입력 전문 생성을 위한 표준전문 헤더의 일부 항목. - 전문의 본문부는 BLOB 타입으로 생성. - 처리 결과 및 상태 코드 관련 항목
+데이터 흐름 | - 업무팀 입력 데이터 생성 배치 (또는 온라인) 에서 Insert. - CCRunner(nkesa) 에서 상태 변경 후 온라인 PM 호출 - 온라인 후처리 FM (nkesa)처리 결과에 따라 동일 ROW 의 처리 결과 관련 항목들 Update
+데이터 구분 | - 중복실행되지 않도록 CC_ID, 일련번호, 일자, 실행키 등 4개의 컬럼으로 pk 구성
+업무 컬럼 | - 센터컷 필수 컬럼 이외에 업무적으로 부가 컬럼을 추가할 수 있음 예) 계좌번호, 금액 등
+테이블 명 | 예) TSABC1234 (업무팀 테이블로 작성)
+테이블 인덱스 | - Index생성(Non-Unique): 처리년월일, GUID 번호 두 컬럼 * GUID번호 컬럼이 nullalbe 컬럼 이므로, Non-Unique Index 생성
+
+=== Table 202 ===
+구분 | 컬럼명 | 속성명 | PK | 타입 | 길이 | NULL 여부 | 주체 | 필드설명
+센터컷  입력 기본 | 센터컷ID | 센터컷ID | 1 | CHAR | 9 | NN | 업무 | 센터컷업무코드
+센터컷  입력 기본 | 실행키번호 | 실행키번호 | 2 | CHAR | 40 | NN | 업무 | 중복실행 방지를 위한 실행 단위값. 온디맨드의 경우 GUID. 일반배치의 경우 배치실행번호
+센터컷  입력 기본 | 처리년월일 | 처리년월일 | 3 | CHAR | 8 | NN | 업무 | 처리일자. Control-M 의 ODATE
+센터컷  입력 기본 | 데이터일련번호 | 데이터일련번호 | 4 | DECIMAL | 10 | NN | 업무 | 입력 데이터의 일련번호
+센터컷  입력 기본 | 순차처리그룹번호 | 순차처리그룹번호 |  | CHAR | 20 |  | 업무 | 동일번호 내의 데이터는 한 쓰레드로 배정하여 순차처리됨
+센터컷  입력 기본 | 처리회차 | 처리회차 |  | VARCHAR | 5 |  | 업무 | 회차처리에 사용
+전문 헤더부 | GUID번호 | GUID번호 |  | CHAR | 36 |  | FW | GUID. CCRunner가 송신전에 채번하여 Update
+전문 헤더부 | 전문수신거래코드 | 전문수신거래코드 |  | CHAR | 15 | NN | 업무 | 센터컷 처리 거래코드
+전문 헤더부 | 화면번호 | 화면번호 |  | CHAR | 11 |  | 업무 | 센터컷용 화면번호를 설정할 경우 사용
+전문 헤더부 | 거래일련번호 | 거래일련번호 |  | DECIMAL | 12 |  | 업무 | 내부채널에서 발생한 거래인 경우 거래 발생 채널에서 채번함을 원칙으로 한다.(업무개시후부터 1씩 증가)
+전문 헤더부 | 원거래GUID번호 | 원거래GUID번호 |  | CHAR | 36 |  | 업무 | 취소거래를 센터컷으로 실행할때 원거래GUID 방식의 취소시 이 항목에 원거래 GUID set
+전문 헤더부 | 은행코드 | 은행코드 |  | CHAR | 3 |  | 업무 | 거래 실행 소속 부점의 은행코드
+전문 헤더부 | 거래부점코드 | 거래부점코드 |  | CHAR | 4 |  | 업무 | 거래 실행 소속 부점 코드
+전문 헤더부 | 언어구분 | 언어구분코드 |  | CHAR | 3 |  | 업무 | 입력 및 출력에 사용될 언어코드이며, 출력메시지를 조립할때 사용할 언어의 정보로 사용한다. (기본값:KOR)
+전문 헤더부 | 사용자직원번호 | 사용자직원번호 |  | CHAR | 7 |  | 업무 | 사용자 직원 번호.
+전문 헤더부 | 취소구분 | 취소구분코드 |  | CHAR | 1 |  | 업무 | 거래의 취소 정정 정보이다. 예시) '0':정상,'7':정정취소,'8':정정,'9':취소
+전문 헤더부 | 취소유형구분 | 취소유형구분코드 |  | CHAR | 1 |  | 업무 | 취소거래의 유형 정보이며 프레임워크에서 취소처리 프로세스 처리를 위해 사용한다. 예시) '1':단말저널 복원취소, '2':거래내역조회취소, '3':에러응답수신으로 인한 자동취소, '4':TIMER에 의한 자동취소 등
+전문 헤더부 | 거래취소정정사유구분 | 거래취소정정사유구분코드 |  | CHAR | 2 |  | 업무 | 거래의 취소/정정처리와 관련한 사유코드이다. 예시) '01':입출금액 오류,'02':의뢰인명 입역 오류, '03':거래구분착오, '04':중복입금 등
+전문 헤더부 | 거래취소정정사유내용 | 거래취소정정사유내용 |  | CHAR | 30 |  | 업무 | 거래의 취소/정정처리과 관련하여 입력한 사유
+전문 헤더부 | 센터컷원거래일시 | 센터컷원거래일시 |  | CHAR | 20 |  | 업무 | 원거래가 발생한 Timestamp정보
+전문 헤더부 | 취소복원정보내용 | 취소복원정보내용 |  | CHAR | 80 |  | 업무 | 취소를 위한 복원 정보이며 거래내역 조회 후 취소거래시 조회 거래의 결과로 출력 및 취소거래의  입력으로 조립되어 Common Area에 전달한다.
+전문 헤더부 | 입력헤더부내용 | 입력헤더부내용 |  | BLOB | 2048 |  | 업무 | 전문헤더를 직접 설정할 경우 이 컬럼 사용. JSON 형식의 내부표준 전문 HEADER, COMMON 포함시킴. 이 컬럼의 값이 존재할 경우 이 컬럼의 값으로 헤더를 생성한 후 위 개별 헤더 컬럼의 값으로 업데이트. 다국어를 고려하여 UTF-8 bytes 데이터를 저장하기 위해 BLOB 저장함
+입력 데이타 | 입력개별부내용 | 입력개별부내용 |  | BLOB | 2048 |  | 업무 | 입력 데이터 개별부. JSON 형식으로 Individual/InData 하위의 key_value 표기. 다국어를 고려하여 UTF-8 bytes 데이터를 저장하기 위해 BLOB 저장함
+센터컷 결과 | 입력데이터생성일시 | 입력데이터생성일시 |  | CHAR | 20 | NN | 업무 | 입력 데이터 insert 일시
+센터컷 결과 | 센터컷상태구분 | 센터컷상태구분코드 |  | CHAR | 1 | NN | 업무 FW | 상태코드. 'I':초기, 'P':호출중(CCRunner에서 업데이트), 'R':거래처리중(FW선처리), 'N':거래정상(FW후처리), 'E':거래에러
+센터컷 결과 | 센터컷전문송신일시 | 센터컷전문송신일시 |  | CHAR | 20 |  | FW | CCRunner 에서 호출 직전 송신시각 업데이트
+센터컷 결과 | 센터컷거래시작일시 | 센터컷거래시작일시 |  | CHAR | 20 |  | FW | FW선처리에서 거래 시작시각 update.
+센터컷 결과 | 센터컷거래종료일시 | 센터컷거래종료일시 |  | CHAR | 20 |  | FW | FW후처리에서 거래 종료시각 update
+센터컷 결과 | 실행밀리초시간 | 실행밀리초시간 |  | DECIMAL | 7 |  | FW | FW후처리에서 거래 실행시간 UPDATE. 밀리초단위
+센터컷 결과 | 센터컷중단요구여부 | 센터컷중단요구여부 |  | CHAR | 1 |  | FW | 거래에서 JACOM 에 설정하는 값. 이 값이 1이면 CCRunner 에서 해당 센터컷 중지시킴.
+센터컷 결과 | 거래에러여부 | 거래에러여부 |  | CHAR | 1 |  | FW | 거래의 정상 에러 여부. '1':여, '0':부
+센터컷 결과 | 에러코드 | 에러코드 |  | CHAR | 8 |  | FW | 거래 출력의 에러코드
+센터컷 결과 | 조치코드 | 조치코드 |  | CHAR | 8 |  | FW | 거래 출력의 조치코드
+센터컷 결과 | 시스템최종처리일시 | 시스템최종처리일시 |  | CHAR | 20 | NN | FW | 시스템최종처리일시
+센터컷 결과 | 시스템최종사용자번호 | 시스템최종사용자번호 |  | CHAR | 7 | NN | FW | 시스템최종사용자번호
+
+=== Table 203 ===
+구분 | 컬럼명 | 속성명 | PK | 타입 | 길이 | NULL 여부 | 주체 | 필드설명
+센터컷 입력 기본 | CncutID | 센터컷ID | 1 | CHAR | 9 | NN | 업무 | 센터컷업무코드
+센터컷 입력 기본 | ExeKeyNo | 실행키번호 | 2 | CHAR | 40 | NN | 업무 | 중복실행 방지를 위한 실행 단위값. 온디맨드의 경우 GUID. 일반배치의 경우 배치실행번호
+센터컷 입력 기본 | PrcssYmd | 처리일자년월일 | 3 | CHAR | 8 | NN | 업무 | 처리일자. Control-M 의 ODATE
+센터컷 입력 기본 | DataSerno | 데이터일련번호 | 4 | DECIMAL | 10 | NN | 업무 | 입력 데이터의 일련번호
+센터컷 입력 기본 | InorPrcssGroupNo | 순차처리그룹번호 |  | CHAR | 20 |  | 업무 | 동일번호내의 데이터는 한 쓰레드로 배정하여 순차처리됨
+센터컷 입력 기본 | PrcssNth | 처리회차 |  | VARCHAR | 5 |  | 업무 | 회차처리에 사용
+전문헤더부 | GUIDNo | GUID번호 |  | CHAR | 33 |  | FW | GUID. CCRunner가 송신전에 채번하여 Update
+전문헤더부 | TelgmRecvTranCd | 전문수신거래코드 |  | CHAR | 15 | NN | 업무 | 센터컷 처리 거래코드
+전문헤더부 | ScrenNo | 화면번호 |  | CHAR | 11 |  | 업무 | 센터컷용 화면번호를 설정할 경우 사용
+전문헤더부 | TranSerno | 거래일련번호 |  | DECIMAL | 12 |  | 업무 | 내부채널에서 발생한 거래인 경우 거래 발생 채널에서 채번함을 원칙으로 한다.(업무개시후부터 1씩 증가)
+전문헤더부 | OgtranGUIDNo | 원거래GUID번호 |  | CHAR | 36 |  | 업무 | 최소 센터컷 실행시 원거래 GUID
+전문헤더부 | BnkCd | 은행코드 |  | CHAR | 3 |  | 업무 | 거래 실행 소속 부점의 은행코드
+전문헤더부 | TranBrncd | 거래부점코드 |  | CHAR | 4 |  | 업무 | 거래 실행 소속 부점 코드
+전문헤더부 | LangDstcd | 언어구분코드 |  | CHAR | 3 |  | 업무 | 입력 및 출력에 사용될 언어코드이며, 출력메시지를 조립할때 사용할 언어의 정보로 사용한다. (기본값:KOR)
+전문헤더부 | UserEmpid | 사용자직원번호 |  | CHAR | 7 |  | 업무 | 사용자 직원 번호.
+전문헤더부 | CnclDstcd | 취소구분코드 |  | CHAR | 1 |  | 업무 | 거래의 취소 정정 정보이다. 예시) '0':정상,'7':정정취소,'8':정정,'9':취소
+전문헤더부 | CnclPtrnDstcd | 취소유형구분코드 |  | CHAR | 1 |  | 업무 | 취소거래의 유형 정보이며 프레임워크에서 취소처리 프로세스 처리를 위해 사용한다. 예시) '1':단말저널 복원취소, '2':거래내역조회취소, '3':에러응답수신으로 인한 자동취소, '4':TIMER에 의한 자동취소 등
+전문헤더부 | TranCnclCorrcResnDstcd | 거래취소정정사유구분코드 |  | CHAR | 2 |  | 업무 | 거래의 취소/정정처리와 관련한 사유코드이다. 예시) '01':입출금액 오류,'02':의뢰인명 입역 오류, '03':거래구분착오, '04':중복입금 등
+전문헤더부 | TranCnclCorrcResnCtnt | 거래취소정정사유내용 |  | CHAR | 30 |  | 업무 | 거래의 취소/정정처리과 관련하여 입력한 사유
+전문헤더부 | CncutOgtranYMS | 센터컷원거래일시 |  | CHAR | 20 |  | 업무 | 원거래가 발생한 Timestamp정보
+전문헤더부 | CnclRstrInfoCtnt | 취소복원정보내용 |  | CHAR | 80 |  | 업무 | 취소를 위한 복원 정보이며 거래내역 조회 후 취소거래시 조회 거래의 결과로 출력 및 취소거래의  입력으로 조립되어 Common Area에 전달한다.
+전문헤더부 | InptHdrPartlCtnt | 입력헤더부내용 |  | BLOB | 2048 |  | 업무 | 전문헤더를 직접 설정할 경우 이 컬럼 사용. JSON 형식의 내부표준 전문 HEADER, COMMON 포함시킴. 이 컬럼의 값이 존재할 경우 이 컬럼의 값으로 헤더를 생성한 후 위 개별 헤더 컬럼의 값으로 업데이트.
+입력데이터 | InptIdiviAtchCtnt | 입력개별부내용 |  | BLOB | 2048 |  | 업무 | 입력 데이터 개별부. JSON 형식으로 Individual/InData 하위의 key_value 표기.
+센터컷 결과 | InptDataCretnYMS | 입력데이터생성일시 |  | CHAR | 20 | NN | 업무 | 입력 데이터 insert 일시
+센터컷 결과 | CncutStusDstcd | 센터컷상태구분코드 |  | CHAR | 1 | NN | 업무 FW | 상태코드. 'I':초기, 'P':호출중(CCRunner에서 업데이트), 'R':거래처리중(FW선처리), 'N':거래정상(FW후처리), 'E':거래에러
+센터컷 결과 | CncutTelgmSendYMS | 센터컷전문송신일시 |  | CHAR | 20 |  | FW | CCRunner 에서 호출 직전 송신시각 업데이트
+센터컷 결과 | CncutTranStartYMS | 센터컷거래시작일시 |  | CHAR | 20 |  | FW | FW선처리에서 거래 시작시각 update.
+센터컷 결과 | CncutTranEndYMS | 센터컷거래종료일시 |  | CHAR | 20 |  | FW | FW후처리에서 거래 종료시각 update
+센터컷 결과 | ExeMilliSSTtm | 실행밀리초시간 |  | DECIMAL | 7 |  | FW | FW후처리에서 거래 실행시간 UPDATE. 밀리초단위
+센터컷 결과 | CncutDscnRqstYn | 센터컷중단요구여부 |  | CHAR | 1 |  | FW | 거래에서 JACOM 에 설정하는 값. 이 값이 1이면 CCRunner 에서 해당 센터컷 중지시킴.
+센터컷 결과 | TranErrzYn | 거래에러여부 |  | CHAR | 1 |  | FW | 거래의 정상 에러 여부. '1':여, '0':부
+센터컷 결과 | Errcd | 에러코드 |  | CHAR | 8 |  | FW | 거래 출력의 에러코드
+센터컷 결과 | TreatCd | 조치코드 |  | CHAR | 8 |  | FW | 거래 출력의 조치코드
+센터컷 결과 | GmtSysLastPrcssYMS | GMT 시스템최종처리일시 |  | CHAR | 20 |  | FW | GMT시스템최종처리일시. 글로벌에서만 사용하는 컬럼
+센터컷 결과 | SysLastPrcssYMS | 시스템최종처리일시 |  | CHAR | 20 | NN | FW | 시스템최종처리일시
+센터컷 결과 | SysLastUno | 시스템최종사용자번호 |  | CHAR | 7 | NN | FW | 시스템최종사용자번호
+
+=== Table 204 ===
+항목 | 설명 | 예시
+센터컷 ID | 센터컷 ID | 센터컷업무코드(9)
+센터컷명 | 센터컷 업무명 | 자동이체
+담당팀 | 센터컷 담당팀 | 업무팀
+담당자 | 센터컷 담당자 | 홍길동
+입력 테이블명 | 센터컷 입력 데이터 테이블명. (INST1. 명시) | INST1.TSZZZCC01
+입력 전문 인코딩 | PM 입력 전문 인코딩. MS949 로 고정 | MS949
+호출간격 | 센터컷 호출 사이 밀리초 단위 sleep 시간. 낮시간 실행하는 센터컷의 경우 온라인 서버에 주는 부하를 줄이기 위해 호출간격 조절함. 0일 경우 sleep 하지 않음 | 0
+쓰레드 수 | 대량 센터컷에서 전체 처리 시간 단축을 위해 병렬 쓰레드로 온라인 서버 호출함. 쓰레드수 MIN, MAX 설정. | CCRunner 실행시 MAX 만큼 미리 쓰레드를 생성하므로 MAX = MIN 값으로 설정하는 것을 권고함
+유량제어 기준시간 (ms) | 병렬쓰레드이면서 MIN != MAX 인 경우. 이 시간을 기준으로 병렬 개수를 조절함. | 2000
+출력전문 인코딩 | PM 출력 전문 인코딩. | MS949
+비동기 응답 체크  타임아웃 (MS) | Async 응답하는 PM을 호출하는 경우 이 시간만큼만 응답 상태 코드 확인함. 밀리초단위 | 60000
+비동기 응답 체크 유형 | Async 응답하는 PM을 호출하는 경우 응답을 체크하는 방식.  AFTER_ALL, ONE_BY_ONE, NO_CHECK | AFTER_ALL
+거래에러무시여부 | 잔액부족, 계좌상태오류 등의 업무 에러발생시 해당 CCRunner Job실행을 End Fail 할 것인지, 업무에러는 무시하고 End OK 할 것인지 | Y
+
+=== Table 205 ===
+거래 ID | 명명규칙에 맞는 거래코드를 입력
+타임아웃 | 거래 타임아웃 설정. 0입력시 기본값 적용 (20초)
+프로그램 거래 ID | 프레임워크 내부적으로 관리하는 메소드 메타정보 “컴포넌트ID@유닛명.메소드명” 형식으로 작성
+
+=== Table 206 ===
+속성ID | 속성명 | 설명 | 비고
+TRAN_BLOCK_YN | 거래차단여부 | 0:차단안함. 정상거래 1:거래차단 | 기본값 : 0. 운영에서 긴급 거래 차단시 설정
+RESERVED_1 | 예비1 | 사용되지 않는 항목 예비전환 | 
+ACNO_FIELD_NAME | 계좌번호 필드명 | 개별부 입력 데이타 중 계좌번호에 해당하는 필드명 (선처리에서 com 영역에 세트를 위한 계좌번호 항목명. 계좌번호는 숫자로만 구성되어야 함) | 업무에서 개별부 특정 항목 값으로 계좌번호를 가져올 때 프로파일 등록후 사용함
+TRAN_BLOCK_FROM_TO_TIME | 거래차단시간 | 거래 차단 시간[HHMM~HHMM] 예) 0000~2400 | 
+TRLOG_INSERT_IGNORE_YN | 거래로그저장 미사용여부 | 거래로그저장 미사용여부. [1:여, 0:부]  (1이면 거래로그 저장안함) | 거래별 거래로그  저장 여부 설정
+CNCL_TRAN_ABIL_YN | 취소거래가능여부 | 취소거래가능여부.  [1:여, 0:부] | 
+CORRC_TRAN_ABIL_YN | 정정거래가능여부 | 정정거래가능여부.  [1:여, 0:부] | 
+CORRC_CNCL_ABIL_YN | 정정취소가능여부 | 정정취소가능여부.  [1:여, 0:부] | 
+NO_RES_TRAN_YN | 무응답거래여부 | [1]이면 요청전문 수신 직후 HTTP 200 에 dummy응답하고 응답 전문은 없음. | 
+TRAN_WAS_PORT | 거래 WAS 인스턴스 포트 | 0:센터컷불가. 8020:마케팅기본 | 
+IN_TELGM_LOG_ENC_YN | 입력전문 로깅시 암호화 여부 (개인정보 포함여부) | 0:암호화 안함,  1:개인정보 포함 암호화 함 | 개인정보 포함시  반드시 1 로 해야함
+OUT_TELGM_LOG_ENC_YN | 출력전문 로깅시 암호화 여부 (개인정보 포함여부) | 0:암호화 안함,  1:개인정보 포함 암호화 함 | 개인정보 포함시  반드시 1 로 해야함
+CUST_IDNFR_FIELD_NAME | 고객식별자 필드명 | 고객식별자 필드명 | 마케팅에서만 사용
+CUST_MGT_NO_FIELD_NAME | 고객관리번호 필드명 | 고객관리번호 필드명 | 마케팅에서만 사용
+CUNIQNO_FIELD_NAME | 고객고유번호 필드명 | 고객고유번호 필드명 | 마케팅에서만 사용
+CUST_PTRN_CLSFI_DSTCD | 고객유형분류구분코드 | 고객유형분류구분코드 | 마케팅에서만 사용
+
+=== Table 207 ===
+※ 중요  전문 개별부에 주민번호와 같은 개인정보가 있다면, 거래프로파일의 암호화여부 속성을 1로 설정해야 합니다 IN_TELGM_LOG_ENC_YN, OUT_TELGM_LOG_ENC_YN 속성을 “1” 로 설정해야 합니다.  “1” 일 경우 전문로그를 암호화 하여 저장됩니다.
+
+=== Table 208 ===
+개발도구에서 000-*-n2config 프로젝트 생성 |  | 형상 저장소 연결 |  | 각 CM 대상 항목 생성 |  | 형상 저장소 반입
+
+=== Table 209 ===
+ |  | 
+
+=== Table 210 ===
+업무대표계정 | /fsconfig/{어플리케이션 코드}/  디렉토리 하위에서 파일 확인
+프로퍼티 | /fsconfig/{어플리케이션 코드}/ 디렉토리 하위에서 파일 확인 (업무대표계정과 동일)
+프로파일 | DB로 직접 insert/update되며 관리콘솔의 각 프로파일 메뉴에서 확인
+
+=== Table 211 ===
+DB 비밀번호 변경 됨 |  | 비밀번호 생성 |  | 비밀번호 적용(최초/변경) |  | CM적용
+
+=== Table 212 ===
+ITSM URL | http://itsm.kbstar.com/
+서비스요청 등록 위치 | 서비스요청관리 – 기타서비스요청 – 기타서비스요청 등록 – 운영 로그레벨 변경 요청
+담당그룹 | SQC로 검색
+
+=== Table 213 ===
+거래코드 | ex. BFA72C33SJ
+로그레벨 적용모드 (debug/info/warn/error) | ex. Debug
+적용 날짜 및 시간 | ex. 2023.11.09 14:00 ~ 2023.11.09 15:00 ** 업무팀에서 거래량, 업무영향도 판단하여 시간을 설정한다.
+
+=== Table 214 ===
+EAI사용포트 확인 위치 | /fsconfig/sqc/nkesa_eai_config_o_(업무도메인코드 4자리)@(업무환경).properties
+
+=== Table 215 ===
+ITSM URL | http://itsm.kbstar.com/
+서비스요청 등록 위치 | 서비스요청관리 – 기타서비스요청 – 기타서비스요청 등록 – 공통 – 운영시스템 모니터링 권한 요청
+담당그룹 | SQC로 검색
+
+=== Table 216 ===
+신규어댑터명 | ex. _BFA_IN_NET_AsS{NS}
+개발/스테이징/운영 어댑터 포트 | ex. (개발/스테이징) 41441 / (운영) 31441
+Perm/Non-Perm 여부 | 
+적용대상 업무 | ex. 금융복합/마케팅/통합인증 등..)
+
+=== Table 217 ===
+#x9 | 탭
+#xA | 줄 바꿈
+#xD | 캐리지 리턴
+#x20-#xD7FF | 일반문자
+#xE000-#xFFFD | 일반문자
+#x10000-#x10FFFF | 일반문자
+
+=== Table 218 ===
+1.0 스펙 금지 | ^\0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\x{10000}-\x{10FFFF}
+코어현대화 적용 | \u0000-\u0008\u000B\u000C\u000E-\u001F\u0080-\u009F
+
+=== Table 219 ===
+범주 | 단축키 | 동작 | 설명
+NEXCORE  탐색기 | Alt-D | 로컬 배포 | 로컬 컴포넌트 배포. NEXCORE 탐색기에서 컴포넌트 선택 후  Alt-D 누르면 컴포넌트 로컬 배포 수행. 소스 에디터 상에서 Alt-D 누르면  해당 컴포넌트 로컬 배포 수행.
+NEXCORE  탐색기 | Alt-T | 메소드 테스트 | 좌측 NEXCORE 탐색기에서 메소드 선택후  Alt-T 누르면 해당 메소드 테스트 케이스 열림. 에디터에서 Alt-T 누르면 해당 유닛의  테스트 케이스 열림. 메소드 선택 필요
+NEXCORE  탐색기 | F3 | 소스 열기 | NEXCORE 탐색기에서 메소드 선택후  F3 누르면 해당 클래스의 소스로 이동
+IO설계기 | Ctrl-F | 필드 추가 | IO 설계기에서 필드 추가.
+IO설계기 | Ctrl-R | 레코드셋 추가 | IO 설계기에서 레코드셋 추가.
+IO설계기 | Ctrl-D | 데이터셋 추가 | IO 설계기에서 데이터셋 추가.
+IO설계기 | Ctrl-위/아래 | IO 레이아웃 내의 항목 이동 | IO 설계시에서 항목 선택후 위아래로 이동
+
+=== Table 220 ===
+단축키 | 동작 | 동작 | 설명
+Alt-Ctrl-위/아래 | 라인 복사 | 라인 복사 | 커서에 위치한 라인을 위아래로 복사 여러줄 선택하여 복사 가능
+Alt-위/아래 | 라인 이동 | 라인 이동 | 커서에 위치한 라인을 위아래로 이동 여러줄 선택하여 이동 가능. 이동시 자동 들여쓰기 됨
+Ctrl-L | 라인으로 바로 가기 | 라인으로 바로 가기 | 원하는 라인 번호 입력하여 바로 이동
+Ctrl-Alt-H | caller 찾기 | caller 찾기 | 메소드 선택후 Ctrl-Alt-H 누르면 해당 메소드를 호출하고 있는 caller 들의 call hierarchy 보여줌. workspace 내의 소스 대상으로만 검색
+ | select 메소드 선택후 Ctrl-Alt-H 누른 결과 | select 메소드 선택후 Ctrl-Alt-H 누른 결과 | select 메소드 선택후 Ctrl-Alt-H 누른 결과
+Ctrl-O | 해당 클래스 메소드 목록 보기 | 해당 클래스 메소드 목록 보기 | 소스 에디터 에서 Ctrl-O 누르면 해당 클래스의 멤버 변수, 메소드 리스트됨
+Ctrl-O | Ctrl-O 를 누른 경우 | Ctrl-O 를 누른 경우 | Ctrl-O 를 누른 경우
+F2 | 이름변경 | 클래스, 메소드, 파일명에서 이름 변경 | 클래스, 메소드, 파일명에서 이름 변경
+F3 | 소스 열기 | 클래스에 커서를 두고 F3 누르면 그 클래스 소스로 이동. 변수에 커서를 두고 F3 누르면 변수 선언부로 이동 | 클래스에 커서를 두고 F3 누르면 그 클래스 소스로 이동. 변수에 커서를 두고 F3 누르면 변수 선언부로 이동
+Ctrl-M | 소스 전체 화면 | 소스 에디터에서 Ctrl-M 누르면 전체 창으로 확대. 다시 누르면 원상복귀 | 소스 에디터에서 Ctrl-M 누르면 전체 창으로 확대. 다시 누르면 원상복귀
+Ctrl-Shift-O | Import 정리 | 소스에서 Ctrl-Shift-O 누르면 import 문장 정리해줌 | 소스에서 Ctrl-Shift-O 누르면 import 문장 정리해줌
+Ctrl-1 | Error Quick Fix | 컴파일 오류가 인해 빨간색 밑줄이 그어진 곳에 커서를 놓고 Ctrl-1 을 하면 그 에러를 수정할 수 있는 여러가지 대안이 나옴. 그중 선택 가능 | 컴파일 오류가 인해 빨간색 밑줄이 그어진 곳에 커서를 놓고 Ctrl-1 을 하면 그 에러를 수정할 수 있는 여러가지 대안이 나옴. 그중 선택 가능
+Ctrl-1 | IRecordSet import 가 안되서 컴파일에러가 나는 상황. ctrl-1 누르면 아래와 같이 대안 목록이 표시됨 | IRecordSet import 가 안되서 컴파일에러가 나는 상황. ctrl-1 누르면 아래와 같이 대안 목록이 표시됨 | IRecordSet import 가 안되서 컴파일에러가 나는 상황. ctrl-1 누르면 아래와 같이 대안 목록이 표시됨
+Ctrl-Shift-T | 클래스 찾기 | workspace 내에서 클래스명으로 직접 클래스 찾아 오픈 | workspace 내에서 클래스명으로 직접 클래스 찾아 오픈
+Ctrl-Shift-T | 클래스명 prefix 입력기 그에 해당하는 클래스 목록 표시. 와일드카드 입력 가능 | 클래스명 prefix 입력기 그에 해당하는 클래스 목록 표시. 와일드카드 입력 가능 | 클래스명 prefix 입력기 그에 해당하는 클래스 목록 표시. 와일드카드 입력 가능
+Ctrl-Shift-R | 파일 찾기 | 클래스 이외의 리소스 파일, *.java, *.uio, *.xio. *.xsql, *.txt, *.xml 등 파일 찾기 | 클래스 이외의 리소스 파일, *.java, *.uio, *.xio. *.xsql, *.txt, *.xml 등 파일 찾기
+Ctrl-Shift-R | 소스 prefix 또는 와일드 카드 입력하여 파일 찾기 | 소스 prefix 또는 와일드 카드 입력하여 파일 찾기 | 소스 prefix 또는 와일드 카드 입력하여 파일 찾기
+Ctrl-Space | Context Assist | 해당 상황의 컨텍스트 표시. - 쩜 이후 메소드 목록 assist 됨 - 클래스명 일부 입력후 전체 이름 자동 채움 - 변수명 자동 생성 (클래스명으로부터 유추) - 빈 바탕에서 ctrl-space 시에 다양한 assist 기능과 템플릿 기능 사용가능 | 해당 상황의 컨텍스트 표시. - 쩜 이후 메소드 목록 assist 됨 - 클래스명 일부 입력후 전체 이름 자동 채움 - 변수명 자동 생성 (클래스명으로부터 유추) - 빈 바탕에서 ctrl-space 시에 다양한 assist 기능과 템플릿 기능 사용가능
+n_ 입력후  Ctrl-Space | 소스 템플릿 | n_ 입력후 ctrl-space 누르면 간단 템플릿 기능 제공. | n_ 입력후 ctrl-space 누르면 간단 템플릿 기능 제공.
+n_ 입력후  Ctrl-Space | 자주 사용되는 간단 템플릿으로부터 소스 자동 생성 | 자주 사용되는 간단 템플릿으로부터 소스 자동 생성 | 자주 사용되는 간단 템플릿으로부터 소스 자동 생성
+Alt-Shift-A | 열편집 모드 전환 | 열편집 모드로 들어감 | 열편집 모드로 들어감
+Ctrl-마우스오버 | 바로가기 | 마우스 포인터 위치에서 해당 소스 바로가기 callSharedMethod 메소드에서 호출하는 유닛명 위치에서 ctrl-마우스클릭 하면 FU 로 이동. FM 으로 이동은 안됨. Ctrl-O 로 메소드 찾아서 이동 필요 | 마우스 포인터 위치에서 해당 소스 바로가기 callSharedMethod 메소드에서 호출하는 유닛명 위치에서 ctrl-마우스클릭 하면 FU 로 이동. FM 으로 이동은 안됨. Ctrl-O 로 메소드 찾아서 이동 필요
+Ctrl-마우스오버 |  |  | 
+Ctrl-/ | 한줄 주석처리 | 커서가 위치한 라인을 // 주석 처리함. 여러 라인 선택하여 주석 처리 가능. | 커서가 위치한 라인을 // 주석 처리함. 여러 라인 선택하여 주석 처리 가능.
+Ctrl-Shift-/ | 여러 줄 주석 | 선택된 부분의 앞뒤로 /* */ 주석 처리함. | 선택된 부분의 앞뒤로 /* */ 주석 처리함.
+Alt-왼쪽 | 이전 편집 소스 이동 | 직전에 편집하던 소스로 이동 | 직전에 편집하던 소스로 이동
+Alt-오른쪽 | 다음 편집 소스 이동 | 이전에 편집하던 소스로 이동한 상태에서 반대로 다음 편집하던 소스로 이동 | 이전에 편집하던 소스로 이동한 상태에서 반대로 다음 편집하던 소스로 이동
+Ctrl-위쪽 | 위로 스크롤 | 커서를 고정한 상태에서 위로 스크롤 | 커서를 고정한 상태에서 위로 스크롤
+Ctrl-아래쪽 | 아래로 스크롤 | 커서를 고정한 상태에서 아래로 스크롤 | 커서를 고정한 상태에서 아래로 스크롤
+Ctrl-Shift-위쪽 | 위 메소드로 이동 | 커서를 바로 위 메소드로 이동 | 커서를 바로 위 메소드로 이동
+Ctrl-Shift-아래쪽 | 아래 메소드로 이동 | 커서를 바로 아래 메소드로 이동 | 커서를 바로 아래 메소드로 이동
+Ctrl-HOME키 | 소스 맨 위로 이동 | 소스의 맨 위로 이동 | 소스의 맨 위로 이동
+Ctrl-END키 | 소스 맨 아래로 이동 | 소스의 맨 아래로 이동 | 소스의 맨 아래로 이동
+Ctrl-PgUp키 | 이전 소스 이동 | 열려 있는 소스 파일 중 탭기준 이전 소스로 이동 | 열려 있는 소스 파일 중 탭기준 이전 소스로 이동
+Ctrl-PgDn키 | 다음 소스 이동 | 열려 있는 소스 파일 중 탭기준 다음 소스로 이동 | 열려 있는 소스 파일 중 탭기준 다음 소스로 이동
+Ctrl-F11 | 직전 수행 재실행 | 직전에 수행했던 메소드 테스트 다시 수행. (상단  의 맨 마지막 실행 다시 실행) | 직전에 수행했던 메소드 테스트 다시 수행. (상단  의 맨 마지막 실행 다시 실행)
+Ctrl-W | 소스 닫기 | 현재 소스 닫기 | 현재 소스 닫기
+Ctrl-Shift-W | 모든 소스 닫기 | 열려 있는 모든 소스 닫기 | 열려 있는 모든 소스 닫기
+Ctrl-K | 다음 찾기 | 단어 선택후 Ctrl-K 누르면 그 단어로 찾기 수행. | 단어 선택후 Ctrl-K 누르면 그 단어로 찾기 수행.

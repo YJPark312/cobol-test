@@ -1,0 +1,104 @@
+      *================================================================*
+      *@ NAME : YPJL4047                                               *
+      *@ DESC : AS국가별신용공여한도사용현황 COPYBOOK                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-03 16:46:07                          *
+      *  생성일시     : 2020-12-03 16:46:50                          *
+      *  전체길이     : 00302010 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4047-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+           07  YPJL4047-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     그리드1
+           07  YPJL4047-GRID1                    OCCURS 000500 TIMES.
+      *--       ISO국가코드
+             09  YPJL4047-ISO-NATNL-CD1          PIC  X(002).
+      *--       국가명
+             09  YPJL4047-ENG-NATNL-NAME1        PIC  X(052).
+      *--       관리부점명
+             09  YPJL4047-MGTBRN-NAME1           PIC  X(052).
+      *--       파생상품
+             09  YPJL4047-DRVT-PRDCT-BAL1        PIC  9(015).
+      *--       대출
+             09  YPJL4047-LN-BAL1                PIC  9(015).
+      *--       주식
+             09  YPJL4047-STCK-BAL1              PIC  9(015).
+      *--       예치금
+             09  YPJL4047-DTMN-BAL1              PIC  9(015).
+      *--       지급보증
+             09  YPJL4047-PYGRNT-BAL1            PIC  9(015).
+      *--       회사채
+             09  YPJL4047-COBND-BAL1             PIC  9(015).
+      *--       기타유가증권
+             09  YPJL4047-SECTS-BAL1             PIC  9(015).
+      *--       기타
+             09  YPJL4047-ETC-BAL1               PIC  9(015).
+      *--       합계
+             09  YPJL4047-BALSUM1                PIC  9(015).
+      *--     그리드2
+           07  YPJL4047-GRID2                    OCCURS 000500 TIMES.
+      *--       ISO국가코드
+             09  YPJL4047-ISO-NATNL-CD2          PIC  X(002).
+      *--       국가명
+             09  YPJL4047-ENG-NATNL-NAME2        PIC  X(052).
+      *--       관리부점명
+             09  YPJL4047-MGTBRN-NAME2           PIC  X(052).
+      *--       상품중분류명
+             09  YPJL4047-PRDCT-M-CLSFI-NAME2    PIC  X(042).
+      *--       차주명
+             09  YPJL4047-BRWR-NAME2             PIC  X(082).
+      *--       계좌번호
+             09  YPJL4047-ACNO2                  PIC  X(020).
+      *--       상품코드
+             09  YPJL4047-PRDCT-CD2              PIC  X(012).
+      *--       계약한도구분
+             09  YPJL4047-CTRC-LIMT-DSTCD2       PIC  X(010).
+      *--       시작년월일
+             09  YPJL4047-START-YMD2             PIC  X(008).
+      *--       만기년월일
+             09  YPJL4047-EXPIR-YMD2             PIC  X(008).
+      *--       통화코드
+             09  YPJL4047-CNCYCD2                PIC  X(003).
+      *--       통화한도금액
+             09  YPJL4047-CRNCY-CLAM2            PIC  9(016)V9(02).
+      *--       통화잔액금액
+             09  YPJL4047-CRNCY-TDD-BAL2         PIC  9(016)V9(02).
+      *--       USD한도금액
+             09  YPJL4047-USD-CLAM2              PIC  9(016)V9(02).
+      *--       USD잔액금액
+             09  YPJL4047-USD-TDD-BAL2           PIC  9(016)V9(02).
+      *================================================================*
+      *        Y  P  J  L  4  0  4  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4047-OUTPT-LINE-CNT1      ;출력라인수1
+      *N  YPJL4047-OUTPT-LINE-CNT2      ;출력라인수2
+      *A  YPJL4047-GRID1                ;그리드1
+      *X  YPJL4047-ISO-NATNL-CD1        ;ISO국가코드
+      *X  YPJL4047-ENG-NATNL-NAME1      ;국가명
+      *X  YPJL4047-MGTBRN-NAME1         ;관리부점명
+      *N  YPJL4047-DRVT-PRDCT-BAL1      ;파생상품
+      *N  YPJL4047-LN-BAL1              ;대출
+      *N  YPJL4047-STCK-BAL1            ;주식
+      *N  YPJL4047-DTMN-BAL1            ;예치금
+      *N  YPJL4047-PYGRNT-BAL1          ;지급보증
+      *N  YPJL4047-COBND-BAL1           ;회사채
+      *N  YPJL4047-SECTS-BAL1           ;기타유가증권
+      *N  YPJL4047-ETC-BAL1             ;기타
+      *N  YPJL4047-BALSUM1              ;합계
+      *A  YPJL4047-GRID2                ;그리드2
+      *X  YPJL4047-ISO-NATNL-CD2        ;ISO국가코드
+      *X  YPJL4047-ENG-NATNL-NAME2      ;국가명
+      *X  YPJL4047-MGTBRN-NAME2         ;관리부점명
+      *X  YPJL4047-PRDCT-M-CLSFI-NAME2  ;상품중분류명
+      *X  YPJL4047-BRWR-NAME2           ;차주명
+      *X  YPJL4047-ACNO2                ;계좌번호
+      *X  YPJL4047-PRDCT-CD2            ;상품코드
+      *X  YPJL4047-CTRC-LIMT-DSTCD2     ;계약한도구분
+      *X  YPJL4047-START-YMD2           ;시작년월일
+      *X  YPJL4047-EXPIR-YMD2           ;만기년월일
+      *X  YPJL4047-CNCYCD2              ;통화코드
+      *N  YPJL4047-CRNCY-CLAM2          ;통화한도금액
+      *N  YPJL4047-CRNCY-TDD-BAL2       ;통화잔액금액
+      *N  YPJL4047-USD-CLAM2            ;USD한도금액
+      *N  YPJL4047-USD-TDD-BAL2         ;USD잔액금액

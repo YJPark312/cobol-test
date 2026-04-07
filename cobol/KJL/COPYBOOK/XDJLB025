@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : XDJLB025                                               *
+      *@ DESC : DC국별수기계좌등록COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-01-28 13:46:04                          *
+      *  생성일시     : 2021-01-28 13:46:05                          *
+      *  전체길이     : 00000066 BYTES                               *
+      *================================================================*
+           03  XDJLB025-RETURN.
+             05  XDJLB025-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB025-OK            VALUE  '00'.
+                 88  COND-XDJLB025-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB025-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB025-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB025-ERROR         VALUE  '09'.
+                 88  COND-XDJLB025-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB025-SYSERROR      VALUE  '99'.
+             05  XDJLB025-R-LINE                 PIC  9(006).
+             05  XDJLB025-R-ERRCD                PIC  X(008).
+             05  XDJLB025-R-TREAT-CD             PIC  X(008).
+             05  XDJLB025-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB025-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB025-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객식별자
+             05  XDJLB025-I-CUST-IDNFR           PIC  X(010).
+      *--       제외사유
+             05  XDJLB025-I-ECLUD-RESN           PIC  X(002).
+      *--       기타사유내용
+             05  XDJLB025-I-ETC-RESN-CTNT        PIC  X(052).
+      *----------------------------------------------------------------*
+           03  XDJLB025-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB025-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  2  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB025-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB025-I-CUST-IDNFR         ;고객식별자
+      *X  XDJLB025-I-ECLUD-RESN         ;제외사유
+      *X  XDJLB025-I-ETC-RESN-CTNT      ;기타사유내용
+      *X  XDJLB025-O-PRCSS-RSULT        ;처리결과

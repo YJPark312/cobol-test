@@ -1,0 +1,73 @@
+//TKJLPR06 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJLR006 TABLE  LOAD
+//*********************************************************************
+//*--------------------------------------------------------------------*
+//*  DB LOAD : RESUME NO REPLACE(삭제후)  / RESUME YES (APPEND)
+//*--------------------------------------------------------------------*
+//LOAD1   EXEC DSNUPROC,PARM='DAPG,KJLR006',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(3000,3000),RLSE),DSNTYPE=LARGE
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(3000,3000),RLSE),DSNTYPE=LARGE
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJLR006,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJLR006
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "유가증권상품구분"                   POSITION(      12         )
+   CHAR(                      2)                ,
+   "종목코드번호"                       POSITION(      14         )
+   CHAR(                     12)                ,
+   "펀드번호"                           POSITION(      26         )
+   CHAR(                      7)                ,
+   "일련번호"                           POSITION(      33:      36)
+   DECIMAL                                      ,
+   "고객식별자"                         POSITION(      37         )
+   CHAR(                     10)                ,
+   "고객관리번호"                       POSITION(      47         )
+   CHAR(                      5)                ,
+   "고객고유번호"                       POSITION(      52         )
+   CHAR(                     20)                ,
+   "발행법인등록번호"                   POSITION(      72         )
+   CHAR(                     13)                ,
+   "관리부점코드"                       POSITION(      85         )
+   CHAR(                      4)                ,
+   "계정과목코드"                       POSITION(      89         )
+   CHAR(                      5)                ,
+   "계정세과목코드"                     POSITION(      94         )
+   CHAR(                      3)                ,
+   "통합계정과목코드"                   POSITION(      97         )
+   CHAR(                     13)                ,
+   "회계구분"                           POSITION(     110         )
+   CHAR(                      1)                ,
+   "신탁합동구분"                       POSITION(     111         )
+   CHAR(                      3)                ,
+   "매입년월일"                         POSITION(     114         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(     122         )
+   CHAR(                      8)                ,
+   "계리장부금액"                       POSITION(     130:     137)
+   DECIMAL                                      ,
+   "평가금액"                           POSITION(     138:     145)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(     146         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     166         )
+   CHAR(                      7)
+   )
+//

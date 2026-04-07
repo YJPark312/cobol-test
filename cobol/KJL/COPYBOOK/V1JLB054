@@ -1,0 +1,47 @@
+      *================================================================*
+      *@ NAME : V1JLB054                                               *
+      *@ DESC : 산업별규모별SUB한도관리                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-12-20 14:31:43                          *
+      *  생성일시     : 2019-12-20 14:31:49                          *
+      *  전체길이     : 00006107 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB054-PRCSS-RSULT              PIC  X(002).
+      *--     총라인수
+ROWCNT     07  V1JLB054-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드
+           07  V1JLB054-GRID                     OCCURS 0 TO 000100
+               DEPENDING ON V1JLB054-TOTAL-LINE-CNT.
+      *--       대분류업종코드
+             09  V1JLB054-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       산업TE기업규모구분
+             09  V1JLB054-IDSTRY-TCS-DSTCD       PIC  X(001).
+      *--       산업별규모별SUB한도
+             09  V1JLB054-IDSTRY-PSP-SUB-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국외산업규모한도
+             09  V1JLB054-ABRD-I-SCAL-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       취급중단년월일
+             09  V1JLB054-HNDLN-DSCN-YMD         PIC  X(008).
+      *--       취급기준1적용년월일
+             09  V1JLB054-HNDLN-B-1-APLY-YMD     PIC  X(008).
+      *--       취급기준2적용년월일
+             09  V1JLB054-HNDLN-B-2-APLY-YMD     PIC  X(008).
+      *--       조회여부
+             09  V1JLB054-INQURY-YN              PIC  X(001).
+      *================================================================*
+      *        V  1  J  L  B  0  5  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB054-PRCSS-RSULT          ;처리결과
+      *L  V1JLB054-TOTAL-LINE-CNT       ;총라인수
+      *A  V1JLB054-GRID                 ;그리드
+      *X  V1JLB054-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JLB054-IDSTRY-TCS-DSTCD     ;산업TE기업규모구분
+      *S  V1JLB054-IDSTRY-PSP-SUB-LIMT  ;산업별규모별SUB한도
+      *S  V1JLB054-ABRD-I-SCAL-LIMT     ;국외산업규모한도
+      *X  V1JLB054-HNDLN-DSCN-YMD       ;취급중단년월일
+      *X  V1JLB054-HNDLN-B-1-APLY-YMD   ;취급기준1적용년월일
+      *X  V1JLB054-HNDLN-B-2-APLY-YMD   ;취급기준2적용년월일
+      *X  V1JLB054-INQURY-YN            ;조회여부

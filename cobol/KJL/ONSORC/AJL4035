@@ -1,0 +1,264 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4035 (AS거액신용공여총액조회)
+      *@처리유형  : AS
+      *@처리개요  : 거액신용공여총액조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090108: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091208: PC 삭제
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4035.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/01/08.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4035 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리PC  INTERFACE
+       01  XDJL4035-CA.
+           COPY  XDJL4035.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4035-CA.
+           COPY  YNJL4035.
+      *    AS COPYBOOK
+       01  YPJL4035-CA.
+           COPY  YPJL4035.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4035-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL4035-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4035-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4035-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4035-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL4035-CALL-RTN
+              THRU S3100-DJL4035-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4035-CALL-RTN.
+      *@1 거액신용공여총액조회
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,기준년월일)
+
+      *    처리구분
+           MOVE YNJL4035-PRCSS-DSTIC
+             TO XDJL4035-I-PRCSS-DSTIC
+      *    기준년월일
+           MOVE YNJL4035-BASE-YMD
+             TO XDJL4035-I-BASE-YMD
+
+      *@3.1.2 프로그램 호출
+      *@처리내용DC프로그램호출
+           #DYCALL DJL4035 YCCOMMON-CA XDJL4035-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL4035-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4035-OK
+              CONTINUE
+           ELSE
+              #ERROR XDJL4035-R-ERRCD
+                     XDJL4035-R-TREAT-CD
+                     XDJL4035-R-STAT
+           END-IF
+           .
+       S3100-DJL4035-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력 항목 조립
+
+      *    신용공여한도
+           MOVE XDJL4035-O-ONCP-BSAMT
+             TO YPJL4035-ONCP-BSAMT
+
+      *    신용공여잔액
+           MOVE XDJL4035-O-FS-GRCR-AMT
+             TO YPJL4035-FS-GRCR-AMT
+
+      *    한도여유액
+           MOVE XDJL4035-O-LIMT-SEXTR-AMT
+             TO YPJL4035-LIMT-SEXTR-AMT
+
+      *    경영지표자기자본
+           MOVE XDJL4035-O-ONCP-BSAMT1
+             TO YPJL4035-ONCP-BSAMT1
+
+      *    자기자본기준년월
+           MOVE XDJL4035-O-BASE-YM
+             TO YPJL4035-BASE-YM
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL4035-O-OUTPT-LINE-CNT1
+             TO YPJL4035-OUTPT-LINE-CNT1
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJL4035-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립 =
+      *@SET(채무자번호(계열코드),채무자명(계열명),신용공여
+      *잔액(은행),신용공여잔액(금감원),제외자산,
+      *공여비율(%))
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4035-OUTPT-LINE-CNT1
+      *            그리드
+                   MOVE XDJL4035-O-GRID1(WK-I)
+                     TO YPJL4035-GRID1  (WK-I)
+           END-PERFORM
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@실행조건:XPJL4035-I-PRCSS-DSTIC = CO-CHA-01
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL04035000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

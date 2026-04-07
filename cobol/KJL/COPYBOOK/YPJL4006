@@ -1,0 +1,142 @@
+      *================================================================*
+      *@ NAME : YPJL4006                                               *
+      *@ DESC : ASExposure총괄조회 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-09 13:27:56                          *
+      *  생성일시     : 2009-04-09 13:28:05                          *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4006-DBTRZ-NAME               PIC  X(042).
+      *--     대표사업자번호
+           07  YPJL4006-RPSNT-BZNO               PIC  X(010).
+      *--     매출액
+           07  YPJL4006-SALEPR                   PIC  9(015).
+      *--     신용등급(당행)
+           07  YPJL4006-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     기업규모
+           07  YPJL4006-CORP-SCAL                PIC  X(020).
+      *--     총자산
+           07  YPJL4006-TOTAL-ASST               PIC  9(015).
+      *--     신용등급평가일
+           07  YPJL4006-CRDT-VALUA-YMD           PIC  X(008).
+      *--     TE기준한도
+           07  YPJL4006-BASE-CLAM                PIC  9(015).
+      *--     관리대상여부
+           07  YPJL4006-MGT-TAGET-YN             PIC  X(008).
+      *--     한도설정유효일
+           07  YPJL4006-TE-M-LIMT-VALD-YMD       PIC  X(008).
+      *--     TE관리한도
+           07  YPJL4006-TE-MGT-CLAM              PIC  9(015).
+      *--     여신성TE한도
+           07  YPJL4006-LNBZ-I-MGT-CLAM          PIC  9(015).
+      *--     시장성TE한도
+           07  YPJL4006-MRKTY-MGT-CLAM           PIC  9(015).
+      *--     관리한도설정일
+           07  YPJL4006-MGT-LIMT-STUP-YMD        PIC  X(008).
+      *--     TotalExposure
+           07  YPJL4006-TE-AMT                   PIC  9(015).
+      *--     여신성Exposure
+           07  YPJL4006-TE-LNBZ-INCLIN-AMT       PIC  9(015).
+      *--     시장성Exposure
+           07  YPJL4006-TE-MRKTY-AMT             PIC  9(015).
+      *--     한도여유액㈜
+           07  YPJL4006-TE-LIMT-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성여유액
+           07  YPJL4006-LNBZ-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성여유액
+           07  YPJL4006-MRKTY-SEXTR-AMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     외화신용공여한도
+           07  YPJL4006-FC-GRCR-CLAM             PIC  9(015).
+      *--     외화한도소진액
+           07  YPJL4006-FC-LIMT-AUC              PIC  9(015).
+      *--     외화한도여유액
+           07  YPJL4006-FC-LIMT-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신용평가기관
+           07  YPJL4006-CRA                      PIC  X(002).
+      *--     신용등급
+           07  YPJL4006-SMPSN-ICV-GRD-DSTCD      PIC  X(004).
+      *--     그룹코드
+           07  YPJL4006-AFFLT-CORP-GROUP-CD      PIC  X(006).
+      *--     그룹명
+           07  YPJL4006-AFFLT-C-GROUP-NAME       PIC  X(042).
+      *--     그룹등급
+           07  YPJL4006-GROUP-ICV-GRD-DSTCD      PIC  X(004).
+      *--     그룹순위
+           07  YPJL4006-AFFLT-CORP-RANKG         PIC  9(003).
+      *--     주채무계열여부
+           07  YPJL4006-MAIN-DEBT-AFFLT-YN       PIC  X(010).
+      *--     그룹한도설정유효일
+           07  YPJL4006-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     그룹TE한도
+           07  YPJL4006-MGT-CLAM                 PIC  9(015).
+      *--     그룹TE
+           07  YPJL4006-GROUP-TE-AMT             PIC  9(015).
+      *--     한도여유액
+           07  YPJL4006-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     표준산업분류코드
+           07  YPJL4006-NEW-SI-CLSFI-CD          PIC  X(005).
+      *--     표준산업코드명
+           07  YPJL4006-STND-IDSTRY-CD-NAME      PIC  X(042).
+      *--     PEER업종
+           07  YPJL4006-PEER-CD-NAME             PIC  X(102).
+      *--     산업등급(IR)
+           07  YPJL4006-IDSTRY-V-GRD-DSTCD       PIC  X(004).
+      *--     관리대상산업여부
+           07  YPJL4006-MGT-TAGET-IDSTRY-YN      PIC  X(010).
+      *--     업종대분류TE한도
+           07  YPJL4006-BZTYP-EC-TE-CLAM         PIC  9(015).
+      *--     업종대분류TE
+           07  YPJL4006-BZTYP-EC-TE-AMT          PIC  9(015).
+      *--     한도여유액
+           07  YPJL4006-BZTYP-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  0  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4006-DBTRZ-NAME           ;채무자명
+      *X  YPJL4006-RPSNT-BZNO           ;대표사업자번호
+      *N  YPJL4006-SALEPR               ;매출액
+      *X  YPJL4006-INTNL-CV-GRD-DSTCD   ;신용등급(당행)
+      *X  YPJL4006-CORP-SCAL            ;기업규모
+      *N  YPJL4006-TOTAL-ASST           ;총자산
+      *X  YPJL4006-CRDT-VALUA-YMD       ;신용등급평가일
+      *N  YPJL4006-BASE-CLAM            ;TE기준한도
+      *X  YPJL4006-MGT-TAGET-YN         ;관리대상여부
+      *X  YPJL4006-TE-M-LIMT-VALD-YMD   ;한도설정유효일
+      *N  YPJL4006-TE-MGT-CLAM          ;TE관리한도
+      *N  YPJL4006-LNBZ-I-MGT-CLAM      ;여신성TE한도
+      *N  YPJL4006-MRKTY-MGT-CLAM       ;시장성TE한도
+      *X  YPJL4006-MGT-LIMT-STUP-YMD    ;관리한도설정일
+      *N  YPJL4006-TE-AMT               ;TotalExposure
+      *N  YPJL4006-TE-LNBZ-INCLIN-AMT   ;여신성Exposure
+      *N  YPJL4006-TE-MRKTY-AMT         ;시장성Exposure
+      *S  YPJL4006-TE-LIMT-SEXTR-AMT    ;한도여유액㈜
+      *S  YPJL4006-LNBZ-SEXTR-AMT       ;여신성여유액
+      *S  YPJL4006-MRKTY-SEXTR-AMT      ;시장성여유액
+      *N  YPJL4006-FC-GRCR-CLAM         ;외화신용공여한도
+      *N  YPJL4006-FC-LIMT-AUC          ;외화한도소진액
+      *S  YPJL4006-FC-LIMT-SEXTR-AMT    ;외화한도여유액
+      *X  YPJL4006-CRA                  ;신용평가기관
+      *X  YPJL4006-SMPSN-ICV-GRD-DSTCD  ;신용등급
+      *X  YPJL4006-AFFLT-CORP-GROUP-CD  ;그룹코드
+      *X  YPJL4006-AFFLT-C-GROUP-NAME   ;그룹명
+      *X  YPJL4006-GROUP-ICV-GRD-DSTCD  ;그룹등급
+      *N  YPJL4006-AFFLT-CORP-RANKG     ;그룹순위
+      *X  YPJL4006-MAIN-DEBT-AFFLT-YN   ;주채무계열여부
+      *X  YPJL4006-MGT-LIMT-VALD-YMD    ;그룹한도설정유효일
+      *N  YPJL4006-MGT-CLAM             ;그룹TE한도
+      *N  YPJL4006-GROUP-TE-AMT         ;그룹TE
+      *S  YPJL4006-LIMT-SEXTR-AMT       ;한도여유액
+      *X  YPJL4006-NEW-SI-CLSFI-CD      ;표준산업분류코드
+      *X  YPJL4006-STND-IDSTRY-CD-NAME  ;표준산업코드명
+      *X  YPJL4006-PEER-CD-NAME         ;PEER업종
+      *X  YPJL4006-IDSTRY-V-GRD-DSTCD   ;산업등급(IR)
+      *X  YPJL4006-MGT-TAGET-IDSTRY-YN  ;관리대상산업여부
+      *N  YPJL4006-BZTYP-EC-TE-CLAM     ;업종대분류TE한도
+      *N  YPJL4006-BZTYP-EC-TE-AMT      ;업종대분류TE
+      *S  YPJL4006-BZTYP-L-SEXTR-AMT    ;한도여유액

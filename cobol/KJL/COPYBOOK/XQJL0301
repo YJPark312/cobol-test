@@ -1,0 +1,43 @@
+      *===========================================================
+      *  프로그램명    : QJL0301
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0301
+      *  사용예        : 01  XQJL0301-CA.
+      *                      COPY  XQJL0301.
+      *  최종변경일시  : 2022년10월12일13시41분21초
+      *===========================================================
+           03  XQJL0301-IN.
+      *            그룹회사코드
+               05  XQJL0301-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL0301-I-BASE-YM
+                                          PIC  X(00006).
+      *            계열적용구분
+               05  XQJL0301-I-AFFLT-APLY-DSTCD
+                                          PIC  X(00001).
+      *            계열기업군코드
+               05  XQJL0301-I-AFFLT-CORP-GROUP-CD
+                                          PIC  X(00006).
+           03  XQJL0301-OUT.
+      *            계열기업순위
+               05  XQJL0301-O-AFFLT-CORP-RANKG
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            계열기업군코드
+               05  XQJL0301-O-AFFLT-CORP-GROUP-CD
+                           OCCURS  00500  PIC  X(00006).
+      *            계열기업군명
+               05  XQJL0301-O-AFFLT-C-GROUP-NAME
+                           OCCURS  00500  PIC  X(00052).
+      *            주채권은행코드
+               05  XQJL0301-O-MAIN-BND-BNK-CD
+                           OCCURS  00500  PIC  X(00003).
+      *            그룹사신용등급구분
+               05  XQJL0301-O-CMGR-CRTDSCD
+                           OCCURS  00500  PIC  X(00003).
+      *            최종집단등급구분
+               05  XQJL0301-O-LAST-CLCT-GRD-DSTCD
+                           OCCURS  00500  PIC  X(00003).
+      *===========================================================
+      *  XQJL0301   C O P Y B O O K   E N D
+      *===========================================================

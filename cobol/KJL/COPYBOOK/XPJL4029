@@ -1,0 +1,67 @@
+      *================================================================*
+      *@ NAME : XPJL4029                                               *
+      *@ DESC : PC금감원주채무계열변경내역조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-11-28 14:56:49                          *
+      *  생성일시     : 2009-11-28 14:56:52                          *
+      *================================================================*
+           03  XPJL4029-RETURN.
+             05  XPJL4029-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4029-OK            VALUE  '00'.
+                 88  COND-XPJL4029-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4029-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4029-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4029-ERROR         VALUE  '09'.
+                 88  COND-XPJL4029-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4029-SYSERROR      VALUE  '99'.
+             05  XPJL4029-R-LINE                 PIC  9(006).
+             05  XPJL4029-R-ERRCD                PIC  X(008).
+             05  XPJL4029-R-TREAT-CD             PIC  X(008).
+             05  XPJL4029-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4029-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4029-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XPJL4029-I-BASE-YM              PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XPJL4029-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XPJL4029-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4029-O-GRID1                OCCURS 001000 TIMES.
+      *--         기준년월
+               07  XPJL4029-O-BASE-YM            PIC  X(006).
+      *--         구분
+               07  XPJL4029-O-PRCSS-DSTIC        PIC  X(006).
+      *--         채무자고객번호
+               07  XPJL4029-O-BRWR-NO            PIC  X(013).
+      *--         채무자명
+               07  XPJL4029-O-DBTRZ-NAME         PIC  X(052).
+      *--         그룹코드
+               07  XPJL4029-O-AFFLT-CORP-GROUP-CD
+                                                 PIC  X(006).
+      *--         그룹명
+               07  XPJL4029-O-AFFLT-C-GROUP-NAME PIC  X(042).
+      *--         등록직원번호
+               07  XPJL4029-O-REGI-EMPID         PIC  X(007).
+      *--         등록년월일
+               07  XPJL4029-O-REGI-YMD           PIC  X(008).
+      *================================================================*
+      *        X  P  J  L  4  0  2  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4029-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4029-I-BASE-YM            ;기준년월
+      *N  XPJL4029-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4029-O-GRID1              ;그리드1
+      *X  XPJL4029-O-BASE-YM            ;기준년월
+      *X  XPJL4029-O-PRCSS-DSTIC        ;구분
+      *X  XPJL4029-O-BRWR-NO            ;채무자고객번호
+      *X  XPJL4029-O-DBTRZ-NAME         ;채무자명
+      *X  XPJL4029-O-AFFLT-CORP-GROUP-CD;그룹코드
+      *X  XPJL4029-O-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XPJL4029-O-REGI-EMPID         ;등록직원번호
+      *X  XPJL4029-O-REGI-YMD           ;등록년월일

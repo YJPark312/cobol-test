@@ -1,0 +1,81 @@
+//TKJLP055 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0055 TABLE  LOAD
+//*********************************************************************
+//*--------------------------------------------------------------------*
+//*  DB LOAD : RESUME NO REPLACE(삭제후)  / RESUME YES (APPEND)
+//*--------------------------------------------------------------------*
+//LOAD1   EXEC DSNUPROC,PARM='DAPG,KJL0055',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(3000,500),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(3000,3000),RLSE),DSNTYPE=LARGE
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(3000,3000),RLSE),DSNTYPE=LARGE
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0055,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0055
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "계좌번호"                           POSITION(      12         )
+   CHAR(                     20)                ,
+   "계좌중복일련번호"                   POSITION(      32:      35)
+   DECIMAL                                      ,
+   "고객식별자"                         POSITION(      36         )
+   CHAR(                     10)                ,
+   "고객관리번호"                       POSITION(      46         )
+   CHAR(                      5)                ,
+   "차주번호"                           POSITION(      51         )
+   CHAR(                     13)                ,
+   "계약한도구분"                       POSITION(      64         )
+   CHAR(                      2)                ,
+   "상품대분류코드"                     POSITION(      66         )
+   CHAR(                      2)                ,
+   "상품중분류코드"                     POSITION(      68         )
+   CHAR(                      2)                ,
+   "상품템플릿코드"                     POSITION(      70         )
+   CHAR(                      3)                ,
+   "상품번호"                           POSITION(      73         )
+   CHAR(                      5)                ,
+   "대출자격구분"                       POSITION(      78         )
+   CHAR(                      3)                ,
+   "ISO국가코드"                        POSITION(      81         )
+   CHAR(                      2)                ,
+   "관리부점코드"                       POSITION(      83         )
+   CHAR(                      4)                ,
+   "시작년월일"                         POSITION(      87         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(      95         )
+   CHAR(                      8)                ,
+   "종료년월일"                         POSITION(     103         )
+   CHAR(                      8)                ,
+   "과목코드"                           POSITION(     111         )
+   CHAR(                      3)                ,
+   "통화코드"                           POSITION(     114         )
+   CHAR(                      3)                ,
+   "통화한도"                           POSITION(     117:     126)
+   DECIMAL                                      ,
+   "통화금일잔액"                       POSITION(     127:     136)
+   DECIMAL                                      ,
+   "USD한도"                            POSITION(     137:     146)
+   DECIMAL                                      ,
+   "USD금일잔액"                        POSITION(     147:     156)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(     157         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     177         )
+   CHAR(                      7)
+   )
+//

@@ -1,0 +1,73 @@
+//TKJLF008 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0008 TABLE UNLOAD & LOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.UNLOAD.KJL0008.ALL'
+  SET MAXCC=0
+/*
+//UNLOAD0  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.PT.PIN.UNLOAD.KJL0008.ALL,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(3000,3000),RLSE)
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0008
+ WITH UR;
+/*
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.PT.PIN.LOAD.KJL0008'
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+ DSN SYSTEM(DAPG)
+ RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD SYSOUT=*
+//SYSREC00 DD DSN=KJL.PT.PIN.LOAD.KJL0008,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(3000,3000),RLSE)
+//SYSIN    DD *
+SELECT
+ A.그룹회사코드
+,A.기준년월일
+,B.고객식별자
+,CHAR('             ') AS 차주번호
+,A.총자산
+,A.매출액
+,A.기준년자기자본금
+,A.금융비용차입금
+,A.당행차입금
+,A.영업현금흐름액
+,A.업체평균이자율
+,A.여신성자산한도
+,A.신용등급지원비율
+,A.자기자본기준금액
+,A.영업활동기준한도
+,A.포괄설정가능금액
+,A.시스템최종처리일시
+,A.시스템최종사용자번호
+ FROM  DB2DBA.THKJL0008 A
+      ,DB2DBA.THKJL0015 B
+WHERE  A.그룹회사코드 = B.그룹회사코드
+  AND  A.차주번호     = B.차주번호
+WITH UR;
+/*
+//
+//

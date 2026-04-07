@@ -1,0 +1,61 @@
+//TKJLGM03 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%MPEND%%$OYEAR.%%OMONTH
+//* %%SET %%B = %%SUBSTR %%A 1 6
+//* %%SET %%C = %%B%%.01
+//*********************************************************************
+//*  고객정보 제공이력 파일UNLOAD
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.UNLOAD.KJLG001'
+  IF LASTCC = 8 THEN SET MAXCC=0
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN  PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+       LIB('DB2APS.DSND10.RUNLIB.LOAD')
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.UNLOAD.KJLG001,
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(200,100),RLSE)
+//SYSIN    DD *
+SELECT 그룹회사코드
+      ,CHAR('|')
+      ,이용그룹회사코드
+      ,CHAR('|')
+      ,고객식별자
+      ,CHAR('|')
+      ,고객관리번호
+      ,CHAR('|')
+      ,제공번호
+      ,CHAR('|')
+      ,담당자번호
+      ,CHAR('|')
+      ,정보제공목적구분
+      ,CHAR('|')
+      ,통지년월일
+      ,CHAR('|')
+      ,정보제공년월일
+      ,CHAR('|')
+      ,CHAR(SUBSTR(정보제공항목,1,100))
+      ,CHAR('|')
+      ,시스템최종사용자번호
+      ,CHAR('|')
+      ,시스템최종처리일시
+  FROM DB2DBA.THKJLG001
+ WHERE 그룹회사코드 = 'KB0'
+  AND  이용그룹회사코드     = 'KC0'
+  AND  제공번호            IN ('006')
+  AND  담당자번호          IN ('01')
+  AND  정보제공목적구분    IN ('003')
+  AND  통지년월일           = '20160301'
+  AND  정보제공년월일       = '20160328'
+  WITH UR;
+/*
+//

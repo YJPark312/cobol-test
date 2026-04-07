@@ -1,0 +1,154 @@
+//MKJLDP22 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLDB21
+//*  %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*  %%SET %%C = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*    보증채무계좌추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD271,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD271.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*    지정어음계좌추출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD272,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD272.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*    B2B계좌추출
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD273,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD273.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*    보증서담보PF대출보증추출
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLD275,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD275.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*    자금보충약정Capital Call 계좌 추출
+//*********************************************************************
+//STEP05 EXEC JZBDEXEC,MBR=BJLD277,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD277.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0027
+//* %%GLOBAL  PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//STEP06   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0027',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0027
+                   PART %%A INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*    간접익스포져일반계좌MC
+//*********************************************************************
+//STEP07 EXEC JZBDEXEC,MBR=BJLD274,OPT=&SYSUID,COND=(4,LT)
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD271.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLD272.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLD273.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLD275.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLD277.V001
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+/*
+//STEP08  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.MKJLDP22.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0031 ')
+        ,CHAR('THKJL0031DB:')
+        ,그룹회사코드
+        ,기준일
+        ,기준년월
+        ,담보보증고객식별자
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,담보보증차주번호
+        ,간접중분류구분
+        ,간접명목금액
+        ,간접익스포져금액
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0031
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준일                 = '%%C'
+    WITH UR;
+/*
+//*********************************************************************
+//*    보증인별익스포져일월정보집계
+//*********************************************************************
+//STEP09 EXEC JZBDEXEC,MBR=BJLD311,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP22-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

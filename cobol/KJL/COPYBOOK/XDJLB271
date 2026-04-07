@@ -1,0 +1,97 @@
+      *================================================================*
+      *@ NAME : XDJLB271                                               *
+      *@ DESC : DC포괄신용공여한도산출조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-10 20:13:12                          *
+      *  생성일시     : 2009-03-10 20:13:14                          *
+      *================================================================*
+           03  XDJLB271-RETURN.
+             05  XDJLB271-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB271-OK            VALUE  '00'.
+                 88  COND-XDJLB271-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB271-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB271-ERROR         VALUE  '09'.
+                 88  COND-XDJLB271-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB271-SYSERROR      VALUE  '99'.
+             05  XDJLB271-R-LINE                 PIC  9(006).
+             05  XDJLB271-R-ERRCD                PIC  X(008).
+             05  XDJLB271-R-TREAT-CD             PIC  X(008).
+             05  XDJLB271-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB271-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB271-I-PRCSS-DSTIC          PIC  X(002).
+      *--       fld총자산2
+             05  XDJLB271-I-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld매출액2
+             05  XDJLB271-I-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본2
+             05  XDJLB271-I-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld금융차입금
+             05  XDJLB271-I-AMND-FNCS-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld당행차입금
+             05  XDJLB271-I-AMND-OWBNK-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업흐름액
+             05  XDJLB271-I-AMND-BZOPR-ACF       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld평균이자율
+             05  XDJLB271-I-AMND-ENTP-AVG-IRT    PIC  9(003)V9(02).
+      *--       fld여신성한도
+             05  XDJLB271-I-AMND-LI-ASST-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도2
+             05  XDJLB271-I-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도2
+             05  XDJLB271-I-AMND-BA-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도2
+             05  XDJLB271-I-AMND-I-STUP-ABLAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld신용등급지원비율
+             05  XDJLB271-I-CRDRAT-SPORT-RATO    PIC  9(003).
+      *----------------------------------------------------------------*
+           03  XDJLB271-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB271-O-PRCSS-RSULT          PIC  X(002).
+      *--       fld여신성한도2
+             05  XDJLB271-O-AMND-LI-ASST-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도2
+             05  XDJLB271-O-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도2
+             05  XDJLB271-O-AMND-BA-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도2
+             05  XDJLB271-O-AMND-I-STUP-ABLAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  B  2  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB271-I-PRCSS-DSTIC        ;처리구분
+      *S  XDJLB271-I-AMND-TOTAL-ASST    ;fld총자산2
+      *S  XDJLB271-I-AMND-SALEPR        ;fld매출액2
+      *S  XDJLB271-I-AMND-B-YR-ONCP-AMT ;fld자기자본2
+      *S  XDJLB271-I-AMND-FNCS-AMBR     ;fld금융차입금
+      *S  XDJLB271-I-AMND-OWBNK-AMBR    ;fld당행차입금
+      *S  XDJLB271-I-AMND-BZOPR-ACF     ;fld영업흐름액
+      *N  XDJLB271-I-AMND-ENTP-AVG-IRT  ;fld평균이자율
+      *S  XDJLB271-I-AMND-LI-ASST-CLAM  ;fld여신성한도
+      *S  XDJLB271-I-AMND-O-CAPTL-BSAMT ;fld자기자본한도2
+      *S  XDJLB271-I-AMND-BA-BASE-CLAM  ;fld영업한도2
+      *S  XDJLB271-I-AMND-I-STUP-ABLAMT ;fld포괄한도2
+      *N  XDJLB271-I-CRDRAT-SPORT-RATO  ;fld신용등급지원비율
+      *X  XDJLB271-O-PRCSS-RSULT        ;처리결과
+      *S  XDJLB271-O-AMND-LI-ASST-CLAM  ;fld여신성한도2
+      *S  XDJLB271-O-AMND-O-CAPTL-BSAMT ;fld자기자본한도2
+      *S  XDJLB271-O-AMND-BA-BASE-CLAM  ;fld영업한도2
+      *S  XDJLB271-O-AMND-I-STUP-ABLAMT ;fld포괄한도2

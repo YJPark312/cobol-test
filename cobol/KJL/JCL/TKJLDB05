@@ -1,0 +1,53 @@
+//TKJLDB05 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 매일（휴일／영업일　무관）
+//*선행작업명     : MKJLDP04
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.BJLD151.V002'
+  DELETE  'KJL.SD.BJLD152.V002'
+  DELETE  'KJL.SD.BJLD153.V002.DUP'
+  SET MAXCC=0
+/*
+//*********************************************************************
+//*    개인사업자/해외/외국인고객정보추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD151,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD151.V002,
+//            DISP=(NEW,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(1000,0500),RLSE),
+//            DCB=(RECFM=FB,BLKSIZE=27896,LRECL=317)
+//SYSIN    DD *
+KB0-20211028-MKJLDB05-001-ONLBAT-KB STAR-20211028
+//*자료기준년월일
+//*********************************************************************
+//*    법인기본정보추출프로그램
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLD152,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.BJLD152.V002,
+//            DISP=(NEW,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0100,0050),RLSE),
+//            DCB=(RECFM=FB,BLKSIZE=27896,LRECL=317)
+//SYSIN    DD *
+KB0-20211028-MKJLDB05-001-ONLBAT-KB STAR-20211028
+//*자료기준년월일
+//*********************************************************************
+//*   채무자고객정보생성
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLD153,OPT=&SYSUID,COND=(4,LT)
+//INFILE    DD DISP=OLD,DSN=KJL.SD.BJLD151.V002
+//          DD DISP=OLD,DSN=KJL.SD.BJLD152.V002
+//OTFILE    DD DSN=KJL.SD.BJLD153.V002.DUP,
+//             DISP=(NEW,CATLG,CATLG),
+//             UNIT=SYSBA,
+//             SPACE=(CYL,(3000,300)),
+//             DCB=(RECFM=FB,BLKSIZE=27896,LRECL=317)
+//SYSIN     DD *
+KB0-20211028-MKJLDP06-001-NORBAT-KB STAR-20211028
+//*자료기준년월일

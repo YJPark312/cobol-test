@@ -1,0 +1,78 @@
+//MKJLDP15 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLDP06 / MKJLDP12
+//*********************************************************************
+//*   EAD트라비스계정추출
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLI257,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI257.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   EAD 수기계좌계정추출
+//*********************************************************************
+//STEP02  EXEC JZBDEXEC,MBR=BJLI258,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI258.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   EAD외화주식추출
+//*********************************************************************
+//STEP03  EXEC JZBDEXEC,MBR=BJLI25A,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI25A.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   EAD외화채권추출
+//*********************************************************************
+//STEP04  EXEC JZBDEXEC,MBR=BJLI25B,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI25B.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   EAD외화파생상품추출
+//*********************************************************************
+//STEP05  EXEC JZBDEXEC,MBR=BJLI25C,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI25C.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//*********************************************************************
+//*   EAD국외점포계좌추출
+//*********************************************************************
+//STEP06  EXEC JZBDEXEC,MBR=BJLI25D,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SD.BJLI25D.V001,
+//             DISP=(OLD,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP15-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

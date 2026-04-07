@@ -1,0 +1,126 @@
+      *================================================================*
+      *@ NAME : XPJL4093                                               *
+      *@ DESC : PC기업및그룹한도신청및승인조회(개별그룹기준한도    *
+      *@        산출) COPYBOOK                                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-27 17:19:12                          *
+      *  생성일시     : 2009-04-27 17:19:14                          *
+      *================================================================*
+           03  XPJL4093-RETURN.
+             05  XPJL4093-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4093-OK            VALUE  '00'.
+                 88  COND-XPJL4093-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4093-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4093-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4093-ERROR         VALUE  '09'.
+                 88  COND-XPJL4093-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4093-SYSERROR      VALUE  '99'.
+             05  XPJL4093-R-LINE                 PIC  9(006).
+             05  XPJL4093-R-ERRCD                PIC  X(008).
+             05  XPJL4093-R-TREAT-CD             PIC  X(008).
+             05  XPJL4093-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4093-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4093-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJL4093-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJL4093-I-BRWR-NO              PIC  X(013).
+      *--       수정신용등급
+             05  XPJL4093-I-AMND-CRDRAT          PIC  X(004).
+      *--       수정표준산업분류코드
+             05  XPJL4093-I-AMND-SI-CLSFI-CD     PIC  X(005).
+      *--       수정신용등급별지원비율
+             05  XPJL4093-I-AMND-CP-SPORT-RATO   PIC  9(003)V9(02).
+      *--       수정영업이익
+             05  XPJL4093-I-AMND-OPRFT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정수입이자
+             05  XPJL4093-I-AMND-IMPRT-INT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정감가상각비
+             05  XPJL4093-I-AMND-DPRC-CST        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정금융비용
+             05  XPJL4093-I-AMND-FNCS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정단기차입금
+             05  XPJL4093-I-AMND-SHTRM-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정가중평균이자율
+             05  XPJL4093-I-AMND-WGHTG-AVG-IRT   PIC  9(003)V9(02).
+      *--       수정총차입금
+             05  XPJL4093-I-AMND-TOTAL-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정매출액
+             05  XPJL4093-I-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본
+             05  XPJL4093-I-AMND-ONCP            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정업종평균비율1
+             05  XPJL4093-I-AMND-B-AVG-RATO1     PIC  9(003)V9(02).
+      *--       수정매출액2
+             05  XPJL4093-I-AMND-SALEPR2         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정업종평균비율2
+             05  XPJL4093-I-AMND-B-AVG-RATO2     PIC  9(003)V9(02).
+      *--       수정총자산
+             05  XPJL4093-I-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정업종평균비율3
+             05  XPJL4093-I-AMND-B-AVG-RATO3     PIC  9(003)V9(02).
+      *----------------------------------------------------------------*
+           03  XPJL4093-OUT.
+      *----------------------------------------------------------------*
+      *--       수정차입금상환예상액
+             05  XPJL4093-O-AMND-AR-ANTICI-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정캐쉬플로우기준액
+             05  XPJL4093-O-AMND-CSFW-BASE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본기준액
+             05  XPJL4093-O-AMND-ONCP-BASE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정상환능력기준한도
+             05  XPJL4093-O-AMND-S-BASE-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정규모기준한도
+             05  XPJL4093-O-AMND-SCAL-BASE-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정기준한도
+             05  XPJL4093-O-AMND-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  P  J  L  4  0  9  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4093-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4093-I-CUST-DSTIC         ;고객구분
+      *X  XPJL4093-I-BRWR-NO            ;차주번호
+      *X  XPJL4093-I-AMND-CRDRAT        ;수정신용등급
+      *X  XPJL4093-I-AMND-SI-CLSFI-CD   ;수정표준산업분류코드
+      *N  XPJL4093-I-AMND-CP-SPORT-RATO
+      * 수정신용등급별지원비율
+      *S  XPJL4093-I-AMND-OPRFT         ;수정영업이익
+      *S  XPJL4093-I-AMND-IMPRT-INT     ;수정수입이자
+      *S  XPJL4093-I-AMND-DPRC-CST      ;수정감가상각비
+      *S  XPJL4093-I-AMND-FNCS          ;수정금융비용
+      *S  XPJL4093-I-AMND-SHTRM-AMBR    ;수정단기차입금
+      *N  XPJL4093-I-AMND-WGHTG-AVG-IRT ;수정가중평균이자율
+      *S  XPJL4093-I-AMND-TOTAL-AMBR    ;수정총차입금
+      *S  XPJL4093-I-AMND-SALEPR        ;수정매출액
+      *S  XPJL4093-I-AMND-ONCP          ;수정자기자본
+      *N  XPJL4093-I-AMND-B-AVG-RATO1   ;수정업종평균비율1
+      *S  XPJL4093-I-AMND-SALEPR2       ;수정매출액2
+      *N  XPJL4093-I-AMND-B-AVG-RATO2   ;수정업종평균비율2
+      *S  XPJL4093-I-AMND-TOTAL-ASST    ;수정총자산
+      *N  XPJL4093-I-AMND-B-AVG-RATO3   ;수정업종평균비율3
+      *S  XPJL4093-O-AMND-AR-ANTICI-AMT ;수정차입금상환예상액
+      *S  XPJL4093-O-AMND-CSFW-BASE-AMT ;수정캐쉬플로우기준액
+      *S  XPJL4093-O-AMND-ONCP-BASE-AMT ;수정자기자본기준액
+      *S  XPJL4093-O-AMND-S-BASE-LIMT   ;수정상환능력기준한도
+      *S  XPJL4093-O-AMND-SCAL-BASE-LIMT;수정규모기준한도
+      *S  XPJL4093-O-AMND-BASE-LIMT     ;수정기준한도

@@ -1,0 +1,78 @@
+      *================================================================*
+      *@ NAME : XDJLB022                                               *
+      *@ DESC : DC본부부서수기원장등록 COPYBOOK                      *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-05-10 17:48:10                          *
+      *  생성일시     : 2023-05-10 17:48:10                          *
+      *  전체길이     : 00000704 BYTES                               *
+      *================================================================*
+           03  XDJLB022-RETURN.
+             05  XDJLB022-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB022-OK            VALUE  '00'.
+                 88  COND-XDJLB022-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB022-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB022-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB022-ERROR         VALUE  '09'.
+                 88  COND-XDJLB022-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB022-SYSERROR      VALUE  '99'.
+             05  XDJLB022-R-LINE                 PIC  9(006).
+             05  XDJLB022-R-ERRCD                PIC  X(008).
+             05  XDJLB022-R-TREAT-CD             PIC  X(008).
+             05  XDJLB022-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB022-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB022-I-PRCSS-DSTIC          PIC  X(002).
+      *--       계좌번호
+             05  XDJLB022-I-ACNO                 PIC  X(020).
+      *--       채무자번호
+             05  XDJLB022-I-BRWR-NO              PIC  X(013).
+      *--       상품대분류코드
+             05  XDJLB022-I-PRDCT-LAG-CLSFI-CD   PIC  X(002).
+      *--       상품중분류코드
+             05  XDJLB022-I-PRDCT-MEDM-CLSFI-CD  PIC  X(002).
+      *--       상품템플릿코드
+             05  XDJLB022-I-PRDCT-TMPLT-CD       PIC  X(003).
+      *--       상품번호
+             05  XDJLB022-I-PRDCT-NO             PIC  X(005).
+      *--       신규년월일
+             05  XDJLB022-I-NEW-YMD              PIC  X(008).
+      *--       만기년월일
+             05  XDJLB022-I-EXPIR-YMD            PIC  X(008).
+      *--       통화코드
+             05  XDJLB022-I-CNCYCD               PIC  X(003).
+      *--       통화한도금액
+             05  XDJLB022-I-CRNCY-CLAM           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       통화금일잔액
+             05  XDJLB022-I-CRNCY-TDD-BAL        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리부점코드
+             05  XDJLB022-I-MGT-BRNCD            PIC  X(004).
+      *--       비고
+             05  XDJLB022-I-RMARK                PIC  X(602).
+      *----------------------------------------------------------------*
+           03  XDJLB022-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB022-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  2  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB022-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB022-I-ACNO               ;계좌번호
+      *X  XDJLB022-I-BRWR-NO            ;채무자번호
+      *X  XDJLB022-I-PRDCT-LAG-CLSFI-CD ;상품대분류코드
+      *X  XDJLB022-I-PRDCT-MEDM-CLSFI-CD;상품중분류코드
+      *X  XDJLB022-I-PRDCT-TMPLT-CD     ;상품템플릿코드
+      *X  XDJLB022-I-PRDCT-NO           ;상품번호
+      *X  XDJLB022-I-NEW-YMD            ;신규년월일
+      *X  XDJLB022-I-EXPIR-YMD          ;만기년월일
+      *X  XDJLB022-I-CNCYCD             ;통화코드
+      *S  XDJLB022-I-CRNCY-CLAM         ;통화한도금액
+      *S  XDJLB022-I-CRNCY-TDD-BAL      ;통화금일잔액
+      *X  XDJLB022-I-MGT-BRNCD          ;관리부점코드
+      *X  XDJLB022-I-RMARK              ;비고
+      *X  XDJLB022-O-PRCSS-RSULT        ;처리결과

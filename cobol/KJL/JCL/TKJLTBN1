@@ -1,0 +1,29 @@
+//TKJLTBN1 JOB ,'M V S',CLASS=T,MSGCLASS=X,REGION=0M
+//*---------------------------------------------*
+//*  UA   ==> ZAPH   &SNODE=NDM.ZAPH            *
+//*  UA   ==> ZABA   &SNODE=NDM.ZABA            *
+//*  UA   ==> ZADA   &SNODE=NDM.ZADA            *
+//*  UA   ==> ZAVA   &SNODE=NDM.ZAVA            *
+//*  UA   ==> ZAUA   &SNODE=NDM.ZAUA            *
+//*---------------------------------------------*
+//*  ZADA => ZABA                               *
+//*---------------------------------------------*
+//NDMPROC  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+ SIGNON USERID=(NDM1,) ESF=NO CASE=YES
+ SUBMIT PROC=$NDMRECV MAXDELAY=0 -
+         &SNODE=NDM.ZADA    -
+         &FTDSN=KJL.DD.SQL  -
+         &TODSN=KJL.SY.SQL
+ SIGNOFF
+/*
+//
+//
+//
+//
+//
+//

@@ -1,0 +1,386 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB070 (AS지역본부별SUB한도관리)
+      *@처리유형  : AS
+      *@처리개요  : 지역본부별SUB한도관리하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20151223: 신규작성
+      * YBH    :20180627: 미기표현황 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB070.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   15/12/23.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB070'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   지역본부별SUB한도조회
+       01  XDJL4701-CA.
+           COPY  XDJL4701.
+      *   지역본부별SUB한도등록
+       01  XDJLB801-CA.
+           COPY  XDJLB801.
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJLB070-CA.
+           COPY  YNJLB070.
+
+       01  YPJLB070-CA.
+           COPY  YPJLB070.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJLB070-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@1 출력영역 확보
+           #GETOUT YPJLB070-CA
+           .
+      * COMMON AREA SETTING 파라미터 조립
+      * MOVE 계좌번호           TO JICOM-ACNO
+      * MOVE 상품코드           TO JICOM-PRDCT-CD
+      * MOVE 고객번호           TO JICOM-CNO
+      * MOVE 상품계약회차       TO JICOM-PRDCT-CTRC-NTH
+
+      *@1  COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   처리구분에 따른 입력값 검증(01:조회02:등록)
+           EVALUATE YNJLB070-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *       기준년월일
+               IF YNJLB070-BASE-YMD = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+      *       대분류업종코드
+               IF YNJLB070-I-LAG-CLSFI-BZTYP = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+      *       지역본부코드
+               IF YNJLB070-I-AREA-HQ-CD = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN CO-CHA-02
+      *       기준년월일
+               IF YNJLB070-BASE-YMD = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+      *       대분류업종코드
+               IF YNJLB070-LAG-CLSFI-BZTYP-CD(1) = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+      *       지역본부코드
+               IF YNJLB070-AREA-HQ-CD(1) = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN OTHER
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           EVALUATE YNJLB070-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *#1     조회처리시
+      *@1     지역본부별SUB한도조회 프로그램호출
+               PERFORM S3100-DJL4701-CALL-RTN                           01040003
+                  THRU S3100-DJL4701-CALL-EXT                           01050003
+           WHEN CO-CHA-02
+      *#1     등록처리시
+      *@1     지역본부별SUB한도등록 프로그램호출
+               PERFORM S3200-DJLB801-CALL-RTN                           01040003
+                  THRU S3200-DJLB801-CALL-EXT                           01050003
+           END-EVALUATE
+
+      *@1 폼ID SET
+           #BOFMID 'V1KJL11070000'
+           .                                                            01060003
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------01090004
+      *@   지역본부별SUB한도조회 DC호출
+      *-----------------------------------------------------------------01110004
+       S3100-DJL4701-CALL-RTN.                                          01120003
+
+           INITIALIZE       XDJL4701-IN
+
+      *@1 입력파라미터 조립
+      *   처리구분                                                    01170003
+           MOVE YNJLB070-PRCSS-DSTIC                                    01180003
+             TO XDJL4701-I-PRCSS-DSTIC                                  01190003
+      *   기준년월일
+           MOVE YNJLB070-BASE-YMD
+             TO XDJL4701-I-BASE-YMD
+      *   대분류업종코드
+           MOVE YNJLB070-I-LAG-CLSFI-BZTYP
+             TO XDJL4701-I-LAG-CLSFI-BZTYP-CD
+      *   지역본부코드
+           MOVE YNJLB070-I-AREA-HQ-CD
+             TO XDJL4701-I-AREA-HQ-CD
+                                                                        01280003
+      *@1 지역본부별SUB한도조회 프로그램 호출
+           #DYCALL DJL4701 YCCOMMON-CA XDJL4701-CA                      01910003
+                                                                        01920003
+      *   처리결과CHECK
+           EVALUATE TRUE
+           WHEN COND-XDJL4701-OK
+      *@      출력파라미터 조립
+      *       총라인수
+               MOVE XDJL4701-O-TOTAL-LINE-CNT
+                 TO YPJLB070-TOTAL-LINE-CNT
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR WK-I > XDJL4701-O-TOTAL-LINE-CNT
+      *           대분류업종코드
+                   MOVE XDJL4701-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                     TO YPJLB070-LAG-CLSFI-BZTYP-CD(WK-I)
+      *           지역본부코드
+                   MOVE XDJL4701-O-AREA-HQ-CD(WK-I)
+                     TO YPJLB070-AREA-HQ-CD(WK-I)
+      *           지역본부명
+                   MOVE XDJL4701-O-AREA-HQ-NAME(WK-I)
+                     TO YPJLB070-AREA-HQ-NAME(WK-I)
+      *           전년도말익스포져금액
+                   MOVE XDJL4701-O-PYY-X-END-EXPSR-AMT(WK-I)
+                     TO YPJLB070-PYY-X-END-EXPSR-AMT(WK-I)
+      *           지역본부SUB한도
+                   MOVE XDJL4701-O-AREA-HQ-SUB-CLAM(WK-I)
+                     TO YPJLB070-AREA-HQ-SUB-CLAM(WK-I)
+      *           지역본부순증SUB한도
+                   MOVE XDJL4701-O-AREA-HN-SUB-CLAM(WK-I)
+                     TO YPJLB070-AREA-HN-SUB-CLAM(WK-I)
+      *           지역본부익스포져금액
+                   MOVE XDJL4701-O-AREA-HQ-EXPSR-AMT(WK-I)
+                     TO YPJLB070-AREA-HQ-EXPSR-AMT(WK-I)
+      *           지역본부한도여유금액
+                   MOVE XDJL4701-O-AREA-HQ-LIMT-EXAN(WK-I)
+                     TO YPJLB070-AREA-HQ-LIMT-EXAN(WK-I)
+      *           지역본부SUB소진율
+                   MOVE XDJL4701-O-AREA-HQ-SUB-EXHS-RT(WK-I)
+                     TO YPJLB070-AREA-HQ-SUB-EXHS-RT(WK-I)
+      *           지역본부예외승인한도
+                   MOVE XDJL4701-O-AREA-HE-ATHOR-CLAM(WK-I)
+                     TO YPJLB070-AREA-HE-ATHOR-CLAM(WK-I)
+      *           지역본부예외승인금액
+                   MOVE XDJL4701-O-AREA-HE-ATHOR-AMT(WK-I)
+                     TO YPJLB070-AREA-HE-ATHOR-AMT(WK-I)
+      *           지역예외승인여유금액
+                   MOVE XDJL4701-O-AREA-E-ATHOR-EXAN(WK-I)
+                     TO YPJLB070-AREA-E-ATHOR-EXAN(WK-I)
+      *           지역예외승인소진율
+                   MOVE XDJL4701-O-AREA-EA-EXHS-RT(WK-I)
+                     TO YPJLB070-AREA-EA-EXHS-RT(WK-I)
+      *           지역본부기준소진율
+                   MOVE XDJL4701-O-AREA-HE-BASE(WK-I)
+                     TO YPJLB070-AREA-HE-BASE(WK-I)
+      *           월SUB한도
+                   MOVE XDJL4701-O-M-AREA-HQ-SUB-CLAM(WK-I)
+                     TO YPJLB070-M-AREA-HQ-SUB-CLAM(WK-I)
+      *           월예외승인한도
+                   MOVE XDJL4701-O-M-AREA-HE-ATHOR(WK-I)
+                     TO YPJLB070-M-AREA-HE-ATHOR(WK-I)
+      *           월기준소진율
+                   MOVE XDJL4701-O-M-AREA-HE-BASE(WK-I)
+                     TO YPJLB070-M-AREA-HE-BASE(WK-I)
+180627*           대출금액
+                   MOVE XDJL4701-O-LN-AMT(WK-I)
+                     TO YPJLB070-LN-AMT(WK-I)
+180627*           실질여유액
+                   MOVE XDJL4701-O-ATUAL-SEXTR-AMT(WK-I)
+                     TO YPJLB070-ATUAL-SEXTR-AMT(WK-I)
+180627*           실질소진율
+                   MOVE XDJL4701-O-ATUAL-EXHS-RT(WK-I)
+                     TO YPJLB070-ATUAL-EXHS-RT(WK-I)
+               END-PERFORM
+           WHEN COND-XDJL4701-NOTFOUND
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJL4701-R-ERRCD
+                      XDJL4701-R-TREAT-CD
+                      XDJL4701-R-STAT
+           END-EVALUATE
+           .                                                            02030003
+
+       S3100-DJL4701-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+
+      *-----------------------------------------------------------------01090004
+      *@   지역본부별SUB한도등록 DC호출
+      *-----------------------------------------------------------------01110004
+       S3200-DJLB801-CALL-RTN.                                          01120003
+
+           INITIALIZE       XDJLB801-IN
+
+      *@1 입력파라미터 조립
+      *   처리구분                                                    01170003
+           MOVE YNJLB070-PRCSS-DSTIC                                    01180003
+             TO XDJLB801-I-PRCSS-DSTIC                                  01190003
+                                                                        01200003
+      *   기준년월
+           MOVE YNJLB070-BASE-YMD(1:6)
+             TO XDJLB801-I-BASE-YM
+
+      *   총라인수
+           MOVE YNJLB070-TOTAL-LINE-CNT
+             TO XDJLB801-I-TOTAL-LINE-CNT
+
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > YNJLB070-TOTAL-LINE-CNT
+      *       대분류업종코드
+               MOVE YNJLB070-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJLB801-I-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       지역본부코드
+               MOVE YNJLB070-AREA-HQ-CD(WK-I)
+                 TO XDJLB801-I-AREA-HQ-CD(WK-I)
+
+      *       지역본부별SUB한도
+               MOVE YNJLB070-M-AREA-HQ-SUB-CLAM(WK-I)
+                 TO XDJLB801-I-AREA-HQ-SUB-CLAM(WK-I)
+      *       지역본부예외승인한도
+               MOVE YNJLB070-M-AREA-HE-ATHOR(WK-I)
+                 TO XDJLB801-I-AREA-HE-ATHOR-CLAM(WK-I)
+      *       지역본부기준소진율
+               MOVE YNJLB070-M-AREA-HE-BASE(WK-I)
+                 TO XDJLB801-I-AREA-HE-BASE(WK-I)
+           END-PERFORM
+
+      *@1 지역본부별SUB한도등록 프로그램 호출
+           #DYCALL DJLB801 YCCOMMON-CA XDJLB801-CA                      01910003
+                                                                        01920003
+      *   처리결과CHECK
+           IF COND-XDJLB801-OK                                          01960003
+               MOVE XDJLB801-O-PRCSS-RSULT                              01980001
+                 TO YPJLB070-PRCSS-RSULT
+           ELSE                                                         01980003
+              #ERROR XDJLB801-R-ERRCD                                   01990004
+                     XDJLB801-R-TREAT-CD                                02000004
+                     XDJLB801-R-STAT                                    02010004
+           END-IF                                                       02020003
+           .                                                            02030003
+
+       S3200-DJLB801-CALL-EXT.                                          02040003
+           EXIT.                                                        02050003
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK WK-MESSAGE.
+       S9000-FINAL-EXT.
+           EXIT.

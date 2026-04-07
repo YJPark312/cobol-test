@@ -1,0 +1,83 @@
+      *================================================================*
+      *@ NAME : XDJL4091                                               *
+      *@ DESC : DC기업및그룹한도신청및승인조회(최종설정현황조회    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-23 11:22:57                          *
+      *  생성일시     : 2009-04-23 11:22:58                          *
+      *================================================================*
+           03  XDJL4091-RETURN.
+             05  XDJL4091-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4091-OK            VALUE  '00'.
+                 88  COND-XDJL4091-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4091-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4091-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4091-ERROR         VALUE  '09'.
+                 88  COND-XDJL4091-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4091-SYSERROR      VALUE  '99'.
+             05  XDJL4091-R-LINE                 PIC  9(006).
+             05  XDJL4091-R-ERRCD                PIC  X(008).
+             05  XDJL4091-R-TREAT-CD             PIC  X(008).
+             05  XDJL4091-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4091-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4091-I-PRCSS-DSTIC          PIC  X(002).
+      *--       fld고객구분
+             05  XDJL4091-I-CUST-DSTIC           PIC  X(001).
+      *--       fld채무자번호
+             05  XDJL4091-I-BRWR-NO              PIC  X(013).
+      *--       fld신청번호
+             05  XDJL4091-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4091-OUT.
+      *----------------------------------------------------------------*
+      *--       채무자명
+             05  XDJL4091-O-DBTRZ-NAME           PIC  X(052).
+      *--       당행자기자본
+             05  XDJL4091-O-OWBNK-ONCP           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       최종설정일
+             05  XDJL4091-O-LAST-STUP-DD         PIC  X(008).
+      *--       한도설정유효일
+             05  XDJL4091-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       관리한도
+             05  XDJL4091-O-MGT-LIMT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성관리한도
+             05  XDJL4091-O-LNBZ-I-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XDJL4091-O-MRKTY-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       개별기업최고한도
+             05  XDJL4091-O-IDIVI-C-HGST-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹별최고한도
+             05  XDJL4091-O-GROUP-PER-HGST-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       개별기업최고한도2
+             05  XDJL4091-O-IDIVI-C-HGST-LIMT2   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       제조금융구분
+             05  XDJL4091-O-MNFC-FINAC-DSTIC     PIC  X(001).
+      *================================================================*
+      *        X  D  J  L  4  0  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4091-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4091-I-CUST-DSTIC         ;fld고객구분
+      *X  XDJL4091-I-BRWR-NO            ;fld채무자번호
+      *X  XDJL4091-I-APLCN-NO           ;fld신청번호
+      *X  XDJL4091-O-DBTRZ-NAME         ;채무자명
+      *S  XDJL4091-O-OWBNK-ONCP         ;당행자기자본
+      *X  XDJL4091-O-LAST-STUP-DD       ;최종설정일
+      *X  XDJL4091-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *S  XDJL4091-O-MGT-LIMT           ;관리한도
+      *S  XDJL4091-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *S  XDJL4091-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *S  XDJL4091-O-IDIVI-C-HGST-LIMT  ;개별기업최고한도
+      *S  XDJL4091-O-GROUP-PER-HGST-LIMT;그룹별최고한도
+      *S  XDJL4091-O-IDIVI-C-HGST-LIMT2 ;개별기업최고한도2
+      *X  XDJL4091-O-MNFC-FINAC-DSTIC   ;제조금융구분

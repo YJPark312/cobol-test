@@ -1,0 +1,418 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB038 (자회사및대주주등록)
+      *@처리유형  : DC
+      *@처리개요  : 자회사및대주주등록
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081229: 신규작성
+      *김진태:20090414: 프로그램수정
+      *김진태:20091211: 에러메세지정비
+      *김진태:20091211: 시스템최종처리일시／사용자　삭제
+      *박주희:20170201:  KB-PIN전환
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  자회사대주주기본        : THKJL0042            : CRUX
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB038.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/29.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      * 에러메세지
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      * 조치메세지
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB038'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *자회사대주주기본　테이블(KEY)
+       01  TKJL0042-KEY.
+           COPY  TKJL0042.
+      *자회사대주주기본　테이블(RECORD)
+       01  TRJL0042-REC.
+           COPY  TRJL0042.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJLB038-CA.
+           COPY  XDJLB038.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB038-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               DBIO
+                      YCDBIOCA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJLB038-OUT
+                      XDJLB038-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   처리구분이　＇02＇,＇04＇이외ERROR
+           IF XDJLB038-I-PRCSS-DSTIC = CO-CHA-02 OR
+              XDJLB038-I-PRCSS-DSTIC = CO-CHA-04
+              CONTINUE
+           ELSE
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF XDJLB038-I-BRWR-NO = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF XDJLB038-I-SBCO-L-SKHDR-DSTCD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           IF XDJLB038-I-PRCSS-DSTIC = CO-CHA-02
+      *@처리구분이　０２일경우
+      *@      자회사／대주주　원장　생성및갱신
+              PERFORM S3100-INSERT-PROC-RTN
+                 THRU S3100-INSERT-PROC-EXT
+           ELSE
+           IF XDJLB038-I-PRCSS-DSTIC = CO-CHA-04
+      *@ 처리구분이　０４일경우
+      *@      자회사／대주주　원장　갱신（삭제년월일셋팅）
+              PERFORM S3200-THKJL0042-UPDATE-RTN
+                 THRU S3200-THKJL0042-UPDATE-EXT
+           END-IF
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신규등록처리　프로세스
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *@카피북초기화
+           INITIALIZE TKJL0042-KEY
+                      TRJL0042-REC
+
+      *@업무처리
+      *@등록선택시 자회사대주주기본을 등록한다.
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0042-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0042-PK-BASE-YM
+170201*@고객식별자
+           MOVE XDJLB038-I-BRWR-NO
+             TO KJL0042-PK-CUST-IDNFR
+      *@자회사대주주구분
+           MOVE XDJLB038-I-SBCO-L-SKHDR-DSTCD
+             TO KJL0042-PK-SBCO-L-SKHDR-DSTCD
+
+      *@DBIO CALL
+           #DYDBIO SELECT-CMD-Y TKJL0042-PK TRJL0042-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@원장에존재할경우
+      *@원장UPDATE
+                    PERFORM S3120-THKJL0042-UPDATE-RTN
+                       THRU S3120-THKJL0042-UPDATE-EXT
+               WHEN COND-DBIO-MRNF
+      *@원장에존재하지않을경우
+      *@원장INSERT
+                    PERFORM S3110-THKJL0042-INSERT-RTN
+                       THRU S3110-THKJL0042-INSERT-EXT
+               WHEN OTHER
+      *@원장에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  자회사대주주기본(THKJL0042)등록
+      *-----------------------------------------------------------------
+       S3110-THKJL0042-INSERT-RTN.
+
+      *@원장등록
+      *@관련테이블 : 자회사및대주주등록  접근유형 : CREATE
+
+      *@입력파라미터조립
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0042-GROUP-CO-CD
+
+      *@기준년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO RJL0042-BASE-YM
+
+
+170201*@고객식별자
+           MOVE XDJLB038-I-BRWR-NO
+             TO RJL0042-CUST-IDNFR
+
+      *@자회사대주주구분
+           MOVE XDJLB038-I-SBCO-L-SKHDR-DSTCD
+             TO RJL0042-SBCO-L-SKHDR-DSTCD
+
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0042-REGI-YMD
+
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0042-REGI-EMPID
+
+      *@대주주출자금액
+           MOVE XDJLB038-I-LAG-SKHDR-AMFN
+             TO RJL0042-LAG-SKHDR-AMFN
+
+      *@해제년월일
+           MOVE SPACE
+             TO RJL0042-REVOC-YMD
+
+      *@해제직원번호
+           MOVE SPACE
+             TO RJL0042-REVOC-EMPID
+
+      *@DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0042-PK TRJL0042-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장에러일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3110-THKJL0042-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  자회사대주주기본(THKJL0042)수정
+      *-----------------------------------------------------------------
+       S3120-THKJL0042-UPDATE-RTN.
+
+      *@원장수정
+      *@관련테이블 : 자회사및대주주등록  접근유형 : UPDATE
+
+      *@입력파라미터조립
+      *@등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0042-REGI-YMD
+
+      *@등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0042-REGI-EMPID
+
+      *@대주주출자금액
+           MOVE XDJLB038-I-LAG-SKHDR-AMFN
+             TO RJL0042-LAG-SKHDR-AMFN
+
+      *@해제년월일
+           MOVE SPACE
+             TO RJL0042-REVOC-YMD
+
+      *@해제직원번호
+           MOVE SPACE
+             TO RJL0042-REVOC-EMPID
+
+      *@DBIO CALL
+           #DYDBIO UPDATE-CMD-Y  TKJL0042-PK TRJL0042-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장에러일경우
+      *@에러메세지 : 테이블 UPDATE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3120-THKJL0042-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  자회사대주주기본(THKJL0042)삭제
+      *-----------------------------------------------------------------
+       S3200-THKJL0042-UPDATE-RTN.
+
+      *@원장수정
+      *@관련테이블 : 자회사및대주주등록  접근유형 : UPDATE
+
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0042-PK-GROUP-CO-CD
+      *@기준년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO KJL0042-PK-BASE-YM
+170201*@고객식별자
+           MOVE XDJLB038-I-BRWR-NO
+             TO KJL0042-PK-CUST-IDNFR
+      *@자회사대주주구분
+           MOVE XDJLB038-I-SBCO-L-SKHDR-DSTCD
+             TO KJL0042-PK-SBCO-L-SKHDR-DSTCD
+
+      *@   UPDATE전에LOCK SELECT검색
+           #DYDBIO SELECT-CMD-Y TKJL0042-PK TRJL0042-REC
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오류인경우에러처리
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@   해제년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0042-REVOC-YMD
+
+      *@   해제직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0042-REVOC-EMPID
+
+      *@   DBIO CALL
+           #DYDBIO UPDATE-CMD-Y TKJL0042-PK TRJL0042-REC
+
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장갱신오류인경우
+      *@에러메세지 : 테이블 UPDATE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3200-THKJL0042-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@종료처리
+
+           MOVE CO-STAT-OK
+             TO XDJLB038-O-PRCSS-RSULT
+
+      *@프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

@@ -1,0 +1,62 @@
+      *================================================================*
+      *@ NAME : XDJLB191                                               *
+      *@ DESC : DC신용공여계정과목정보COPYBOOK                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-04-01 16:36:43                          *
+      *  생성일시     : 2024-04-01 16:36:44                          *
+      *  전체길이     : 00000115 BYTES                               *
+      *================================================================*
+           03  XDJLB191-RETURN.
+             05  XDJLB191-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB191-OK            VALUE  '00'.
+                 88  COND-XDJLB191-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB191-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB191-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB191-ERROR         VALUE  '09'.
+                 88  COND-XDJLB191-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB191-SYSERROR      VALUE  '99'.
+             05  XDJLB191-R-LINE                 PIC  9(006).
+             05  XDJLB191-R-ERRCD                PIC  X(008).
+             05  XDJLB191-R-TREAT-CD             PIC  X(008).
+             05  XDJLB191-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB191-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB191-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB191-I-BASE-YM              PIC  X(006).
+      *--       통합계정과목코드
+             05  XDJLB191-I-INTGRA-TIACC-CD      PIC  X(013).
+      *--       계정과목명
+             05  XDJLB191-I-TIACC-NAME           PIC  X(042).
+      *--       계정과목CCF환산율
+             05  XDJLB191-I-TIACC-CCF-UTCRT      PIC S9(003)
+                                                 LEADING  SEPARATE.
+      *--       신용공여계정구분
+             05  XDJLB191-I-GRCR-ACITM-DSTCD     PIC  X(002).
+      *--       신용공여대상구분
+             05  XDJLB191-I-GRCR-TAGET-DSTCD     PIC  X(001).
+      *--       신용공여중분류코드
+             05  XDJLB191-I-GRCR-MIDL-CLSFI-CD   PIC  X(003).
+      *--       신용공여중분류코드명
+             05  XDJLB191-I-GRCR-MC-CD-NAME      PIC  X(042).
+      *----------------------------------------------------------------*
+           03  XDJLB191-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB191-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  1  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB191-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB191-I-BASE-YM            ;기준년월
+      *X  XDJLB191-I-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJLB191-I-TIACC-NAME         ;계정과목명
+      *S  XDJLB191-I-TIACC-CCF-UTCRT    ;계정과목CCF환산율
+      *X  XDJLB191-I-GRCR-ACITM-DSTCD   ;신용공여계정구분
+      *X  XDJLB191-I-GRCR-TAGET-DSTCD   ;신용공여대상구분
+      *X  XDJLB191-I-GRCR-MIDL-CLSFI-CD ;신용공여중분류코드
+      *X  XDJLB191-I-GRCR-MC-CD-NAME    ;신용공여중분류코드명
+      *X  XDJLB191-O-PRCSS-RSULT        ;처리결과

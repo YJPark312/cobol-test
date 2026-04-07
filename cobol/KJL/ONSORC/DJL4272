@@ -1,0 +1,565 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4272 (포괄신용공여한도신청조회)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도신청조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081229: 신규작성
+      *김진태:20090623: 프로그램수정
+      *김진태:20091119: 에러메세지정비
+      *                   채무자명추출방법변경 DBIO => SQLIO
+      *김진태:20091218: 출력항목에　관리여부　추가
+      *                   관리여부를　셋팅하여　단말에서
+      *                   포괄대상여부　처리
+      *백현정:20110603:현재설정현황　항목　추가　및　변경           00130001
+      * YBH    :20140818: 포괄한도관리대상구분 조회추가
+      * PJH    :20170627:  KB-PIN（３차）
+      * YBH    :20220324: 사용액 산출방법 변경
+      *박정수:20230914:산업평가등급구분 추가
+      *박정수:20230523:역만기일 산출 방식 변경
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  한도신청사유실적        : THKJL0006            : XRXX
+      **  CP관리한도신청실적      : THKJL0007            : XRXX
+      **  CP차주관리한도기본      : THKJL0010            : XRXX
+      **  차주관리한도실적        : THKJL0011            : XRXX
+      **  그룹사기본              : THKJL0013            : XRXX
+      **  계열사기본              : THKJL0014            : XRXX
+      **  채무자고객기본          : THKJL0015            : XRXX
+      **  계정코드목록            : THKJL0018            : XRXX
+      **  차주익스포져일실적      : THKJL0029            : XRXX
+      **  표준산업코드목록        : THKJL0044            : XRXX
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4272.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/29.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B2400323             PIC  X(008) VALUE 'B2400323'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4272'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+
+       01  CO-CSTMSG.
+           03  CO-MSG1                 PIC  X(100) VALUE
+           '채무자에대한　신청정보가　존재하지　않습니다．'.
+           03  CO-SUBMSG1              PIC  X(050) VALUE
+           '포괄한도　조회　오류'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-BASE-YMD             PIC  X(008).
+           03  WK-MGT-YN               PIC  X(001).
+220324     03  WK-BASEYMD              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *포괄한도최종설정현황추출
+       01  XQJL1251-CA.
+           COPY XQJL1251.
+
+      *포괄한도설정대상원장ＭＡＸ（기준년월일）추출
+       01  XQJL2714-CA.
+           COPY XQJL2714.
+
+      *포괄한도신청내역조회
+       01  XQJL2721-CA.
+           COPY XQJL2721.
+
+      *직원명조회
+       01  XCJIHR01-CA.
+           COPY XCJIHR01.
+
+220324* 만기일/역만기일 산출 Parameter
+       01  XCJIIL03-CA.
+           COPY    XCJIIL03.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO  COMMUNICATION AREA
+      * SQLIO COMMUNICATION AREA
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4272-CA.
+           COPY  XDJL4272.
+      *=================================================================
+       PROCEDURE                       DIVISION
+      *=================================================================
+                                       USING       YCCOMMON-CA
+                                                   XDJL4272-CA.
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               DBIO
+      * SQLIO COMMUNICATION AREA
+                      YCDBSQLA-CA
+           .
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4272-OUT
+                      XDJL4272-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@처리구분
+      *@０１：신청번호없음
+      *@０２：신청번호있음
+           IF XDJL4272-I-PRCSS-DSTIC = CO-CHA-01 OR
+              XDJL4272-I-PRCSS-DSTIC = CO-CHA-02
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@채무자번호체크
+           IF XDJL4272-I-KB-PIN = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+220324*@   거래일 1개월전 날짜 구함
+           PERFORM S3100-CJIIL03-CALL-RTN
+              THRU S3100-CJIIL03-CALL-EXT
+
+      *@1  기준일자추출
+           IF XDJL4272-I-PRCSS-DSTIC = CO-CHA-01
+      *@신청번호가없을때는현재설정현황조회시전영업일을기준으로조회
+              MOVE JICOM-BF-BZOPR-YMD
+                TO WK-BASE-YMD
+           ELSE
+      *@신청번호존재시포괄한도설정대상원장의ＭＡＸ（기준년월일）
+      *@을추출한다．
+      *@사유는신청당시에는포괄한도대상이었으나신청서출력이나과거
+      *@자료조회시에는현재포괄한도대상이아닐수있으므로포괄한도
+      *@대상이었던최종일을추출하여설정현황을조회한다
+              PERFORM S3110-QJL2714-CALL-RTN
+                 THRU S3110-QJL2714-CALL-EXT
+           END-IF
+
+      *@3  포괄신용공여한도현재설정현황추출
+           PERFORM S3130-QJL1251-CALL-RTN
+              THRU S3130-QJL1251-CALL-EXT
+
+      *@   설정신청조회
+           IF XDJL4272-I-PRCSS-DSTIC = CO-CHA-01
+      *@   신청번호미입력
+              PERFORM S3200-PROCESS-RTN
+                 THRU S3200-PROCESS-EXT
+           ELSE
+      *@   신청번호입력
+              PERFORM S3300-QJL2721-CALL-RTN
+                 THRU S3300-QJL2721-CALL-EXT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+220324*@  만기일/역만기일 산출(거래일 1개월전 날짜 구함)
+      *-----------------------------------------------------------------
+       S3100-CJIIL03-CALL-RTN.
+
+           INITIALIZE     XCJIIL03-IN
+
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XCJIIL03-I-GROUP-CO-CD
+      *    구분코드
+           MOVE  '4'
+             TO  XCJIIL03-I-DSTCD
+      *    년월일
+           MOVE  JICOM-BF-BZOPR-YMD
+            TO   XCJIIL03-I-YMD
+      *    일수/월수
+           MOVE  1
+             TO  XCJIIL03-I-NODAY-NOMN
+
+      *@1 공통 UTILITY CALL
+           #DYCALL     CJIIL03  YCCOMMON-CA  XCJIIL03-CA
+
+      *@1 RETURN 정보 확인
+           IF  XCJIIL03-R-STAT    =  ZEROS
+      *        거래일 1개월전 날짜
+               MOVE  XCJIIL03-O-YMD
+                 TO  WK-BASEYMD
+           ELSE
+               #ERROR XCJIIL03-R-ERRCD
+                      XCJIIL03-R-TREAT-CD
+                      XCJIIL03-R-STAT
+           END-IF
+           .
+
+       S3100-CJIIL03-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  ＭＡＸ（기준년월일）구하기
+      *-----------------------------------------------------------------
+       S3110-QJL2714-CALL-RTN.
+
+      *@1.1 초기화
+           INITIALIZE XQJL2714-IN
+      *@1.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL2714-I-GROUP-CO-CD
+170201*@   고객식별자
+           MOVE XDJL4272-I-KB-PIN
+             TO XQJL2714-I-KB-PIN
+      *@1.3 프로그램 호출
+           #DYSQLA QJL2714 XQJL2714-CA
+      *@1.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    MOVE XQJL2714-O-BASE-YMD
+                      TO WK-BASE-YMD
+               WHEN COND-DBSQL-MRNF
+      *@원장NOT FOUND인경우
+      *@에러메세지 : 원장없음오류입니다
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3110-QJL2714-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  포괄한도신청/승인HEADER조회
+      *-----------------------------------------------------------------
+       S3130-QJL1251-CALL-RTN.
+
+      *@3.1변수초기화
+           INITIALIZE XQJL1251-IN
+
+      *@3.2변수 MOVE
+220324*@   월말구분(1:일,2:월)
+           IF WK-BASEYMD < WK-BASE-YMD
+               MOVE '1'
+                 TO XQJL1251-I-ENMN-DSTIC
+           ELSE
+               MOVE '2'
+                 TO XQJL1251-I-ENMN-DSTIC
+           END-IF
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1251-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE WK-BASE-YMD
+             TO XQJL1251-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4272-I-KB-PIN
+             TO XQJL1251-I-KB-PIN
+
+      *@3.3 프로그램호출
+           #DYSQLA QJL1251 XQJL1251-CA
+
+      *@3.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    MOVE CO-CHA-1
+                      TO WK-MGT-YN
+               WHEN COND-DBSQL-MRNF
+                    MOVE CO-CHA-0
+                      TO WK-MGT-YN
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *    채무자명
+           MOVE XQJL1251-O-DBTRZ-NAME
+             TO XDJL4272-O-DBTRZ-NAME
+      *@   관리여부
+           MOVE WK-MGT-YN
+             TO XDJL4272-O-MGT-YN
+
+220324*    포괄신용관리한도가 0이 아니면(설정상태:설정)이면
+           IF XQJL1251-O-MGT-CLAM NOT = ZERO
+      *@       TE여신성최고한도2011.06.03추가
+               COMPUTE XDJL4272-O-LNBZ-I-HGST-LIMT
+                     = FUNCTION MAX(
+                       XQJL1251-O-LNBZ-I-HGST-LIMT / 1000000, 0)
+      *@       포괄신용관리한도
+               COMPUTE XDJL4272-O-MGT-CLAM
+                     = XQJL1251-O-MGT-CLAM / 1000000
+      *@       최종승인　관리한도
+      *@             = MIN(TE여신성최고한도，포괄신용공여한도)
+               COMPUTE XDJL4272-O-LAST-INLS-LIMT
+                     = FUNCTION MAX(
+                       FUNCTION MIN(XQJL1251-O-LNBZ-I-HGST-LIMT,
+                                    XQJL1251-O-MGT-CLAM) / 1000000, 0)
+220324*@       기사용액 = MIN(사용액, 최종적용 포괄신용공여한도)
+               COMPUTE XDJL4272-O-INLS-GRCR-LIMT-AUC
+                     = FUNCTION MAX(
+                       FUNCTION MIN(
+                       XQJL1251-O-INLS-GRCR-LIMT-AUC / 1000000,
+                       XDJL4272-O-LAST-INLS-LIMT), 0)
+      *@       한도여유액＝최종승인　관리한도-기사용액
+               COMPUTE XDJL4272-O-LIMT-SEXTR-AMT
+                     = XDJL4272-O-LAST-INLS-LIMT
+                     - XDJL4272-O-INLS-GRCR-LIMT-AUC
+           END-IF
+
+      *@   계열명                                                     02184907
+           MOVE XQJL1251-O-AFFLT-C-GROUP-NAME
+             TO XDJL4272-O-AFFLT-C-GROUP-NAME                           02185107
+      *@   계열신용등급                                               02185207
+           MOVE XQJL1251-O-INTNL-CV-GRD-DSTCD                           02185307
+             TO XDJL4272-O-INTNL-CV-GRD-DSTCD                           02185407
+      *@   기업신용등급                                               02185507
+           MOVE XQJL1251-O-INTNL-CV-GRD-DSTCD1                          02185607
+             TO XDJL4272-O-INTNL-CV-GRD-DSTCD1                          02185707
+      *@   유효기일                                                   02185807
+           MOVE XQJL1251-O-MGT-LIMT-VALD-YMD                            02185907
+             TO XDJL4272-O-MGT-LIMT-VALD-YMD                            02186007
+      *@   업종명                                                     02186107
+           MOVE XQJL1251-O-STND-IDSTRY-CD-NAME                          02186207
+             TO XDJL4272-O-STND-IDSTRY-CD-NAME                          02186307
+140818*   포괄한도관리대상구분
+           MOVE XQJL1251-O-INLS-LM-TAGET-DSTCD
+             TO XDJL4272-O-INLS-LM-TAGET-DSTCD
+230914*    산업평가등급구분
+           MOVE XQJL1251-O-IDSTRY-V-GRD-DSTCD
+             TO XDJL4272-O-IDSTRY-V-GRD-DSTCD
+           .
+       S3130-QJL1251-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3200-PROCESS-RTN.
+
+      *@   신청구분
+           MOVE CO-CHA-3
+             TO XDJL4272-O-LIMT-A-KND-DSTCD
+      *@   신청일자
+           MOVE BICOM-TRAN-BASE-YMD
+             TO XDJL4272-O-APLCN-YMD
+      *@   영업점코드
+           MOVE BICOM-BRNCD
+             TO XDJL4272-O-APLCN-BRNCD
+      *@   영업점명
+           MOVE JICOM-BRN-HANGL-NAME
+             TO XDJL4272-O-BRN-HANGL-NAME
+      *@   신청자직원번호
+           MOVE BICOM-USER-EMPID
+             TO XDJL4272-O-APLCN-EMPID
+      *@   신청자명
+           MOVE JICOM-USER-NAME
+             TO XDJL4272-O-EMNM
+      *@   한도설정가능액
+           MOVE ZERO
+             TO XDJL4272-O-LIMT-STUP-ABLAMT
+      *@   한도신청액
+           MOVE ZERO
+             TO XDJL4272-O-LIMT-APLCN-AMT
+      *@   신청사유
+           MOVE SPACE
+             TO XDJL4272-O-APLCN-RESN-CTNT
+           .
+       S3200-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  포괄한도신청DATA조회
+      *-----------------------------------------------------------------
+       S3300-QJL2721-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XQJL2721-IN
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL2721-I-GROUP-CO-CD
+      *@   신청번호
+           MOVE XDJL4272-I-APLCN-NO
+             TO XQJL2721-I-LIMT-APLCN-NO
+      *@2.2.1 프로그램 호출
+      *@처리내용 :포괄한도 신청 DATA 조회SQLIO
+      *@프로그램 호출
+           #DYSQLA QJL2721 XQJL2721-CA
+      *@2.2.2 SQLIO 에러처리
+      *@처리내용 : IF 포괄한도 신청 DATA 조회
+      *@SQLIO.리턴코드=오류면 에러처리
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    PERFORM S3310-CJIHR01-CALL-RTN
+                       THRU S3310-CJIHR01-CALL-EXT
+               WHEN COND-DBSQL-MRNF
+      *@원장NOT FOUND인경우
+      *@에러메세지 : 원장없음오류입니다
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #CSTMSG CO-MSG1     CO-SUBMSG1
+                    #ERROR  CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@   신청구분
+           MOVE XQJL2721-O-LIMT-A-KND-DSTCD
+             TO XDJL4272-O-LIMT-A-KND-DSTCD
+      *@   신청일자
+           MOVE XQJL2721-O-APLCN-YMD
+             TO XDJL4272-O-APLCN-YMD
+      *@   영업점코드
+           MOVE XQJL2721-O-APLCN-BRNCD
+             TO XDJL4272-O-APLCN-BRNCD
+      *@   영업점명
+           MOVE XQJL2721-O-BRN-HANGL-NAME
+             TO XDJL4272-O-BRN-HANGL-NAME
+      *@   신청자직원번호
+           MOVE XQJL2721-O-APLCN-EMPID
+             TO XDJL4272-O-APLCN-EMPID
+      *@   신청자명
+           MOVE XCJIHR01-O-EMP-HANGL-FNAME
+             TO XDJL4272-O-EMNM
+      *@   한도설정가능액
+           COMPUTE XDJL4272-O-LIMT-STUP-ABLAMT
+                 = XQJL2721-O-LIMT-STUP-ABLAMT
+                 / 1000000
+      *@   한도신청액
+           COMPUTE XDJL4272-O-LIMT-APLCN-AMT
+                 = XQJL2721-O-LIMT-APLCN-AMT
+                 / 1000000
+      *@   신청사유
+           MOVE XQJL2721-O-APLCN-RESN-CTNT
+             TO XDJL4272-O-APLCN-RESN-CTNT
+           .
+       S3300-QJL2721-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  직원한글성명을 구한다
+      *-----------------------------------------------------------------
+       S3310-CJIHR01-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE XCJIHR01-IN
+      *@직원한글성명을 구한다.
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIHR01-I-GROUP-CO-CD
+
+           MOVE XQJL2721-O-APLCN-EMPID
+             TO XCJIHR01-I-EMPID
+
+      *@   UTILITY CALL
+           #DYCALL CJIHR01 YCCOMMON-CA XCJIHR01-CA
+
+      *@   처리결과확인
+           IF XCJIHR01-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIHR01-R-ERRCD
+                     XCJIHR01-R-TREAT-CD
+                     XCJIHR01-R-STAT
+           END-IF
+           .
+       S3310-CJIHR01-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

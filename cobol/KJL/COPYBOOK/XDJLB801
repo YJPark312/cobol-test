@@ -1,0 +1,69 @@
+      *================================================================*
+      *@ NAME : XDJLB801                                               *
+      *@ DESC : DC지역본부별SUB한도등록COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2015-12-09 18:03:51                          *
+      *  생성일시     : 2015-12-09 18:03:53                          *
+      *  전체길이     : 00004513 BYTES                               *
+      *================================================================*
+           03  XDJLB801-RETURN.
+             05  XDJLB801-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB801-OK            VALUE  '00'.
+                 88  COND-XDJLB801-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB801-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB801-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB801-ERROR         VALUE  '09'.
+                 88  COND-XDJLB801-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB801-SYSERROR      VALUE  '99'.
+             05  XDJLB801-R-LINE                 PIC  9(006).
+             05  XDJLB801-R-ERRCD                PIC  X(008).
+             05  XDJLB801-R-TREAT-CD             PIC  X(008).
+             05  XDJLB801-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB801-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB801-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB801-I-BASE-YM              PIC  X(006).
+      *--       그리드
+             05  XDJLB801-I-GRID.
+      *--         총라인수
+               07  XDJLB801-I-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJLB801-I-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           대분류업종코드
+                 09  XDJLB801-I-LAG-CLSFI-BZTYP-CD
+                                                 PIC  X(003).
+      *--           지역본부코드
+                 09  XDJLB801-I-AREA-HQ-CD       PIC  X(004).
+      *--           지역본부SUB한도
+                 09  XDJLB801-I-AREA-HQ-SUB-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부예외승인한도
+                 09  XDJLB801-I-AREA-HE-ATHOR-CLAM
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부기준소진율
+                 09  XDJLB801-I-AREA-HE-BASE     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB801-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB801-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  8  0  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB801-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB801-I-BASE-YM            ;기준년월
+      *G  XDJLB801-I-GRID               ;그리드
+      *N  XDJLB801-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB801-I-DATA-BOOK          ;데이터부
+      *X  XDJLB801-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJLB801-I-AREA-HQ-CD         ;지역본부코드
+      *S  XDJLB801-I-AREA-HQ-SUB-CLAM   ;지역본부SUB한도
+      *S  XDJLB801-I-AREA-HE-ATHOR-CLAM ;지역본부예외승인한도
+      *S  XDJLB801-I-AREA-HE-BASE       ;지역본부기준소진율
+      *X  XDJLB801-O-PRCSS-RSULT        ;처리결과

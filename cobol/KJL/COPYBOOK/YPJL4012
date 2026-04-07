@@ -1,0 +1,104 @@
+      *================================================================*
+      *@ NAME : YPJL4012                                               *
+      *@ DESC : AS계좌별TE현황조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-11-26 14:45:29                          *
+      *  생성일시     : 2009-11-26 14:45:38                          *
+      *================================================================*
+      *--     출력라인수
+           07  YPJL4012-OUTPT-LINE-CNT           PIC  9(005).
+      *--     채무자명
+           07  YPJL4012-DBTRZ-NAME               PIC  X(052).
+      *--     기준한도금액
+           07  YPJL4012-BASE-CLAM                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기준한도산출년월일
+           07  YPJL4012-BASE-LIMT-CMPTN-YMD      PIC  X(008).
+      *--     관리한도유효년월일
+           07  YPJL4012-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     관리한도금액
+           07  YPJL4012-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     토탈익스포져
+           07  YPJL4012-TE                       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4012-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성한도
+           07  YPJL4012-LNBZ-INCLIN-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성익스포져
+           07  YPJL4012-LNBZ-INCLIN-EXPSR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     여신성한도여유액
+           07  YPJL4012-LNBZ-IL-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성한도
+           07  YPJL4012-MRKTY-LIMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성익스포져
+           07  YPJL4012-MRKTY-EXPSR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성한도여유액
+           07  YPJL4012-MRKTY-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     파생상품총거래한도
+           07  YPJL4012-DRVT-PT-TRAN-LIMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     파생상품익스포져
+           07  YPJL4012-DRVT-PRDCT-EXPSR         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그리드
+           07  YPJL4012-GRID                     OCCURS 005000 TIMES.
+      *--       계좌번호
+             09  YPJL4012-ACNO                   PIC  X(020).
+      *--       상품코드
+             09  YPJL4012-PRDCT-CD               PIC  X(012).
+      *--       상품명
+             09  YPJL4012-PRDCT-NAME             PIC  X(262).
+      *--       자산구분
+             09  YPJL4012-ASST-DSTIC             PIC  X(010).
+      *--       약정구분
+             09  YPJL4012-AGRE-DSTIC             PIC  X(010).
+      *--       명목액기준한도금액
+             09  YPJL4012-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  YPJL4012-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져한도환산금액
+             09  YPJL4012-TE-LIMT-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       토탈익스포져잔액환산금액
+             09  YPJL4012-TE-BAL-AUC             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  1  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4012-OUTPT-LINE-CNT       ;출력라인수
+      *X  YPJL4012-DBTRZ-NAME           ;채무자명
+      *S  YPJL4012-BASE-CLAM            ;기준한도금액
+      *X  YPJL4012-BASE-LIMT-CMPTN-YMD  ;기준한도산출년월일
+      *X  YPJL4012-MGT-LIMT-VALD-YMD    ;관리한도유효년월일
+      *S  YPJL4012-MGT-CLAM             ;관리한도금액
+      *S  YPJL4012-TE                   ;토탈익스포져
+      *S  YPJL4012-LIMT-SEXTR-AMT       ;한도여유액
+      *S  YPJL4012-LNBZ-INCLIN-LIMT     ;여신성한도
+      *S  YPJL4012-LNBZ-INCLIN-EXPSR    ;여신성익스포져
+      *S  YPJL4012-LNBZ-IL-SEXTR-AMT    ;여신성한도여유액
+      *S  YPJL4012-MRKTY-LIMT           ;시장성한도
+      *S  YPJL4012-MRKTY-EXPSR          ;시장성익스포져
+      *S  YPJL4012-MRKTY-L-SEXTR-AMT    ;시장성한도여유액
+      *S  YPJL4012-DRVT-PT-TRAN-LIMT    ;파생상품총거래한도
+      *S  YPJL4012-DRVT-PRDCT-EXPSR     ;파생상품익스포져
+      *A  YPJL4012-GRID                 ;그리드
+      *X  YPJL4012-ACNO                 ;계좌번호
+      *X  YPJL4012-PRDCT-CD             ;상품코드
+      *X  YPJL4012-PRDCT-NAME           ;상품명
+      *X  YPJL4012-ASST-DSTIC           ;자산구분
+      *X  YPJL4012-AGRE-DSTIC           ;약정구분
+      *S  YPJL4012-TTL-AMT-BASE-CLAM    ;명목액기준한도금액
+      *S  YPJL4012-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *S  YPJL4012-TE-LIMT-AUC          ;토탈익스포져한도환산금액
+      *S  YPJL4012-TE-BAL-AUC           ;토탈익스포져잔액환산금액

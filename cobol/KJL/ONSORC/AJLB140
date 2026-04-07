@@ -1,0 +1,353 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB140 (AS국별한도제외대상관리)
+      *@처리유형  : AS
+      *@처리개요  :국별한도제외대상관리
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *최주원 : 20210128 : 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB140.
+       AUTHOR.                         최주원.
+       DATE-WRITTEN.                   21/01/28.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *@에러메시지
+      *처리구분 오류입니다
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+      *조회조건값 오류입니다.
+           03  CO-B0100505             PIC  X(008) VALUE 'B0100505'.
+      *@조치메시지
+      *전산업무담당자에게　문의바랍니다.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB140'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-99               PIC  X(002) VALUE '99'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   조회처리DC  INTERFACE
+       01  XDJL4025-CA.
+           COPY  XDJL4025.
+
+      *   등록처리DC  INTERFACE
+       01  XDJLB025-CA.
+           COPY  XDJLB025.
+
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      *    AS COPYBOOK
+       01  YNJLB140-CA.
+           COPY  YNJLB140.
+
+      *    AS COPYBOOK
+       01  YPJLB140-CA.
+           COPY  YPJLB140.
+      *=================================================================
+       PROCEDURE                       DIVISION
+
+                                       USING       YCCOMMON-CA
+                                                   YNJLB140-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XDJL4025-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJLB140-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK(01:조회/02:등록/03:삭제)
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJLB140-PRCSS-DSTIC = (CO-CHA-01 OR CO-CHA-02 OR
+                                      CO-CHA-03)
+               CONTINUE
+           ELSE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF YNJLB140-PRCSS-DSTIC     NOT = CO-CHA-01
+
+               IF  YNJLB140-CUST-IDNFR = SPACE
+                   #ERROR CO-B0100505 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+
+               IF  YNJLB140-ECLUD-RESN = SPACE
+                   #ERROR CO-B0100505 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+
+               IF  YNJLB140-ECLUD-RESN = CO-CHA-99
+                   AND YNJLB140-ETC-RESN-CTNT = SPACE
+                   #ERROR CO-B0100505 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*           INPUT AJLB140 DATA                   *"
+           #USRLOG  "=================================================="
+           #USRLOG  " PRCSS-DSTIC    : " YNJLB140-PRCSS-DSTIC
+           #USRLOG  " CUST-IDNFR     : " YNJLB140-CUST-IDNFR
+           #USRLOG  " ECLUD-RESN     : " YNJLB140-ECLUD-RESN
+           #USRLOG  " ETC-RESN-CTNT  : " YNJLB140-ETC-RESN-CTNT
+           #USRLOG  "=================================================="
+
+
+      *    YNJLB140-PRCSS-DSTIC : 처리구분
+      *    01 : 조회
+      *    02 : 등록/수정
+      *    03 : 삭제
+           IF YNJLB140-PRCSS-DSTIC     = CO-CHA-01
+
+      *@3.1   조회DC호출
+               PERFORM S3100-DJL4025-CALL-RTN
+                  THRU S3100-DJL4025-CALL-EXT
+           ELSE
+
+      *@3.2   관리DC호출
+               PERFORM S3200-DJLB025-CALL-RTN
+                  THRU S3200-DJLB025-CALL-EXT
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   조회DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4025-CALL-RTN.
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리PC입력파라미터=
+      *@SET(처리구분,부점코드)
+
+           MOVE YNJLB140-PRCSS-DSTIC   TO XDJL4025-I-PRCSS-DSTIC
+           MOVE YNJLB140-CUST-IDNFR    TO XDJL4025-I-CUST-IDNFR
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4025 YCCOMMON-CA XDJL4025-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL4025-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4025-OK
+      *@      출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           ELSE
+              #ERROR XDJL4025-R-ERRCD
+                     XDJL4025-R-TREAT-CD
+                     XDJL4025-R-STAT
+           END-IF
+           .
+       S3100-DJL4025-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국별한도제외대상관리 DC호출
+      *-----------------------------------------------------------------
+       S3200-DJLB025-CALL-RTN.
+           CONTINUE
+
+           INITIALIZE    XDJLB025-IN
+
+           MOVE YNJLB140-PRCSS-DSTIC   TO XDJLB025-I-PRCSS-DSTIC
+
+      *   총라인수
+      *    MOVE YNJLB140-TOTAL-LINE-CNT
+      *      TO XDJLB025-I-TOTAL-LINE-CNT
+
+      *    PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 500
+      *                 OR WK-I > YNJLB140-TOTAL-LINE-CNT
+      *    END-PERFORM
+
+      *--     처리구분
+           MOVE  YNJLB140-PRCSS-DSTIC
+             TO  XDJLB025-I-PRCSS-DSTIC
+      *--     고객식별자
+           MOVE  YNJLB140-CUST-IDNFR
+             TO  XDJLB025-I-CUST-IDNFR
+      *--     제외사유
+           MOVE  YNJLB140-ECLUD-RESN
+             TO  XDJLB025-I-ECLUD-RESN
+      *--     기타사유내용
+           MOVE  YNJLB140-ETC-RESN-CTNT
+             TO  XDJLB025-I-ETC-RESN-CTNT
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJLB025 YCCOMMON-CA XDJLB025-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJLB025-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJLB025-OK
+               MOVE XDJLB025-O-PRCSS-RSULT
+                 TO YPJLB140-PRCSS-RSULT
+           ELSE
+              #ERROR XDJLB025-R-ERRCD
+                     XDJLB025-R-TREAT-CD
+                     XDJLB025-R-STAT
+           END-IF
+           .
+
+       S3200-DJLB025-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*           DJL4025 OUTPUT DATA                  *"
+           #USRLOG  "=================================================="
+           #USRLOG  " OUTPT-LINE-CNT1    : " XDJL4025-O-OUTPT-LINE-CNT1
+           #USRLOG  "=================================================="
+
+      *@4.1 출력항목 조립
+           MOVE CO-STAT-OK
+             TO YPJLB140-PRCSS-RSULT
+
+      *@4.2 출력라인수 조립
+           MOVE XDJL4025-O-OUTPT-LINE-CNT1
+             TO YPJLB140-OUTPT-LINE-CNT1
+
+      *@4.3 그리드1 조립
+      *@실행조건:WK-I > YPJLB140-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJLB140-OUTPT-LINE-CNT1
+      *            그리드１
+                   MOVE XDJL4025-O-GRID1(WK-I)
+                     TO YPJLB140-GRID1  (WK-I)
+           END-PERFORM
+
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11140000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

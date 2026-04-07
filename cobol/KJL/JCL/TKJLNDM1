@@ -1,0 +1,50 @@
+//TKJLNDM1  JOB ,'M V S',CLASS=T,MSGCLASS=X,REGION=0M
+//*--------------------------------------------------------------------
+//*    STEP01    FROM   보안파일서버   TO   ZABA NDM전송
+//*   1.송신할파일을 보안파일서버로 업로드한다
+//*   2. 업로드한 파일을 호스트전송한다
+//*   3. 본JCL을 수행하여 ZABA로 수신한다
+//*  (수신할DATASET의 길이를 VB 23036 정도로 길게생성)
+//*--------------------------------------------------------------------
+//NDMSEND EXEC PGM=DMBATCH,COND=(4,LT)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+  SIGNON  USERID=(KIE000N,)  ESF=NO  CASE=YES
+    SUBMIT  PROC=MKIENDM0  MAXDELAY=0       -
+    &SERVNM=nepapo23                        -
+    &SVRPATH=/data/efms/data/host/kie000    -
+    &SVRFILE1=kie000-BIDT303.INF            -
+    &TODSN1=KID.ST.BIDT303.INF
+  SIGNOFF
+/*
+//
+
+
+
+
+
+
+
+
+
+//*********************************************************************
+//* NDM JCL (EDW => ZABA)
+//*********************************************************************
+//*NDMPROC  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+ SIGNON USERID=(C309509,) ESF=NO CASE=YES
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABLO53.dat -
+         &TODSN=KJL.SD.BJLR013.V001
+ SIGNOFF
+/*
+//

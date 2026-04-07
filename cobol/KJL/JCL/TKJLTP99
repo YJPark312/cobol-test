@@ -1,0 +1,211 @@
+//TKJLTP99 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*수시작업용 JCL
+//*********************************************************************
+//STEP01  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLDR06.D220630.T100000,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR012 ')
+        ,CHAR('THKJLR012DB:')
+        , 그룹회사코드
+        , 기준년월일
+        , 외화상품유형구분
+        , 통합트레이드번호
+        , 계정과목코드
+        , 계정세과목코드
+        , 통합계정과목코드
+        , 고객식별자
+        , 고객관리번호
+        , 고객고유번호
+        , 발행법인등록번호
+        , 매입년월일
+        , 통화코드
+        , 외화장부금액
+        , 만기년월일
+        , 관리부점코드
+        , 총외환여신금액
+        ,"ISO국가코드"
+        , 계약한도구분
+        , 국제한도구분
+        , 대미환산장부금액
+        , 대미환산한도
+        , 시스템최종처리일시
+        , 시스템최종사용자번호
+    FROM DB2DBA.THKJLR012
+   WHERE  그룹회사코드            = 'KB0'
+     AND SUBSTR( 기준년월일 ,7,2) = '30'
+    WITH UR;
+/*
+//*********************************************************************
+//*    외화채권상품정보적재            (THKJLR012)
+//*********************************************************************
+//STEP02  EXEC JZBDEXEC,MBR=BJLDR06,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SM.SHRKJL.TAATR72
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SD.MKJLDP12.DATA09
+//SYSIN     DD *
+KB0-20220630-MKJLDP12-001-ONLBAT-KB STAR-20220630
+//* 자료기준년월일
+//*********************************************************************
+//*   EAD 외화주식추출
+//*********************************************************************
+//STEP03  EXEC JZBDEXEC,MBR=BJLI25A,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SM.BJLI25A.V001,
+//             DISP=(NEW,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-20220630-MKJLDP15-001-ONLBAT-KB STAR-20220630
+//* 자료기준년월일
+//****************************************************
+//*   EAD 외화채권추출
+//****************************************************
+//STEP04  EXEC JZBDEXEC,MBR=BJLI25B,OPT=&SYSUID
+//OTFILE    DD DSN=KJL.SM.BJLI25B.V001,
+//             DISP=(NEW,CATLG,CATLG),
+//             UNIT=SYSPA,
+//             SPACE=(CYL,(0050,0030),RLSE),
+//             DCB=(RECFM=FB,LRECL=320)
+//SYSIN     DD *
+KB0-20220630-MKJLDP15-001-ONLBAT-KB STAR-20220630
+//* 자료기준년월일
+//*************************************************************
+//*   EAD 한도환산금액산출
+//*************************************************************
+//STEP05  EXEC JZBDEXEC,MBR=BJLI25I,OPT=&SYSUID
+//INFILE   DD DISP=OLD,DSN=KJL.SM.BJLI25A.V001
+//         DD DISP=OLD,DSN=KJL.SM.BJLI25B.V001
+//OTFILE   DD DSN=KJL.SM.BJLI25I.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=320)
+//SYSIN    DD *
+KB0-20220630-MKJLDP16-001-ONLBAT-KB STAR-20220630
+//* 자료기준년월일
+//*********************************************************************
+//*    EAD 신용공여한도추출
+//*********************************************************************
+//STEP06 EXEC JZBDEXEC,MBR=BJLI25J,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SM.BJLI25I.V001
+//OTFILE   DD DSN=KJL.SM.BJLI25J.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=320)
+//SYSIN    DD *
+KB0-20220630-MKJLDB17-001-ONLBAT-KB STAR-20220630
+//* 자료기준년월일
+//STEP07  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.MKJLT25K.D220630.T100000,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0125 ')
+        ,CHAR('THKJL0125DB:')
+        ,그룹회사코드
+        ,계좌번호
+        ,계좌중복일련번호
+        ,기준일
+        ,기준년월
+        ,고객식별자
+        ,고객관리번호
+        ,해외현지법인여부
+        ,차주번호
+        ,관리부점코드
+        ,"TE계좌고객구분"
+        ,한도계좌여부
+        ,"TE계좌구분"
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,대출자격구분
+        ,시작년월일
+        ,만기년월일
+        ,종료년월일
+        ,상품계약상태구분
+        ,통화코드
+        ,통화한도
+        ,통화잔액
+        ,"BS기준잔액"
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"CCF명목잔액환산금액"
+        ,배분내부회복가치
+        ,"CA담보제외금액"
+        ,"CA담보환산금액"
+        ,한도계좌번호
+        ,한도상품대분류코드
+        ,한도상품중분류코드
+        ,한도상품템플릿코드
+        ,한도상품번호
+        ,관련테이블명
+        ,과목코드
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,"BS기준한도"
+        ,차주고객식별자
+        ,지급보증신용장번호
+    FROM DB2DBA.THKJL0125
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준일       = '30'
+     AND 기준년월     = '202206'
+     AND 과목코드    IN ('KTS')
+    WITH UR;
+/*
+//*********************************************************************
+//*  EAD 한도관리계좌삭제작업（업무코드별삭제）
+//*********************************************************************
+//STEP08  EXEC JZBDEXEC,MBR=BJLT25L,OPT=&SYSUID
+//SYSIN     DD *
+KB0-20220630-MKJLT25K-001-NORBAT-KB STAR-20220630-KTS
+//*********************************************************************
+//*  EAD 한도관리계좌MC
+//*********************************************************************
+//STEP09 EXEC JZBDEXEC,MBR=BJLI25K,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SM.BJLI25J.V001
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLI25K.D220630.T100000,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-20220630-MKJLTP02-001-ONLBAT-KB STAR-20220630-N
+//*자료기준년월일

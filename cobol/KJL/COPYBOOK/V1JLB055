@@ -1,0 +1,48 @@
+      *================================================================*
+      *@ NAME : V1JLB055                                               *
+      *@ DESC : 신용공여기관관리                                     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2012-09-26 11:17:12                          *
+      *  생성일시     : 2012-09-26 11:17:17                          *
+      *  전체길이     : 00009007 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB055-PRCSS-RSULT              PIC  X(002).
+      *--     그리드
+           07  V1JLB055-GRID.
+      *--       총라인수
+ROWCNT       09  V1JLB055-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  V1JLB055-DATA-BOOK              OCCURS 0 TO 000100
+                 DEPENDING ON V1JLB055-TOTAL-LINE-CNT.
+      *--         보증기관번호
+               11  V1JLB055-GRNTY-INSTI-NO       PIC  X(013).
+      *--         TE보증기관코드
+               11  V1JLB055-T-E-GRNTY-INSTI-CD   PIC  X(003).
+      *--         보증기관명
+               11  V1JLB055-GRNTY-INSTI-NAME     PIC  X(052).
+      *--         신표준산업분류코드
+               11  V1JLB055-NEW-SI-CLSFI-CD      PIC  X(005).
+      *--         국가코드
+               11  V1JLB055-NATNL-CD             PIC  X(003).
+      *--         신용공여위험가중치
+               11  V1JLB055-GRCR-RISK-WGHT       PIC  9(003).
+      *--         신용공여기관구분
+               11  V1JLB055-GRCR-INSTI-DSTCD     PIC  X(001).
+      *--         보증기관고객식별자
+               11  V1JLB055-GRNTY-I-CUST-IDNFR   PIC  X(010).
+      *================================================================*
+      *        V  1  J  L  B  0  5  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB055-PRCSS-RSULT          ;처리결과
+      *G  V1JLB055-GRID                 ;그리드
+      *L  V1JLB055-TOTAL-LINE-CNT       ;총라인수
+      *A  V1JLB055-DATA-BOOK            ;데이터부
+      *X  V1JLB055-GRNTY-INSTI-NO       ;보증기관번호
+      *X  V1JLB055-T-E-GRNTY-INSTI-CD   ;TE보증기관코드
+      *X  V1JLB055-GRNTY-INSTI-NAME     ;보증기관명
+      *X  V1JLB055-NEW-SI-CLSFI-CD      ;신표준산업분류코드
+      *X  V1JLB055-NATNL-CD             ;국가코드
+      *N  V1JLB055-GRCR-RISK-WGHT       ;신용공여위험가중치
+      *X  V1JLB055-GRCR-INSTI-DSTCD     ;신용공여기관구분
+      *X  V1JLB055-GRNTY-I-CUST-IDNFR   ;보증기관고객식별자

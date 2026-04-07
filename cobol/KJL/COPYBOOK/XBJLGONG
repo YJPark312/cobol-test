@@ -1,0 +1,85 @@
+      *=================================================================00001000
+      *  공통SAM LAYOUT : THKJL0025(차주일계좌명세)                 00002000
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY                            00003000
+      *   MEMBER NAME   : XBJLGONG                                      00004000
+      *  사용예        : 01  XBJLGONG-REC.                            00005000
+      *                        COPY  XBJLGONG.                          00006000
+      *=================================================================00008000
+                                                                        00008100
+      *       그룹회사코드                                            00009000
+           03 XBJLGONG-GROUP-CO-CD           PIC  X(00003).             00009100
+      *       계좌번호                                                00009200
+           03 XBJLGONG-ACNO                  PIC  X(00020).             00009300
+      *       기준일                                                  00009400
+           03 XBJLGONG-BASE-DD               PIC  X(00002).             00009500
+      *       기준년월                                                00009600
+           03 XBJLGONG-BASE-YM               PIC  X(00006).             00009700
+      *       계좌중복일련번호                                        00009800
+           03 XBJLGONG-ACN-DUP-SERNO         PIC S9(00007) COMP-3.      00009900
+      *       고객식별자                                              00010000
+           03 XBJLGONG-CUST-IDNFR            PIC  X(00010).             00010100
+      *       고객관리번호                                            00010200
+           03 XBJLGONG-CUST-MGT-NO           PIC  X(00005).             00010300
+      *       해외현지법인여부                                        00010400
+           03 XBJLGONG-OVSES-LCAL-COPR-YN    PIC  X(00001).             00010500
+      *       차주번호                                                00010600
+           03 XBJLGONG-BRWR-NO               PIC  X(00013).             00010700
+      *       관리부점코드                                            00010800
+           03 XBJLGONG-MGT-BRNCD             PIC  X(00004).             00010900
+      *       계좌적용구분                                            00011000
+           03 XBJLGONG-ACN-APLY-DSTCD        PIC  X(00001).             00011100
+      *       한도계좌여부                                            00011200
+           03 XBJLGONG-LIMT-ACN-YN           PIC  X(00001).             00011300
+      *       상품대분류코드                                          00011400
+           03 XBJLGONG-PRDCT-LAG-CLSFI-CD    PIC  X(00002).             00011500
+      *       상품중분류코드                                          00011600
+           03 XBJLGONG-PRDCT-MEDM-CLSFI-CD   PIC  X(00002).             00011700
+      *       상품템플릿코드                                          00011800
+           03 XBJLGONG-PRDCT-TMPLT-CD        PIC  X(00003).             00011900
+      *       상품번호                                                00012000
+           03 XBJLGONG-PRDCT-NO              PIC  X(00005).             00012100
+      *       한도통합계정과목코드                                    00012200
+           03 XBJLGONG-LIMT-I-TIACC-CD       PIC  X(00013).             00012300
+      *       시작년월일                                              00012400
+           03 XBJLGONG-START-YMD             PIC  X(00008).             00012500
+      *       만기년월일                                              00012600
+           03 XBJLGONG-EXPIR-YMD             PIC  X(00008).             00012700
+      *       종료년월일                                              00012800
+           03 XBJLGONG-END-YMD               PIC  X(00008).             00012900
+      *       상품계약상태구분                                        00013000
+           03 XBJLGONG-PRDCT-C-STUS-DSTCD    PIC  X(00001).             00013100
+      *       통화코드                                                00013200
+           03 XBJLGONG-CNCYCD                PIC  X(00003).             00013300
+      *       통화한도                                                00013400
+           03 XBJLGONG-CRNCY-CLAM            PIC S9(00015)V9(3) COMP-3. 00013500
+      *       통화잔액                                                00013600
+           03 XBJLGONG-CRNCY-BAL             PIC S9(00015)V9(3) COMP-3. 00013700
+      *       BS기준잔액                                              00013800
+           03 XBJLGONG-BS-BASE-BAL           PIC S9(00015) COMP-3.      00013900
+      *       명목액기준한도                                          00014000
+           03 XBJLGONG-TTL-AMT-BASE-CLAM     PIC S9(00015) COMP-3.      00014100
+      *       명목액기준잔액                                          00014200
+           03 XBJLGONG-TTL-AMT-BASE-BAL      PIC S9(00015) COMP-3.      00014300
+      *       TE한도환산금액                                          00014400
+           03 XBJLGONG-TE-LIMT-AUC           PIC S9(00015) COMP-3.      00014500
+      *       TE잔액환산금액                                          00014600
+           03 XBJLGONG-TE-BAL-AUC            PIC S9(00015) COMP-3.      00014700
+      *       CP한도환산금액                                          00014800
+           03 XBJLGONG-INLS-GRCR-LIMT-AUC    PIC S9(00015) COMP-3.      00014900
+      *       CP잔액환산금액                                          00015000
+           03 XBJLGONG-INLS-GRCR-BAL-AUC     PIC S9(00015) COMP-3.      00015100
+      *       CA담보제외금액                                          00015200
+           03 XBJLGONG-CA-SCURTY-ECLUD-AMT   PIC S9(00015) COMP-3.      00015300
+      *       CA담보환산금액                                          00015400
+           03 XBJLGONG-CA-SCURTY-AUC         PIC S9(00015) COMP-3.      00015500
+      *       관련테이블명                                            00015600
+           03 XBJLGONG-RELATD-TBL-NAME       PIC  X(00012).             00015700
+      *       과목코드                                                00015800
+           03 XBJLGONG-SBJCT-CD              PIC  X(00003).             00015900
+      *       시스템최종처리일시                                      00016000
+           03 XBJLGONG-SYS-LAST-PRCSS-YMS    PIC  X(00020).             00016100
+      *       시스템최종사용자번호                                    00016200
+           03 XBJLGONG-SYS-LAST-UNO          PIC  X(00007).             00016300
+      *=================================================================00016400
+      *  TXBJLGONG  C O P Y B O O K   E N D                             00016500
+      *=================================================================00016600

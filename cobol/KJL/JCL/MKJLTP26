@@ -1,0 +1,169 @@
+//MKJLTP26 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 매월3영업일
+//*수시작업명     :  계좌별 신용공여한도 산출
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0072
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 7 2
+//*  %%SET %%C = %%SUBSTR %%A 1 6
+//*********************************************************************
+//*  데이터셋 삭제
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.SHRTAA.SKJL0072.P00002'
+  DELETE  'KJL.SD.SHRTAA.SKJL0073.P00002'
+
+  SET MAXCC=00
+/*
+//*********************************************************************
+//*  테이블　해당　파티션　데이터　삭제
+//*********************************************************************
+//STEP01   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0072',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+  LOAD DATA
+  LOG NO  NOCOPYPEND KEEPDICTIONARY
+  INTO TABLE DB2DBA.THKJL0072
+                   PART %%B INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*신용공여계좌정보생성 THKJL0072(일)/THKJL0073(월)
+//*********************************************************************
+//STEP02   EXEC JZBDEXEC,MBR=BJLD721,OPT=&SYSUID
+//OTFILE   DD DSN=KJL.SD.SHRTAA.SKJL0072.P00002,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP26-001-ONLBAT-KB STAR-%%A-Y
+//*자료기준년월일-원장삭제구분
+//*********************************************************************
+//*THKJL0072(일) LOAD
+//*********************************************************************
+//STEP03   EXEC DSNUPROC,PARM='DAPG,KJL0072',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.SD.SHRTAA.SKJL0072.P00002,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME YES
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0072
+/*
+//*********************************************************************
+//*신용공여일집계 월말 THKJL0072 UNLOAD
+//*********************************************************************
+//STEP04 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0073.P00002,
+//            UNIT=SYSDA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT 그룹회사코드
+          ,계좌번호
+          ,계좌중복일련번호
+          ,기준년월
+          ,통합계정과목코드
+          ,신용공여대상구분
+          ,원만기구분
+          ,잔존만기구분
+          ,"BS기준한도"
+          ,기준환율
+          ,신용공여보증비율
+          ,신용공여담보비율
+          ,"계정과목CCF환산율"
+          ,신용공여금액
+          ,신용공여제외금액
+          ,"CA보증담보합산액"
+          ,"CA보증담보금액1"
+          ,"CA보증담보금액2"
+          ,"CA보증담보금액3"
+          ,"CA보증담보금액4"
+          ,"CA보증담보금액5"
+          ,"CA보증담보금액6"
+          ,"CA보증담보금액7"
+          ,"CA보증담보금액8"
+          ,"CA보증담보금액9"
+          ,"CA보증담보환산금액1"
+          ,"CA보증담보환산금액2"
+          ,"CA보증담보환산금액3"
+          ,"CA보증담보환산금액4"
+          ,"CA보증담보환산금액5"
+          ,"CA보증담보환산금액6"
+          ,"CA보증담보환산금액7"
+          ,"CA보증담보환산금액8"
+          ,"CA보증담보환산금액9"
+          ,신용공여기관구분
+          ,시스템최종처리일시
+          ,시스템최종사용자번호
+      FROM  DB2DBA.THKJL0072
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준일    = '%%B'
+       AND 기준년월  = '%%C'
+    WITH  UR;
+/*
+//*********************************************************************
+//*THKJL0073(월) LOAD
+//*********************************************************************
+//STEP06   EXEC DSNUPROC,PARM='DAPG,KJL0073',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(2000,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,100),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC02 DD  DISP=SHR,DSN=KJL.SD.SHRTAA.SKJL0073.P00002
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME YES
+  INDDN SYSREC02 INTO TABLE
+      DB2DBA.THKJL0073
+/*
+//

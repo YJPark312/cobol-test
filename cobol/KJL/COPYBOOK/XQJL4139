@@ -1,0 +1,127 @@
+      *===========================================================
+      *  프로그램명    : QJL4139
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL4139
+      *  사용예        : 01  XQJL4139-CA.
+      *                      COPY  XQJL4139.
+      *  최종변경일시  : 2024년09월03일13시05분56초
+      *===========================================================
+           03  XQJL4139-IN.
+      *            그룹회사코드
+               05  XQJL4139-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL4139-I-BASE-YM
+                                          PIC  X(00006).
+      *            기준년월일
+               05  XQJL4139-I-BASE-YMD
+                                          PIC  X(00008).
+      *            부점구분
+               05  XQJL4139-I-BRN-DSTIC
+                                          PIC  X(00001).
+      *            소관부점코드
+               05  XQJL4139-I-JRSDZ-BRNCD
+                                          PIC  X(00004).
+      *            소관부점코드1
+               05  XQJL4139-I-JRSDZ-BRNCD1
+                                          PIC  X(00004).
+      *            소관부점코드2
+               05  XQJL4139-I-JRSDZ-BRNCD2
+                                          PIC  X(00004).
+           03  XQJL4139-OUT.
+      *            이사회승인번호
+               05  XQJL4139-O-BRDC-ATHOR-NO
+                           OCCURS  00500  PIC  X(00010).
+      *            고객식별자
+               05  XQJL4139-O-CUST-IDNFR
+                           OCCURS  00500  PIC  X(00010).
+      *            고객명
+               05  XQJL4139-O-CUSTNM
+                           OCCURS  00500  PIC  X(00052).
+      *            소관부점코드
+               05  XQJL4139-O-JRSDZ-BRNCD
+                           OCCURS  00500  PIC  X(00004).
+      *            소관부점명
+               05  XQJL4139-O-JRSD-BRNZ-NAME
+                           OCCURS  00500  PIC  X(00042).
+      *            통화코드1
+               05  XQJL4139-O-CNCYCD1
+                           OCCURS  00500  PIC  X(00003).
+      *            이사회승인금액
+               05  XQJL4139-O-BRDC-ATHOR-AMT
+                           OCCURS  00500  PIC S9(00016)V9(2) COMP-3.
+      *            이사회승인년월일
+               05  XQJL4139-O-BRDC-ATHOR-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            이사회승인유효년월일
+               05  XQJL4139-O-BRDC-ATHOR-VALD-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            관련여신일련번호
+               05  XQJL4139-O-RELATD-LNBZ-SERNO
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            신용공여중분류코드
+               05  XQJL4139-O-GRCR-MIDL-CLSFI-CD
+                           OCCURS  00500  PIC  X(00003).
+      *            계좌번호
+               05  XQJL4139-O-ACNO
+                           OCCURS  00500  PIC  X(00020).
+      *            약정계좌번호
+               05  XQJL4139-O-AGRE-ACNO
+                           OCCURS  00500  PIC  X(00020).
+      *            통합계정과목코드
+               05  XQJL4139-O-INTGRA-TIACC-CD
+                           OCCURS  00500  PIC  X(00013).
+      *            상품명
+               05  XQJL4139-O-PRDCT-NAME
+                           OCCURS  00500  PIC  X(00052).
+      *            통화코드2
+               05  XQJL4139-O-CNCYCD2
+                           OCCURS  00500  PIC  X(00003).
+      *            통화한도
+               05  XQJL4139-O-CRNCY-CLAM
+                           OCCURS  00500  PIC S9(00015)V9(3) COMP-3.
+      *            통화잔액
+               05  XQJL4139-O-CRNCY-BAL
+                           OCCURS  00500  PIC S9(00015)V9(3) COMP-3.
+      *            BS기준한도
+               05  XQJL4139-O-BS-BASE-CLAM
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            BS기준잔액
+               05  XQJL4139-O-BS-BASE-BAL
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            시작년월일
+               05  XQJL4139-O-START-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            만기년월일
+               05  XQJL4139-O-EXPIR-YMD
+                           OCCURS  00500  PIC  X(00008).
+      *            신용공여익스포져금액
+               05  XQJL4139-O-GRCR-EXPSR-AMT
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            금리내용
+               05  XQJL4139-O-IRTZ-CTNT
+                           OCCURS  00500  PIC  X(00042).
+      *            담보형태구분
+               05  XQJL4139-O-SCURTY-FORM-DSTCD
+                           OCCURS  00500  PIC  X(00001).
+      *            담보설정금액
+               05  XQJL4139-O-SCURTY-SETAMT
+                           OCCURS  00500  PIC S9(00015) COMP-3.
+      *            취급부점코드
+               05  XQJL4139-O-HNDLN-BRNCD
+                           OCCURS  00500  PIC  X(00004).
+      *            취급부점명
+               05  XQJL4139-O-HNDLN-BRN-NAME
+                           OCCURS  00500  PIC  X(00042).
+      *            대출취급형태구분
+               05  XQJL4139-O-LN-HNDLN-FORM-DSTCD
+                           OCCURS  00500  PIC  X(00001).
+      *            수기계좌여부
+               05  XQJL4139-O-HWRT-ACN-YN
+                           OCCURS  00500  PIC  X(00001).
+      *            자회사대주주구분
+               05  XQJL4139-O-SBCO-L-SKHDR-DSTCD
+                           OCCURS  00500  PIC  X(00001).
+      *===========================================================
+      *  XQJL4139   C O P Y B O O K   E N D
+      *===========================================================

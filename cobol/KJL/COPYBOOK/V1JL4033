@@ -1,0 +1,56 @@
+      *================================================================*
+      *@ NAME : V1JL4033                                               *
+      *@ DESC : 동일차주별신용공여조회                               *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-10-07 17:01:35                          *
+      *  생성일시     : 2009-10-07 17:01:50                          *
+      *================================================================*
+      *--     자기자본기준금액
+           07  V1JL4033-ONCP-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본기준년월
+           07  V1JL4033-ONCP-BASE-YM             PIC  X(006).
+      *--     출력라인수1
+ROWCNT     07  V1JL4033-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4033-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JL4033-OUTPT-LINE-CNT1.
+      *--       계열기업군코드
+             09  V1JL4033-AFFLT-CORP-GROUP-CD    PIC  X(006).
+      *--       계열기업군명
+             09  V1JL4033-AFFLT-C-GROUP-NAME     PIC  X(042).
+      *--       전년말신용공여
+             09  V1JL4033-PYY-END-GRCR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말신용공여
+             09  V1JL4033-LSMN-END-GRCR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       당월말신용공여
+             09  V1JL4033-TTMM-END-GRCR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전월말대비증감
+             09  V1JL4033-LSMN-E-CNTST-INCRDC    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년말대비증감
+             09  V1JL4033-PYY-E-CNTST-INCRDC     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본대비신용공여율
+             09  V1JL4033-ONCP-CNTST-GRCR-RT     PIC  9(003)V9(02).
+      *--       신용공여규모순위
+             09  V1JL4033-GRCR-SCAL-RANKG        PIC  9(003).
+      *================================================================*
+      *        V  1  J  L  4  0  3  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *S  V1JL4033-ONCP-BSAMT           ;자기자본기준금액
+      *X  V1JL4033-ONCP-BASE-YM         ;자기자본기준년월
+      *L  V1JL4033-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4033-GRID1                ;그리드1
+      *X  V1JL4033-AFFLT-CORP-GROUP-CD  ;계열기업군코드
+      *X  V1JL4033-AFFLT-C-GROUP-NAME   ;계열기업군명
+      *S  V1JL4033-PYY-END-GRCR         ;전년말신용공여
+      *S  V1JL4033-LSMN-END-GRCR        ;전월말신용공여
+      *S  V1JL4033-TTMM-END-GRCR        ;당월말신용공여
+      *S  V1JL4033-LSMN-E-CNTST-INCRDC  ;전월말대비증감
+      *S  V1JL4033-PYY-E-CNTST-INCRDC   ;전년말대비증감
+      *N  V1JL4033-ONCP-CNTST-GRCR-RT   ;자기자본대비신용공여율
+      *N  V1JL4033-GRCR-SCAL-RANKG      ;신용공여규모순위

@@ -1,0 +1,65 @@
+//TKJLNDM3 JOB ,'M V S',CLASS=T,MSGCLASS=X,REGION=0M
+//*********************************************************************
+//* 파일보안서버 전송
+//*********************************************************************
+//NDMSEND  EXEC PGM=DMBATCH
+//DMNETMAP DD  DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB DD  DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL DD  DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT  DD  SYSOUT=*
+//SYSIN    DD  *
+  SIGNON  USERID=(KJL000N,)  ESF=NO  CASE=YES
+  SUBMIT  PROC=MKJLNDM0  MAXDELAY=0             -
+  &SERVNM=nepapo23                              -
+  &TODIR1=/data/efms/data/ftp/kjl000            -
+  &FRDSN1=E905679.SRCHFOR.LIST.AUTOAB           -
+  &TODSN1=3801074-3801074-DB2DBA-AUTOAB.TXT
+  SIGNOFF
+/*
+//*********************************************************************
+//* 파일보안서버 전송
+//*********************************************************************
+//NDMSEND  EXEC PGM=DMBATCH
+//DMNETMAP DD  DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB DD  DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL DD  DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT  DD  SYSOUT=*
+//SYSIN    DD  *
+  SIGNON  USERID=(KJL000N,)  ESF=NO  CASE=YES
+  SUBMIT  PROC=MKJLNDM0  MAXDELAY=0             -
+  &SERVNM=nepapo23                              -
+  &TODIR1=/data/efms/data/ftp/kjl000            -
+  &FRDSN1=E905679.SRCHFOR.LIST.AUTOAP           -
+  &TODSN1=3801074-3801074-DB2DBA-AUTOAP.TXT
+  SIGNOFF
+/*
+//
+
+
+
+
+
+//*================================================================*/
+//* TE 데이터 글로벌플랫폼 정보 제공                       */
+//*----------------------------------------------------------------*/
+//*NDMPROC1  EXEC PGM=DMBATCH
+//DMNETMAP  DD   DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD   DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD   DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD   SYSOUT=*
+//SYSIN     DD   *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0             -
+  &SNODE=NDM.begapo11                        -
+  &FTDSN=KJL.SD.SHRKEE.BJLD561.V001          -
+  &TODSN1="/nfsfile/tstream/DAT/REA/RCV_DAT" -
+  &TODSN2="/KJL_SD_BJLD561_V001_D%%ODATE.txt"
+
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0             -
+  &SNODE=NDM.begapo11                        -
+  &FTDSN=KJL.SD.BJLD112.V001                 -
+  &TODSN1="/nfsfile/tstream/DAT/REA/RCV_DAT" -
+  &TODSN2="/KJL_SD_BJLD112_V001_D%%ODATE.txt"
+ SIGNOFF
+/*
+//

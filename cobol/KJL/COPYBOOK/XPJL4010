@@ -1,0 +1,70 @@
+      *================================================================*
+      *@ NAME : XPJL4010                                               *
+      *@ DESC : PC산업별TE한도설정조회 COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-11-30 13:51:18                          *
+      *  생성일시     : 2009-11-30 13:51:19                          *
+      *================================================================*
+           03  XPJL4010-RETURN.
+             05  XPJL4010-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4010-OK            VALUE  '00'.
+                 88  COND-XPJL4010-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4010-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4010-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4010-ERROR         VALUE  '09'.
+                 88  COND-XPJL4010-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4010-SYSERROR      VALUE  '99'.
+             05  XPJL4010-R-LINE                 PIC  9(006).
+             05  XPJL4010-R-ERRCD                PIC  X(008).
+             05  XPJL4010-R-TREAT-CD             PIC  X(008).
+             05  XPJL4010-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4010-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4010-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XPJL4010-I-BASE-YM              PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XPJL4010-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XPJL4010-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XPJL4010-O-GRID1                OCCURS 001000 TIMES.
+      *--         피어코드
+               07  XPJL4010-O-PEER-DSTCD         PIC  X(005).
+      *--         피어명
+               07  XPJL4010-O-PEER-CD-NAME       PIC  X(102).
+      *--         산업등급
+               07  XPJL4010-O-IDSTRY-V-GRD-DSTCD PIC  X(004).
+      *--         산업별
+               07  XPJL4010-O-IDSTRY-PER-EAD-AMT PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         가용
+               07  XPJL4010-O-AVL-EAD-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         산업별조정율
+               07  XPJL4010-O-IDSTRY-P-ADJS-RATO PIC  9(003)V9(02).
+      *--         산업별T/E금액
+               07  XPJL4010-O-IDSTRY-TE-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         산업별T/E관리금액
+               07  XPJL4010-O-IDSTRY-MGT-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  P  J  L  4  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4010-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4010-I-BASE-YM            ;기준년월
+      *N  XPJL4010-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XPJL4010-O-GRID1              ;그리드1
+      *X  XPJL4010-O-PEER-DSTCD         ;피어코드
+      *X  XPJL4010-O-PEER-CD-NAME       ;피어명
+      *X  XPJL4010-O-IDSTRY-V-GRD-DSTCD ;산업등급
+      *S  XPJL4010-O-IDSTRY-PER-EAD-AMT ;산업별 EAD
+      *S  XPJL4010-O-AVL-EAD-AMT        ;가용 EAD
+      *N  XPJL4010-O-IDSTRY-P-ADJS-RATO ;산업별조정율
+      *S  XPJL4010-O-IDSTRY-TE-AMT      ;산업별T/E금액
+      *S  XPJL4010-O-IDSTRY-MGT-CLAM    ;산업별T/E관리금액

@@ -1,0 +1,112 @@
+      *===========================================================
+      *  프로그램명    : QJL1201
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL1201
+      *  사용예        : 01  XQJL1201-CA.
+      *                      COPY  XQJL1201.
+      *  최종변경일시  : 2023년12월05일17시06분46초
+      *===========================================================
+           03  XQJL1201-IN.
+      *            그룹회사코드
+               05  XQJL1201-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL1201-I-BASE-YM
+                                          PIC  X(00006).
+      *            상품코드
+               05  XQJL1201-I-PRDCT-CD
+                                          PIC  X(00012).
+      *            N회계구분
+               05  XQJL1201-I-N-ACCTG-DSTCD
+                                          PIC  X(00001).
+      *            N상품대분류코드
+               05  XQJL1201-I-N-PRD-LAG-CLSFI-CD
+                                          PIC  X(00002).
+      *            N상품중분류코드
+               05  XQJL1201-I-N-PRD-MEDM-CLSFI-CD
+                                          PIC  X(00002).
+      *            N상품템플릿코드
+               05  XQJL1201-I-N-PRD-TMPLT-CD
+                                          PIC  X(00003).
+      *            N상품번호
+               05  XQJL1201-I-N-PRD-NO
+                                          PIC  X(00005).
+           03  XQJL1201-OUT.
+      *            회계구분
+               05  XQJL1201-O-ACCTG-DSTCD
+                           OCCURS  00100  PIC  X(00001).
+      *            상품대분류코드
+               05  XQJL1201-O-PRDCT-LAG-CLSFI-CD
+                           OCCURS  00100  PIC  X(00002).
+      *            상품중분류코드
+               05  XQJL1201-O-PRDCT-MEDM-CLSFI-CD
+                           OCCURS  00100  PIC  X(00002).
+      *            상품템플릿코드
+               05  XQJL1201-O-PRDCT-TMPLT-CD
+                           OCCURS  00100  PIC  X(00003).
+      *            상품번호
+               05  XQJL1201-O-PRDCT-NO
+                           OCCURS  00100  PIC  X(00005).
+      *            자산구분
+               05  XQJL1201-O-ASST-DSTIC
+                           OCCURS  00100  PIC  X(00001).
+      *            잔액CCF환산율
+               05  XQJL1201-O-BAL-CCF-UTCRT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            EAD한도CCF환산율
+               05  XQJL1201-O-EAD-LIMT-CCF-UTCRT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            EAD한도NCCF환산율
+               05  XQJL1201-O-EAD-LIMT-NCCF-UTCRT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            한도기준TE환산율
+               05  XQJL1201-O-LIMT-BASE-TE-UTCRT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            CP대상계정여부
+               05  XQJL1201-O-INLS-GT-ACITM-YN
+                           OCCURS  00100  PIC  X(00001).
+      *            CA대상계정여부
+               05  XQJL1201-O-CA-TAGET-ACITM-YN
+                           OCCURS  00100  PIC  X(00001).
+      *            신용공여한도환산율
+               05  XQJL1201-O-GRCR-LIMT-UTCRT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            상품명
+               05  XQJL1201-O-PRDCT-NAME
+                           OCCURS  00100  PIC  X(00252).
+      *            EAD중분류코드
+               05  XQJL1201-O-EAD-MEDM-CLSFI-CD
+                           OCCURS  00100  PIC  X(00003).
+      *            EAD중분류명
+               05  XQJL1201-O-EAD-MEDM-CLSFI-NAME
+                           OCCURS  00100  PIC  X(00042).
+      *            TE중분류코드
+               05  XQJL1201-O-TE-MEDM-CLSFI-CD
+                           OCCURS  00100  PIC  X(00003).
+      *            TE중분류명
+               05  XQJL1201-O-TE-MEDM-CLSFI-NAME
+                           OCCURS  00100  PIC  X(00042).
+      *            CA중분류코드
+               05  XQJL1201-O-CA-MEDM-CLSFI-CD
+                           OCCURS  00100  PIC  X(00003).
+      *            CA중분류명
+               05  XQJL1201-O-CA-MEDM-CLSFI-NAME
+                           OCCURS  00100  PIC  X(00042).
+      *            통합계정과목코드
+               05  XQJL1201-O-INTGRA-TIACC-CD
+                           OCCURS  00100  PIC  X(00013).
+      *            국외편중관리대상여부
+               05  XQJL1201-O-ABRD-L-MGT-TAGET-YN
+                           OCCURS  00100  PIC  X(00001).
+      *            바젤기준신용환산률
+               05  XQJL1201-O-BSL-B-CRDT-UTCNG-RT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            거액익스포져대상여부
+               05  XQJL1201-O-BSM-EXPSR-TAGET-YN
+                           OCCURS  00100  PIC  X(00001).
+      *            신용익스포져대상여부
+               05  XQJL1201-O-CRDT-EXPSR-TAGET-YN
+                           OCCURS  00100  PIC  X(00001).
+      *===========================================================
+      *  XQJL1201   C O P Y B O O K   E N D
+      *===========================================================

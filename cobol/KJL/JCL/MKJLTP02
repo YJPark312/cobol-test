@@ -1,0 +1,829 @@
+//MKJLTP02 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*  %%SET %%C = %%SUBSTR %%A 7 2
+//*  %%SET %%D = %%SUBSTR %%A 1 6
+//*  %%SET %%E = %%$WCALC %%A -1 WORKDAYS
+//*********************************************************************
+//*배치작업기준일 : 매월3영업일
+//*선행작업명     : MKJLT25K
+//*********************************************************************
+//*  EAD 한도관리계좌MC
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLI25K,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SM.BJLI25J.V001
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLI25K.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A-N
+//*자료기준년월일-원장삭제구분
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0127
+//*********************************************************************
+//STEP02   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0127',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0127
+                   PART %%C INDDN PARTKJL RESUME NO REPLACE
+/*
+//STEP03  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLI271.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0128 ')
+        ,CHAR('THKJL0128DB:')
+        ,그룹회사코드
+        ,기준년월
+        ,차주고객식별자
+        ,한도계좌번호
+        ,한도상품대분류코드
+        ,한도상품중분류코드
+        ,한도상품템플릿코드
+        ,한도상품번호
+        ,차주번호
+        ,"BS기준잔액"
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"EAD한도"
+        ,"명목잔액CCF환산금액"
+        ,"EAD한도CCF환산금액"
+        ,"한도기준TE금액"
+        ,"잔액기준TE금액"
+        ,"CA담보제외금액"
+        ,"CA담보환산금액"
+        ,신용공여한도
+        ,외화신용공여한도
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,"BS기준한도"
+    FROM DB2DBA.THKJL0128
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월               = '%%D'
+    WITH UR;
+/*
+//*********************************************************************
+//*  EAD 차주별익스포져중간집계원장구축
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLI271,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0129
+//*********************************************************************
+//STEP05   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0129',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0129
+                   PART %%C INDDN PARTKJL RESUME NO REPLACE
+/*
+//STEP06  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLI291.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0130 ')
+        ,CHAR('THKJL0130DB:')
+        ,그룹회사코드
+        ,기준년월
+        ,차주고객식별자
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,차주번호
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"한도기준TE금액"
+        ,"잔액기준TE금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0130
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월               = '%%D'
+    WITH UR;
+/*
+//*********************************************************************
+//*  EAD 차주별익스포져집계원장구축
+//*********************************************************************
+//STEP07 EXEC JZBDEXEC,MBR=BJLI291,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP08  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLI351.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0136 ')
+        ,CHAR('THKJL0136DB:')
+        ,그룹회사코드
+        ,기준년월
+        ,계열기업군코드
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,"TE직접간접구분"
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"한도기준TE금액"
+        ,"잔액기준TE금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0136
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월               = '%%D'
+    WITH UR;
+/*
+//*********************************************************************
+//*  EAD 그룹익스포져일정보생성
+//*********************************************************************
+//STEP09 EXEC JZBDEXEC,MBR=BJLI351,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP10  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD391.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0039 ')
+        ,CHAR('THKJL0039DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,산업평가등급구분
+        ,대분류업종코드
+        ,"TEPEER구분"
+        ,대상업체건수
+        ,산업관리한도
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"TE한도환산금액"
+        ,"TE잔액환산금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,전년도말익스포져금액
+        ,국외대상업체건수
+        ,국외산업관리한도금액
+        ,국외명목기준한도금액
+        ,국외명목액기준잔액
+        ,"국외TE한도환산금액"
+        ,"국외TE잔액환산금액"
+        ,"국외전년말TE금액"
+        ,전체대상업체건수
+    FROM  DB2DBA.THKJL0039
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*   산업등급별TE현황자료추출
+//*********************************************************************
+//STEP11 EXEC JZBDEXEC,MBR=BJLD391,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP12  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD601.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0060 ')
+        ,CHAR('THKJL0060DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,산업평가등급구분
+        ,대분류업종코드
+        ,"TEPEER구분"
+        ,대상업체건수
+        ,산업관리한도
+        ,명목액기준한도
+        ,명목액기준잔액
+        ,"TE한도환산금액"
+        ,"TE잔액환산금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0060
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*   한도관리최고한도산업등급별TE현황추출
+//*********************************************************************
+//STEP13 EXEC JZBDEXEC,MBR=BJLD601,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*    한도초과업체명세정보생성
+//*********************************************************************
+//STEP15 EXEC JZBDEXEC,MBR=BJLD611,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD611.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP16  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD661.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0066 ')
+        ,CHAR('THKJL0066DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,대분류업종코드
+        ,"산업TE기업규모구분"
+        ,내부신용평가등급구분
+        ,"산업별규모별TE금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,"국외산업규모TE금액"
+    FROM DB2DBA.THKJL0066
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*  산업별규모별등급별익스포져일집계자료추출
+//*********************************************************************
+//STEP17 EXEC JZBDEXEC,MBR=BJLD661,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A-%%A
+//*자료기준년월일
+/*
+//STEP18  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD671.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0067 ')
+        ,CHAR('THKJL0067DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,대분류업종코드
+        ,"산업TE기업규모구분"
+        ,대상업체건수
+        ,"산업별규모별SUB한도"
+        ,"산업별규모별TE금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,한도초과년월일
+        ,예외적용년월일
+        ,취급중단년월일
+        ,"취급기준1적용년월일"
+        ,"취급기준2적용년월일"
+        ,전년도말익스포져금액
+        ,조회여부
+        ,대출금액
+        ,국외대상업체건수
+        ,국외산업규모한도금액
+        ,"국외산업규모TE금액"
+        ,"국외전년말TE금액"
+        ,전체대상업체건수
+    FROM DB2DBA.THKJL0067
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*  산업별규모별익스포져일집계자료추출（경기민감업종기업규모별）
+//*********************************************************************
+//STEP19 EXEC JZBDEXEC,MBR=BJLD671,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A-%%A
+//*자료기준년월일
+//*********************************************************************
+//*  산업별규모별익스포져일집계자료갱신（한도초과일／예외적용일）
+//*********************************************************************
+//STEP20 EXEC JZBDEXEC,MBR=BJLD674,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD674.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A-%%E
+//*자료기준년월일
+/*
+//STEP21  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD701.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0070 ')
+        ,CHAR('THKJL0070DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,대분류업종코드
+        ,지역본부코드
+        ,전년도말익스포져금액
+        ,"지역본부SUB한도"
+        ,"지역본부순증SUB한도"
+        ,지역본부익스포져금액
+        ,지역본부한도여유금액
+        ,"지역본부SUB소진율"
+        ,지역본부예외승인한도
+        ,지역본부예외승인금액
+        ,지역예외승인여유금액
+        ,지역예외승인소진율
+        ,지역본부기준소진율
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0070
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*  지역본부별산업별　익스포져　일집계자료생성
+//*********************************************************************
+//STEP22 EXEC JZBDEXEC,MBR=BJLD701,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A-%%A
+//*자료기준년월일
+/*
+//STEP23  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD551.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0055 ')
+        ,CHAR('THKJL0055DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,계좌번호
+        ,계좌중복일련번호
+        ,고객식별자
+        ,고객관리번호
+        ,차주번호
+        ,계약한도구분
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,대출자격구분
+        ,"ISO국가코드"
+        ,관리부점코드
+        ,시작년월일
+        ,만기년월일
+        ,종료년월일
+        ,과목코드
+        ,통화코드
+        ,통화한도
+        ,통화금일잔액
+        ,"USD한도"
+        ,"USD금일잔액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0055
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+     AND 과목코드              IN ('R02','R05','R07')
+    WITH UR;
+/*
+//*********************************************************************
+//*   국별익스포져(국외점포)계좌추출
+//*********************************************************************
+//STEP24 EXEC JZBDEXEC,MBR=BJLD551,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*   국별익스포져(KBTS-외화채권（개별여신））계좌추출
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD553,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*   국별익스포져(KBTS-외화파생상품)계좌추출
+//*********************************************************************
+//STEP25 EXEC JZBDEXEC,MBR=BJLD554,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP26  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD571.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0057 ')
+        ,CHAR('THKJL0057DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,관리부점코드
+        ,"ISO국가코드"
+        ,영문국가명
+        ,국가별관리한도
+        ,대출잔액
+        ,지급보증잔액
+        ,회사채잔액
+        ,주식잔액
+        ,유가증권잔액
+        ,예치금잔액
+        ,파생상품잔액
+        ,기타잔액
+        ,합계잔액
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,지역관리한도금액
+        ,당행국가신용등급구분
+        ,국가전체공통한도여부
+        ,국가전체공통한도금액
+        ,국가위험수준구분
+        ,한도관리지역구분
+    FROM DB2DBA.THKJL0057
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*   국별부점별익스포져생성
+//*********************************************************************
+//STEP27 EXEC JZBDEXEC,MBR=BJLD571,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0131
+//*********************************************************************
+//STEP28   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0131',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0131
+                   PART %%C INDDN PARTKJL RESUME NO REPLACE
+/*
+//STEP29  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLI311.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0132 ')
+        ,CHAR('THKJL0132DB:')
+        ,그룹회사코드
+        ,기준년월
+        ,차주고객식별자
+        ,관리부점코드
+        ,한도계좌번호
+        ,한도상품대분류코드
+        ,한도상품중분류코드
+        ,한도상품템플릿코드
+        ,한도상품번호
+        ,"한도기준TE금액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0132
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월               = '%%D'
+    WITH UR;
+/*
+//*********************************************************************
+//*  국외상품차주　익스포져　일집계자료생성
+//*********************************************************************
+//STEP30   EXEC JZBDEXEC,MBR=BJLI311,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP31  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD911.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0091 ')
+        ,CHAR('THKJL0091DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,관리부점코드
+        ,대분류업종코드
+        ,익스포져금액
+        ,편중관리비율
+        ,합산관리여부
+        ,편중관리익스포져금액
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0091
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*  국외영업점산업별TE현황 정보생성
+//*********************************************************************
+//STEP32   EXEC JZBDEXEC,MBR=BJLD911,OPT=&SYSUID,COND=(4,LT)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*    토탈익스포져일일배치작업결과（완료）
+//*********************************************************************
+//STEP99 EXEC JZBDEXEC,MBR=BJLDLG1,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLDLG1.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-001-ONLBAT-KB STAR-%%A-1-1
+//*자료기준년월일
+//*토탈익스포져업무구분（１：TE－고정）
+//*배치완료여부（１：완료，０：진행）
+/*
+//*********************************************************************
+//*거액익스포져계좌명세(THKJL0076/THKJL0078) 생성
+//*월말THKJL0077 추가 생성
+//*********************************************************************
+//STEP33   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0076',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0076
+                   PART %%C INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*거액익스포져계좌명세(THKJL0076) 생성
+//*********************************************************************
+//STEP34   EXEC JZBDEXEC,MBR=BJLD761,OPT=&SYSUID,COND=(4,LT)
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD761.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A-Y
+//*자료기준년월일-원장삭제구분
+/*
+//*********************************************************************
+//*거액익스포져차주그룹명세(THKJL0078) 생성
+//*********************************************************************
+//STEP35   EXEC JZBDEXEC,MBR=BJLD781,OPT=&SYSUID,COND=(4,LT)
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD781.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%A-MKJLTP02-002-ONLBAT-KB STAR-%%A-Y
+//*자료기준년월일-원장삭제구분
+//

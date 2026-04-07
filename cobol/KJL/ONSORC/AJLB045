@@ -1,0 +1,374 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB045 (AS산업취급관리)
+      *@처리유형  : AS
+      *@처리개요  : 산업취급관리하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20220707: 신규작성
+      * YBH    :20221027: 확인권자 결재기능 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB045.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   22/07/07.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB045'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   산업취급등록
+       01  XDJLB068-CA.
+           COPY  XDJLB068.
+      *   산업취급조회
+       01  XDJL4068-CA.
+           COPY  XDJL4068.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJLB045-CA.
+           COPY  YNJLB045.
+
+       01  YPJLB045-CA.
+           COPY  YPJLB045.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJLB045-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@1 출력영역 확보
+           #GETOUT YPJLB045-CA
+           .
+      * COMMON AREA SETTING 파라미터 조립
+      * MOVE 계좌번호           TO JICOM-ACNO
+      * MOVE 상품코드           TO JICOM-PRDCT-CD
+      * MOVE 고객번호           TO JICOM-CNO
+      * MOVE 상품계약회차       TO JICOM-PRDCT-CTRC-NTH
+
+      *@1  COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   처리구분에 따른 입력값 검증
+      *    (01:조회/02:등록/03:등록결재/04:해제/05:해제결재)
+           EVALUATE YNJLB045-PRCSS-DSTIC
+           WHEN CO-CHA-01
+           WHEN CO-CHA-02
+      *       대분류업종코드
+               IF YNJLB045-LAG-CLSFI-BZTYP-CD1 = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN CO-CHA-03
+           WHEN CO-CHA-04
+           WHEN CO-CHA-05
+      *       대분류업종코드
+               IF YNJLB045-LAG-CLSFI-BZTYP-CD2(1) = SPACE
+                   #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           WHEN OTHER
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           EVALUATE YNJLB045-PRCSS-DSTIC
+           WHEN CO-CHA-01
+      *#1     조회처리시
+      *@1     산업별규모별SUB한도조회 프로그램호출
+               PERFORM S3200-DJL4068-CALL-RTN
+                  THRU S3200-DJL4068-CALL-EXT
+           WHEN CO-CHA-02
+           WHEN CO-CHA-03
+           WHEN CO-CHA-04
+           WHEN CO-CHA-05
+      *#1     등록/삭제처리시
+      *@1     산업별규모별SUB한도등록 프로그램호출
+               PERFORM S3100-DJLB068-CALL-RTN
+                  THRU S3100-DJLB068-CALL-EXT
+           END-EVALUATE
+
+      *@1 폼ID SET
+           #BOFMID 'V1KJL11045000'
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   산업취급등록 DC호출
+      *-----------------------------------------------------------------
+       S3100-DJLB068-CALL-RTN.
+
+      *  카피북초기화
+           INITIALIZE                  XDJLB068-IN
+
+      *@1 입력파라미터 조립
+      *   처리구분
+           MOVE YNJLB045-PRCSS-DSTIC
+             TO XDJLB068-I-PRCSS-DSTIC
+      *   대분류업종코드
+           MOVE YNJLB045-LAG-CLSFI-BZTYP-CD1
+             TO XDJLB068-I-LAG-CLSFI-BZTYP-CD1
+      *   일련번호
+           MOVE YNJLB045-SERNO1
+             TO XDJLB068-I-SERNO1
+      *   취급중단년월일
+           MOVE YNJLB045-HNDLN-DSCN-YMD
+             TO XDJLB068-I-HNDLN-DSCN-YMD
+      *   예외적용년월일
+           MOVE YNJLB045-ECEPT-APLY-YMD
+             TO XDJLB068-I-ECEPT-APLY-YMD
+      *   총라인수
+           MOVE YNJLB045-TOTAL-LINE-CNT
+             TO XDJLB068-I-TOTAL-LINE-CNT
+
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 1000
+                        OR WK-I > YNJLB045-TOTAL-LINE-CNT
+      *       대분류업종코드2
+               MOVE YNJLB045-LAG-CLSFI-BZTYP-CD2(WK-I)
+                 TO XDJLB068-I-LAG-CLSFI-BZTYP-CD2(WK-I)
+      *       대분류업종코드명2
+               MOVE YNJLB045-LAG-C-BZTYP-CD-NM2(WK-I)
+                 TO XDJLB068-I-LAG-C-BZTYP-CD-NM2(WK-I)
+221027*       일련번호2
+               MOVE YNJLB045-SERNO2(WK-I)
+                 TO XDJLB068-I-SERNO2(WK-I)
+           END-PERFORM
+
+      *@1 산업별규모별SUB한도등록 프로그램 호출
+           #DYCALL DJLB068 YCCOMMON-CA XDJLB068-CA
+
+      *   처리결과CHECK
+           IF COND-XDJLB068-OK
+               MOVE XDJLB068-O-PRCSS-RSULT
+                 TO YPJLB045-PRCSS-RSULT
+           ELSE
+              #ERROR XDJLB068-R-ERRCD
+                     XDJLB068-R-TREAT-CD
+                     XDJLB068-R-STAT
+           END-IF
+           .
+
+       S3100-DJLB068-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   산업취급조회 DC호출
+      *-----------------------------------------------------------------
+       S3200-DJL4068-CALL-RTN.
+
+      *  카피북초기화
+           INITIALIZE                  XDJL4068-IN
+
+      *@1 입력파라미터 조립
+      *   처리구분
+           MOVE YNJLB045-PRCSS-DSTIC
+             TO XDJL4068-I-PRCSS-DSTIC
+      *   대분류업종코드
+           MOVE YNJLB045-LAG-CLSFI-BZTYP-CD1
+             TO XDJL4068-I-LAG-CLSFI-BZTYP-CD
+      *   조회기준시작년월일
+           MOVE YNJLB045-INQURY-B-START-YMD
+             TO XDJL4068-I-INQURY-B-START-YMD
+      *   조회기준종료년월일
+           MOVE YNJLB045-INQURY-BASE-END-YMD
+             TO XDJL4068-I-INQURY-BASE-END-YMD
+
+      *@1 산업취급조회 프로그램 호출
+           #DYCALL DJL4068 YCCOMMON-CA XDJL4068-CA
+
+      *   처리결과CHECK
+           EVALUATE TRUE
+           WHEN COND-XDJL4068-OK
+      *       출력라인수 조립
+               MOVE XDJL4068-O-TOTAL-LINE-CNT
+                 TO YPJLB045-TOTAL-LINE-CNT
+
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 1000
+                            OR WK-I > XDJL4068-O-TOTAL-LINE-CNT
+      *           대분류업종코드
+                   MOVE XDJL4068-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                     TO YPJLB045-LAG-CLSFI-BZTYP-CD(WK-I)
+      *           대분류업종코드명
+                   MOVE XDJL4068-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                     TO YPJLB045-LAG-C-BZTYP-CD-NAME(WK-I)
+221027*           일련번호
+                   MOVE XDJL4068-O-SERNO(WK-I)
+                     TO YPJLB045-SERNO(WK-I)
+      *           취급중단년월일
+                   MOVE XDJL4068-O-HNDLN-DSCN-YMD(WK-I)
+                     TO YPJLB045-HNDLN-DSCN-YMD(WK-I)
+      *           예외적용년월일
+                   MOVE XDJL4068-O-ECEPT-APLY-YMD(WK-I)
+                     TO YPJLB045-ECEPT-APLY-YMD(WK-I)
+      *           산업등록해제구분코드
+                   MOVE  XDJL4068-O-LIMT-EIRR-DSTCD(WK-I)
+                     TO  YPJLB045-LIMT-EIRR-DSTCD(WK-I)
+      *           등록직원번호
+                   MOVE  XDJL4068-O-REGI-EMPID(WK-I)
+                     TO  YPJLB045-REGI-EMPID(WK-I)
+      *           등록직원명
+                   MOVE  XDJL4068-O-REGI-EMNM(WK-I)
+                     TO  YPJLB045-REGI-EMNM(WK-I)
+      *           등록년월일
+                   MOVE  XDJL4068-O-REGI-YMD(WK-I)
+                     TO  YPJLB045-REGI-YMD(WK-I)
+      *           등록결재직원번호
+                   MOVE  XDJL4068-O-REGI-APRVAL-EMPID(WK-I)
+                     TO  YPJLB045-REGI-APRVAL-EMPID(WK-I)
+      *           등록결재직원명
+                   MOVE  XDJL4068-O-REGI-APRVAL-EMNM(WK-I)
+                     TO  YPJLB045-REGI-APRVAL-EMNM(WK-I)
+      *           등록결재년월일
+                   MOVE  XDJL4068-O-REGI-APRVAL-YMD(WK-I)
+                     TO  YPJLB045-REGI-APRVAL-YMD(WK-I)
+      *           해제직원번호
+                   MOVE  XDJL4068-O-REVOC-EMPID(WK-I)
+                     TO  YPJLB045-REVOC-EMPID(WK-I)
+      *           해제직원명
+                   MOVE  XDJL4068-O-REVOC-EMNM(WK-I)
+                     TO  YPJLB045-REVOC-EMNM(WK-I)
+      *           해제년월일
+                   MOVE  XDJL4068-O-REVOC-YMD(WK-I)
+                     TO  YPJLB045-REVOC-YMD(WK-I)
+      *           해제결재직원번호
+                   MOVE  XDJL4068-O-REVOC-APRVAL-EMPID(WK-I)
+                     TO  YPJLB045-REVOC-APRVAL-EMPID(WK-I)
+      *           해제결재직원명
+                   MOVE  XDJL4068-O-REVOC-APRVAL-EMNM(WK-I)
+                     TO  YPJLB045-REVOC-APRVAL-EMNM(WK-I)
+      *           해제결재년월일
+                   MOVE  XDJL4068-O-REVOC-APRVAL-YMD(WK-I)
+                     TO  YPJLB045-REVOC-APRVAL-YMD(WK-I)
+               END-PERFORM
+           WHEN COND-XDJL4068-NOTFOUND
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJL4068-R-ERRCD
+                      XDJL4068-R-TREAT-CD
+                      XDJL4068-R-STAT
+           END-EVALUATE
+           .
+
+       S3200-DJL4068-CALL-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK WK-MESSAGE.
+       S9000-FINAL-EXT.
+           EXIT.

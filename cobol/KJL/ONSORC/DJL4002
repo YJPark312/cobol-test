@@ -1,0 +1,308 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4002 (DC그룹코드및그룹명조회)
+      *@처리유형  : DC
+      *@처리개요  : 그룹코드 및 그룹명 조회처리하는
+      *@              프로그램이다
+      *@구현방법  : 자동거래
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081203: 신규작성
+      *김진태:20090417: 프로그램수정
+      *김진태:20091102: 에러／조치메세지　정비
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  그룹사기본              : THKJL0013            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4002.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/03.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900002             PIC  X(008) VALUE 'B3900002'.
+           03  CO-B4200223             PIC  X(008) VALUE 'B4200223'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4002'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-MAX-CNT              PIC  9(005) VALUE 30.
+           03  CO-NUM-ONE              PIC  9(001) VALUE 1.
+           03  CO-NUM-6                PIC  9(001) VALUE 6.
+           03  CO-NUM-42               PIC  9(002) VALUE 42.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-LEN                  PIC  9(003).
+      *    NEXT KEY 항목정의
+           03  WK-BF-KEY.
+               05  WK-BF-GROUP-NO      PIC  X(006).
+           03  WK-AF-KEY.
+               05  WK-AF-GROUP-NO      PIC  X(006).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    KJL.DDB2.DBCOPY
+       01  XQJL0021-CA.
+           COPY  XQJL0021.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    DC COPYBOOK
+       01  XDJL4002-CA.
+           COPY  XDJL4002.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4002-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-SET-RTN
+              THRU S6000-OUTPUT-SET-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+                         XQJL0021-IN
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XDJL4002-OUT
+                         XDJL4002-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XDJL4002-I-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:처리구분 오류입니다
+           IF XDJL4002-I-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@2.2 계열적용구분미입력CHECK
+      *@실행조건:XDJL4002-I-AFFLT-APLY-DSTCD = SPACE
+      *@처리내용:계열적용구분미입력일경우 오류처리한다
+      *@에러메세지:필수항목미입력오류입니다.
+      *@조치메세지:전산업무담당자에게 문의바랍니다.
+           IF XDJL4002-I-AFFLT-APLY-DSTCD = SPACE
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0021)입력파라메타=
+      *@SET(그룹회사구분코드,계열적용구분,계열기업군코드,
+      *@계열기업군명)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0021-I-GROUP-CO-CD
+      *    계열적용구분
+           MOVE XDJL4002-I-AFFLT-APLY-DSTCD
+             TO XQJL0021-I-AFFLT-APLY-DSTCD
+
+      *유효문자 뒤의 모든 공백을 '%' 로 채워준다
+      *유효문자　뒤의　공백을 COUNT
+           MOVE ZERO                   TO WK-LEN
+           INSPECT FUNCTION REVERSE(XDJL4002-I-AFFLT-CORP-GROUP-CD)
+           TALLYING WK-LEN FOR LEADING SPACE.
+      *유효문자　뒤의　모든공백을 '%'  로　채움
+           IF WK-LEN NOT = ZERO
+              MOVE ALL '%'
+                TO XDJL4002-I-AFFLT-CORP-GROUP-CD(CO-NUM-6 - WK-LEN + 1
+                                                     :WK-LEN)
+           END-IF
+
+      *    계열기업군코드
+           MOVE XDJL4002-I-AFFLT-CORP-GROUP-CD
+             TO XQJL0021-I-AFFLT-CORP-GROUP-CD
+
+      *유효문자 뒤의 모든 공백을 '%' 로 채워준다
+      *유효문자　뒤의　공백을 COUNT
+           MOVE ZERO                   TO WK-LEN
+           INSPECT FUNCTION REVERSE(XDJL4002-I-AFFLT-C-GROUP-NAME)
+           TALLYING WK-LEN FOR LEADING SPACE.
+      *유효문자　뒤의　모든공백을 '%'  로　채움
+           IF WK-LEN NOT = ZERO
+              MOVE ALL '%'
+                TO XDJL4002-I-AFFLT-C-GROUP-NAME(CO-NUM-42 - WK-LEN + 1
+                                                     :WK-LEN)
+           END-IF
+
+      *    계열기업군코드
+           MOVE XDJL4002-I-AFFLT-C-GROUP-NAME
+             TO XQJL0021-I-AFFLT-C-GROUP-NAME
+
+      *    그룹코드 - NEXT KEY
+      *    자동거래일경우 NEXT KEY 처리한다
+           IF BICOM-DSCN-TRAN-DSTCD = CO-CHA-1 OR CO-CHA-2
+              MOVE BOCOM-BF-TDK-INFO-CTNT
+                TO WK-BF-KEY
+              MOVE WK-BF-GROUP-NO
+                TO XQJL0021-I-NEXT-KEY
+           END-IF
+
+      *@3.2 SQLIO 호출
+      *@처리내용:QJL0021프로그램을 호출한다
+      *@관련테이블:THKJL0013(그룹사기본) 접근유형:READ
+           #DYSQLA QJL0021 XQJL0021-CA
+
+      *@3.3 호출결과 확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+      *@3.4 호출결과 확인
+      *@실행조건:OTHER
+      *@처리내용:오류처리한다.
+      *@에러메시지:테이블SELECT에러입니다．
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+               WHEN OTHER
+                    #ERROR CO-B4200223 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력파라미터 SET
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-SET-RTN.
+      *@4 출력처리
+
+      *@4.1 출력라인수 조립
+           IF DBSQL-SELECT-CNT > CO-MAX-CNT
+              MOVE CO-MAX-CNT
+                TO XDJL4002-O-OUTPT-LINE-CNT1
+           ELSE
+              MOVE DBSQL-SELECT-CNT
+                TO XDJL4002-O-OUTPT-LINE-CNT1
+           END-IF
+
+      *@4.2 그리드1 조립
+      *@실행조건:WK-I > YPJL4002-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립 =
+      *@SET(계열코드,계열명)
+           PERFORM VARYING WK-I FROM CO-NUM-ONE BY CO-NUM-ONE
+                     UNTIL WK-I > XDJL4002-O-OUTPT-LINE-CNT1
+
+      *            계열코드
+                   MOVE XQJL0021-O-AFFLT-CORP-GROUP-CD(WK-I)
+                     TO XDJL4002-O-AFFLT-CORP-GROUP-CD(WK-I)
+      *            계열명
+                   MOVE XQJL0021-O-AFFLT-C-GROUP-NAME(WK-I)
+                     TO XDJL4002-O-AFFLT-C-GROUP-NAME(WK-I)
+           END-PERFORM
+
+      *@4.3 NEXT DATA KEY SET
+      *@실행조건:DBSQL-SELECT-CNT > CO-MAX-CNT
+      *@처리내용:중단거래 대비한 마지막 KEY 항목 SET
+           IF DBSQL-SELECT-CNT > CO-MAX-CNT
+              MOVE XQJL0021-O-AFFLT-CORP-GROUP-CD(31)
+                TO WK-AF-GROUP-NO
+              #DSCNTR 2 WK-AF-KEY
+           END-IF
+           .
+       S6000-OUTPUT-SET-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상 종료 함
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

@@ -1,0 +1,46 @@
+      *================================================================*
+      *@ NAME : YPJLB054                                               *
+      *@ DESC : AS산업별규모별SUB한도관리COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2019-12-20 14:32:45                          *
+      *  생성일시     : 2019-12-20 14:32:57                          *
+      *  전체길이     : 00006107 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  YPJLB054-PRCSS-RSULT              PIC  X(002).
+      *--     총라인수
+           07  YPJLB054-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드
+           07  YPJLB054-GRID                     OCCURS 000100 TIMES.
+      *--       대분류업종코드
+             09  YPJLB054-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       산업TE기업규모구분
+             09  YPJLB054-IDSTRY-TCS-DSTCD       PIC  X(001).
+      *--       산업별규모별SUB한도
+             09  YPJLB054-IDSTRY-PSP-SUB-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       국외산업규모한도
+             09  YPJLB054-ABRD-I-SCAL-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       취급중단년월일
+             09  YPJLB054-HNDLN-DSCN-YMD         PIC  X(008).
+      *--       취급기준1적용년월일
+             09  YPJLB054-HNDLN-B-1-APLY-YMD     PIC  X(008).
+      *--       취급기준2적용년월일
+             09  YPJLB054-HNDLN-B-2-APLY-YMD     PIC  X(008).
+      *--       조회여부
+             09  YPJLB054-INQURY-YN              PIC  X(001).
+      *================================================================*
+      *        Y  P  J  L  B  0  5  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJLB054-PRCSS-RSULT          ;처리결과
+      *N  YPJLB054-TOTAL-LINE-CNT       ;총라인수
+      *A  YPJLB054-GRID                 ;그리드
+      *X  YPJLB054-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  YPJLB054-IDSTRY-TCS-DSTCD     ;산업TE기업규모구분
+      *S  YPJLB054-IDSTRY-PSP-SUB-LIMT  ;산업별규모별SUB한도
+      *S  YPJLB054-ABRD-I-SCAL-LIMT     ;국외산업규모한도
+      *X  YPJLB054-HNDLN-DSCN-YMD       ;취급중단년월일
+      *X  YPJLB054-HNDLN-B-1-APLY-YMD   ;취급기준1적용년월일
+      *X  YPJLB054-HNDLN-B-2-APLY-YMD   ;취급기준2적용년월일
+      *X  YPJLB054-INQURY-YN            ;조회여부

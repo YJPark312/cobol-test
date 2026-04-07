@@ -1,0 +1,887 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD781 (거액익스포져차주그룹명세)
+      *@처리유형  : BATCH
+      *@처리개요  : 거액익스포져차주그룹명세
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20240123: 신규작성
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM            : 테이블              : 접근유형
+      **  ------------------------   -----------------------------------
+      **  거액익스포져일계좌명세   : THKJL0076           : R
+      **  거액익스포져월계좌명세   : THKJL0077           : R
+      **  거액익스포져차주그룹명세 : THKJL0178           : CD
+      **
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD781.
+       AUTHOR.                         HYH.
+       DATE-WRITTEN.                   24/01/23.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *-----------------------------------------------------------------
+       INPUT-OUTPUT                    SECTION.
+      *-----------------------------------------------------------------
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       FILE                            SECTION.
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD781'.
+
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NTFND           PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-SQL-OK               PIC  9(003) VALUE  000.
+           03  CO-SQL-NTFND            PIC  9(003) VALUE  100.
+
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-07               PIC  X(002) VALUE '07'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+
+           03  CO-NUM-0                PIC  9(001) VALUE  0.
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+           03  CO-NUM-20               PIC  9(002) VALUE  20.
+           03  CO-NUM-50               PIC  9(002) VALUE  50.
+           03  CO-NUM-1000             PIC  9(007) VALUE  1000.
+
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-FETCH-CNT1           PIC  9(013) VALUE  ZEROS.
+           03  WK-FETCH-CNT2           PIC  9(013) VALUE  ZEROS.
+           03  WK-INSERT-CNT           PIC  9(013) VALUE  ZEROS.
+           03  WK-DELETE-CNT           PIC  9(013) VALUE  ZEROS.
+
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  EOF-Y                           VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-TBL-ID               PIC  X(008).
+           03  WK-FUNC-CD              PIC  X(008).
+           03  WK-REC-CNT              PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0078-REC.
+           COPY    TRJL0078.
+       01  TKJL0078-KEY.
+           COPY    TKJL0078.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+       EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+       01  WK-HOST-IN.
+      *       그룹회사코드
+           03 WK-H-I-GROUP-CO-CD            PIC  X(003).
+      *       기준일
+           03 WK-H-I-BASE-DD                PIC  X(002).
+      *       기준년월
+           03 WK-H-I-BASE-YM                PIC  X(006).
+      *       기준년월일
+           03 WK-H-I-BASE-YMD               PIC  X(008).
+
+       01  WK-HOST-DEL-OUT.
+      *       그룹회사코드
+           03 WK-H-D-GROUP-CO-CD            PIC  X(00003).
+      *       기준년월일
+           03 WK-H-D-BASE-YMD               PIC  X(00008).
+      *       차주고객식별자
+           03 WK-H-D-BRWR-CUST-IDNFR        PIC  X(00010).
+
+       01  WK-HOST-OUT1.
+      *       그룹회사코드
+           03 WK-H-O1-GROUP-CO-CD           PIC  X(00003).
+      *       기준년월일
+           03 WK-H-O1-BASE-YMD              PIC  X(00008).
+      *       차주고객식별자
+           03 WK-H-O1-BRWR-CUST-IDNFR       PIC  X(00010).
+      *       거액CCF환산금액
+           03 WK-H-O1-BSM-CCF-AUC           PIC S9(00015) COMP-3.
+      *       신용공여익스포져금액
+           03 WK-H-O1-GRCR-EXPSR-AMT        PIC S9(00015) COMP-3.
+      *       순위
+           03 WK-H-O1-RANKG                 PIC S9(00003) COMP-3.
+      *       거래상대방구분
+           03 WK-H-O1-BSM-T-CNPRT-DSTCD     PIC  X(00001).
+
+
+       EXEC  SQL  END  DECLARE              SECTION  END-EXEC.
+      *-----------------------------------------------------------------
+      * SQL CURSOR DECLARE
+      *-----------------------------------------------------------------
+           EXEC SQL
+            DECLARE  KJL0078_DEL_CUR   CURSOR  WITH HOLD FOR
+            SELECT   그룹회사코드
+                   , 기준년월일
+                   , 차주고객식별자
+              FROM   DB2DBA.THKJL0078
+             WHERE   그룹회사코드  = :WK-H-I-GROUP-CO-CD
+               AND   기준년월일    = :WK-H-I-BASE-YMD
+           END-EXEC
+
+           EXEC SQL
+            DECLARE  KJL0076_SEL_CUR   CURSOR  WITH HOLD FOR
+            SELECT  그룹회사코드
+                  , :WK-H-I-BASE-YMD   AS 기준년월일
+                  , 차주고객식별자
+                  , 거액
+                  , 신용공여
+                  , 순위
+                  , 거래상대방구분
+              FROM (
+            SELECT T.그룹회사코드
+                  ,T.차주고객식별자
+                  ,T.거액
+                  ,T.신용공여
+                  ,RANK() OVER (ORDER BY T.거액 DESC)
+                   AS 순위
+                  ,T.거래상대방구분
+               FROM
+               (SELECT A.그룹회사코드
+                      ,A.차주고객식별자
+                      ,SUM(A."거액CCF환산금액")  AS 거액
+                      ,SUM(A.신용공여익스포져금액) AS 신용공여
+                      ,'1'                           AS 거래상대방구분
+                  FROM DB2DBA.THKJL0076 A
+                 WHERE A.그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                   AND A.기준일       = :WK-H-I-BASE-DD
+                   AND A.기준년월     = :WK-H-I-BASE-YM
+                 GROUP BY A.그룹회사코드
+                         ,A.차주고객식별자
+                UNION ALL
+                SELECT A.그룹회사코드
+                      ,D.계열기업군코드            AS 차주고객식별자
+                      ,SUM(A."거액CCF환산금액")  AS 거액
+                      ,SUM(A.신용공여익스포져금액) AS 신용공여
+                      ,'2'                           AS 거래상대방구분
+                  FROM DB2DBA.THKJL0076 A
+                      ,DB2DBA.THKJL0014 D
+                 WHERE A.그룹회사코드   = D.그룹회사코드
+                   AND A.기준년월       = D.기준년월
+                   AND A.차주고객식별자 = D.고객식별자
+                   AND A.그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                   AND A.기준일       = :WK-H-I-BASE-DD
+                   AND A.기준년월     = :WK-H-I-BASE-YM
+                   AND D.계열적용구분 = '1'
+                 GROUP BY A.그룹회사코드
+                         ,D.계열기업군코드
+               ) T
+             ) TBL
+             WHERE 순위 <= 100
+             ORDER BY 순위
+              WITH UR
+           END-EXEC.
+
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@   SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@   재작업 대비 삭제 프로세스 수행
+           PERFORM  S3000-KJL0078-DELETE-RTN
+              THRU  S3000-KJL0078-DELETE-EXT
+
+           PERFORM  S4000-KJL0078-INSERT-RTN
+              THRU  S4000-KJL0078-INSERT-EXT
+
+      *@  처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *    초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@WK-AREA,DBIO,PARAMETER 초기화
+           INITIALIZE    WK-AREA
+                         WK-SYSIN
+                         YCDBIOCA-CA
+
+      *@JCL SYSIN ACCEPT  처리기준
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD781 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *@   그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *@   구분코드
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *@   공통 UTILITY CALL
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+      *@   RETURN 정보 확인
+           IF  XBJISTDT-R-STAT = ZEROS
+      *@       정상처리
+               CONTINUE
+           ELSE
+      *@       에러처리
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@  그룹회사구분코드 미입력시 오류
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  작업실행일 미입력시 오류
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  작업명 미입력시 오류
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  처리회차 미입력시 오류
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  배치작업구분 미입력시 오류
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  작업자ID  미입력시 오류
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  자료기준년월일 미입력시 오류
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+           INITIALIZE    WK-HOST-IN
+
+      *@   그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-H-I-GROUP-CO-CD
+
+      *@   기준일
+           MOVE  WK-SYSIN-BASE-YMD(7:2)
+             TO  WK-H-I-BASE-DD
+
+      *@   기준년월
+           MOVE  WK-SYSIN-BASE-YMD(1:6)
+             TO  WK-H-I-BASE-YM
+
+      *@   기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  WK-H-I-BASE-YMD
+
+           .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *@   거액익스포져차주그룹명세(THKJL0078)삭제
+      *-----------------------------------------------------------------
+       S3000-KJL0078-DELETE-RTN.
+
+           #USRLOG '*DELETE START TIME : ' FUNCTION CURRENT-DATE
+
+           PERFORM  S3100-KJL0078-OPEN-RTN
+              THRU  S3100-KJL0078-OPEN-EXT
+
+           PERFORM  S3200-KJL0078-FETCH-RTN
+              THRU  S3200-KJL0078-FETCH-EXT
+
+           PERFORM  UNTIL EOF-Y
+
+                    PERFORM  S3300-KJL0078-DELETE-RTN
+                       THRU  S3300-KJL0078-DELETE-EXT
+
+                    PERFORM  S3200-KJL0078-FETCH-RTN
+                       THRU  S3200-KJL0078-FETCH-EXT
+           END-PERFORM
+
+      *    DELETE 1000건 단위 COMMIT 처리
+           INITIALIZE                      WK-AREA
+           MOVE  'KJL0078'             TO  WK-TBL-ID
+           MOVE  'LAST'                TO  WK-FUNC-CD
+           MOVE   WK-DELETE-CNT        TO  WK-REC-CNT
+
+           PERFORM  S8000-COMMIT-PROCESS-RTN
+              THRU  S8000-COMMIT-PROCESS-EXT
+
+           PERFORM  S3400-KJL0078-CLOSE-RTN
+              THRU  S3400-KJL0078-CLOSE-EXT
+
+           #USRLOG '*DELETE END   TIME : ' FUNCTION CURRENT-DATE
+
+           .
+       S3000-KJL0078-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   CURSOR OPEN
+      *-----------------------------------------------------------------
+       S3100-KJL0078-OPEN-RTN.
+
+           INITIALIZE    WK-SWITCHES
+
+           EXEC SQL
+               OPEN  KJL0078_DEL_CUR
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'OPEN'       TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR OPEN시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3100-KJL0078-OPEN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   CURSOR FETCH
+      *-----------------------------------------------------------------
+       S3200-KJL0078-FETCH-RTN.
+
+           INITIALIZE                  WK-HOST-DEL-OUT
+
+           EXEC SQL
+              FETCH  KJL0078_DEL_CUR
+               INTO  :WK-HOST-DEL-OUT
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     ADD   CO-NUM-1    TO  WK-FETCH-CNT1
+               WHEN  CO-SQL-NTFND
+                     SET   EOF-Y       TO  TRUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'FETCH'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR FETCH시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3200-KJL0078-FETCH-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   거액익스포져차주그룹명세(THKJL0078)삭제
+      *-----------------------------------------------------------------
+       S3300-KJL0078-DELETE-RTN.
+
+
+           INITIALIZE    TKJL0078-KEY
+                         TRJL0078-REC
+
+      *   그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  KJL0078-PK-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE  WK-H-D-BASE-YMD
+             TO  KJL0078-PK-BASE-YMD
+
+      *@   차주고객식별자
+           MOVE  WK-H-D-BRWR-CUST-IDNFR
+             TO  KJL0078-PK-BRWR-CUST-IDNFR
+
+           #DYDBIO  SELECT-CMD-Y  TKJL0078-PK  TRJL0078-REC
+
+      *@1 DBIO 처리결과확인 ERROR 처리
+           EVALUATE SQLCODE
+               WHEN CO-SQL-OK
+               WHEN CO-SQL-NTFND
+                    CONTINUE
+               WHEN OTHER
+                    MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                    MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                    MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                    MOVE 'SELECT시 오류가 발생했습니다'
+                                      TO  XZUGEROR-I-MSG
+      *@에러메시지:내부 본 처리
+                    #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                    #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      **DB  LOG  WRITE START
+           IF  WK-FETCH-CNT1 < CO-NUM-1000
+               SET  COND-DBIO-CHGLOG-YES  TO TRUE
+           ELSE
+               SET  COND-DBIO-CHGLOG-NO   TO TRUE
+           END-IF
+
+           #DYDBIO DELETE-CMD-Y  TKJL0078-PK TRJL0078-REC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     ADD  CO-NUM-1     TO  WK-DELETE-CNT
+
+      *    DELETE 1000건 단위 COMMIT 처리
+                     INITIALIZE                      WK-AREA
+                     MOVE  'KJL0078'             TO  WK-TBL-ID
+                     MOVE  'DELETE'              TO  WK-FUNC-CD
+                     MOVE   WK-DELETE-CNT        TO  WK-REC-CNT
+
+                     PERFORM  S8000-COMMIT-PROCESS-RTN
+                        THRU  S8000-COMMIT-PROCESS-EXT
+
+               WHEN  CO-SQL-NTFND
+                     #USRLOG '<< THKJL0078 DELETE OK >>'
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'DELETE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DELETE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+      *@에러메시지:내부 본 처리
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+
+       S3300-KJL0078-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   CURSOR CLOSE
+      *-----------------------------------------------------------------
+       S3400-KJL0078-CLOSE-RTN.
+
+           EXEC SQL
+              CLOSE  KJL0078_DEL_CUR
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'CLOSE'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR CLOSE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           .
+       S3400-KJL0078-CLOSE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  거액익스포져차주그룹명세(THKJL0078) 등록
+      *-----------------------------------------------------------------
+       S4000-KJL0078-INSERT-RTN.
+
+           PERFORM  S4100-KJL0078-OPEN-RTN
+              THRU  S4100-KJL0078-OPEN-EXT
+
+           PERFORM  S4200-KJL0078-FETCH-RTN
+              THRU  S4200-KJL0078-FETCH-EXT
+
+           PERFORM  UNTIL EOF-Y
+
+                    PERFORM  S4400-KJL0078-INSERT-RTN
+                       THRU  S4400-KJL0078-INSERT-EXT
+
+                    PERFORM  S4200-KJL0078-FETCH-RTN
+                       THRU  S4200-KJL0078-FETCH-EXT
+           END-PERFORM
+
+      *    마지막 1000건 미만 INSERT / UPDATE  COMMIT 처리
+           INITIALIZE                      WK-AREA
+           MOVE  'KJL0078'             TO  WK-TBL-ID
+           MOVE  'LAST'                TO  WK-FUNC-CD
+           MOVE   WK-INSERT-CNT        TO  WK-REC-CNT
+
+           PERFORM  S8000-COMMIT-PROCESS-RTN
+              THRU  S8000-COMMIT-PROCESS-EXT
+
+           PERFORM  S4400-KJL0078-CLOSE-RTN
+              THRU  S4400-KJL0078-CLOSE-EXT
+
+           .
+       S4000-KJL0078-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR OPEN
+      *-----------------------------------------------------------------
+       S4100-KJL0078-OPEN-RTN.
+
+           INITIALIZE    WK-SWITCHES
+
+           EXEC SQL
+               OPEN  KJL0076_SEL_CUR
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'OPEN'       TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR OPEN시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           .
+       S4100-KJL0078-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR FETCH
+      *-----------------------------------------------------------------
+       S4200-KJL0078-FETCH-RTN.
+
+           EXEC SQL
+              FETCH  KJL0076_SEL_CUR
+               INTO  :WK-HOST-OUT1
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     ADD   CO-NUM-1    TO  WK-FETCH-CNT2
+               WHEN  CO-SQL-NTFND
+                     SET   EOF-Y       TO  TRUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'FETCH'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR FETCH시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           .
+       S4200-KJL0078-FETCH-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@    거액익스포져차주그룹명세(THKJL0078) 등록
+      *-----------------------------------------------------------------
+       S4400-KJL0078-INSERT-RTN.
+
+           INITIALIZE                  TKJL0078-KEY
+                                       TRJL0078-REC
+
+      *@   그룹회사코드
+           MOVE  WK-H-O1-GROUP-CO-CD
+             TO  RJL0078-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE  WK-H-I-BASE-YMD
+             TO  RJL0078-BASE-YMD
+
+      *@   차주고객식별자
+           MOVE  WK-H-O1-BRWR-CUST-IDNFR
+             TO  RJL0078-BRWR-CUST-IDNFR
+
+      *@   거액CCF환산금액
+           MOVE  WK-H-O1-BSM-CCF-AUC
+             TO  RJL0078-BSM-CCF-AUC
+
+      *@   신용공여익스포져금액
+           MOVE  WK-H-O1-GRCR-EXPSR-AMT
+             TO  RJL0078-GRCR-EXPSR-AMT
+
+      *@   순위
+           MOVE  WK-H-O1-RANKG
+             TO  RJL0078-RANKG
+
+      *@   거래상대방구분
+           MOVE  WK-H-O1-BSM-T-CNPRT-DSTCD
+             TO  RJL0078-BSM-T-CNPRT-DSTCD
+
+           #DYDBIO  INSERT-CMD-Y TKJL0078-PK TRJL0078-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-INSERT-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'INSERT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'INSERT시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+
+      *    마지막 1000건 미만 INSERT / UPDATE  COMMIT 처리
+           INITIALIZE                      WK-AREA
+           MOVE  'KJL0078'             TO  WK-TBL-ID
+           MOVE  'INSERT'              TO  WK-FUNC-CD
+           MOVE   WK-INSERT-CNT        TO  WK-REC-CNT
+
+           PERFORM  S8000-COMMIT-PROCESS-RTN
+              THRU  S8000-COMMIT-PROCESS-EXT
+
+                               .
+       S4400-KJL0078-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR CLOSE
+      *-----------------------------------------------------------------
+       S4400-KJL0078-CLOSE-RTN.
+
+           EXEC SQL
+              CLOSE  KJL0076_SEL_CUR
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-SQL-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0078'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'CLOSE'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR CLOSE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S4400-KJL0078-CLOSE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  INSERT / UPDATE 1000건 단위 COMMIT 처리
+      *-----------------------------------------------------------------
+       S8000-COMMIT-PROCESS-RTN.
+
+      *    1000 건　마다　 COMMIT & USRLOG
+           IF  (FUNCTION MOD(WK-REC-CNT, 100000) = CO-NUM-0)  OR
+               (WK-FUNC-CD                     = 'LAST'  )
+
+               #USRLOG  '*' WK-TBL-ID '-' WK-FUNC-CD '-' WK-REC-CNT
+
+               EXEC SQL
+                    COMMIT
+               END-EXEC
+
+      * Commit 처리결과 SQL-CODE를 확인하여 정상/오류 처리
+               EVALUATE  SQLCODE
+                   WHEN  CO-SQL-OK
+                         CONTINUE
+                   WHEN  OTHER
+                         MOVE  WK-TBL-ID   TO  XZUGEROR-I-TBL-ID
+                         MOVE  WK-FUNC-CD  TO  XZUGEROR-I-FUNC-CD
+                         MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                         MOVE 'DBCommit시오류가발생했습니다 '
+                                           TO  XZUGEROR-I-MSG
+                         #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                         #OKEXIT CO-CHA-08
+               END-EVALUATE
+           END-IF
+                               .
+       S8000-COMMIT-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* KJL0078 DEL FETCH  COUNT  = ' WK-FETCH-CNT1
+           #USRLOG '* KJL0078     DELETE COUNT  = ' WK-DELETE-CNT
+
+           #USRLOG '* KJL0127 SEL FETCH  COUNT  = ' WK-FETCH-CNT1
+           #USRLOG '* KJL0078     INSERT COUNT  = ' WK-INSERT-CNT
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD781 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.
+

@@ -1,0 +1,91 @@
+      *================================================================*
+      *@ NAME : YPJL4125                                               *
+      *@ DESC : AS(EAD)포괄신용공여한도기업여신현황 COPYBOOK         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2022-03-10 14:39:25                          *
+      *  생성일시     : 2022-03-10 14:39:30                          *
+      *  전체길이     : 01705274 BYTES                               *
+      *================================================================*
+      *--     채무자명
+           07  YPJL4125-DBTRZ-NAME               PIC  X(052).
+      *--     여신성최고한도
+           07  YPJL4125-LNBZ-I-HGST-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹명
+           07  YPJL4125-AFFLT-C-GROUP-NAME       PIC  X(052).
+      *--     유효기일
+           07  YPJL4125-MGT-LIMT-VALD-YMD        PIC  X(008).
+      *--     포괄신용공여관리한도
+           07  YPJL4125-MGT-CLAM                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹신용등급
+           07  YPJL4125-INTNL-CV-GRD-DSTCD       PIC  X(004).
+      *--     업종명
+           07  YPJL4125-STND-IDSTRY-CD-NAME      PIC  X(052).
+      *--     최종포괄신용공여관리한도
+           07  YPJL4125-LAST-INLS-LIMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     기업신용등급
+           07  YPJL4125-INTNL-CV-GRD-DSTCD1      PIC  X(004).
+      *--     부실회계기업등급
+           07  YPJL4125-INSL-ACCTG-CORP-GRD      PIC  X(001).
+      *--     기사용액
+           07  YPJL4125-INLS-GRCR-LIMT-AUC       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4125-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     출력라인수1
+           07  YPJL4125-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4125-GRID1                    OCCURS 005000 TIMES.
+      *--       기준년월일
+             09  YPJL4125-BASE-YMD               PIC  X(008).
+      *--       계좌번호
+             09  YPJL4125-ACNO                   PIC  X(020).
+      *--       상품코드
+             09  YPJL4125-PRDCT-CD               PIC  X(012).
+      *--       상품명
+             09  YPJL4125-PRDCT-NAME             PIC  X(252).
+      *--       명목액기준한도
+             09  YPJL4125-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  YPJL4125-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       대출일
+             09  YPJL4125-START-YMD              PIC  X(008).
+      *--       만기일
+             09  YPJL4125-EXPIR-YMD              PIC  X(008).
+      *--       별도전결권적용여부
+             09  YPJL4125-SEPA-DAR-APLY-YN       PIC  X(001).
+      *--     별도전결권적용금액
+           07  YPJL4125-SEPA-DAR-APLY-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  1  2  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4125-DBTRZ-NAME           ;채무자명
+      *S  YPJL4125-LNBZ-I-HGST-LIMT     ;여신성최고한도
+      *X  YPJL4125-AFFLT-C-GROUP-NAME   ;그룹명
+      *X  YPJL4125-MGT-LIMT-VALD-YMD    ;유효기일
+      *S  YPJL4125-MGT-CLAM             ;포괄신용공여관리한도
+      *X  YPJL4125-INTNL-CV-GRD-DSTCD   ;그룹신용등급
+      *X  YPJL4125-STND-IDSTRY-CD-NAME  ;업종명
+      *S  YPJL4125-LAST-INLS-LIMT       ;최종포괄신용공여관리한도
+      *X  YPJL4125-INTNL-CV-GRD-DSTCD1  ;기업신용등급
+      *X  YPJL4125-INSL-ACCTG-CORP-GRD  ;부실회계기업등급
+      *S  YPJL4125-INLS-GRCR-LIMT-AUC   ;기사용액
+      *S  YPJL4125-LIMT-SEXTR-AMT       ;한도여유액
+      *N  YPJL4125-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4125-GRID1                ;그리드1
+      *X  YPJL4125-BASE-YMD             ;기준년월일
+      *X  YPJL4125-ACNO                 ;계좌번호
+      *X  YPJL4125-PRDCT-CD             ;상품코드
+      *X  YPJL4125-PRDCT-NAME           ;상품명
+      *S  YPJL4125-TTL-AMT-BASE-CLAM    ;명목액기준한도
+      *S  YPJL4125-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *X  YPJL4125-START-YMD            ;대출일
+      *X  YPJL4125-EXPIR-YMD            ;만기일
+      *X  YPJL4125-SEPA-DAR-APLY-YN     ;별도전결권적용여부
+      *S  YPJL4125-SEPA-DAR-APLY-AMT    ;별도전결권적용금액

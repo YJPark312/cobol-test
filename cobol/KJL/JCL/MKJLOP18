@@ -1,0 +1,37 @@
+//MKJLOP18 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLOB17
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0025
+//* %%GLOBAL  PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//STEP01   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0025',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0025
+                   PART %%A INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*   차주일계좌명세
+//*********************************************************************
+//STEP02   EXEC JZBDEXEC,MBR=BJLD25K,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLD25J.V001
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLOP18-001-ONLBAT-KB STAR-%%$ODATE-Y
+//*자료기준년월일-원장삭제구분

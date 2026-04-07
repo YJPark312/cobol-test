@@ -1,0 +1,51 @@
+      *================================================================*
+      *@ NAME : XDJL4005                                               *
+      *@ DESC : DC피어코드및피어코드명조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-08 18:44:55                          *
+      *  생성일시     : 2009-06-08 18:44:57                          *
+      *================================================================*
+           03  XDJL4005-RETURN.
+             05  XDJL4005-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4005-OK            VALUE  '00'.
+                 88  COND-XDJL4005-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4005-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4005-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4005-ERROR         VALUE  '09'.
+                 88  COND-XDJL4005-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4005-SYSERROR      VALUE  '99'.
+             05  XDJL4005-R-LINE                 PIC  9(006).
+             05  XDJL4005-R-ERRCD                PIC  X(008).
+             05  XDJL4005-R-TREAT-CD             PIC  X(008).
+             05  XDJL4005-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4005-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4005-I-PRCSS-DSTIC          PIC  X(002).
+      *--       피어코드
+             05  XDJL4005-I-PEER-DSTCD           PIC  X(005).
+      *--       피어코드명
+             05  XDJL4005-I-PEER-CD-NAME         PIC  X(102).
+      *----------------------------------------------------------------*
+           03  XDJL4005-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XDJL4005-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4005-O-GRID1                OCCURS 000500 TIMES.
+      *--         피어코드
+               07  XDJL4005-O-PEER-DSTCD         PIC  X(005).
+      *--         피어코드명
+               07  XDJL4005-O-PEER-CD-NAME       PIC  X(102).
+      *================================================================*
+      *        X  D  J  L  4  0  0  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4005-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4005-I-PEER-DSTCD         ;피어코드
+      *X  XDJL4005-I-PEER-CD-NAME       ;피어코드명
+      *N  XDJL4005-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4005-O-GRID1              ;그리드1
+      *X  XDJL4005-O-PEER-DSTCD         ;피어코드
+      *X  XDJL4005-O-PEER-CD-NAME       ;피어코드명

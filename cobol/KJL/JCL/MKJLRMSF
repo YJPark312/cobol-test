@@ -1,0 +1,44 @@
+//MKJLRMSF JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMSE                                       */
+//*********************************************************************
+//*   국별관리한도원장UNLOAD -지주사　제공자료                   */
+//********************************************************************/
+//STEP01   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0056'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0056.P00001,DISP=OLD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월
+           ,  "ISO국가코드"
+           , 영문국가명
+           , 한도관리지역구분
+           , 한도국가체질구분
+           , 경보발령여부
+           , 경보발령등록년월일
+           , 모니터링여부
+           , 모니터링등록년월일
+           ,  "SNP등급구분"
+           , 무디스등급구분
+           , 피치등급구분
+           ,  SUBSTR(CHAR(전체관리한도),2,19)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0056
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '%%$OYEAR.%%OMONTH'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*

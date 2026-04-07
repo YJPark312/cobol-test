@@ -1,0 +1,56 @@
+      *================================================================*
+      *@ NAME : YPJL4032                                               *
+      *@ DESC : AS동일차주신용공여조회 COPYBOOK                      *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-04-17 10:19:53                          *
+      *  생성일시     : 2009-04-17 10:20:05                          *
+      *================================================================*
+      *--     계열코드명
+           07  YPJL4032-CMGR-NAME                PIC  X(042).
+      *--     신용공여한도
+           07  YPJL4032-ONCP-BSAMT               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신용공여잔액
+           07  YPJL4032-CA-SCURTY-AUC            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도여유액
+           07  YPJL4032-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     업무규제자기자본
+           07  YPJL4032-ONCP-BSAMT1              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     자기자본기준년월
+           07  YPJL4032-ONCP-BASE-YM             PIC  X(006).
+      *--     출력라인수1
+           07  YPJL4032-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4032-GRID1                    OCCURS 0100 TIMES.
+      *--       채무자번호
+             09  YPJL4032-BRWR-NO1               PIC  X(013).
+      *--       채무자명
+             09  YPJL4032-DBTR-NAME1             PIC  X(052).
+      *--       신용공여잔액(은행기준)
+             09  YPJL4032-BS-BASE-BAL1           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       신용공여잔액(금감원기준)
+             09  YPJL4032-CA-SCURTY-AUC1         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       제외자산
+             09  YPJL4032-ECLUD-ASAM1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  3  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YPJL4032-CMGR-NAME            ;계열코드명
+      *S  YPJL4032-ONCP-BSAMT           ;신용공여한도
+      *S  YPJL4032-CA-SCURTY-AUC        ;신용공여잔액
+      *S  YPJL4032-LIMT-SEXTR-AMT       ;한도여유액
+      *S  YPJL4032-ONCP-BSAMT1          ;업무규제자기자본
+      *X  YPJL4032-ONCP-BASE-YM         ;자기자본기준년월
+      *N  YPJL4032-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4032-GRID1                ;그리드1
+      *X  YPJL4032-BRWR-NO1             ;채무자번호
+      *X  YPJL4032-DBTR-NAME1           ;채무자명
+      *S  YPJL4032-BS-BASE-BAL1         ;신용공여잔액(은행기준)
+      *S  YPJL4032-CA-SCURTY-AUC1       ;신용공여잔액(금감원기준)
+      *S  YPJL4032-ECLUD-ASAM1          ;제외자산

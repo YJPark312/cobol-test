@@ -1,0 +1,53 @@
+//MKJLSNDY JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLSND1
+//*********************************************************************
+//*   거액익스포져차주그룹명세UNLOAD - DW제공자료
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.SHRTAA.SKJL0078.P00001'
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0078.P00001,
+//            UNIT=SYSPA,DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(1000,0500),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 그룹회사코드
+        ,기준년월일
+        ,차주고객식별자
+        ,"거액CCF환산금액"
+        ,신용공여익스포져금액
+        ,순위
+        ,거액거래상대방구분
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0078
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '%%$ODATE'
+    WITH UR;
+//*
+//

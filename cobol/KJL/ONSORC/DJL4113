@@ -1,0 +1,1182 @@
+      *=================================================================00001022
+      *@업무명    : KJL     (Total Exposure)                          00002022
+      *@프로그램명: DJL4113 (EAD-과목별TE현황조회－일별／월별）   00003022
+      *@처리유형  : DC                                                00004022
+      *@처리개요  : 조회기준일과 채무자번호에 대한 자산의     00005022
+      *@            : 계정과목별 구성현황을 조회처리하는 프로그 00006022
+      *@            : 램이다                                          00007022
+      *@구현방법  : OPEN-FETCH-CLOSE
+      *-----------------------------------------------------------------00008022
+      *                 P R O G R A M   변　경　이　력                00009022
+      *-----------------------------------------------------------------00009122
+      *@성명 : 일자 : 변　경　내　용                              00009222
+      * ----------------------------------------------------------------00009322
+      *김진태:20101029: 신규작성                                    00009422
+      *박주희:20170201:  KB-PIN 전환（２차）                        00009422
+      *박주희:20170629:  KB-PIN 전환（３차）                        00009422
+      * YBH    :20200228: TE일일배치작업　진행중이면
+      *                  ＇진행중＇사용자　메세지　띄움
+      *=================================================================00009622
+      ******************************************************************00009722
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00009922
+      **  ------------------------- ------------------------------------00010022
+      **  차주관리한도기본        : THKJL0011            : R          00010222
+      **  채무자고객기본          : THKJL0015            : R          00010322
+      **  차주익스포져일집계      : THKJL0129            : R          00010422
+      **  간접익스포져일집계      : THKJL0031            : R          00010522
+      **  간접익스포져월집계      : THKJL0032            : R          00010522
+      **                            : THKJL0025            : R          00010622
+      **  상품코드                : THKJL0118            : R          00010722
+      **                            : THKJL0027            : R          00010822
+      **                            : THKJL0019            : R          00010922
+      **                            : THKJL0026            : R          00011022
+      **                            : THKJL0028            : R          00011122
+      **  파생상품차주별익스포저  : THKJLR007            : R          00011122
+      ******************************************************************00011222
+       IDENTIFICATION                  DIVISION.                        00300022
+      *=================================================================00310022
+       PROGRAM-ID.                     DJL4113.                         00320022
+       AUTHOR.                         김진태.                        00330022
+       DATE-WRITTEN.                   10/10/29.                        00340022
+      *=================================================================00350022
+       ENVIRONMENT                     DIVISION.                        00360022
+      *=================================================================00370022
+       CONFIGURATION                   SECTION.                         00380022
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00390022
+       DATA                            DIVISION.                        00400022
+      *=================================================================00410022
+       WORKING-STORAGE                 SECTION.                         00420022
+      *-----------------------------------------------------------------00430022
+      *CONSTANT ERROR AREA                                              00440022
+      *-----------------------------------------------------------------00450022
+       01  CO-ERROR-AREA.                                               00460022
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200220             PIC  X(008) VALUE 'B4200220'.
+           03  CO-B4200231             PIC  X(008) VALUE 'B4200231'.
+      *        전산업무담당자에게　문의하시기　바랍니다．
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+200228     03  CO-B3800205             PIC  X(008) VALUE 'B3800205'.
+200228     03  CO-UKJL0037             PIC  X(008) VALUE 'UKJL0037'.
+
+      *-----------------------------------------------------------------00530022
+      * CONSTANT AREA                                                   00540022
+      *-----------------------------------------------------------------00550022
+       01  CO-AREA.                                                     00560022
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4113'.     00570022
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00580022
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00590022
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00600022
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00610022
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00620022
+                                                                        00630022
+           03  CO-MAX-CNT              PIC  9(005) VALUE 1000.          00640022
+                                                                        00660022
+200228     03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00670022
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.          00680022
+                                                                        00690022
+           03  CO-CHA-Y                PIC  X(001) VALUE '1'.           00700022
+           03  CO-CHA-N                PIC  X(001) VALUE '0'.           00710022
+      *-----------------------------------------------------------------00720022
+      * WORKING AREA                                                    00730022
+      *-----------------------------------------------------------------00740022
+       01  WK-AREA.                                                     00750022
+           03  WK-I                    PIC  9(005) COMP.                00760022
+           03  WK-J                    PIC  9(005) COMP.                00770022
+           03  WK-BIT                  PIC  X(001).                     00780022
+           03  WK-GUBUN1               PIC  X(025).                     00780022
+           03  WK-GUBUN2               PIC  X(025).                     00780022
+           03  WK-CUR-CNT              PIC  9(005) COMP.                00790022
+           03  WK-SUM1.
+               05 WK-TTL-AMT-BASE-CLAM1 PIC  9(015).
+               05 WK-TTL-AMT-BASE-BAL1  PIC  9(015).
+               05 WK-TE-LIMT-AUC1       PIC  9(015).
+               05 WK-TE-BAL-AUC1        PIC  9(015).
+           03  WK-SUM2.
+               05 WK-TTL-AMT-BASE-CLAM2 PIC  9(015).
+               05 WK-TTL-AMT-BASE-BAL2  PIC  9(015).
+               05 WK-TE-LIMT-AUC2       PIC  9(015).
+               05 WK-TE-BAL-AUC2        PIC  9(015).
+      *-----------------------------------------------------------------00800022
+      * PGM INTERFACE PARAMETER                                         00810022
+      *-----------------------------------------------------------------00820022
+      *관리한도조회
+       01  XQJL1121-CA.
+           COPY    XQJL1121.
+      *익스포져조회
+       01  XQJL1122-CA.
+           COPY    XQJL1122.
+      *간접익스포져조회
+       01  XQJL1123-CA.
+           COPY    XQJL1123.
+      *익스포져조회（월）
+       01  XQJL1125-CA.
+           COPY    XQJL1125.
+      *간접익스포져조회（월）
+       01  XQJL1126-CA.
+           COPY    XQJL1126.
+      *파생상품총거래한도조회
+       01  XQJL1128-CA.
+           COPY    XQJL1128.
+      *과목별TE현황조회－일
+       01  XQJL1131-CA.                                                 00961022
+           COPY    XQJL1131.                                            00962022
+      *과목별TE현황조회－월
+       01  XQJL1132-CA.                                                 00963022
+           COPY    XQJL1132.                                            00964022
+200228*   토탈익스포져일일배치작업결과　조회
+       01  XQJLI056-CA.
+           COPY    XQJLI056.
+
+      *-----------------------------------------------------------------00970022
+      * DBIO SQLIO INTERFACE PARAMETER                                  00980022
+      *-----------------------------------------------------------------00990022
+170629* DBIO INTERFACE COPYBOOK
+           COPY    YCDBIOCA.                                            01010022
+      * SQLIO INTERFACE COPYBOOK
+           COPY    YCDBSQLA.                                            01010022
+      *-----------------------------------------------------------------01020022
+      * TABLE ACCESS INTERFACE PARAMETER                                01030022
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01040022
+      *-----------------------------------------------------------------00810000
+      * DBIO ACCESS KEY관리                                           008200
+170626*채무자고객기본　테이블(KEY)                                    009200
+       01  TKJL0015-KEY.                                                00930000
+           COPY  TKJL0015.                                              00940000
+170626*채무자고객기본　테이블(RECORD)                                 009200
+       01  TRJL0015-REC.                                                00960000
+           COPY  TRJL0015.                                              00970000
+      *-----------------------------------------------------------------01050022
+      * DBIO ACCESS KEY관리                                           01060022
+      *-----------------------------------------------------------------01070022
+      *-----------------------------------------------------------------01120022
+       LINKAGE                         SECTION.                         01130022
+      *-----------------------------------------------------------------01140022
+      *공통 AREA                                                      01150022
+       01  YCCOMMON-CA.                                                 01160022
+           COPY  YCCOMMON.                                              01170022
+      *DC COPYBOOK AREA                                                 01180022
+       01  XDJL4113-CA.                                                 01190022
+           COPY  XDJL4113.                                              01200022
+      *=================================================================01210022
+       PROCEDURE                       DIVISION                         01220022
+                                       USING       YCCOMMON-CA          01230022
+                                                   XDJL4113-CA          01240022
+                                                   .                    01250022
+      *=================================================================01260022
+                                                                        01270022
+      *-----------------------------------------------------------------01280022
+      *@  처리메인                                                    01290022
+      *-----------------------------------------------------------------01300022
+       S0000-MAIN-RTN.                                                  01310022
+                                                                        01320022
+      *@  초기화                                                      01330022
+           PERFORM S1000-INITIALIZE-RTN                                 01340022
+              THRU S1000-INITIALIZE-EXT                                 01350022
+                                                                        01360022
+      *@  입력값　CHECK                                               01370022
+           PERFORM S2000-VALIDATION-RTN                                 01380022
+              THRU S2000-VALIDATION-EXT                                 01390022
+                                                                        01400022
+      *@  업무처리                                                    01410022
+           PERFORM S3000-PROCESS-RTN                                    01420022
+              THRU S3000-PROCESS-EXT                                    01430022
+                                                                        01440022
+      *@  처리종료                                                    01450022
+           PERFORM S9000-FINAL-RTN                                      01460022
+              THRU S9000-FINAL-EXT                                      01470022
+           .                                                            01480022
+       S0000-MAIN-EXT.                                                  01490022
+           EXIT.                                                        01500022
+      *-----------------------------------------------------------------01510022
+      *@  초기화                                                      01520022
+      *-----------------------------------------------------------------01530022
+       S1000-INITIALIZE-RTN.                                            01540022
+                                                                        01550022
+      *@   WK-AREA 및　프로그램파라미터　초기화                       01560022
+           INITIALIZE       WK-AREA                                     01570022
+      *                     SQLIO
+                            YCDBSQLA-CA                                 01580022
+                            YCDBIOCA-CA                                 01580022
+                                                                        01620022
+      *@  출력영역　및　결과코드　초기화                              01630022
+           INITIALIZE       XDJL4113-OUT                                01640022
+                            XDJL4113-RETURN                             01650022
+           .                                                            01660022
+       S1000-INITIALIZE-EXT.                                            01670022
+           EXIT.                                                        01680022
+      *-----------------------------------------------------------------01690022
+      *@  입력값검증                                                  01700022
+      *-----------------------------------------------------------------01710022
+       S2000-VALIDATION-RTN.                                            01720022
+                                                                        01730022
+      *@   처리구분                                                   01740022
+           IF XDJL4113-I-PRCSS-DSTIC = CO-CHA-01 OR                     01750022
+                                       CO-CHA-02                        01760022
+              CONTINUE                                                  01770022
+           ELSE                                                         01780022
+      * 에러메세지 : 처리구분오류입니다．                           01790022
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01800022
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR              01810022
+           END-IF                                                       01820022
+                                                                        01830022
+      *@   채무자번호                                                 01840022
+           IF XDJL4113-I-BRWR-NO = SPACE                                01850022
+      * 에러메세지 : 필수항목미입력오류입니다．                     01860022
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01870022
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01880022
+           END-IF                                                       01890022
+                                                                        01900022
+      *@   기준년월일                                                 01910022
+           IF XDJL4113-I-BASE-YMD = SPACE                               01920022
+      * 에러메세지 : 필수항목미입력오류입니다．                     01930022
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01940022
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01950022
+           END-IF                                                       01960022
+           .                                                            01970022
+       S2000-VALIDATION-EXT.                                            01980022
+           EXIT.                                                        01990022
+      *-----------------------------------------------------------------02000022
+      *@  업무처리                                                    02010022
+      *-----------------------------------------------------------------02020022
+       S3000-PROCESS-RTN.                                               02030022
+
+200228*@1 토탈익스포져일일배치작업결과　조회
+      *@  진행중이면　＇진행중＇　사용자　메세지띄움
+           PERFORM S3900-QJLI056-CALL-RTN
+              THRU S3900-QJLI056-CALL-EXT
+
+170201*@1  차주명　추출                                               02050022
+170626     PERFORM S3100-THKJL0015-SELECT-RTN                           02072007
+              THRU S3100-THKJL0015-SELECT-EXT                           02073007
+                                                                        02080022
+      *@2  관리한도조회                                               02090022
+           PERFORM S3200-QJL1121-CALL-RTN                               02100022
+              THRU S3200-QJL1121-CALL-EXT                               02110022
+                                                                        02120022
+           IF XDJL4113-I-PRCSS-DSTIC = CO-CHA-01                        02130022
+      *@      일익스포져　조회                                        02140022
+              PERFORM S3210-QJL1122-CALL-RTN                            02150022
+                 THRU S3210-QJL1122-CALL-EXT                            02160022
+      *@      일간접익스포져　조회                                    02170022
+              PERFORM S3220-QJL1123-CALL-RTN                            02180022
+                 THRU S3220-QJL1123-CALL-EXT                            02190022
+           ELSE                                                         02200022
+      *@      월익스포져　조회                                        02210022
+              PERFORM S3230-QJL1125-CALL-RTN                            02220022
+                 THRU S3230-QJL1125-CALL-EXT                            02230022
+      *@      월간접익스포져　조회                                    02240022
+              PERFORM S3240-QJL1126-CALL-RTN                            02250022
+                 THRU S3240-QJL1126-CALL-EXT                            02260022
+           END-IF                                                       02270022
+                                                                        02280022
+      *@   파생상품총거래한도조회
+           PERFORM S3250-QJL1128-CALL-RTN
+              THRU S3250-QJL1128-CALL-EXT
+
+      *@3  현재설정현황　출력　처리                                   02290022
+           PERFORM S6000-OUTPUT-SET-RTN                                 02300022
+              THRU S6000-OUTPUT-SET-EXT                                 02310022
+                                                                        02320022
+      *@4  과목별현황조회                                             02330022
+           IF XDJL4113-I-PRCSS-DSTIC = CO-CHA-01                        02340022
+      *@      일과목별조회
+              PERFORM S3300-QJL1131-CALL-RTN                            02350022
+                 THRU S3300-QJL1131-CALL-EXT                            02360022
+           ELSE                                                         02370022
+      *@      월과목별조회
+              PERFORM S3400-QJL1132-CALL-RTN                            02380022
+                 THRU S3400-QJL1132-CALL-EXT                            02390022
+           END-IF                                                       02400022
+           .                                                            02410022
+       S3000-PROCESS-EXT.                                               02420022
+           EXIT.                                                        02430022
+
+      *-----------------------------------------------------------------
+200228*@ 토탈익스포져일일배치작업결과　조회
+      *-----------------------------------------------------------------
+       S3900-QJLI056-CALL-RTN.
+
+      *@1 초기화
+           INITIALIZE    XQJLI056-IN
+
+      *@1 입력파라미터 조립
+      *@  처리내용:SQLIO(QJLI056)입력파라메타=
+      *@   SET(그룹회사코드,토탈익스포져업무구분,배치작업완료여부)
+
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLI056-I-GROUP-CO-CD
+
+      *    토탈익스포져업무구분
+           MOVE CO-CHA-1
+             TO XQJLI056-I-TE-BZWK-DSTCD
+
+      *    배치작업완료여부
+           MOVE CO-CHA-1
+             TO XQJLI056-I-BTCH-FNSH-YN
+
+      *@1  SLQIO프로그램 호출
+      *@  처리내용:QJLI056프로그램을 호출한다
+      *@  관련테이블:THKJLLOG1 접근유형:READ
+           #DYSQLA QJLI056 XQJLI056-CA
+
+      *@1 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    IF XQJLI056-O-BTCH-FNSH-YN = CO-CHA-0
+      *#2정상이지만 배치가 종료되기 전이면
+      *@에러메세지 : 거래가능시간 오류입니다.
+      *@조치메세지 : 토탈익스포져 작업 중입니다.
+150818                 #ERROR CO-B3800205 CO-UKJL0037 CO-STAT-ERROR
+                    END-IF
+               WHEN COND-DBSQL-MRNF
+      *#2원장NOT FOUND인경우
+      *@에러메세지 : 거래가능시간 오류입니다.
+      *@조치메세지 : 토탈익스포져 작업 중입니다.
+150818              #ERROR CO-B3800205 CO-UKJL0037 CO-STAT-ERROR
+               WHEN OTHER
+      *#2원장조회에러인경우
+      *@2에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3900-QJLI056-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------02440022
+      *@  차주명　조회                                                02450022
+      *-----------------------------------------------------------------02460022
+       S3100-THKJL0015-SELECT-RTN.
+
+      *@초기화　　　　                                                025534
+           INITIALIZE TKJL0015-KEY                                      02541109
+                      TRJL0015-REC                                      02541209
+      *@   그룹회사코드                                               025414
+           MOVE BICOM-GROUP-CO-CD                                       02541509
+             TO KJL0015-PK-GROUP-CO-CD                                  02541609
+      *@   고객식별자                                                 025417
+           MOVE XDJL4113-I-BRWR-NO                                      02541809
+             TO KJL0015-PK-CUST-IDNFR                                   02541909
+
+           #DYDBIO SELECT-CMD-Y TKJL0015-PK TRJL0015-REC                02542409
+
+           EVALUATE TRUE                                                02542609
+               WHEN COND-DBIO-OK                                        02542709
+                    MOVE RJL0015-DBTRZ-NAME                             02610022
+                      TO XDJL4113-O-BRWR-NAME                           02620022
+               WHEN COND-DBIO-MRNF                                      02543009
+                    CONTINUE
+               WHEN OTHER                                               02543309
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．                   0254
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다               0254
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02543609
+           END-EVALUATE                                                 02543709
+           .
+       S3100-THKJL0015-SELECT-EXT.
+           EXIT.                                                        02543809
+      *-----------------------------------------------------------------02690022
+      *@  관리한도조회                                                02700022
+      *-----------------------------------------------------------------02710022
+       S3200-QJL1121-CALL-RTN.                                          02720022
+                                                                        02730022
+      *@2.1 변수초기화
+           INITIALIZE XQJL1121-IN
+      *@2.2 호출변수 MOVE
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1121-I-BASE-YMD
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1121-I-GROUP-CO-CD
+170201*@   고객식별자
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1121-I-KB-PIN
+      *@2.3 프로그램 호출
+           #DYSQLA QJL1121 XQJL1121-CA
+      *@2.4 호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            02990022
+       S3200-QJL1121-CALL-EXT.                                          03000022
+           EXIT.                                                        03010022
+      *-----------------------------------------------------------------03020022
+      *@  일익스포져　조회                                            03030022
+      *-----------------------------------------------------------------03040022
+       S3210-QJL1122-CALL-RTN.                                          03050022
+                                                                        03060022
+      *@    변수초기화
+           INITIALIZE XQJL1122-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1122-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1122-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1122-I-KB-PIN
+      *@    프로그램 호출
+           #DYSQLA QJL1122 XQJL1122-CA
+      *@    호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            03290022
+       S3210-QJL1122-CALL-EXT.                                          03300022
+           EXIT.                                                        03310022
+      *-----------------------------------------------------------------03320022
+      *@  일간접익스포져　조회                                        03330022
+      *-----------------------------------------------------------------03340022
+       S3220-QJL1123-CALL-RTN.                                          03350022
+                                                                        03360022
+      *@    변수초기화
+           INITIALIZE XQJL1123-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1123-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1123-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1123-I-KB-PIN
+      *@   프로그램 호출
+           #DYSQLA QJL1123 XQJL1123-CA
+      *@    호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            03620022
+       S3220-QJL1123-CALL-EXT.                                          03630022
+           EXIT.                                                        03640022
+      *-----------------------------------------------------------------03650022
+      *@  월익스포져　조회                                            03660022
+      *-----------------------------------------------------------------03670022
+       S3230-QJL1125-CALL-RTN.                                          03680022
+                                                                        03690022
+      *@    변수초기화
+           INITIALIZE XQJL1125-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1125-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1125-I-BASE-YMD
+170201*@   차주번호
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1125-I-KB-PIN
+      *@    프로그램 호출
+           #DYSQLA QJL1125 XQJL1125-CA
+      *@    호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            03920022
+       S3230-QJL1125-CALL-EXT.                                          03930022
+           EXIT.                                                        03940022
+      *-----------------------------------------------------------------03950022
+      *@  월간접익스포져　조회                                        03960022
+      *-----------------------------------------------------------------03970022
+       S3240-QJL1126-CALL-RTN.                                          03980022
+                                                                        03990022
+      *@    변수초기화
+           INITIALIZE XQJL1126-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1126-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1126-I-BASE-YMD
+170201*@   고객식별자
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1126-I-KB-PIN
+      *@    프로그램 호출
+           #DYSQLA QJL1126 XQJL1126-CA
+      *@    호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            04220022
+       S3240-QJL1126-CALL-EXT.                                          04230022
+           EXIT.                                                        04240022
+      *-----------------------------------------------------------------
+      *@  파생상품총거래한도조회
+      *-----------------------------------------------------------------
+       S3250-QJL1128-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XQJL1128-IN
+
+      *@   호출변수MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL1128-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4113-I-BASE-YMD
+             TO XQJL1128-I-BASE-YMD
+170201*@   고객식별자　
+           MOVE XDJL4113-I-BRWR-NO
+             TO XQJL1128-I-KB-PIN
+
+      *@   프로그램호출
+           #DYSQLA QJL1128 XQJL1128-CA
+
+      *@   호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류인경우
+      *@에러메세지 : 테이블SELECT오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3250-QJL1128-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------04250022
+      *@  일과목명세조회                                              04260022
+      *-----------------------------------------------------------------04270022
+       S3300-QJL1131-CALL-RTN.                                          04280022
+                                                                        04290022
+      *@   SQLIO OPEN
+           PERFORM S3310-QJL1131-OPEN-RTN                               04300022
+              THRU S3310-QJL1131-OPEN-EXT                               04310022
+                                                                        04320022
+           MOVE CO-CHA-Y                                                04330022
+             TO WK-BIT                                                  04340022
+                                                                        04350022
+      *@   SQLIO FETCH
+           PERFORM UNTIL WK-BIT     = CO-CHA-N OR                       04360022
+                         WK-CUR-CNT = CO-MAX-CNT                        04370022
+      *@      SQLIO FETCH CALL
+              PERFORM S3320-QJL1131-FETCH-RTN                           04380022
+                 THRU S3320-QJL1131-FETCH-EXT                           04390022
+           END-PERFORM                                                  04400022
+                                                                        04410022
+      *@   SQLIO CLOSE
+           PERFORM S3330-QJL1131-CLOSE-RTN                              04420022
+              THRU S3330-QJL1131-CLOSE-EXT                              04430022
+                                                                        04440022
+           MOVE WK-CUR-CNT                                              04450022
+             TO XDJL4113-O-OUTPT-LINE-CNT1                              04460022
+
+      *@   합계처리
+           IF WK-CUR-CNT > ZERO
+
+              ADD 1 TO WK-CUR-CNT
+
+              MOVE WK-CUR-CNT
+                TO XDJL4113-O-OUTPT-LINE-CNT1
+
+      *@       회계구분                                               07850022
+               MOVE '합계'                                            07860022
+                 TO XDJL4113-O-TE-ITEM-DSTIC1(WK-CUR-CNT)               07870022
+      *@       상품코드                                               07890022
+               MOVE SPACE                                               07900022
+                 TO XDJL4113-O-PRDCT-CD1(WK-CUR-CNT)                    07910022
+      *@       상품명                                                 07930022
+               MOVE SPACE                                               07940022
+                 TO XDJL4113-O-PRDCT-NAME1(WK-CUR-CNT)                  07950022
+      *@       자산구분                                               07970022
+               MOVE SPACE                                               07980022
+                 TO XDJL4113-O-TE-ASST-DSTCD1(WK-CUR-CNT)               07990022
+      *@       명목액기준한도                                         08050022
+               MOVE WK-TTL-AMT-BASE-CLAM1                               08060022
+                 TO XDJL4113-O-TTL-AMT-BASE-CLAM1(WK-CUR-CNT)           08070022
+      *@       명목액기준잔액                                         08090022
+               MOVE WK-TTL-AMT-BASE-BAL1                                08100022
+                 TO XDJL4113-O-TTL-AMT-BASE-BAL1(WK-CUR-CNT)            08110022
+      *@       TE한도환산액                                           08130022
+               MOVE WK-TE-LIMT-AUC1                                     08140022
+                 TO XDJL4113-O-TE-LIMT-AUC1(WK-CUR-CNT)                 08150022
+      *@       TE잔액환산액                                           08170022
+               MOVE WK-TE-BAL-AUC1                                      08180022
+                 TO XDJL4113-O-TE-BAL-AUC1(WK-CUR-CNT)                  08190022
+
+           END-IF
+           .                                                            04470022
+       S3300-QJL1131-CALL-EXT.                                          04480022
+           EXIT.                                                        04490022
+      *-----------------------------------------------------------------04500022
+      *@  SQLIO QJL1131 OPEN                                            04510022
+      *-----------------------------------------------------------------04520022
+       S3310-QJL1131-OPEN-RTN.                                          04530022
+                                                                        04540022
+      *@   초기화
+           INITIALIZE XQJL1131-IN
+
+      *@   그룹회사코드                                               04550022
+           MOVE BICOM-GROUP-CO-CD                                       04560022
+             TO XQJL1131-I-GROUP-CO-CD                                  04570022
+      *@   기준년월일                                                 04610022
+           MOVE XDJL4113-I-BASE-YMD                                     04620022
+             TO XQJL1131-I-BASE-YMD                                     04630022
+170201*@   고객식별자                                                 04640022
+           MOVE XDJL4113-I-BRWR-NO                                      04650022
+             TO XQJL1131-I-KB-PIN                                       04660022
+                                                                        04670022
+      *@   SQLIO CALL
+           #DYSQLA QJL1131 OPEN XQJL1131-CA                             04680022
+                                                                        04690022
+      *@   호출결과확인
+           EVALUATE TRUE                                                04700022
+               WHEN COND-DBSQL-OK                                       04710022
+                    CONTINUE                                            04720022
+               WHEN OTHER                                               04730022
+      *@커서오픈에러인경우
+      *@에러메세지 : 테이블OPEN오류입니다.                        04740022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              04750022
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        04760022
+           END-EVALUATE                                                 04770022
+           .                                                            04780022
+       S3310-QJL1131-OPEN-EXT.                                          04790022
+           EXIT.                                                        04800022
+      *-----------------------------------------------------------------04810022
+      *@  SQLIO QJL1131 FETCH                                           04820022
+      *-----------------------------------------------------------------04830022
+       S3320-QJL1131-FETCH-RTN.                                         04840022
+                                                                        04850022
+      *@   SQLIO FETCH                                                  04860022
+           #DYSQLA QJL1131 FETCH XQJL1131-CA                            04870022
+      *@   결과확인                                                   04880022
+           EVALUATE TRUE                                                04890022
+               WHEN COND-DBSQL-OK                                       04900022
+                    PERFORM S6200-OUTPUT-SET-RTN                        04910022
+                       THRU S6200-OUTPUT-SET-EXT                        04920022
+               WHEN COND-DBSQL-MRNF                                     04930022
+                    MOVE CO-CHA-N TO WK-BIT                             04940022
+               WHEN OTHER                                               04950022
+      *@커서패치에러인경우
+      *@에러메세지 : 테이블FETCH오류입니다.                       04960022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              04970022
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR        04980022
+           END-EVALUATE                                                 04990022
+           .                                                            05000022
+       S3320-QJL1131-FETCH-EXT.                                         05010022
+           EXIT.                                                        05020022
+      *-----------------------------------------------------------------05030022
+      *@  SQLIO QJL1131 CLOSE                                           05040022
+      *-----------------------------------------------------------------05050022
+       S3330-QJL1131-CLOSE-RTN.                                         05060022
+                                                                        05070022
+      *@   SQLIO CLOSE                                                  05080022
+           #DYSQLA QJL1131 CLOSE XQJL1131-CA                            05090022
+      *@   결과확인                                                   05100022
+           EVALUATE TRUE                                                05110022
+               WHEN COND-DBSQL-OK                                       05120022
+                    CONTINUE                                            05130022
+               WHEN OTHER                                               05140022
+      *@커서클로즈에러인경우
+      *@에러메세지 : 테이블CLOSE오류입니다.                       05150022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              05160022
+                    #ERROR CO-B4200231 CO-UKJL0036 CO-STAT-ERROR        05170022
+           END-EVALUATE                                                 05180022
+           .                                                            05190022
+       S3330-QJL1131-CLOSE-EXT.                                         05200022
+           EXIT.                                                        05210022
+      *-----------------------------------------------------------------05220022
+      *@  월과목명세조회                                              05230022
+      *-----------------------------------------------------------------05240022
+       S3400-QJL1132-CALL-RTN.                                          05250022
+                                                                        05260022
+      *@   SQLIO OPEN
+           PERFORM S3410-QJL1132-OPEN-RTN                               05270022
+              THRU S3410-QJL1132-OPEN-EXT                               05280022
+                                                                        05290022
+           MOVE  CO-CHA-Y                                               05300022
+             TO  WK-BIT                                                 05310022
+                                                                        05320022
+      *@   SQLIO FETCH
+           PERFORM UNTIL WK-BIT     = CO-CHA-N   OR                     05330022
+                         WK-CUR-CNT = CO-MAX-CNT                        05340022
+      *@      SQLIO FETCH CALL
+              PERFORM S3420-QJL1132-FETCH-RTN                           05350022
+                 THRU S3420-QJL1132-FETCH-EXT                           05360022
+           END-PERFORM                                                  05370022
+                                                                        05380022
+      *@   SQLIO CLOSE
+           PERFORM S3430-QJL1132-CLOSE-RTN                              05390022
+              THRU S3430-QJL1132-CLOSE-EXT                              05400022
+                                                                        05410022
+           MOVE WK-CUR-CNT                                              05420022
+             TO XDJL4113-O-OUTPT-LINE-CNT2                              05430022
+
+      *@   합계처리
+           IF WK-CUR-CNT > ZERO
+
+              ADD 1 TO WK-CUR-CNT
+
+              MOVE WK-CUR-CNT
+                TO XDJL4113-O-OUTPT-LINE-CNT2
+
+      *@       회계구분                                               07850022
+               MOVE '합계'                                            07860022
+                 TO XDJL4113-O-TE-ITEM-DSTIC2(WK-CUR-CNT)               07870022
+      *@       상품코드                                               07890022
+               MOVE SPACE                                               07900022
+                 TO XDJL4113-O-PRDCT-CD2(WK-CUR-CNT)                    07910022
+      *@       상품명                                                 07930022
+               MOVE SPACE                                               07940022
+                 TO XDJL4113-O-PRDCT-NAME2(WK-CUR-CNT)                  07950022
+      *@       자산구분                                               07970022
+               MOVE SPACE                                               07980022
+                 TO XDJL4113-O-TE-ASST-DSTCD2(WK-CUR-CNT)               07990022
+      *@       명목액기준한도                                         08050022
+               MOVE WK-TTL-AMT-BASE-CLAM2                               08060022
+                 TO XDJL4113-O-TTL-AMT-BASE-CLAM2(WK-CUR-CNT)           08070022
+      *@       명목액기준잔액                                         08090022
+               MOVE WK-TTL-AMT-BASE-BAL2                                08100022
+                 TO XDJL4113-O-TTL-AMT-BASE-BAL2(WK-CUR-CNT)            08110022
+      *@       TE한도환산액                                           08130022
+               MOVE WK-TE-LIMT-AUC2                                     08140022
+                 TO XDJL4113-O-TE-LIMT-AUC2(WK-CUR-CNT)                 08150022
+      *@       TE잔액환산액                                           08170022
+               MOVE WK-TE-BAL-AUC2                                      08180022
+                 TO XDJL4113-O-TE-BAL-AUC2(WK-CUR-CNT)                  08190022
+
+           END-IF
+           .                                                            05440022
+       S3400-QJL1132-CALL-EXT.                                          05450022
+           EXIT.                                                        05460022
+      *-----------------------------------------------------------------05470022
+      *@  SQLIO QJL1132 OPEN                                            05480022
+      *-----------------------------------------------------------------05490022
+       S3410-QJL1132-OPEN-RTN.                                          05500022
+                                                                        05510022
+      *@   초기화
+           INITIALIZE XQJL1132-IN
+
+      *@   그룹회사코드                                               05520022
+           MOVE BICOM-GROUP-CO-CD                                       05530022
+             TO XQJL1132-I-GROUP-CO-CD                                  05540022
+      *@   기준년월                                                   05550022
+           MOVE XDJL4113-I-BASE-YMD(1:6)                                05560022
+             TO XQJL1132-I-BASE-YM                                      05570022
+170201*@   고객식별자                                                 05580022
+           MOVE XDJL4113-I-BRWR-NO                                      05590022
+             TO XQJL1132-I-KB-PIN                                       05600022
+                                                                        05610022
+      *@   SQLIO CALL
+           #DYSQLA QJL1132 OPEN XQJL1132-CA                             05620022
+                                                                        05630022
+      *@   호출결과확인
+           EVALUATE TRUE                                                05640022
+               WHEN COND-DBSQL-OK                                       05650022
+                    CONTINUE                                            05660022
+               WHEN OTHER                                               05670022
+      *@커서오픈에러인경우
+      *@에러메세지 : 테이블OPEN오류입니다.                        05680022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              05690022
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        05700022
+           END-EVALUATE                                                 05710022
+           .                                                            05720022
+       S3410-QJL1132-OPEN-EXT.                                          05730022
+           EXIT.                                                        05740022
+      *-----------------------------------------------------------------05750022
+      *@  SQLIO QJL1132 FETCH                                           05760022
+      *-----------------------------------------------------------------05770022
+       S3420-QJL1132-FETCH-RTN.                                         05780022
+                                                                        05790022
+      *@   SQLIO FETCH                                                  05800022
+           #DYSQLA QJL1132 FETCH XQJL1132-CA                            05810022
+      *@   결과확인                                                   05820022
+           EVALUATE TRUE                                                05830022
+               WHEN COND-DBSQL-OK                                       05840022
+                    PERFORM S6300-OUTPUT-SET-RTN                        05850022
+                       THRU S6300-OUTPUT-SET-EXT                        05860022
+               WHEN COND-DBSQL-MRNF                                     05870022
+                    MOVE CO-CHA-N TO WK-BIT                             05880022
+               WHEN OTHER                                               05890022
+      *@커서패치에러인경우
+      *@에러메세지 : 테이블FETCH오류입니다.                       05900022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              05910022
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR        05920022
+           END-EVALUATE                                                 05930022
+           .                                                            05940022
+       S3420-QJL1132-FETCH-EXT.                                         05950022
+           EXIT.                                                        05960022
+      *-----------------------------------------------------------------05970022
+      *@  SQLIO QJL1132 CLOSE                                           05980022
+      *-----------------------------------------------------------------05990022
+       S3430-QJL1132-CLOSE-RTN.                                         06000022
+                                                                        06010022
+      *@   SQLIO CLOSE                                                  06020022
+           #DYSQLA QJL1132 CLOSE XQJL1132-CA                            06030022
+      *@   결과확인                                                   06040022
+           EVALUATE TRUE                                                06050022
+               WHEN COND-DBSQL-OK                                       06060022
+                    CONTINUE                                            06070022
+               WHEN OTHER                                               06080022
+      *@커서클로즈에러인경우
+      *@에러메세지 : 테이블CLOSE오류입니다.                       06090022
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              06100022
+                    #ERROR CO-B4200231 CO-UKJL0036 CO-STAT-ERROR        06110022
+           END-EVALUATE                                                 06120022
+           .                                                            06130022
+       S3430-QJL1132-CLOSE-EXT.                                         06140022
+           EXIT.                                                        06150022
+      *-----------------------------------------------------------------06160022
+      *@ 출력파라미터 SET                                             06170022
+      *-----------------------------------------------------------------06180022
+       S6000-OUTPUT-SET-RTN.                                            06190022
+                                                                        06200022
+      *@   일과목설정현황조회                                         06210022
+           IF XDJL4113-I-PRCSS-DSTIC = CO-CHA-01                        06220022
+      *@      OUTPUT CALL
+              PERFORM S6100-OUTPUT-SET-RTN                              06230022
+                 THRU S6100-OUTPUT-SET-EXT                              06240022
+      *@   월과목설정현황조회                                         06250022
+           ELSE                                                         06260022
+      *@      OUTPUT CALL
+              PERFORM S6110-OUTPUT-SET-RTN                              06270022
+                 THRU S6110-OUTPUT-SET-EXT                              06280022
+           END-IF                                                       06290022
+           .                                                            06300022
+       S6000-OUTPUT-SET-EXT.                                            06310022
+           EXIT.                                                        06320022
+      *-----------------------------------------------------------------06330022
+      *@ 출력파라미터 SET                                             06340022
+      *-----------------------------------------------------------------06350022
+       S6100-OUTPUT-SET-RTN.                                            06360022
+                                                                        06410022
+      *@   TE기준한도
+           MOVE XQJL1121-O-TE-BASE-LIMT
+             TO XDJL4113-O-TE-BASE-LIMT
+
+      *@   기준한도산출일
+           MOVE XQJL1121-O-BASE-LIMT-CMPTN-DD
+             TO XDJL4113-O-BASE-LIMT-CMPTN-DD
+
+      *@   한도설정유효일
+           MOVE XQJL1121-O-LIMT-STUP-VALD-DD
+             TO XDJL4113-O-LIMT-STUP-VALD-DD
+
+      *@   여신성관리한도
+           MOVE XQJL1121-O-LNBZ-I-MGT-LIMT
+             TO XDJL4113-O-LNBZ-I-MGT-LIMT
+
+      *@   시장성관리한도
+           MOVE XQJL1121-O-MRKTY-MGT-LIMT
+             TO XDJL4113-O-MRKTY-MGT-LIMT
+
+      *@   관리한도
+           MOVE XQJL1121-O-MGT-LIMT
+             TO XDJL4113-O-MGT-LIMT
+
+      *@한도기준TE = 한도기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LIMT-BASE-TE
+                 = XQJL1122-O-LIMT-BASE-TE +
+                   XQJL1123-O-INDR-EXPSR-AMT
+
+      *@잔액기준TE = 잔액기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-BAL-BASE-TE
+                 = XQJL1122-O-BAL-BASE-TE +
+                   XQJL1123-O-INDR-EXPSR-AMT
+
+      *@여신성한도기준TE = 여신성한도기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LNBZ-I-LIMT-BASE-TE
+                 = XQJL1122-O-LNBZ-I-LIMT-BASE-TE +
+                   XQJL1123-O-INDR-EXPSR-AMT
+
+      *@여신성잔액기준TE = 여신성잔액기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LNBZ-I-BAL-BASE-TE
+                 = XQJL1122-O-LNBZ-I-BAL-BASE-TE +
+                   XQJL1123-O-INDR-EXPSR-AMT
+
+      *@시장성한도기준TE
+           MOVE XQJL1122-O-MRKTY-LIMT-BASE-TE
+             TO XDJL4113-O-MRKTY-LIMT-BASE-TE
+
+      *@시장성잔액기준TE
+           MOVE XQJL1122-O-MRKTY-BAL-BASE-TE
+             TO XDJL4113-O-MRKTY-BAL-BASE-TE
+
+      *@여신성한도여유액=여신성관리한도-여신성한도기준TE
+           COMPUTE XDJL4113-O-LNBZ-IL-SEXTR-AMT
+                 = XDJL4113-O-LNBZ-I-MGT-LIMT -
+                   XDJL4113-O-LNBZ-I-LIMT-BASE-TE
+
+      *@시장성한도여유액=시장성관리한도-시장성한도기준TE
+           COMPUTE XDJL4113-O-MRKTY-L-SEXTR-AMT
+                 = XDJL4113-O-MRKTY-MGT-LIMT -
+                   XDJL4113-O-MRKTY-LIMT-BASE-TE
+
+      *@한도여유액=관리한도-한도기준TE
+           COMPUTE XDJL4113-O-LIMT-SEXTR-AMT
+                 = XDJL4113-O-MGT-LIMT -
+                   XDJL4113-O-LIMT-BASE-TE
+
+      *@   파생상품총거래한도
+           MOVE XQJL1128-O-DRVT-PT-TRAN-LIMT
+             TO XDJL4113-O-DRVT-PT-TRAN-LIMT
+
+      *@   (파생상품Exposure)
+           MOVE XQJL1122-O-DRVT-PRDCT-EXPSR
+             TO XDJL4113-O-DRVT-PRDCT-EXPSR
+           .                                                            07010022
+       S6100-OUTPUT-SET-EXT.                                            07020022
+           EXIT.                                                        07030022
+      *-----------------------------------------------------------------07040022
+      *@ 출력파라미터 SET                                             07050022
+      *-----------------------------------------------------------------07060022
+       S6110-OUTPUT-SET-RTN.                                            07070022
+                                                                        07080022
+      *@   TE기준한도
+           MOVE XQJL1121-O-TE-BASE-LIMT
+             TO XDJL4113-O-TE-BASE-LIMT
+
+      *@   기준한도산출일
+           MOVE XQJL1121-O-BASE-LIMT-CMPTN-DD
+             TO XDJL4113-O-BASE-LIMT-CMPTN-DD
+
+      *@   한도설정유효일
+           MOVE XQJL1121-O-LIMT-STUP-VALD-DD
+             TO XDJL4113-O-LIMT-STUP-VALD-DD
+
+      *@   여신성관리한도
+           MOVE XQJL1121-O-LNBZ-I-MGT-LIMT
+             TO XDJL4113-O-LNBZ-I-MGT-LIMT
+
+      *@   시장성관리한도
+           MOVE XQJL1121-O-MRKTY-MGT-LIMT
+             TO XDJL4113-O-MRKTY-MGT-LIMT
+
+      *@   관리한도
+           MOVE XQJL1121-O-MGT-LIMT
+             TO XDJL4113-O-MGT-LIMT
+
+      *@한도기준TE = 한도기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LIMT-BASE-TE
+                 = XQJL1125-O-LIMT-BASE-TE +
+                   XQJL1126-O-INDR-EXPSR-AMT
+
+      *@잔액기준TE = 잔액기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-BAL-BASE-TE
+                 = XQJL1125-O-BAL-BASE-TE +
+                   XQJL1126-O-INDR-EXPSR-AMT
+
+      *@여신성한도기준TE = 여신성한도기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LNBZ-I-LIMT-BASE-TE
+                 = XQJL1125-O-LNBZ-I-LIMT-BASE-TE +
+                   XQJL1126-O-INDR-EXPSR-AMT
+
+      *@여신성잔액기준TE = 여신성잔액기준TE + 간접익스포져
+           COMPUTE XDJL4113-O-LNBZ-I-BAL-BASE-TE
+                 = XQJL1125-O-LNBZ-I-BAL-BASE-TE +
+                   XQJL1126-O-INDR-EXPSR-AMT
+
+      *@시장성한도기준TE
+           MOVE XQJL1125-O-MRKTY-LIMT-BASE-TE
+             TO XDJL4113-O-MRKTY-LIMT-BASE-TE
+
+      *@시장성잔액기준TE
+           MOVE XQJL1125-O-MRKTY-BAL-BASE-TE
+             TO XDJL4113-O-MRKTY-BAL-BASE-TE
+
+      *@여신성한도여유액=여신성관리한도-여신성한도기준TE
+           COMPUTE XDJL4113-O-LNBZ-IL-SEXTR-AMT
+                 = XDJL4113-O-LNBZ-I-MGT-LIMT -
+                   XDJL4113-O-LNBZ-I-LIMT-BASE-TE
+
+      *@시장성한도여유액=시장성관리한도-시장성한도기준TE
+           COMPUTE XDJL4113-O-MRKTY-L-SEXTR-AMT
+                 = XDJL4113-O-MRKTY-MGT-LIMT -
+                   XDJL4113-O-MRKTY-LIMT-BASE-TE
+
+      *@한도여유액=관리한도-한도기준TE
+           COMPUTE XDJL4113-O-LIMT-SEXTR-AMT
+                 = XDJL4113-O-MGT-LIMT -
+                   XDJL4113-O-LIMT-BASE-TE
+
+      *@   파생상품총거래한도
+           MOVE XQJL1128-O-DRVT-PT-TRAN-LIMT
+             TO XDJL4113-O-DRVT-PT-TRAN-LIMT
+
+      *@   (파생상품Exposure)
+           MOVE XQJL1125-O-DRVT-PRDCT-EXPSR
+             TO XDJL4113-O-DRVT-PRDCT-EXPSR
+           .                                                            07720022
+       S6110-OUTPUT-SET-EXT.                                            07730022
+           EXIT.                                                        07740022
+      *-----------------------------------------------------------------07750022
+      *@ 일과목명세출력조립                                           07760022
+      *-----------------------------------------------------------------07770022
+       S6200-OUTPUT-SET-RTN.                                            07780022
+                                                                        07790022
+      *@   OUTPUT
+           PERFORM VARYING WK-I FROM 1 BY 1                             07800022
+                   UNTIL WK-I > DBSQL-SELECT-CNT                        07810022
+                                                                        07820022
+               ADD 1 TO WK-CUR-CNT                                      07830022
+                                                                        07840022
+      *@       회계구분
+               IF XQJL1131-O-ACCTG-DSTCD(WK-I) = WK-GUBUN1
+                  MOVE SPACE
+                    TO XDJL4113-O-TE-ITEM-DSTIC1(WK-CUR-CNT)
+               ELSE
+                  MOVE XQJL1131-O-ACCTG-DSTCD(WK-I)
+                    TO XDJL4113-O-TE-ITEM-DSTIC1(WK-CUR-CNT)
+               END-IF
+
+               MOVE XQJL1131-O-ACCTG-DSTCD(WK-I)
+                 TO WK-GUBUN1
+
+      *@       상품코드                                               07890022
+               MOVE XQJL1131-O-PRDCT-CD(WK-I)                           07900022
+                 TO XDJL4113-O-PRDCT-CD1(WK-CUR-CNT)                    07910022
+      *@       상품명                                                 07930022
+               MOVE XQJL1131-O-PRDCT-NAME(WK-I)                         07940022
+                 TO XDJL4113-O-PRDCT-NAME1(WK-CUR-CNT)                  07950022
+      *@       자산구분                                               07970022
+               MOVE XQJL1131-O-TE-ASST-DSTCD(WK-I)                      07980022
+                 TO XDJL4113-O-TE-ASST-DSTCD1(WK-CUR-CNT)               07990022
+      *@       명목액기준한도                                         08050022
+               MOVE XQJL1131-O-TTL-AMT-BASE-CLAM(WK-I)                  08060022
+                 TO XDJL4113-O-TTL-AMT-BASE-CLAM1(WK-CUR-CNT)           08070022
+      *@       명목액기준잔액                                         08090022
+               MOVE XQJL1131-O-TTL-AMT-BASE-BAL(WK-I)                   08100022
+                 TO XDJL4113-O-TTL-AMT-BASE-BAL1(WK-CUR-CNT)            08110022
+      *@       한도기준TE                                             08130022
+               MOVE XQJL1131-O-TE-LIMT-AUC(WK-I)                        08140022
+                 TO XDJL4113-O-TE-LIMT-AUC1(WK-CUR-CNT)                 08150022
+      *@       잔액기준TE                                             08170022
+               MOVE XQJL1131-O-TE-BAL-AUC(WK-I)                         08180022
+                 TO XDJL4113-O-TE-BAL-AUC1(WK-CUR-CNT)                  08190022
+                                                                        08200022
+      *@합계처리
+               IF XDJL4113-O-TE-ITEM-DSTIC1(WK-CUR-CNT) = '소계'
+               ADD XDJL4113-O-TTL-AMT-BASE-CLAM1(WK-CUR-CNT)
+                TO WK-TTL-AMT-BASE-CLAM1
+               ADD XDJL4113-O-TTL-AMT-BASE-BAL1(WK-CUR-CNT)
+                TO WK-TTL-AMT-BASE-BAL1
+               ADD XDJL4113-O-TE-LIMT-AUC1(WK-CUR-CNT)
+                TO WK-TE-LIMT-AUC1
+               ADD XDJL4113-O-TE-BAL-AUC1(WK-CUR-CNT)
+                TO WK-TE-BAL-AUC1
+               END-IF
+
+           END-PERFORM                                                  08210022
+           .                                                            08220022
+       S6200-OUTPUT-SET-EXT.                                            08230022
+           EXIT.                                                        08240022
+      *-----------------------------------------------------------------08250022
+      *@ 월과목명세출력조립                                           08260022
+      *-----------------------------------------------------------------08270022
+       S6300-OUTPUT-SET-RTN.                                            08280022
+                                                                        08290022
+      *@   OUTPUT
+           PERFORM VARYING WK-J FROM 1 BY 1                             08300022
+                   UNTIL WK-J > DBSQL-SELECT-CNT                        08310022
+                                                                        08320022
+               ADD 1 TO WK-CUR-CNT                                      08330022
+                                                                        08340022
+      *@       회계구분
+               IF XQJL1132-O-ACCTG-DSTCD(WK-J) = WK-GUBUN2
+                  MOVE SPACE
+                    TO XDJL4113-O-TE-ITEM-DSTIC2(WK-CUR-CNT)
+               ELSE
+                  MOVE XQJL1132-O-ACCTG-DSTCD(WK-J)
+                    TO XDJL4113-O-TE-ITEM-DSTIC2(WK-CUR-CNT)
+               END-IF
+
+               MOVE XQJL1132-O-ACCTG-DSTCD(WK-J)
+                 TO WK-GUBUN2
+                                                                        08344022
+      *@       상품코드                                               08345022
+               MOVE  XQJL1132-O-PRDCT-CD(WK-J)                          08346022
+                 TO  XDJL4113-O-PRDCT-CD2(WK-CUR-CNT)                   08347022
+                                                                        08348022
+      *@       상품명                                                 08349022
+               MOVE  XQJL1132-O-PRDCT-NAME(WK-J)                        08349122
+                 TO  XDJL4113-O-PRDCT-NAME2(WK-CUR-CNT)                 08349222
+                                                                        08349322
+      *@       자산구분                                               08349422
+               MOVE  XQJL1132-O-TE-ASST-DSTCD(WK-J)                     08349522
+                 TO  XDJL4113-O-TE-ASST-DSTCD2(WK-CUR-CNT)              08349622
+                                                                        08349722
+      *@       명목액기준한도                                         08349822
+               MOVE  XQJL1132-O-TTL-AMT-BASE-CLAM(WK-J)                 08349922
+                 TO  XDJL4113-O-TTL-AMT-BASE-CLAM2(WK-CUR-CNT)          08350022
+                                                                        08350122
+      *@       명목액기준잔액                                         08350222
+               MOVE  XQJL1132-O-TTL-AMT-BASE-BAL(WK-J)                  08350322
+                 TO  XDJL4113-O-TTL-AMT-BASE-BAL2(WK-CUR-CNT)           08350422
+                                                                        08350522
+      *@       한도기준TE                                             08350622
+               MOVE  XQJL1132-O-TE-LIMT-AUC(WK-J)                       08350722
+                 TO  XDJL4113-O-TE-LIMT-AUC2(WK-CUR-CNT)                08350822
+                                                                        08350922
+      *@       잔액기준TE                                             08351022
+               MOVE  XQJL1132-O-TE-BAL-AUC(WK-J)                        08351122
+                 TO  XDJL4113-O-TE-BAL-AUC2(WK-CUR-CNT)                 08351222
+
+      *@합계처리
+               IF XDJL4113-O-TE-ITEM-DSTIC2(WK-CUR-CNT) = '소계'
+               ADD XDJL4113-O-TTL-AMT-BASE-CLAM2(WK-CUR-CNT)
+                TO WK-TTL-AMT-BASE-CLAM2
+               ADD XDJL4113-O-TTL-AMT-BASE-BAL2(WK-CUR-CNT)
+                TO WK-TTL-AMT-BASE-BAL2
+               ADD XDJL4113-O-TE-LIMT-AUC2(WK-CUR-CNT)
+                TO WK-TE-LIMT-AUC2
+               ADD XDJL4113-O-TE-BAL-AUC2(WK-CUR-CNT)
+                TO WK-TE-BAL-AUC2
+               END-IF
+
+           END-PERFORM                                                  08710022
+           .                                                            08720022
+       S6300-OUTPUT-SET-EXT.                                            08730022
+           EXIT.                                                        08740022
+      *-----------------------------------------------------------------08750022
+      *@  처리종료                                                    08760022
+      *-----------------------------------------------------------------08770022
+       S9000-FINAL-RTN.                                                 08780022
+      *@3 종료처리                                                    08790022
+                                                                        08800022
+      *@3.1 프로그램 종료                                           08810022
+      *@처리내용 : 프로그램을 정상 종료 함                    08820022
+                                                                        08830022
+           #OKEXIT  CO-STAT-OK                                          08840022
+           .                                                            08850022
+       S9000-FINAL-EXT.                                                 08860022
+           EXIT.                                                        08870022

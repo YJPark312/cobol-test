@@ -1,0 +1,57 @@
+//MKJLRMS4 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMS3                                       */
+//*********************************************************************
+//*   채무자고객기본원장UNLOAD -지주사　제공자료                 */
+//********************************************************************/
+//STEP01   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0015'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0015.P00001,DISP=OLD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 차주번호
+           , 차주번호구분
+           , 고객식별자
+           , 신표준산업분류코드
+           , 내부신용평가등급구분
+           , 신용평가년월일
+           , 신용평가유효년월일
+           , 고객관리부점코드
+           ,  "TE기업규모구분"
+           ,  "TEPEER구분"
+           , 대분류업종코드
+           , 산업평가등급구분
+           , 채무자명
+           , 계열기업군코드
+           , 계열기업군명
+           , 대표사업자번호
+           ,  SUBSTR(CHAR(매출액),2,15)
+           ,  SUBSTR(CHAR(총자산),2,15)
+           , 한도고객구분
+           , 모기업법인등록번호
+           ,  "모기업ISO국가코드"
+           , 연합회차주번호
+           ,  "고객ID구분"
+           , 한도그룹번호
+           , 그룹사신용등급구분
+           , 차주대표자명
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0015
+       WHERE 그룹회사코드= 'KB0'
+         AND 차주번호구분 <> '1'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*

@@ -1,0 +1,1319 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD691 (지역별 SUB한도 및 익스포져 추출
+      *@처리유형  : BATCH
+      *@처리개요  : 지역별 SUB한도 및 익스포져 추출
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20130419: 신규작성
+      * HYH    :20150612: 표준사업분류코드가 없는경우 대분류코드
+      *                    '000' 으로 처리
+      * HYH    :20161208: 점포통폐합관련 적용종료일 체크 변경
+      * YBH    :20170119: 전년도말 TE 산출시 당시 표준산업에
+      *                   해당하는 대분류로 생성토록 변경
+      * YBH    :20170224: KB-PIN 처리(2차)
+      *                 :폐쇄부점 관련 폐쇄시점 당시
+      *                 : 영업지원본부 취득 처리 추가
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM               : 테이블명         : 접근유형
+      **  ---------------------------   --------------------------------
+      **  TE일계좌명세                : THKJL0125          : R
+      **  TE월계좌명세                : THKJL0126          : R
+      ** 부점정보                     : THKJIBR01          : R
+      ** 지역별SUB한도익스포져      : THKJL0069          : CD
+      **
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD691.
+       AUTHOR.                         하윤희.
+       DATE-WRITTEN.                   13/04/19.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       CONFIGURATION                   SECTION.
+      *-----------------------------------------------------------------
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD691'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-OK                   PIC  9(003) VALUE  000.
+           03  CO-NOT-FOUND            PIC  9(003) VALUE  100.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-5                PIC  X(001) VALUE '5'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+           03  CO-CHA-0000             PIC  X(004) VALUE '0000'.
+           03  CO-CHA-9999             PIC  X(004) VALUE '9999'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-FE-CNT            PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-INT-CNT           PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-UPT-CNT           PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  EOF-Y                           VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *관리부점코드
+           03  WK-MGT-BRNCD            PIC  X(004).
+      *국가별관리한도
+           03  WK-NATNL-PER-MGT-CLAM   PIC S9(015)V9(3).
+      *부실점구분
+           03  WK-GUBUN                PIC  X(001).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일　기준　전영업일
+           03  WK-SYSIN-BEFORE-YMD     PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0069-REC.
+           COPY  TRJL0069.
+       01  TKJL0069-KEY.
+           COPY  TKJL0069.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY  YCDBIOCA.
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+       EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+       01  WK-HOST-IN.
+      *       그룹회사코드
+           03 WK-H-I-GROUP-CO-CD            PIC  X(00003).
+      *       기준년월
+           03 WK-H-I-BASE-YM                PIC  X(00006).
+      *       기준일
+           03 WK-H-I-BASE-DD                PIC  X(00002).
+      *       기준년월일
+           03 WK-H-I-BASE-YMD               PIC  X(00008).
+      *     　전영업일
+           03 WK-H-I-BEFORE-YMD             PIC  X(00008).
+      *       전년도말월
+           03 WK-H-I-BEFORE-YM              PIC  X(00006).
+           03 WK-BASE-YEAR                  PIC  9(00004).
+           03 WK-BEFORE-YEAR                PIC  9(00004).
+
+       01  WK-HOST-OUT.
+      *       대분류업종코드
+           03 WK-H-O-LAG-CLSFI-BZTYP-CD     PIC  X(00003).
+      *       지역구분
+           03 WK-H-O-AREA-DSTCD             PIC  X(00002).
+      *       SUB한도
+           03 WK-H-O-SUB-CLAM               PIC S9(00015) COMP-3.
+
+       EXEC  SQL  END    DECLARE            SECTION  END-EXEC.
+      *-----------------------------------------------------------------
+      * SQL CURSOR DECLARE
+      *-----------------------------------------------------------------
+
+      *@   당일 지역별 TE 조회
+           EXEC SQL
+            DECLARE  THKJL0069_CUR1    CURSOR FOR
+            SELECT VALUE(T044.대분류업종코드,'000')
+                 , CASE WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3348','3364','3555','3982','4945'
+                             ,'4958','4987','5447','7201','7214')
+                        THEN '31'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3814','3827','5038','5041')
+                        THEN '21'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3885','4974')
+                        THEN '22'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3940','5009')
+                        THEN '33'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3830','5012')
+                        THEN '35'
+                        ELSE '11'
+                   END 지역별
+                 , SUM(S125."한도기준TE금액")
+                         AS "한도기준TE금액"
+            FROM (
+              SELECT T125.그룹회사코드
+                   , T125.기준일
+                   , T125.기준년월
+170224             , T125.차주고객식별자
+                   , T125.한도계좌번호
+                   , T125.한도상품대분류코드
+                   , T125.한도상품중분류코드
+                   , T125.한도상품템플릿코드
+                   , T125.한도상품번호
+                   , T125.관리부점코드
+                   , CASE WHEN (CASE WHEN T125.명목액기준한도 = 0
+                                      AND T125.명목액기준잔액 > 0
+                                     THEN T125.명목액기준잔액
+                                     ELSE T125.명목액기준한도
+                                END ) = 0
+                                OR  T118."한도기준TE환산율"  =  0
+                          THEN 0
+                          ELSE TRUNC(DOUBLE(
+                               CASE WHEN T125.명목액기준한도 = 0
+                                     AND T125.명목액기준잔액 > 0
+                                    THEN T125.명목액기준잔액
+                                    ELSE T125.명목액기준한도
+                               END ) * T118."한도기준TE환산율"
+                                     / 100 ,0)
+                     END  AS "한도기준TE금액"
+              FROM ( SELECT A.그룹회사코드
+                          , A.기준일
+                          , A.기준년월
+170224                    , A.차주고객식별자
+                          , A.한도계좌번호
+                          , A.한도상품대분류코드
+                          , A.한도상품중분류코드
+                          , A.한도상품템플릿코드
+                          , A.한도상품번호
+170224                    , A.관리부점코드
+                          , SUM(A.명목액기준한도) AS 명목액기준한도
+                          , SUM(A.명목액기준잔액) AS 명목액기준잔액
+                     FROM   DB2DBA.THKJL0125 A
+                    WHERE  A.그룹회사코드  = :WK-H-I-GROUP-CO-CD
+                      AND  A.기준일        = :WK-H-I-BASE-DD
+                      AND  A.기준년월      = :WK-H-I-BASE-YM
+                      AND  A."TE계좌고객구분"  NOT
+                           IN ('3','4','6','7','9')
+170224                AND  A.차주고객식별자 NOT IN
+                              ('          ', '',
+                               '==========','----------')
+                      AND  NOT ( A.한도상품대분류코드= ' ' OR
+                                 A.한도상품중분류코드= ' ' OR
+                                 A.한도상품템플릿코드= ' ' OR
+                                 A.한도상품번호 = ' ' )
+                    GROUP BY  A.그룹회사코드
+                            , A.기준일
+                            , A.기준년월
+170224                      , A.차주고객식별자
+                            , A.한도계좌번호
+                            , A.한도상품대분류코드
+                            , A.한도상품중분류코드
+                            , A.한도상품템플릿코드
+                            , A.한도상품번호
+170224                      , A.관리부점코드
+                    ) T125
+                     , DB2DBA.THKJL0118 T118
+              WHERE  T125.그룹회사코드        = T118.그룹회사코드
+                AND  T125.기준년월            = T118.기준년월
+                AND  T125.한도상품대분류코드  = T118.상품대분류코드
+                AND  T125.한도상품중분류코드  = T118.상품중분류코드
+                AND  T125.한도상품템플릿코드  = T118.상품템플릿코드
+                AND  T125.한도상품번호        = T118.상품번호
+              ) S125 LEFT OUTER JOIN
+              (SELECT 부점코드, 영업지원본부부점코드
+                 FROM DB2DBA.THKJIBR01 E
+                WHERE 그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                  AND 지주회사구분   = '01'
+                  AND 적용종료년월일 >= :WK-H-I-BASE-YMD
+                  AND 적용시작년월일 = (SELECT 적용시작년월일
+                                          FROM DB2DBA.THKJIBR01
+                                         WHERE 그룹회사코드
+                                             = E.그룹회사코드
+                                           AND 부점코드
+                                             = E.부점코드
+                                           AND 적용시작년월일
+                                            <= :WK-H-I-BASE-YMD
+                                         ORDER BY 적용시작년월일 DESC
+                                         FETCH FIRST 1 ROW ONLY)) BR01
+               ON  S125.관리부점코드  = BR01.부점코드
+            , DB2DBA.THKJL0015  T015 LEFT OUTER JOIN
+		       DB2DBA.THKJL0044  T044
+	                             ON  T015.그룹회사코드
+	                               = T044.그룹회사코드
+	                            AND  T015.신표준산업분류코드
+	                               = T044.신표준산업분류코드
+	                            AND  T044.기준년월
+	                               = :WK-H-I-BASE-YM
+              WHERE  S125.그룹회사코드   = T015.그룹회사코드
+170224          AND  S125.차주고객식별자 = T015.고객식별자
+              GROUP BY VALUE(T044.대분류업종코드,'000')
+                   , CASE WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3348','3364','3555','3982','4945'
+                                ,'4958','4987','5447','7201','7214')
+                              THEN '31'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3814','3827','5038','5041')
+                              THEN '21'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3885','4974')
+                              THEN '22'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3940','5009')
+                              THEN '33'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3830','5012')
+                              THEN '35'
+                          ELSE  '11'
+                     END
+              WITH UR
+           END-EXEC.
+
+      *@   전년도말 지역별 TE 조회
+           EXEC SQL
+            DECLARE  THKJL0069_CUR2    CURSOR FOR
+            SELECT VALUE(T044.대분류업종코드,'000')
+                 , CASE WHEN VALUE(BR01.영업지원본부부점코드,
+                             VALUE(BR02.영업지원본부부점코드,'')) IN
+                             ('3348','3364','3555','3982','4945'
+                             ,'4958','4987','5447','7201','7214')
+                        THEN '31'
+                        WHEN VALUE(BR01.영업지원본부부점코드,
+                             VALUE(BR02.영업지원본부부점코드,'')) IN
+                             ('3814','3827','5038','5041')
+                        THEN '21'
+                        WHEN VALUE(BR01.영업지원본부부점코드,
+                             VALUE(BR02.영업지원본부부점코드,'')) IN
+                             ('3885','4974')
+                        THEN '22'
+                        WHEN VALUE(BR01.영업지원본부부점코드,
+                             VALUE(BR02.영업지원본부부점코드,'')) IN
+                             ('3940','5009')
+                        THEN '33'
+                        WHEN VALUE(BR01.영업지원본부부점코드,
+                             VALUE(BR02.영업지원본부부점코드,'')) IN
+                             ('3830','5012')
+                        THEN '35'
+                        ELSE '11'
+                   END 지역별
+                 , SUM(S126."한도기준TE금액")
+                         AS "한도기준TE금액"
+            FROM (
+              SELECT T126.그룹회사코드
+                   , T126.기준년월
+170224             , T126.차주고객식별자
+                   , T126.한도계좌번호
+                   , T126.한도상품대분류코드
+                   , T126.한도상품중분류코드
+                   , T126.한도상품템플릿코드
+                   , T126.한도상품번호
+                   , T126.관리부점코드
+                   , CASE WHEN (CASE WHEN T126.명목액기준한도 = 0
+                                      AND T126.명목액기준잔액 > 0
+                                     THEN T126.명목액기준잔액
+                                     ELSE T126.명목액기준한도
+                                END ) = 0
+                                OR  T118."한도기준TE환산율"  =  0
+                          THEN 0
+                          ELSE TRUNC(DOUBLE(
+                               CASE WHEN T126.명목액기준한도 = 0
+                                     AND T126.명목액기준잔액 > 0
+                                    THEN T126.명목액기준잔액
+                                    ELSE T126.명목액기준한도
+                               END ) * T118."한도기준TE환산율"
+                                     / 100 ,0)
+                     END  AS "한도기준TE금액"
+              FROM ( SELECT A.그룹회사코드
+                          , A.기준년월
+170224                    , A.차주고객식별자
+                          , A.한도계좌번호
+                          , A.한도상품대분류코드
+                          , A.한도상품중분류코드
+                          , A.한도상품템플릿코드
+                          , A.한도상품번호
+170224                    , A.관리부점코드
+                          , SUM(A.명목액기준한도) AS 명목액기준한도
+                          , SUM(A.명목액기준잔액) AS 명목액기준잔액
+                     FROM   DB2DBA.THKJL0126 A
+                    WHERE  A.그룹회사코드  = :WK-H-I-GROUP-CO-CD
+                      AND  A.기준년월      = :WK-H-I-BEFORE-YM
+                      AND  A."TE계좌고객구분"  NOT
+                           IN ('3','4','6','7','9')
+170224                AND  A.차주고객식별자 NOT IN
+                              ('          ', '',
+                               '==========','----------')
+                      AND  NOT ( A.한도상품대분류코드= ' ' OR
+                                 A.한도상품중분류코드= ' ' OR
+                                 A.한도상품템플릿코드= ' ' OR
+                                 A.한도상품번호 = ' ' )
+                    GROUP BY  A.그룹회사코드
+                            , A.기준년월
+170224                      , A.차주고객식별자
+                            , A.한도계좌번호
+                            , A.한도상품대분류코드
+                            , A.한도상품중분류코드
+                            , A.한도상품템플릿코드
+                            , A.한도상품번호
+170224                      , A.관리부점코드
+                    ) T126
+                     , DB2DBA.THKJL0118 T118
+              WHERE  T126.그룹회사코드        = T118.그룹회사코드
+                AND  T126.기준년월            = T118.기준년월
+                AND  T126.한도상품대분류코드  = T118.상품대분류코드
+                AND  T126.한도상품중분류코드  = T118.상품중분류코드
+                AND  T126.한도상품템플릿코드  = T118.상품템플릿코드
+                AND  T126.한도상품번호        = T118.상품번호
+              ) S126 LEFT OUTER JOIN
+              (SELECT 부점코드, 영업지원본부부점코드
+                 FROM DB2DBA.THKJIBR01 E
+                WHERE 그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                  AND 지주회사구분   = '01'
+                  AND 적용종료년월일 >= :WK-H-I-BASE-YMD
+                  AND 적용시작년월일 = (SELECT 적용시작년월일
+                                            FROM DB2DBA.THKJIBR01
+                                           WHERE 그룹회사코드 =
+                                               E.그룹회사코드
+                                             AND 부점코드     =
+                                               E.부점코드
+                                             AND 적용시작년월일
+                                            <= :WK-H-I-BASE-YMD
+                                         ORDER BY 적용시작년월일 DESC
+                                         FETCH FIRST 1 ROW ONLY)
+               ) BR01
+              ON  S126.관리부점코드  = BR01.부점코드
+170224           LEFT OUTER JOIN
+              (SELECT 부점코드, 영업지원본부부점코드
+                 FROM DB2DBA.THKJIBR01 E
+                WHERE 그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                  AND 지주회사구분   = '01'
+                  AND 적용시작년월일 = (SELECT 적용시작년월일
+                                            FROM DB2DBA.THKJIBR01
+                                           WHERE 그룹회사코드 =
+                                               E.그룹회사코드
+                                             AND 부점코드     =
+                                               E.부점코드
+                                             AND 적용시작년월일
+                                            <= :WK-H-I-BASE-YMD
+                                         ORDER BY 적용시작년월일 DESC
+                                         FETCH FIRST 1 ROW ONLY)
+               ) BR02
+              ON  S126.관리부점코드  = BR02.부점코드
+            , DB2DBA.THKJL0152  T152 LEFT OUTER JOIN
+		       DB2DBA.THKJL0044  T044
+	                             ON  T152.그룹회사코드
+	                               = T044.그룹회사코드
+                                  AND  T152.기준년월
+                                     = T044.기준년월
+	                            AND  T152.신표준산업분류코드
+	                               = T044.신표준산업분류코드
+              WHERE  S126.그룹회사코드   = T152.그룹회사코드
+170224          AND  S126.차주고객식별자 = T152.고객식별자
+	          AND  T152.기준년월       = :WK-H-I-BEFORE-YM
+              GROUP BY VALUE(T044.대분류업종코드,'000')
+                   , CASE WHEN VALUE(BR01.영업지원본부부점코드,
+170224                         VALUE(BR02.영업지원본부부점코드,'')) IN
+                                ('3348','3364','3555','3982','4945'
+                                ,'4958','4987','5447','7201','7214')
+                              THEN '31'
+                          WHEN VALUE(BR01.영업지원본부부점코드,
+170224                         VALUE(BR02.영업지원본부부점코드,'')) IN
+                                ('3814','3827','5038','5041')
+                              THEN '21'
+                          WHEN VALUE(BR01.영업지원본부부점코드,
+170224                         VALUE(BR02.영업지원본부부점코드,'')) IN
+                                ('3885','4974')
+                              THEN '22'
+                          WHEN VALUE(BR01.영업지원본부부점코드,
+170224                         VALUE(BR02.영업지원본부부점코드,'')) IN
+                                ('3940','5009')
+                              THEN '33'
+                          WHEN VALUE(BR01.영업지원본부부점코드,
+170224                         VALUE(BR02.영업지원본부부점코드,'')) IN
+                                ('3830','5012')
+                              THEN '35'
+                          ELSE  '11'
+                     END
+               WITH UR
+           END-EXEC.
+
+      *@   2013년 4월1일 이후 지역별 TE 조회
+           EXEC SQL
+            DECLARE  THKJL0069_CUR3    CURSOR FOR
+            SELECT VALUE(T044.대분류업종코드,'000')
+                 , CASE WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3348','3364','3555','3982','4945'
+                             ,'4958','4987','5447','7201','7214')
+                        THEN '31'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3814','3827','5038','5041')
+                        THEN '21'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3885','4974')
+                        THEN '22'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3940','5009')
+                        THEN '33'
+                        WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                             ('3830','5012')
+                        THEN '35'
+                        ELSE  '11'
+                   END 지역별
+                 , SUM(S125."한도기준TE금액")
+                         AS "한도기준TE금액"
+            FROM (
+              SELECT T125.그룹회사코드
+                   , T125.기준일
+                   , T125.기준년월
+170224             , T125.차주고객식별자
+                   , T125.한도계좌번호
+                   , T125.한도상품대분류코드
+                   , T125.한도상품중분류코드
+                   , T125.한도상품템플릿코드
+                   , T125.한도상품번호
+                   , T125.관리부점코드
+                   , CASE WHEN (CASE WHEN T125.명목액기준한도 = 0
+                                      AND T125.명목액기준잔액 > 0
+                                     THEN T125.명목액기준잔액
+                                     ELSE T125.명목액기준한도
+                                END ) = 0
+                                OR  T118."한도기준TE환산율"  =  0
+                          THEN 0
+                          ELSE TRUNC(DOUBLE(
+                               CASE WHEN T125.명목액기준한도 = 0
+                                     AND T125.명목액기준잔액 > 0
+                                    THEN T125.명목액기준잔액
+                                    ELSE T125.명목액기준한도
+                               END ) * T118."한도기준TE환산율"
+                                     / 100 ,0)
+                     END  AS "한도기준TE금액"
+              FROM ( SELECT A.그룹회사코드
+                          , A.기준일
+                          , A.기준년월
+170224                    , A.차주고객식별자
+                          , A.한도계좌번호
+                          , A.한도상품대분류코드
+                          , A.한도상품중분류코드
+                          , A.한도상품템플릿코드
+                          , A.한도상품번호
+170224                    , A.관리부점코드
+                          , SUM(A.명목액기준한도) AS 명목액기준한도
+                          , SUM(A.명목액기준잔액) AS 명목액기준잔액
+                     FROM   DB2DBA.THKJL0125 A
+                    WHERE  A.그룹회사코드  = :WK-H-I-GROUP-CO-CD
+                      AND  A.기준일        = :WK-H-I-BASE-DD
+                      AND  A.기준년월      = :WK-H-I-BASE-YM
+                      AND  A.시작년월일    <> '99991231'
+                      AND  A.시작년월일    >= '20130401'
+                      AND  A."TE계좌고객구분"  NOT
+                           IN ('3','4','6','7','9')
+170224                AND  A.차주고객식별자 NOT IN
+                              ('          ', '',
+                               '==========','----------')
+                      AND  NOT ( A.한도상품대분류코드= ' ' OR
+                                 A.한도상품중분류코드= ' ' OR
+                                 A.한도상품템플릿코드= ' ' OR
+                                 A.한도상품번호 = ' ' )
+                    GROUP BY  A.그룹회사코드
+                            , A.기준일
+                            , A.기준년월
+170224                      , A.차주고객식별자
+                            , A.한도계좌번호
+                            , A.한도상품대분류코드
+                            , A.한도상품중분류코드
+                            , A.한도상품템플릿코드
+                            , A.한도상품번호
+170224                      , A.관리부점코드
+                    ) T125
+                     , DB2DBA.THKJL0118 T118
+              WHERE  T125.그룹회사코드        = T118.그룹회사코드
+                AND  T125.기준년월            = T118.기준년월
+                AND  T125.한도상품대분류코드  = T118.상품대분류코드
+                AND  T125.한도상품중분류코드  = T118.상품중분류코드
+                AND  T125.한도상품템플릿코드  = T118.상품템플릿코드
+                AND  T125.한도상품번호        = T118.상품번호
+              ) S125 LEFT OUTER JOIN
+              (SELECT 부점코드, 영업지원본부부점코드
+                 FROM DB2DBA.THKJIBR01 E
+                WHERE 그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                  AND 지주회사구분   = '01'
+                  AND 적용종료년월일 >= :WK-H-I-BASE-YMD
+                  AND 적용시작년월일 = (SELECT 적용시작년월일
+                                          FROM DB2DBA.THKJIBR01
+                                         WHERE 그룹회사코드
+                                             = E.그룹회사코드
+                                           AND 부점코드
+                                             = E.부점코드
+                                           AND 적용시작년월일
+                                            <= :WK-H-I-BASE-YMD
+                                         ORDER BY 적용시작년월일 DESC
+                                         FETCH FIRST 1 ROW ONLY)) BR01
+              ON  S125.관리부점코드  = BR01.부점코드
+            , DB2DBA.THKJL0015  T015 LEFT OUTER JOIN
+		       DB2DBA.THKJL0044  T044
+	                             ON  T015.그룹회사코드
+	                               = T044.그룹회사코드
+	                            AND  T015.신표준산업분류코드
+	                               = T044.신표준산업분류코드
+	                            AND  T044.기준년월
+	                               = :WK-H-I-BASE-YM
+              WHERE  S125.그룹회사코드   = T015.그룹회사코드
+170224          AND  S125.차주고객식별자 = T015.고객식별자
+              GROUP BY VALUE(T044.대분류업종코드,'000')
+                   , CASE WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3348','3364','3555','3982','4945'
+                                ,'4958','4987','5447','7201','7214')
+                              THEN '31'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3814','3827','5038','5041')
+                              THEN '21'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3885','4974')
+                              THEN '22'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3940','5009')
+                              THEN '33'
+                          WHEN VALUE(BR01.영업지원본부부점코드,'') IN
+                                ('3830','5012')
+                              THEN '35'
+                          ELSE  '11'
+                     END
+                    WITH UR
+           END-EXEC.
+
+      *@   지역별 SUB한도 조회
+           EXEC SQL
+             DECLARE  THKJL0069_CUR4    CURSOR FOR
+              SELECT 대분류업종코드, 지역구분, "지역별SUB한도"
+                FROM  DB2DBA.THKJL0069
+               WHERE 그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                 AND 기준년월일   = :WK-H-I-BEFORE-YMD
+                WITH  UR
+           END-EXEC.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@   초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@   입력값　CHECK
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@   SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@   업무처리
+           PERFORM  S3000-KJL0069-DELETE-RTN
+              THRU  S3000-KJL0069-DELETE-EXT
+
+      *    당일 TE
+           MOVE  CO-CHA-1
+             TO  WK-GUBUN
+           PERFORM  S3000-KJL0069-PROCESS-RTN
+              THRU  S3000-KJL0069-PROCESS-EXT
+
+           PERFORM  S3310-KJL0069-COMMIT-RTN
+              THRU  S3310-KJL0069-COMMIT-EXT
+
+      * EOF-Y변수　초기화
+           INITIALIZE   WK-SW-EOF
+
+      *    전년도말TE
+           MOVE  CO-CHA-2
+             TO  WK-GUBUN
+           PERFORM  S3000-KJL0069-PROCESS-RTN
+              THRU  S3000-KJL0069-PROCESS-EXT
+
+           PERFORM  S3310-KJL0069-COMMIT-RTN
+              THRU  S3310-KJL0069-COMMIT-EXT
+
+      * EOF-Y변수　초기화
+           INITIALIZE   WK-SW-EOF
+
+      *    4월1일이후 TE
+           MOVE  CO-CHA-3
+             TO  WK-GUBUN
+           PERFORM  S3000-KJL0069-PROCESS-RTN
+              THRU  S3000-KJL0069-PROCESS-EXT
+
+           PERFORM  S3310-KJL0069-COMMIT-RTN
+              THRU  S3310-KJL0069-COMMIT-EXT
+
+      * EOF-Y변수　초기화
+           INITIALIZE   WK-SW-EOF
+
+      *    지역별SUB한도조회
+           MOVE  CO-CHA-4
+             TO  WK-GUBUN
+           PERFORM  S3000-KJL0069-PROCESS-RTN
+              THRU  S3000-KJL0069-PROCESS-EXT
+
+           PERFORM  S3310-KJL0069-COMMIT-RTN
+              THRU  S3310-KJL0069-COMMIT-EXT
+
+      *@   처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@DBIO, SQLIO PARAMETER 초기화
+           INITIALIZE       WK-AREA
+                            WK-SYSIN
+                            YCDBIOCA-CA
+
+      * JCL SYSIN ACCEPT  처리기준
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD691 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *    그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *    구분코드
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *    공통 UTILITY CALL
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+      *@   RETURN 정보 확인
+           IF  XBJISTDT-R-STAT = ZEROS
+      *        정상처리
+               CONTINUE
+           ELSE
+      *        에러처리
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   그룹회사구분코드
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업실행일
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업명
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   처리회차
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   배치작업구분
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업자ID
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   자료기준년월일
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   전영업기준년월일
+           IF  WK-SYSIN-BEFORE-YMD = SPACE
+               MOVE '전영업기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+                           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+           INITIALIZE    WK-HOST-IN
+
+      *    그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-H-I-GROUP-CO-CD
+
+      *    기준년월
+           MOVE  WK-SYSIN-BASE-YMD(1:6)
+             TO  WK-H-I-BASE-YM
+      *    기준일
+           MOVE  WK-SYSIN-BASE-YMD(7:2)
+             TO  WK-H-I-BASE-DD
+      *    기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  WK-H-I-BASE-YMD
+      *    전영업년월일
+           MOVE  WK-SYSIN-BEFORE-YMD
+             TO  WK-H-I-BEFORE-YMD
+
+      *    전년도말월 = 기준년 - 1년 + '12'
+           MOVE  WK-SYSIN-BASE-YMD(1:4)
+             TO  WK-BASE-YEAR
+
+           COMPUTE WK-BEFORE-YEAR = WK-BASE-YEAR - 1
+
+           MOVE  WK-BEFORE-YEAR
+             TO  WK-H-I-BEFORE-YM(1:4)
+
+           MOVE '12'
+             TO WK-H-I-BEFORE-YM(5:2)
+
+                             .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   지역별 SUB한도 및 익스포져 (THKJL0069)삭제
+      *-----------------------------------------------------------------
+       S3000-KJL0069-DELETE-RTN.
+
+           EXEC SQL
+               LOCK TABLE DB2DBA.THKJL0069 IN EXCLUSIVE MODE
+           END-EXEC
+
+           EXEC SQL
+             DELETE  FROM  DB2DBA.THKJL0069
+              WHERE  그룹회사코드 = :WK-H-I-GROUP-CO-CD
+                AND  기준년월일   = :WK-H-I-BASE-YMD
+           END-EXEC
+
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+               WHEN  CO-NOT-FOUND
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'DELETE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DELETE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+      *에러메시지:내부 본 처리
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           PERFORM S3310-KJL0069-COMMIT-RTN
+              THRU S3310-KJL0069-COMMIT-EXT
+
+                               .
+       S3000-KJL0069-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-KJL0069-PROCESS-RTN.
+
+           PERFORM  S3100-KJL0069-OPEN-RTN
+              THRU  S3100-KJL0069-OPEN-EXT
+
+           PERFORM  S3200-KJL0069-FETCH-RTN
+              THRU  S3200-KJL0069-FETCH-EXT
+
+           PERFORM  UNTIL EOF-Y
+
+                    PERFORM  S3300-KJL0069-INSERT-RTN
+                       THRU  S3300-KJL0069-INSERT-EXT
+
+                    PERFORM  S3200-KJL0069-FETCH-RTN
+                       THRU  S3200-KJL0069-FETCH-EXT
+           END-PERFORM
+
+           PERFORM  S3400-KJL0069-CLOSE-RTN
+              THRU  S3400-KJL0069-CLOSE-EXT
+           .
+       S3000-KJL0069-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR OPEN
+      *-----------------------------------------------------------------
+       S3100-KJL0069-OPEN-RTN.
+
+
+
+           EVALUATE  WK-GUBUN
+               WHEN  CO-CHA-1
+      *             당일
+                     EXEC SQL
+                          OPEN  THKJL0069_CUR1
+                     END-EXEC
+               WHEN  CO-CHA-2
+      *             전년도말
+                     EXEC SQL
+                          OPEN  THKJL0069_CUR2
+                     END-EXEC
+               WHEN  CO-CHA-3
+      *             4월1일이후
+                     EXEC SQL
+                          OPEN  THKJL0069_CUR3
+                     END-EXEC
+               WHEN  CO-CHA-4
+      *             지역별SUB한도조회
+                     EXEC SQL
+                          OPEN  THKJL0069_CUR4
+                     END-EXEC
+           END-EVALUATE
+
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'OPEN'       TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR OPEN시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3100-KJL0069-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR FETCH
+      *-----------------------------------------------------------------
+       S3200-KJL0069-FETCH-RTN.
+
+           INITIALIZE    WK-MGT-BRNCD
+                         WK-HOST-OUT
+
+           EVALUATE  WK-GUBUN
+               WHEN  CO-CHA-1
+      *              당일
+                     EXEC SQL
+                        FETCH  THKJL0069_CUR1
+                         INTO  :WK-HOST-OUT
+                     END-EXEC
+
+               WHEN  CO-CHA-2
+      *              전년도말
+                     EXEC SQL
+                        FETCH  THKJL0069_CUR2
+                         INTO  :WK-HOST-OUT
+                     END-EXEC
+
+               WHEN  CO-CHA-3
+      *             4월1일이후
+                     EXEC SQL
+                        FETCH  THKJL0069_CUR3
+                         INTO  :WK-HOST-OUT
+                     END-EXEC
+
+               WHEN  CO-CHA-4
+      *             지역별SUB한도조회
+                     EXEC SQL
+                        FETCH  THKJL0069_CUR4
+                         INTO  :WK-HOST-OUT
+                     END-EXEC
+           END-EVALUATE
+
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-FE-CNT
+               WHEN  CO-NOT-FOUND
+                     SET   EOF-Y       TO  TRUE
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'FETCH'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR FETCH시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3200-KJL0069-FETCH-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   지역별 SUB-LIMIT (THKJL0069) 등록
+      *-----------------------------------------------------------------
+       S3300-KJL0069-INSERT-RTN.
+
+           INITIALIZE    TKJL0069-KEY
+                         TRJL0069-REC
+
+
+      *    그룹회사코드
+           MOVE  WK-H-I-GROUP-CO-CD
+             TO  RJL0069-GROUP-CO-CD
+
+      *    기준년월일
+           MOVE  WK-H-I-BASE-YMD
+             TO  RJL0069-BASE-YMD
+
+      *    대분류업종코드
+           MOVE  WK-H-O-LAG-CLSFI-BZTYP-CD
+             TO  RJL0069-LAG-CLSFI-BZTYP-CD
+
+      *   지역구분
+           MOVE  WK-H-O-AREA-DSTCD
+             TO  RJL0069-AREA-DSTCD
+
+
+           EVALUATE  WK-GUBUN
+               WHEN  CO-CHA-1
+      *              당일
+      *              지역별익스포져금액
+                     MOVE  WK-H-O-SUB-CLAM
+                       TO  RJL0069-AREA-PER-EXPSR-AMT
+
+               WHEN  CO-CHA-2
+      *              전년도말익스포져금액
+                     MOVE  WK-H-O-SUB-CLAM
+                       TO  RJL0069-PYY-X-END-EXPSR-AMT
+
+               WHEN  CO-CHA-3
+      *              증가익스포져금액
+                     MOVE  WK-H-O-SUB-CLAM
+                       TO  RJL0069-INCRSE-EXPSR-AMT
+
+               WHEN  CO-CHA-4
+      *              지역별SUB한도
+                     MOVE  WK-H-O-SUB-CLAM
+                       TO  RJL0069-AREA-PER-SUB-CLAM
+           END-EVALUATE
+
+      *    한도초과년월일
+           MOVE  SPACES
+             TO  RJL0069-LIMT-EXCS-YMD
+
+      *    예외적용년월일
+           MOVE  SPACES
+             TO  RJL0069-ECEPT-APLY-YMD
+
+
+           #DYDBIO  INSERT-CMD-Y TKJL0069-PK TRJL0069-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-INT-CNT
+               WHEN  COND-DBIO-DUPM
+                     PERFORM S3310-KJL0069-UPDATE-RTN
+                        THRU S3310-KJL0069-UPDATE-EXT
+
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'INSERT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'INSERT시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+
+                               .
+       S3300-KJL0069-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   지역별 SUB-LIMIT (THKJL0069) 변경
+      *-----------------------------------------------------------------
+       S3310-KJL0069-UPDATE-RTN.
+
+
+           EVALUATE  WK-GUBUN
+               WHEN  CO-CHA-1
+      *              지역별익스포져금액
+                 EXEC SQL
+                  UPDATE  DB2DBA.THKJL0069
+                     SET  지역별익스포져금액 = :WK-H-O-SUB-CLAM
+                        , 시스템최종처리일시   = :BICOM-TRAN-START-YMS
+                        , 시스템최종사용자번호 = :BICOM-USER-EMPID
+                   WHERE  그룹회사코드    = :WK-H-I-GROUP-CO-CD
+                     AND  기준년월일      = :WK-H-I-BASE-YMD
+                     AND  대분류업종코드  = :WK-H-O-LAG-CLSFI-BZTYP-CD
+                     AND  지역구분        = :WK-H-O-AREA-DSTCD
+                 END-EXEC
+
+               WHEN  CO-CHA-2
+      *              전년도말익스포져금액
+                 EXEC SQL
+                  UPDATE  DB2DBA.THKJL0069
+                     SET  전년도말익스포져금액 = :WK-H-O-SUB-CLAM
+                        , 시스템최종처리일시   = :BICOM-TRAN-START-YMS
+                        , 시스템최종사용자번호 = :BICOM-USER-EMPID
+                   WHERE  그룹회사코드    = :WK-H-I-GROUP-CO-CD
+                     AND  기준년월일      = :WK-H-I-BASE-YMD
+                     AND  대분류업종코드  = :WK-H-O-LAG-CLSFI-BZTYP-CD
+                     AND  지역구분        = :WK-H-O-AREA-DSTCD
+                 END-EXEC
+
+               WHEN  CO-CHA-3
+      *              증가익스포져금액
+                 EXEC SQL
+                  UPDATE  DB2DBA.THKJL0069
+                     SET  증가익스포져금액 = :WK-H-O-SUB-CLAM
+                        , 시스템최종처리일시   = :BICOM-TRAN-START-YMS
+                        , 시스템최종사용자번호 = :BICOM-USER-EMPID
+                   WHERE  그룹회사코드    = :WK-H-I-GROUP-CO-CD
+                     AND  기준년월일      = :WK-H-I-BASE-YMD
+                     AND  대분류업종코드  = :WK-H-O-LAG-CLSFI-BZTYP-CD
+                     AND  지역구분        = :WK-H-O-AREA-DSTCD
+                 END-EXEC
+
+               WHEN  CO-CHA-4
+      *              지역별SUB한도금액
+                 EXEC SQL
+                  UPDATE  DB2DBA.THKJL0069
+                     SET "지역별SUB한도"  = :WK-H-O-SUB-CLAM
+                        , 시스템최종처리일시   = :BICOM-TRAN-START-YMS
+                        , 시스템최종사용자번호 = :BICOM-USER-EMPID
+                   WHERE  그룹회사코드    = :WK-H-I-GROUP-CO-CD
+                     AND  기준년월일      = :WK-H-I-BASE-YMD
+                     AND  대분류업종코드  = :WK-H-O-LAG-CLSFI-BZTYP-CD
+                     AND  지역구분        = :WK-H-O-AREA-DSTCD
+                 END-EXEC
+           END-EVALUATE
+
+
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-UPT-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'UPDATE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'UPDATE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3310-KJL0069-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR CLOSE
+      *-----------------------------------------------------------------
+       S3400-KJL0069-CLOSE-RTN.
+
+           EVALUATE  WK-GUBUN
+               WHEN  CO-CHA-1
+      *             당일
+                     EXEC SQL
+                          CLOSE THKJL0069_CUR1
+                     END-EXEC
+               WHEN  CO-CHA-2
+      *             전년도말
+                     EXEC SQL
+                          CLOSE THKJL0069_CUR2
+                     END-EXEC
+               WHEN  CO-CHA-3
+      *             4월1일이후
+                     EXEC SQL
+                          CLOSE THKJL0069_CUR3
+                     END-EXEC
+               WHEN  CO-CHA-4
+      *             지역별SUB한도조회
+                     EXEC SQL
+                          CLOSE THKJL0069_CUR4
+                     END-EXEC
+           END-EVALUATE
+
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'CLOSE'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR CLOSE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+           PERFORM S3310-KJL0069-COMMIT-RTN
+              THRU S3310-KJL0069-COMMIT-EXT
+
+                              .
+       S3400-KJL0069-CLOSE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   COMMIT
+      *-----------------------------------------------------------------
+       S3310-KJL0069-COMMIT-RTN.
+
+           EXEC  SQL  COMMIT  END-EXEC
+
+      * Commit 처리결과 SQL-CODE를 확인하여 정상/오류 처
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KJL0069'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'COMMIT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DB  Commit 시   오류가   발생했습니다 '
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+                               .
+       S3310-KJL0069-COMMIT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+           DISPLAY '*--------------------------------------*'
+           DISPLAY '  BEFORE-YMD   : ' WK-H-I-BEFORE-YMD
+           DISPLAY '  BEFORE-YM    : ' WK-H-I-BEFORE-YM
+           DISPLAY '*--------------------------------------*'
+           DISPLAY '* THKJL0069_CUR   COUNT  = ' WK-AC-FE-CNT
+           DISPLAY '* KJL0069 INSERT  COUNT  = ' WK-AC-INT-CNT
+           DISPLAY '* KJL0069 UPDATE  COUNT  = ' WK-AC-UPT-CNT
+           DISPLAY '*--------------------------------------*'
+           DISPLAY '* BJLD691 PGM END                      *'
+           DISPLAY '*--------------------------------------*'
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

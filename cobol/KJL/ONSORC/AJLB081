@@ -1,0 +1,257 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB081 (AS신용공여이사회승인내역관리)
+      *@처리유형  : AS
+      *@처리개요  : 신용공여이사회승인내역을 관리하는
+      *@            : 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240425: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB081.
+       AUTHOR.                        박정수.
+       DATE-WRITTEN.                   24/04/25.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB081'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *@출력영역 확보를 위한 INTERFACE정의
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+
+      *   신용공여이사회승인내역등록
+       01  XDJLB081-CA.
+           COPY  XDJLB081.
+
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  YNJLB081-CA.
+           COPY  YNJLB081.
+
+       01  YPJLB081-CA.
+           COPY  YPJLB081.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJLB081-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE       WK-AREA
+                            XIJICOMM-IN
+                            XZUGOTMY-IN.
+      *@출력영역 확보
+           #GETOUT YPJLB081-CA
+
+      * COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA.
+
+      * 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF.
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    처리구분
+           IF YNJLB081-PRCSS-DSTIC = SPACE
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           EVALUATE YNJLB081-PRCSS-DSTIC
+           WHEN CO-CHA-02
+           WHEN CO-CHA-04
+      *#1     등록/삭제처리시
+      *@1     신용공여이사회승인내역관리 프로그램호출
+               PERFORM S3100-DJLB081-CALL-RTN
+                  THRU S3100-DJLB081-CALL-EXT
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   신용공여이사회승인내역관리 DC호출
+      *-----------------------------------------------------------------
+       S3100-DJLB081-CALL-RTN.
+
+      *@1 입력파라미터 조립
+
+      *    처리구분
+           MOVE YNJLB081-PRCSS-DSTIC
+             TO XDJLB081-I-PRCSS-DSTIC
+
+      *    이사회승인번호
+           MOVE  YNJLB081-BRDC-ATHOR-NO
+             TO  XDJLB081-I-BRDC-ATHOR-NO
+
+      *    고객식별자
+           MOVE  YNJLB081-CUST-IDNFR
+             TO  XDJLB081-I-CUST-IDNFR
+
+      *    신용공여중분류코드
+           MOVE  YNJLB081-GRCR-MIDL-CLSFI-CD
+             TO  XDJLB081-I-GRCR-MIDL-CLSFI-CD
+
+      *    통화코드
+           MOVE  YNJLB081-CNCYCD
+             TO  XDJLB081-I-CNCYCD
+
+      *    이사회승인금액
+           MOVE  YNJLB081-BRDC-ATHOR-AMT
+             TO  XDJLB081-I-BRDC-ATHOR-AMT
+
+      *    소관부점코드
+           MOVE  YNJLB081-JRSDZ-BRNCD
+             TO  XDJLB081-I-JRSDZ-BRNCD
+
+      *    이사회승인년월일
+           MOVE  YNJLB081-BRDC-ATHOR-YMD
+             TO  XDJLB081-I-BRDC-ATHOR-YMD
+
+      *    이사회승인유효년월일
+           MOVE  YNJLB081-BRDC-ATHOR-VALD-YMD
+             TO  XDJLB081-I-BRDC-ATHOR-VALD-YMD
+
+      *    이사회승인금리내용
+           MOVE  YNJLB081-BRDC-ATHOR-IRT-CTNT
+             TO  XDJLB081-I-BRDC-ATHOR-IRT-CTNT
+
+      *    비고
+           MOVE  YNJLB081-RMARK
+             TO  XDJLB081-I-RMARK
+
+      *@1 신용공여이사회승인내역관리 프로그램 호출
+           #DYCALL  DJLB081  YCCOMMON-CA  XDJLB081-CA
+
+      *   처리결과CHECK
+           EVALUATE TRUE
+           WHEN COND-XDJLB081-OK
+      *        처리결과
+                MOVE XDJLB081-O-PRCSS-RSULT
+                 TO YPJLB081-PRCSS-RSULT
+           WHEN COND-XDJLB081-NOTFOUND
+
+               MOVE  CO-STAT-NOTFND
+                 TO  YPJLB081-PRCSS-RSULT
+
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJLB081-R-ERRCD
+                      XDJLB081-R-TREAT-CD
+                      XDJLB081-R-STAT
+           END-EVALUATE
+
+           .
+       S3100-DJLB081-CALL-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@1 폼ID SET
+           #BOFMID 'V1KJL11081000'
+
+           #OKEXIT  CO-STAT-OK WK-MESSAGE.
+       S9000-FINAL-EXT.
+           EXIT.

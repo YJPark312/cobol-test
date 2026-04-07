@@ -1,0 +1,22 @@
+//MKJLTB01 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*********************************************************************
+//*배치작업기준일 : 매월3영업일
+//*선행작업명     : MKJLTP01
+//*********************************************************************
+//*    EAD신용공여한도추출
+//*********************************************************************
+//STEP02 EXEC JZBDEXEC,MBR=BJLI25J,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SM.BJLI25I.V001
+//OTFILE   DD DSN=KJL.SM.BJLI25J.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSBA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=320)
+//SYSIN    DD *
+KB0-%%A-MKJLTB01-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//

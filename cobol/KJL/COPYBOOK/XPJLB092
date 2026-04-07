@@ -1,0 +1,104 @@
+      *================================================================*
+      *@ NAME : XPJLB092                                               *
+      *@ DESC : PC기업및그룹한도신청및승인(금융기관기준한도저장    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-22 15:57:15                          *
+      *  생성일시     : 2009-07-22 15:57:18                          *
+      *================================================================*
+           03  XPJLB092-RETURN.
+             05  XPJLB092-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB092-OK            VALUE  '00'.
+                 88  COND-XPJLB092-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB092-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB092-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB092-ERROR         VALUE  '09'.
+                 88  COND-XPJLB092-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB092-SYSERROR      VALUE  '99'.
+             05  XPJLB092-R-LINE                 PIC  9(006).
+             05  XPJLB092-R-ERRCD                PIC  X(008).
+             05  XPJLB092-R-TREAT-CD             PIC  X(008).
+             05  XPJLB092-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB092-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB092-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJLB092-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJLB092-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJLB092-I-APLCN-NO             PIC  X(010).
+      *--       신용등급
+             05  XPJLB092-I-CRDRAT               PIC  X(004).
+      *--       결산년월
+             05  XPJLB092-I-STLACC-YM            PIC  X(006).
+      *--       업종코드
+             05  XPJLB092-I-BZTYP-CD             PIC  X(002).
+      *--       업종평균기준년
+             05  XPJLB092-I-BZTYP-AVG-BASE-YR    PIC  X(004).
+      *--       신용등급별지원비율
+             05  XPJLB092-I-CRDRAT-P-SPORT-RATO  PIC  9(003)V9(02).
+      *--       전전기법인세비율차감전계속사업이익
+             05  XPJLB092-I-BF-PCRSBC-BIZ-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전기법인세비율차감전계속사업이익
+             05  XPJLB092-I-PRPRID-CRSBCB-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       당기법인세비율차감전계속사업이익
+             05  XPJLB092-I-CRTM-CRSBC-BIZ-PRFT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전기자기자본
+             05  XPJLB092-I-BF-PRPRID-ONCP       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전기자기자본
+             05  XPJLB092-I-PRPRID-ONCP          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       당기자기자본
+             05  XPJLB092-I-CRTM-ONCP            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       최근업종평균자기자본비율
+             05  XPJLB092-I-LA-B-AVG-ONCP-RATO   PIC  9(003)V9(02).
+      *--       상환능력기준한도
+             05  XPJLB092-I-SOLVN-BASE-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       규모기준한도
+             05  XPJLB092-I-SCAL-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준한도
+             05  XPJLB092-I-BASE-LIMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB092-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB092-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  9  2    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB092-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB092-I-CUST-DSTIC         ;고객구분
+      *X  XPJLB092-I-BRWR-NO            ;차주번호
+      *X  XPJLB092-I-APLCN-NO           ;신청번호
+      *X  XPJLB092-I-CRDRAT             ;신용등급
+      *X  XPJLB092-I-STLACC-YM          ;결산년월
+      *X  XPJLB092-I-BZTYP-CD           ;업종코드
+      *X  XPJLB092-I-BZTYP-AVG-BASE-YR  ;업종평균기준년
+      *N  XPJLB092-I-CRDRAT-P-SPORT-RATO;신용등급별지원비율
+      *S  XPJLB092-I-BF-PCRSBC-BIZ-PRFT
+      * 전전기법인세비율차감전계속사업이익
+      *S  XPJLB092-I-PRPRID-CRSBCB-PRFT
+      * 전기법인세비율차감전계속사업이익
+      *S  XPJLB092-I-CRTM-CRSBC-BIZ-PRFT
+      * 당기법인세비율차감전계속사업이익
+      *S  XPJLB092-I-BF-PRPRID-ONCP     ;전전기자기자본
+      *S  XPJLB092-I-PRPRID-ONCP        ;전기자기자본
+      *S  XPJLB092-I-CRTM-ONCP          ;당기자기자본
+      *N  XPJLB092-I-LA-B-AVG-ONCP-RATO
+      * 최근업종평균자기자본비율
+      *S  XPJLB092-I-SOLVN-BASE-LIMT    ;상환능력기준한도
+      *S  XPJLB092-I-SCAL-BASE-LIMT     ;규모기준한도
+      *S  XPJLB092-I-BASE-LIMT          ;기준한도
+      *X  XPJLB092-O-PRCSS-RSULT        ;처리결과

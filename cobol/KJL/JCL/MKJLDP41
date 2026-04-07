@@ -1,0 +1,17 @@
+//MKJLDP41 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  MKIBG454/MKIBG152
+//*********************************************************************
+//*   SUB-LIMIT집계원장구축(THKJL0064)
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLD641,OPT=&SYSUID
+//INFILE    DD DISP=SHR,DSN=KEE.SD.SHRKJL.DM87
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SD.MKJLDP41.DATA
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLDP41-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//

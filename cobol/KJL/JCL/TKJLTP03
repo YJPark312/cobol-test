@@ -1,0 +1,53 @@
+//TKJLTP03 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*  %%SET %%B = %%SUBSTR %%A 7 2
+//*********************************************************************
+//*배치작업기준일 : 수시작업
+//*선행작업명     : TKJLT25K
+//*********************************************************************
+//*   한도관리계좌MC
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD25K,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SM.BJLD25J.V001
+//SYSIN    DD *
+KB0-%%A-TKJLTP03-001-ONLBAT-KB STAR-%%A-N
+//*자료기준년월일-원장삭제구분
+//*********************************************************************
+//*주의!!!!!
+//*이　작업　수행시  테이블　해당　파티션　데이터　삭제
+//*대상 TABLE : THKJL0029
+//*********************************************************************
+//STEP02   EXEC PGM=DSNUTILB,PARM='DAPG,THKJL0029',COND=(4,LT)
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//SW01WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW02WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SW03WK01 DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SYSUT1   DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//SORTOUT  DD UNIT=SYSALLDA,SPACE=(CYL,(3000,200),,,ROUND)
+//PARTKJL  DD DUMMY
+//SYSPRINT DD SYSOUT=*
+//UTPRINT  DD SYSOUT=*
+//SYSIN    DD *
+ LOAD DATA
+ LOG NO  NOCOPYPEND KEEPDICTIONARY
+ INTO TABLE DB2DBA.THKJL0029
+                   PART %%B INDDN PARTKJL RESUME NO REPLACE
+/*
+//*********************************************************************
+//*   차주별익스포져집계원장구축
+//*********************************************************************
+//STEP03 EXEC JZBDEXEC,MBR=BJLD291,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-TKJLTP03-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//*********************************************************************
+//*   그룹익스포져일정보생성
+//*********************************************************************
+//STEP04 EXEC JZBDEXEC,MBR=BJLD351,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-TKJLTP03-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//

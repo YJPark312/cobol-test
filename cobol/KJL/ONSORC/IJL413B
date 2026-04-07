@@ -1,0 +1,249 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: IJL413B (ICTE한신평관리대상그룹조회)
+      *@처리유형  : IC
+      *@처리개요  : TE한신평관리대상그룹조회하는 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20121026: 신규작성
+      * YBH    :20170825: 암호화 관련 적용
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     IJL413B.
+       AUTHOR.                         하윤희.
+       DATE-WRITTEN.                   12/10/26.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'IJL413B'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-B2700093             PIC  X(008) VALUE 'B2700093'.
+           03  CO-UKJL0002             PIC  X(008) VALUE 'UKJL0002'.
+           03  CO-B2100001             PIC  X(008) VALUE 'B2100001'.
+           03  CO-UKJL0033             PIC  X(008) VALUE 'UKJL0033'.
+           03  CO-B3900001             PIC  X(008) VALUE 'B3900001'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-NEXT-KEY.
+               05 WK-AFFLT-CORP-GROUP-CD    PIC  X(006).
+               05 WK-N-KB-PIN               PIC  X(010).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL413B-CA.
+           COPY  XQJL413B.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XIJL413B-CA.
+           COPY  XIJL413B.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XIJL413B-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XIJL413B-OUT
+                            XIJL413B-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    KB-PIN
+           IF      (XIJL413B-I-PRCSS-DSTIC = '1'   )
+               AND (XIJL413B-I-KB-PIN      = SPACE )
+               #ERROR CO-B2100001 CO-UKJL0033 CO-STAT-ERROR
+           END-IF
+
+      *   계열기업군명
+           IF      (XIJL413B-I-PRCSS-DSTIC        = '3'   )
+               AND (XIJL413B-I-AFFLT-C-GROUP-NAME = SPACE )
+               #ERROR CO-B2100001 CO-UKJL0033 CO-STAT-ERROR
+           END-IF
+
+      *    KB-PIN
+           IF      (XIJL413B-I-PRCSS-DSTIC = '4'   )
+               AND (XIJL413B-I-KB-PIN      = SPACE )
+               #ERROR CO-B2100001 CO-UKJL0033 CO-STAT-ERROR
+           END-IF
+
+                           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           INITIALIZE       XQJL413B-IN
+
+      *   처리구분
+           MOVE XIJL413B-I-PRCSS-DSTIC
+             TO XQJL413B-I-PRCSS-DSTIC
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL413B-I-GROUP-CO-CD
+
+      *   기준년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO XQJL413B-I-BASE-YM
+
+      *    KB-PIN
+           MOVE XIJL413B-I-KB-PIN
+             TO XQJL413B-I-KB-PIN
+
+      *   계열기업군명
+           MOVE XIJL413B-I-AFFLT-C-GROUP-NAME
+             TO XQJL413B-I-AFFLT-C-GROUP-NAME
+
+      *   중단거래여부 확인
+           IF BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+               MOVE BOCOM-BF-TDK-INFO-CTNT
+                 TO WK-NEXT-KEY
+
+      *       계열기업군코드
+               MOVE WK-AFFLT-CORP-GROUP-CD
+                 TO XQJL413B-I-AFFLT-CORP-GROUP-CD
+      *       N차주번호
+               MOVE WK-N-KB-PIN
+                 TO XQJL413B-I-N-KB-PIN
+           END-IF
+
+           #DYSQLA QJL413B SELECT XQJL413B-CA
+
+      *   조회결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *@      조회자료MOVE
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR WK-I > DBSQL-SELECT-CNT
+      *           총라인수
+                   MOVE WK-I
+                     TO XIJL413B-O-TOTAL-LINE-CNT
+
+      *           계열기업군코드
+                   MOVE XQJL413B-O-AFFLT-CORP-GROUP-CD(WK-I)(3:3)
+                     TO XIJL413B-O-AFFLT-CORP-GROUP-CD(WK-I)
+      *           계열기업군명
+                   MOVE XQJL413B-O-AFFLT-C-GROUP-NAME(WK-I)
+                     TO XIJL413B-O-AFFLT-C-GROUP-NAME(WK-I)
+      *           그룹사신용등급구분
+                   MOVE XQJL413B-O-CMGR-CRTDSCD(WK-I)
+                     TO XIJL413B-O-CMGR-CRTDSCD(WK-I)
+      *           계열기업순위
+                   MOVE XQJL413B-O-AFFLT-CORP-RANKG(WK-I)
+                     TO XIJL413B-O-AFFLT-CORP-RANKG(WK-I)
+      *            KB-PIN
+                   MOVE XQJL413B-O-CUST-IDNFR(WK-I)
+                     TO XIJL413B-O-KB-PIN(WK-I)
+      *           채무자명
+                   MOVE XQJL413B-O-DBTRZ-NAME(WK-I)
+                     TO XIJL413B-O-DBTRZ-NAME(WK-I)
+               END-PERFORM
+
+               IF  DBSQL-SELECT-CNT > 100
+      *           계열기업군코드
+                   MOVE XQJL413B-O-AFFLT-CORP-GROUP-CD(WK-I)
+                     TO WK-AFFLT-CORP-GROUP-CD
+      *            NKB-PIN
+                   MOVE XQJL413B-O-CUST-IDNFR(WK-I)
+                     TO WK-N-KB-PIN
+
+                   #DSCNTR 1 WK-NEXT-KEY
+               END-IF
+           WHEN COND-DBSQL-MRNF
+               #OKEXIT  CO-STAT-NOTFND
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900001 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

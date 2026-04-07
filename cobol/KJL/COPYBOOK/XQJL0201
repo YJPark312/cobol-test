@@ -1,0 +1,86 @@
+      *===========================================================
+      *  프로그램명    : QJL0201
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0201
+      *  사용예        : 01  XQJL0201-CA.
+      *                      COPY  XQJL0201.
+      *  최종변경일시  : 2010년01월23일17시16분27초
+      *===========================================================
+           03  XQJL0201-IN.
+      *            그룹회사코드
+               05  XQJL0201-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월
+               05  XQJL0201-I-BASE-YM
+                                          PIC  X(00006).
+      *            상품대분류코드
+               05  XQJL0201-I-PRDCT-CD1
+                                          PIC  X(00002).
+      *            상품중분류코드
+               05  XQJL0201-I-PRDCT-CD2
+                                          PIC  X(00002).
+      *            상품템플릿코드
+               05  XQJL0201-I-PRDCT-CD3
+                                          PIC  X(00003).
+      *            상품일련번호
+               05  XQJL0201-I-PRDCT-CD4
+                                          PIC  X(00005).
+           03  XQJL0201-OUT.
+      *            회계구분
+               05  XQJL0201-O-ACCTG-DSTCD
+                           OCCURS  00500  PIC  X(00020).
+      *            상품대분류코드
+               05  XQJL0201-O-PRDCT-LAG-CLSFI-CD
+                           OCCURS  00500  PIC  X(00002).
+      *            상품중분류코드
+               05  XQJL0201-O-PRDCT-MEDM-CLSFI-CD
+                           OCCURS  00500  PIC  X(00002).
+      *            상품템플릿코드
+               05  XQJL0201-O-PRDCT-TMPLT-CD
+                           OCCURS  00500  PIC  X(00003).
+      *            상품번호
+               05  XQJL0201-O-PRDCT-NO
+                           OCCURS  00500  PIC  X(00005).
+      *            TE자산구분
+               05  XQJL0201-O-TE-ASST-DSTCD
+                           OCCURS  00500  PIC  X(00010).
+      *            TE환산율
+               05  XQJL0201-O-TE-UTCRT
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            TE금융환산율
+               05  XQJL0201-O-TE-FINAC-UTCRT
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            CA대상계정여부
+               05  XQJL0201-O-CA-TAGET-ACITM-YN
+                           OCCURS  00500  PIC  X(00004).
+      *            신용공여한도환산율
+               05  XQJL0201-O-GRCR-LIMT-UTCRT
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            CP대상계정여부
+               05  XQJL0201-O-INLS-CT-ACITM-YN
+                           OCCURS  00500  PIC  X(00004).
+      *            포괄신용공여환산율
+               05  XQJL0201-O-INLS-GRCR-UTCRT
+                           OCCURS  00500  PIC S9(00003) COMP-3.
+      *            상품명
+               05  XQJL0201-O-PRDCT-NAME
+                           OCCURS  00500  PIC  X(00262).
+      *            TE중분류구분
+               05  XQJL0201-O-TE-MIDL-CLSFI-DSTCD
+                           OCCURS  00500  PIC  X(00003).
+      *            TE중분류명
+               05  XQJL0201-O-TE-MEDM-CLSFI-NAME
+                           OCCURS  00500  PIC  X(00042).
+      *            CA중분류구분
+               05  XQJL0201-O-CRACT-M-CLSFI-DSTCD
+                           OCCURS  00500  PIC  X(00003).
+      *            CA중분류명
+               05  XQJL0201-O-CA-MEDM-CLSFI-NAME
+                           OCCURS  00500  PIC  X(00042).
+      *            통합계정과목코드
+               05  XQJL0201-O-INTGRA-TIACC-CD
+                           OCCURS  00500  PIC  X(00013).
+
+      *===========================================================
+      *  XQJL0201   C O P Y B O O K   E N D
+      *===========================================================

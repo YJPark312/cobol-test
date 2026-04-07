@@ -1,0 +1,396 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB025 (DC국별한도제외대상관리)
+      *@처리유형  : DC
+      *@처리개요  : 국별한도제외대상관리하는 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *최주원 : 20210128 : 신규작성
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **  THKJL0025 : 국별익스포져제외대상관리                      : CRUD
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB025.
+       AUTHOR.                         최주원.
+       DATE-WRITTEN.                   21/01/28.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지
+      *처리구분코드 오류입니다.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+      *필수항목 오류입니다.
+      *    03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+      *데이터를 검색할 수 없습니다.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *데이터를 생성할 수 없습니다.
+           03  CO-B3900010             PIC  X(008) VALUE 'B3900010'.
+      *데이터를 삭제할 수 없습니다.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+      *데이터가 존재하지 않습니다.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+      *데이터를 변경 할 수 없습니다.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+
+      *조치메시지
+      *전산업무담당자에게 문의바랍니다.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB025'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0025-REC.
+           COPY  TRJL0025.
+
+       01  TKJL0025-KEY.
+           COPY  TKJL0025.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJLB025-CA.
+           COPY  XDJLB025.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB025-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJLB025-OUT
+                            XDJLB025-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   1 DC필수입력파라미터 검증
+      *@   1.1 처리구분코드체크
+      *@   실행조건 : 입력-처리구분코드 02(등록), 03(삭제)
+      *@   처리내용 : 에러처리
+           IF XDJLB025-I-PRCSS-DSTIC   = (CO-CHA-02 OR CO-CHA-03)
+              CONTINUE
+           ELSE
+      *@에러메세지 : 처리구분오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   처리구분
+           EVALUATE XDJLB025-I-PRCSS-DSTIC
+      *#1 처리구분(02:등록 03:삭제)
+           WHEN CO-CHA-02
+      *        PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 500
+      *                     OR WK-I > XDJLB025-I-TOTAL-LINE-CNT
+      *@1         국별한도제외대상 등록
+                   PERFORM S3100-INSERT-PROC-RTN
+                      THRU S3100-INSERT-PROC-EXT
+      *        END-PERFORM
+
+           WHEN CO-CHA-03
+      *        PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 500
+      *                     OR WK-I > XDJLB025-I-TOTAL-LINE-CNT
+      *@1         국별한도제외대상 삭제
+                   PERFORM S3200-DELETE-PROC-RTN
+                      THRU S3200-DELETE-PROC-EXT
+      *        END-PERFORM
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국별한도제외대상 등록 전 조회
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *  카피북초기화
+           INITIALIZE TKJL0025-KEY
+                      TRJL0025-REC
+
+      *@1 입력파라미터　조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0025-PK-GROUP-CO-CD
+      *    고객식별자
+           MOVE XDJLB025-I-CUST-IDNFR
+             TO KJL0025-PK-CUST-IDNFR
+
+           #USRLOG  "=================================================="
+           #USRLOG  "*        INPUT DBIO SELECT DATA                  *"
+           #USRLOG  "=================================================="
+           #USRLOG  "그룹회사코드        : " KJL0025-PK-GROUP-CO-CD
+           #USRLOG  "고객식별자          : " KJL0025-PK-CUST-IDNFR
+           #USRLOG  "=================================================="
+
+      *@1  DBIO프로그램　호출
+           #DYDBIO SELECT-CMD-Y  TKJL0025-PK TRJL0025-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *#1     원장에 존재할 경우
+      *@1     국별한도제외대상 수정
+               PERFORM S3110-THKJL0025-UPDATE-RTN
+                  THRU S3110-THKJL0025-UPDATE-EXT
+           WHEN COND-DBIO-MRNF
+      *@1     국별한도제외대상 등록
+               PERFORM S3120-THKJL0025-INSERT-RTN
+                  THRU S3120-THKJL0025-INSERT-EXT
+           WHEN OTHER
+      *원장에러일경우　에러처리
+      *@에러메세지 : 데이터를 검색할 수 없습니다.
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국별한도제외대상관리 (수정)
+      *-----------------------------------------------------------------
+       S3110-THKJL0025-UPDATE-RTN.
+
+      *       국별관리제외사유구분
+           MOVE XDJLB025-I-ECLUD-RESN
+             TO RJL0025-NTIN-PME-RESN-DSTCD
+      *       등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0025-REGI-YMD
+      *       등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0025-REGI-EMPID
+      *       기타사유내용
+           MOVE XDJLB025-I-ETC-RESN-CTNT
+             TO RJL0025-ETC-RESN-CTNT
+
+      *@1 국별한도제외대상관리 (수정)
+           #DYDBIO UPDATE-CMD-Y TKJL0025-PK TRJL0025-REC
+
+      *   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+      *@에러메세지 : 데이터를 변경 할 수 없습니다.
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3110-THKJL0025-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국별한도제외대상관리 (THKJL0025)등록
+      *-----------------------------------------------------------------
+       S3120-THKJL0025-INSERT-RTN.
+
+      *@입력파라미터조립
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0025-GROUP-CO-CD
+      *   고객식별자
+           MOVE XDJLB025-I-CUST-IDNFR
+             TO RJL0025-CUST-IDNFR
+      ******************************************************************
+      *       국별관리제외사유구분
+           MOVE XDJLB025-I-ECLUD-RESN
+             TO RJL0025-NTIN-PME-RESN-DSTCD
+      *       등록년월일
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0025-REGI-YMD
+      *       등록직원번호
+           MOVE BICOM-USER-EMPID
+             TO RJL0025-REGI-EMPID
+      *       기타사유내용
+           MOVE XDJLB025-I-ETC-RESN-CTNT
+             TO RJL0025-ETC-RESN-CTNT
+
+      *@프로그램호출
+           #DYDBIO INSERT-CMD-Y TKJL0025-PK TRJL0025-REC
+
+      *@호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장에러일경우에러처리
+      *@에러메세지 : 데이터를 생성할 수 없습니다.
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900010 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3120-THKJL0025-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  국별한도제외대상관리(THKJL0025)삭제처리
+      *-----------------------------------------------------------------
+       S3200-DELETE-PROC-RTN.
+
+      *@ 원장삭제
+      *@ 관련테이블 : 국별한도제외대상관리  접근유형 : DELETE
+      *@ 카피북초기화
+           INITIALIZE TKJL0025-KEY
+                      TRJL0025-REC
+
+      *@ 입력값조립
+      *@ 그룹회사코드
+           MOVE BICOM-GROUP-CO-CD      TO KJL0025-PK-GROUP-CO-CD
+      *    고객식별자
+           MOVE XDJLB025-I-CUST-IDNFR  TO KJL0025-PK-CUST-IDNFR
+
+      *@ DBIO프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0025-PK TRJL0025-REC
+
+      *@ 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN COND-DBIO-MRNF
+      * 에러메세지 : 데이터가 존재하지 않습니다.
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER
+      *@ 원장조회오류일경우는에러처리
+      *@ 에러메세지 : 데이터를 검색할 수 없습니다.
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@ 원장삭제를위한DBIO프로그램호출
+           #DYDBIO DELETE-CMD-Y TKJL0025-PK TRJL0025-REC
+
+      *@ 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@ 원장삭제오류일경우는에러처리
+      *@ 에러메세지 : 데이터를 삭제할 수 없습니다.
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3200-DELETE-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@처리결과MOVE
+           MOVE CO-STAT-OK
+             TO XDJLB025-O-PRCSS-RSULT
+
+           #OKEXIT  CO-STAT-OK.
+
+       S9000-FINAL-EXT.
+           EXIT.

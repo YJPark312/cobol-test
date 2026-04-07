@@ -1,0 +1,57 @@
+      *================================================================*
+      *@ NAME : YNJL4095                                               *
+      *@ DESC : AS기업및그룹한도신청및승인조회(금융기관기준한도    *
+      *@        산출) COPYBOOK                                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-24 16:02:52                          *
+      *  생성일시     : 2021-11-24 16:02:57                          *
+      *  전체길이     : 00000121 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJL4095-PRCSS-DSTIC              PIC  X(002).
+      *--     고객구분
+           07  YNJL4095-CUST-DSTIC               PIC  X(001).
+      *--     KB-PIN
+           07  YNJL4095-KB-PIN                   PIC  X(010).
+      *--     수정신용등급별지원비율
+           07  YNJL4095-AMND-CP-SPORT-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전기법인세비율차감전계속사업이익
+           07  YNJL4095-AMND-BPCRSBCB-PRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전기법인세비율차감전계속사업이익
+           07  YNJL4095-AMND-PCRSBCB-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당기법인세비율차감전계속사업이익
+           07  YNJL4095-AMND-CCRSBCB-PRFT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정최근업종평균자기자본비율
+           07  YNJL4095-AMND-LBA-ONCP-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--     수정전전기자기자본
+           07  YNJL4095-AMND-BF-PRPRID-ONCP      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정전기자기자본
+           07  YNJL4095-AMND-PRPRID-ONCP         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당기자기자본
+           07  YNJL4095-AMND-CRTM-ONCP           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  N  J  L  4  0  9  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJL4095-PRCSS-DSTIC          ;처리구분
+      *X  YNJL4095-CUST-DSTIC           ;고객구분
+      *X  YNJL4095-KB-PIN               ;KB-PIN
+      *S  YNJL4095-AMND-CP-SPORT-RATO   ;수정신용등급별지원비율
+      *S  YNJL4095-AMND-BPCRSBCB-PRFT
+      * 수정전전기법인세비율차감전계속사업이익
+      *S  YNJL4095-AMND-PCRSBCB-PRFT
+      * 수정전기법인세비율차감전계속사업이익
+      *S  YNJL4095-AMND-CCRSBCB-PRFT
+      * 수정당기법인세비율차감전계속사업이익
+      *S  YNJL4095-AMND-LBA-ONCP-RATO
+      * 수정최근업종평균자기자본비율
+      *S  YNJL4095-AMND-BF-PRPRID-ONCP  ;수정전전기자기자본
+      *S  YNJL4095-AMND-PRPRID-ONCP     ;수정전기자기자본
+      *S  YNJL4095-AMND-CRTM-ONCP       ;수정당기자기자본

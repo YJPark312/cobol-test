@@ -1,0 +1,353 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020030
+      *@프로그램명: DJLB002 (기업및그룹한도신청및승인)              00030030
+      *@처리유형  : DC                                                00040030
+      *@처리개요  : 첨부파일관리
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   변　경　이　력                00070030
+      *-----------------------------------------------------------------00080001
+      *@성명 : 일자 : 변　경　내　용                              00090030
+      * ----------------------------------------------------------------00100001
+      *@YBH    :20090527: 신규작성                                    00110030
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00150030
+      **  ------------------------- ------------------------------------00160001
+      ** 첨부파일관리기본         : THKJL0002            : CRUD
+      ******************************************************************00240001
+       IDENTIFICATION                  DIVISION.                        00250001
+      *=================================================================00260001
+       PROGRAM-ID.                     DJLB002.                         00270001
+       AUTHOR.                         YBH.                             00280030
+       DATE-WRITTEN.                   20/12/31.                        00290001
+      *=================================================================00300001
+       ENVIRONMENT                     DIVISION.                        00310001
+      *=================================================================00320001
+       CONFIGURATION                   SECTION.                         00330001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00340001
+       DATA                            DIVISION.                        00350001
+      *=================================================================00360001
+       WORKING-STORAGE                 SECTION.                         00370001
+      *-----------------------------------------------------------------00380001
+      *CONSTANT ERROR AREA                                              00390001
+      *-----------------------------------------------------------------00400001
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B2500200             PIC  X(008) VALUE 'B2500200'.
+           03  CO-B3000068             PIC  X(008) VALUE 'B3000068'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3800039             PIC  X(008) VALUE 'B3800039'.
+           03  CO-B4200022             PIC  X(008) VALUE 'B4200022'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00460001
+      * CONSTANT AREA                                                   00470001
+      *-----------------------------------------------------------------00480001
+       01  CO-AREA.                                                     00490001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB002'.     00500001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00510001
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00520001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00530001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00540001
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00550001
+                                                                        00560001
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.           00570001
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00570001
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.           00570001
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00650069
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.          00650069
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.          00570001
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.          00570001
+
+           03  CO-CHA-000              PIC  X(003) VALUE '000'.         00650069
+
+      *-----------------------------------------------------------------00740001
+      * WORKING AREA                                                    00750001
+      *-----------------------------------------------------------------00760001
+       01  WK-AREA.                                                     00770001
+           03  WK-STAT                 PIC  X(002).                     00780001
+      *-----------------------------------------------------------------00850001
+      * PGM INTERFACE PARAMETER                                         00860001
+      *-----------------------------------------------------------------00870001
+      *   첨부파일MAX일련번호조회
+       01  XQJL4021-CA.
+           COPY  XQJL4021.
+      *-----------------------------------------------------------------01860001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01870001
+      *-----------------------------------------------------------------01880001
+      *    DBIO  INTERFACE PARAMETER
+           COPY    YCDBSQLA.                                            01890001
+      *    SQLIO INTERFACE PARAMETER
+           COPY    YCDBIOCA.                                            01900001
+      *-----------------------------------------------------------------01910001
+      * TABLE ACCESS INTERFACE PARAMETER                                01920001
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01930001
+      *-----------------------------------------------------------------01940001
+      * DBIO ACCESS KEY관리                                           01950030
+      *-----------------------------------------------------------------01960001
+      *첨부파일관리기본 KEY
+       01  TKJL0002-KEY.                                                02050001
+           COPY    TKJL0002.                                            02060001
+      *첨부파일관리기본 RECORD
+       01  TRJL0002-REC.                                                02070001
+           COPY    TRJL0002.                                            02080001
+      *-----------------------------------------------------------------02210001
+       LINKAGE                         SECTION.                         02220001
+      *-----------------------------------------------------------------02230001
+      * COMMON
+       01  YCCOMMON-CA.                                                 02240001
+           COPY    YCCOMMON.                                            02250001
+      * DC COPYBOOK
+       01  XDJLB002-CA.                                                 02260001
+           COPY    XDJLB002.                                            02270001
+      *=================================================================02280001
+       PROCEDURE                       DIVISION                         02290001
+                                       USING       YCCOMMON-CA          02300001
+                                                   XDJLB002-CA          02310001
+                                                   .                    02320001
+      *=================================================================02330001
+      *-----------------------------------------------------------------02340001
+      *@  처리메인                                                    02350030
+      *-----------------------------------------------------------------02360001
+       S0000-MAIN-RTN.                                                  02370001
+                                                                        02380001
+      *@  초기화                                                      02390030
+           PERFORM S1000-INITIALIZE-RTN                                 02400001
+              THRU S1000-INITIALIZE-EXT                                 02410001
+                                                                        02420001
+      *@  입력값　CHECK                                               02430030
+           PERFORM S2000-VALIDATION-RTN                                 02440001
+              THRU S2000-VALIDATION-EXT                                 02450001
+                                                                        02460001
+      *@  업무처리                                                    02470030
+           PERFORM S3000-PROCESS-RTN                                    02480001
+              THRU S3000-PROCESS-EXT                                    02490001
+                                                                        02500001
+      *@  처리종료                                                    02510030
+           PERFORM S9000-FINAL-RTN                                      02520001
+              THRU S9000-FINAL-EXT                                      02530001
+           .                                                            02540001
+       S0000-MAIN-EXT.                                                  02550001
+           EXIT.                                                        02560001
+      *-----------------------------------------------------------------02570001
+      *@  초기화                                                      02580030
+      *-----------------------------------------------------------------02590001
+       S1000-INITIALIZE-RTN.                                            02600001
+                                                                        02610001
+      *@   WK-AREA 및　프로그램파라미터　초기화                       02620030
+           INITIALIZE WK-AREA                                           02630001
+      *               DBIO
+                      YCDBIOCA-CA                                       02640001
+      *               SQLIO
+                      YCDBSQLA-CA                                       02650001
+                                                                        02660001
+      *@  출력영역　및　결과코드　초기화                              02670030
+           INITIALIZE XDJLB002-OUT                                      02680001
+                      XDJLB002-RETURN                                   02690001
+           .                                                            02700001
+       S1000-INITIALIZE-EXT.                                            02710001
+           EXIT.                                                        02720001
+      *-----------------------------------------------------------------02730001
+      *@  입력값검증                                                  02740030
+      *-----------------------------------------------------------------02750001
+       S2000-VALIDATION-RTN.                                            02760001
+                                                                        02770001
+      *@처리구분체크(03:파일등록/04:파일삭제)
+           IF XDJLB002-I-PRCSS-DSTIC = CO-CHA-03 OR CO-CHA-04
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@  한도신청번호
+           IF XDJLB002-I-LIMT-APLCN-NO = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            02880001
+
+       S2000-VALIDATION-EXT.                                            02890001
+           EXIT.                                                        02900001
+
+      *-----------------------------------------------------------------03120001
+      *@  업무처리                                                    03130030
+      *-----------------------------------------------------------------03140001
+       S3000-PROCESS-RTN.                                               03150001
+
+      *@   파일등록
+           IF XDJLB002-I-PRCSS-DSTIC = CO-CHA-03
+      *       첨부파일　등록
+               PERFORM S3100-FILE-ADD-RTN
+                  THRU S3100-FILE-ADD-EXT
+
+      *@   파일삭제
+           ELSE
+      *       첨부파일　삭제
+               PERFORM S3200-FILE-DEL-RTN
+                  THRU S3200-FILE-DEL-EXT
+           END-IF
+
+      *@6  처리결과 MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .                                                            03380001
+       S3000-PROCESS-EXT.                                               03390001
+           EXIT.                                                        03400001
+
+      *------------------------------------------------------------------
+      *@  첨부파일　등록
+      *------------------------------------------------------------------
+       S3100-FILE-ADD-RTN.
+
+      *@1 첨부파일일련번호　조회
+           PERFORM S3110-SEARCH-SERNO-RTN
+              THRU S3110-SEARCH-SERNO-EXT
+
+      *@1 첨부파일　조회 KEY 초기화
+           INITIALIZE  TKJL0002-KEY
+                       TRJL0002-REC
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0002-GROUP-CO-CD
+      *   한도신청번호
+           MOVE XDJLB002-I-LIMT-APLCN-NO
+             TO RJL0002-LIMT-APLCN-NO
+      *   첨부파일일련번호
+           MOVE XQJL4021-O-APNDX-FILE-SERNO
+             TO RJL0002-APNDX-FILE-SERNO
+      *   첨부파일식별자　
+           MOVE XDJLB002-I-APNDX-FILE-IDNFR
+             TO RJL0002-APNDX-FILE-IDNFR
+      *   첨부파일내용　　
+           MOVE XDJLB002-I-APNDX-FILE-CTNT
+             TO RJL0002-APNDX-FILE-CTNT
+      *   첨부파일명　　　
+           MOVE XDJLB002-I-APNDX-FILE-NAME
+             TO RJL0002-APNDX-FILE-NAME
+      *   등록년월일　　　
+           MOVE BICOM-TRAN-BASE-YMD
+             TO RJL0002-REGI-YMD
+      *   등록부점코드　　
+           MOVE BICOM-BRNCD
+             TO RJL0002-REGI-BRNCD
+      *   등록직원번호　　
+           MOVE BICOM-USER-EMPID
+             TO RJL0002-REGI-EMPID
+      *   고객식별자
+           MOVE XDJLB002-I-KB-PIN
+             TO RJL0002-CUST-IDNFR
+
+           #DYDBIO INSERT-CMD-Y  TKJL0002-PK TRJL0002-REC
+
+      *@1 호출결과 검증
+           IF  COND-DBIO-OK
+               CONTINUE
+           ELSE
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+
+       S3100-FILE-ADD-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   첨부파일일련번호　조회
+      *-----------------------------------------------------------------
+       S3110-SEARCH-SERNO-RTN.
+
+      *@1  초기화
+           INITIALIZE          XQJL4021-IN
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4021-I-GROUP-CO-CD
+      *   한도신청번호
+           MOVE XDJLB002-I-LIMT-APLCN-NO
+             TO XQJL4021-I-LIMT-APLCN-NO
+
+      *@1  처리프로그램 호출
+           #DYSQLA  QJL4021  XQJL4021-CA
+
+      *@1 호출결과 검증
+           IF  COND-DBSQL-OK
+               CONTINUE
+           ELSE
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+
+       S3110-SEARCH-SERNO-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  첨부파일　삭제
+      *------------------------------------------------------------------
+       S3200-FILE-DEL-RTN.
+
+           INITIALIZE  TKJL0002-KEY
+                       TRJL0002-REC
+
+      *   그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  KJL0002-PK-GROUP-CO-CD
+      *   한도신청번호
+           MOVE  XDJLB002-I-LIMT-APLCN-NO
+             TO  KJL0002-PK-LIMT-APLCN-NO
+      *   첨부파일일련번호
+           MOVE  XDJLB002-I-APNDX-FILE-SERNO
+             TO  KJL0002-PK-APNDX-FILE-SERNO
+
+           #DYDBIO SELECT-CMD-Y  TKJL0002-PK TRJL0002-REC
+
+      *@1 DBIO 처리결과확인 ERROR 처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           #DYDBIO DELETE-CMD-Y  TKJL0002-PK TRJL0002-REC
+
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3200-FILE-DEL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------32250001
+      *@  처리종료                                                    32260030
+      *-----------------------------------------------------------------32270001
+       S9000-FINAL-RTN.                                                 32280001
+      *@3 종료처리                                                    32290030
+                                                                        32300001
+      *@   처리결과 MOVE
+           MOVE WK-STAT
+             TO XDJLB002-O-PRCSS-RESULT
+
+      *@3.1 프로그램 종료                                           32310030
+      *@처리내용 : 프로그램을 정상 종료 함                    32320030
+                                                                        32330001
+           #OKEXIT  CO-STAT-OK                                          32340001
+           .                                                            32350001
+       S9000-FINAL-EXT.                                                 32360001
+           EXIT.                                                        32370001

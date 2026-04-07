@@ -1,0 +1,583 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB081 (DC신용공여이사회승인내역관리)
+      *@처리유형  : DC
+      *@처리개요  : 신용공여이사회승인내역을 관리하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240425: 신규작성
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJL0081                     : CRUD
+      **
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB081.
+       AUTHOR.                        박정수.
+       DATE-WRITTEN.                   24/04/25.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB081'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-004              PIC  X(003) VALUE '004'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *    이사회승인번호
+           03  WK-BRDC-ATHOR-NO        PIC  X(010).
+           03  WK-I                    PIC S9(004) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통채번
+       01  XCJICN03-CA.
+           COPY  XCJICN03.
+
+      *자회사및대주주 조회
+       01  XQJL4082-CA.
+           COPY  XQJL4082.
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0081-REC.
+           COPY  TRJL0081.
+
+       01  TKJL0081-KEY.
+           COPY  TKJL0081.
+
+       01  TRJL0082-REC.
+           COPY  TRJL0082.
+
+       01  TKJL0082-KEY.
+           COPY  TKJL0082.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJLB081-CA.
+           COPY  XDJLB081.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB081-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJLB081-OUT
+                            XDJLB081-RETURN
+      *@DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   처리구분
+           EVALUATE XDJLB081-I-PRCSS-DSTIC
+           WHEN CO-CHA-02
+
+      *        자회사 대주주 조회
+               PERFORM S3300-QJL4082-CALL-RTN
+                  THRU S3300-QJL4082-CALL-EXT
+
+               IF XDJLB081-I-BRDC-ATHOR-NO = SPACE
+      *            이사회승인번호 채번
+                   PERFORM S3400-CJICN03-CALL-RTN
+                      THRU S3400-CJICN03-CALL-EXT
+               END-IF
+
+      *#1     처리구분이 ０２등록인 경우
+      *@1     신용공여이사회승인내역등록
+               PERFORM S3100-INSERT-PROC-RTN
+                  THRU S3100-INSERT-PROC-EXT
+           WHEN CO-CHA-04
+      *#1     처리구분이 ０４삭제인 인경우
+      *@1     신용공여이사회승인내역삭제
+               PERFORM S3200-THKJL0081-DELETE-RTN
+                  THRU S3200-THKJL0081-DELETE-EXT
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  이사회승인내역 기본(THKJL0081)
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *    카피북초기화
+           INITIALIZE                  TKJL0081-KEY
+                                       TRJL0081-REC
+
+      *@1  입력파라미터　조립
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0081-PK-GROUP-CO-CD
+
+      *    이사회승인번호
+           IF XDJLB081-I-BRDC-ATHOR-NO = SPACE
+               MOVE WK-BRDC-ATHOR-NO
+                 TO KJL0081-PK-BRDC-ATHOR-NO
+           ELSE
+               MOVE XDJLB081-I-BRDC-ATHOR-NO
+                 TO WK-BRDC-ATHOR-NO
+
+               MOVE WK-BRDC-ATHOR-NO
+                 TO KJL0081-PK-BRDC-ATHOR-NO
+           END-IF
+
+
+      *@1  DBIO프로그램　호출
+           #DYDBIO SELECT-CMD-Y  TKJL0081-PK TRJL0081-REC
+
+      *    호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *#1      원장에 존재할 경우
+      *@1      신용공여이사회승인내역수정
+               PERFORM S3140-THKJL0081-UPDATE-RTN
+                  THRU S3140-THKJL0081-UPDATE-EXT
+           WHEN COND-DBIO-MRNF
+      *#1      원장에존재하지않을경우
+      *@1      신용공여이사회승인내역등록
+               PERFORM S3130-THKJL0081-INSERT-RTN
+                  THRU S3130-THKJL0081-INSERT-EXT
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  이사회승인내역 등록처리
+      *-----------------------------------------------------------------
+       S3130-THKJL0081-INSERT-RTN.
+
+      *@1 입력값조립
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  KJL0081-PK-GROUP-CO-CD
+                 RJL0081-GROUP-CO-CD
+
+      *    이사회승인번호
+           MOVE  WK-BRDC-ATHOR-NO
+             TO  KJL0081-PK-BRDC-ATHOR-NO
+                 RJL0081-BRDC-ATHOR-NO
+
+      *    고객식별자
+           MOVE  XDJLB081-I-CUST-IDNFR
+             TO  RJL0081-CUST-IDNFR
+
+      *    소관부점코드
+           MOVE  XDJLB081-I-JRSDZ-BRNCD
+             TO  RJL0081-JRSDZ-BRNCD
+
+      *    신용공여중분류코드
+           MOVE  XDJLB081-I-GRCR-MIDL-CLSFI-CD
+             TO  RJL0081-GRCR-MIDL-CLSFI-CD
+
+      *    통화코드
+           MOVE  XDJLB081-I-CNCYCD
+             TO  RJL0081-CNCYCD
+
+      *    이사회승인금액
+           MOVE  XDJLB081-I-BRDC-ATHOR-AMT
+             TO  RJL0081-BRDC-ATHOR-AMT
+
+      *    이사회승인년월일
+           MOVE  XDJLB081-I-BRDC-ATHOR-YMD
+             TO  RJL0081-BRDC-ATHOR-YMD
+
+      *    이사회승인유효년월일
+           MOVE  XDJLB081-I-BRDC-ATHOR-VALD-YMD
+             TO  RJL0081-BRDC-ATHOR-VALD-YMD
+
+      *    이사회승인금리내용
+           MOVE  XDJLB081-I-BRDC-ATHOR-IRT-CTNT
+             TO  RJL0081-BRDC-ATHOR-IRT-CTNT
+
+      *    등록직원번호
+           MOVE  BICOM-USER-EMPID
+             TO  RJL0081-REGI-EMPID
+
+      *    등록년월일
+           MOVE  BICOM-TRAN-BASE-YMD
+             TO  RJL0081-REGI-YMD
+
+      *    비고
+           MOVE  XDJLB081-I-RMARK
+             TO  RJL0081-RMARK
+
+      *@1  신용공여관련기관정보등록 프로그램호출
+           #DYDBIO  INSERT-CMD-Y  TKJL0081-PK  TRJL0081-REC
+
+      *    DBIO호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+                CONTINUE
+           WHEN OTHER
+                #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3130-THKJL0081-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  이사회승인내역 수정처리
+      *-----------------------------------------------------------------
+       S3140-THKJL0081-UPDATE-RTN.
+
+      *@1 입력값조립
+      *    고객식별자
+           MOVE  XDJLB081-I-CUST-IDNFR
+             TO  RJL0081-CUST-IDNFR
+
+      *    소관부점코드
+           MOVE  XDJLB081-I-JRSDZ-BRNCD
+             TO  RJL0081-JRSDZ-BRNCD
+
+      *    신용공여중분류코드
+           MOVE  XDJLB081-I-GRCR-MIDL-CLSFI-CD
+             TO  RJL0081-GRCR-MIDL-CLSFI-CD
+
+      *    통화코드
+           MOVE  XDJLB081-I-CNCYCD
+             TO  RJL0081-CNCYCD
+
+      *    이사회승인금액
+           MOVE  XDJLB081-I-BRDC-ATHOR-AMT
+             TO  RJL0081-BRDC-ATHOR-AMT
+
+      *    이사회승인년월일
+           MOVE  XDJLB081-I-BRDC-ATHOR-YMD
+             TO  RJL0081-BRDC-ATHOR-YMD
+
+      *    이사회승인유효년월일
+           MOVE  XDJLB081-I-BRDC-ATHOR-VALD-YMD
+             TO  RJL0081-BRDC-ATHOR-VALD-YMD
+
+      *    이사회승인금리내용
+           MOVE  XDJLB081-I-BRDC-ATHOR-IRT-CTNT
+             TO  RJL0081-BRDC-ATHOR-IRT-CTNT
+
+      *    등록직원번호
+           MOVE  BICOM-USER-EMPID
+             TO  RJL0081-REGI-EMPID
+
+      *    등록년월일
+           MOVE  BICOM-TRAN-BASE-YMD
+             TO  RJL0081-REGI-YMD
+
+      *    비고
+           MOVE  XDJLB081-I-RMARK
+             TO  RJL0081-RMARK
+
+      *@1 신용공여관련기관정보수정 프로그램호출
+           #DYDBIO  UPDATE-CMD-Y  TKJL0081-PK  TRJL0081-REC
+
+      *   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN OTHER
+               #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3140-THKJL0081-UPDATE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  이사회승인내역 삭제처리
+      *-----------------------------------------------------------------
+       S3200-THKJL0081-DELETE-RTN.
+
+      *    카피북초기화
+           INITIALIZE                  TKJL0081-KEY
+                                       TRJL0081-REC
+
+      *@1  입력파라미터　조립
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0081-PK-GROUP-CO-CD
+
+      *    이사회승인번호
+           MOVE XDJLB081-I-BRDC-ATHOR-NO
+             TO KJL0081-PK-BRDC-ATHOR-NO
+
+      *@1  DBIO프로그램호출
+           #DYDBIO SELECT-CMD-Y TKJL0081-PK TRJL0081-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               CONTINUE
+           WHEN COND-DBIO-MRNF
+               #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+           WHEN OTHER
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1 원장삭제를위한DBIO프로그램호출
+           #DYDBIO DELETE-CMD-Y TKJL0081-PK TRJL0081-REC
+
+      *   호출결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               PERFORM S3210-THKJL0082-DELETE-RTN
+                  THRU S3210-THKJL0082-DELETE-EXT
+           WHEN OTHER
+               #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3200-THKJL0081-DELETE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  이사회승인관련계좌현황 삭제처리
+      *-----------------------------------------------------------------
+       S3210-THKJL0082-DELETE-RTN.
+
+      *    카피북초기화
+           INITIALIZE                  TKJL0082-KEY
+                                       TRJL0082-REC
+
+      *@1  입력파라미터　조립
+      *    그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0082-PK-GROUP-CO-CD
+
+      *    이사회승인번호
+           MOVE XDJLB081-I-BRDC-ATHOR-NO
+             TO KJL0082-PK-BRDC-ATHOR-NO
+
+      *    관련여신일련번호
+           MOVE 0
+             TO KJL0082-PK-RELATD-LNBZ-SERNO
+
+           #DYDBIO  OPEN-CMD-1 TKJL0082-PK TRJL0082-REC
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+               PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                            OR COND-DBIO-MRNF
+
+                   #DYDBIO  FETCH-CMD-1 TKJL0082-PK TRJL0082-REC
+
+                   EVALUATE TRUE
+                   WHEN COND-DBIO-OK
+      *                관련여신일련번호
+                       MOVE RJL0082-RELATD-LNBZ-SERNO
+                         TO KJL0082-PK-RELATD-LNBZ-SERNO
+
+                       #DYDBIO DELETE-CMD-Y TKJL0082-PK TRJL0082-REC
+
+                       EVALUATE TRUE
+                       WHEN COND-DBIO-OK
+                       WHEN COND-DBIO-MRNF
+                           CONTINUE
+                       WHEN OTHER
+      *@                  원장삭제오류일경우
+                           #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+                       END-EVALUATE
+                   WHEN COND-DBIO-MRNF
+                       CONTINUE
+                   END-EVALUATE
+               END-PERFORM
+           WHEN COND-DBIO-MRNF
+               CONTINUE
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3210-THKJL0082-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  자회사대주주 조회
+      *-----------------------------------------------------------------
+       S3300-QJL4082-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL4082-IN
+
+      *@2.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4082-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO XQJL4082-I-BASE-YM
+
+      *@   고객식별자
+           MOVE XDJLB081-I-CUST-IDNFR
+             TO XQJL4082-I-CUST-IDNFR
+
+      *@2.3 프로그램 호출
+           #DYSQLA QJL4082 XQJL4082-CA
+
+      *@2.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+                    #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+           .
+       S3300-QJL4082-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  이사회승인번호 채번
+      *-----------------------------------------------------------------
+       S3400-CJICN03-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE XCJICN03-IN
+
+      *@　그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJICN03-I-GROUP-CO-CD
+      *@　어플리케이션구분코드
+           MOVE 'KJL'
+             TO XCJICN03-I-UAPPL-CD
+      *@　채번식별코드
+           MOVE CO-CHA-004
+             TO XCJICN03-I-NBRING-IDNFI-CD
+      *@　부점코드
+           MOVE SPACE
+             TO XCJICN03-I-BRNCD
+
+      *@2.2 DC프로그램 호출 (CJICN03)
+      *@처리내용 : IC고객검증
+           #DYCALL CJICN03 YCCOMMON-CA XCJICN03-CA
+
+      *@2.3 호출결과 확인
+      *@처리내용 : IF 공통영역.리턴코드가 정상이 아니면
+      *@에러처리한다.
+
+           IF NOT COND-XCJICN03-OK
+              #ERROR XCJICN03-R-ERRCD
+                     XCJICN03-R-TREAT-CD
+                     XCJICN03-R-STAT
+           END-IF
+
+           MOVE XCJICN03-O-MGT-NO
+             TO WK-BRDC-ATHOR-NO
+           .
+       S3400-CJICN03-CALL-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

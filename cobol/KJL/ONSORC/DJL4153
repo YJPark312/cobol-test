@@ -1,0 +1,245 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4153 (DCT/E변경고객정보조회)
+      *@처리유형  : DC
+      *@처리개요  : T/E변경고객정보조회 처리하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20180416: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4153.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   18/04/16.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4153'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                         PIC S9(004) COMP.
+           03  WK-NEXT-KEY.
+               05 WK-CUST-IDNFR             PIC  X(010).
+
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL1531-CA.
+           COPY  XQJL1531.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4153-CA.
+           COPY  XDJL4153.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4153-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4153-OUT
+                            XDJL4153-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *   원장 조회
+           EVALUATE XDJL4153-I-PRCSS-DSTIC
+           WHEN CO-CHA-01
+               INITIALIZE       XQJL1531-IN
+
+      *       그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL1531-I-GROUP-CO-CD
+      *       기준년월
+               MOVE BICOM-TRAN-BASE-YMD(1:6)
+                 TO XQJL1531-I-BASE-YM
+      *       고객식별자
+               IF XDJL4153-I-KB-PIN = SPACE
+                   MOVE ALL '%'
+                     TO XQJL1531-I-CUST-IDNFR
+               ELSE
+                   MOVE XDJL4153-I-KB-PIN
+                     TO XQJL1531-I-CUST-IDNFR
+               END-IF
+
+      *       중단거래여부 확인
+               IF BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-NEXT-KEY
+
+      *            N고객식별자
+                   MOVE WK-CUST-IDNFR
+                     TO XQJL1531-I-N-CUST-IDNFR
+               END-IF
+
+               #DYSQLA QJL1531 SELECT XQJL1531-CA
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR         03076006
+               END-EVALUATE
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *       총라인수
+               MOVE WK-I
+                 TO XDJL4153-O-TOTAL-LINE-CNT
+      *        KB-PIN
+               MOVE XQJL1531-O-CUST-IDNFR(WK-I)
+                 TO XDJL4153-O-KB-PIN(WK-I)
+      *       채무자명
+               MOVE XQJL1531-O-DBTRZ-NAME(WK-I)
+                 TO XDJL4153-O-DBTRZ-NAME(WK-I)
+      *       신표준산업분류코드
+               MOVE XQJL1531-O-NEW-SI-CLSFI-CD(WK-I)
+                 TO XDJL4153-O-NEW-SI-CLSFI-CD(WK-I)
+      *       표준산업코드명
+               MOVE XQJL1531-O-STND-IDSTRY-CD-NAME(WK-I)
+                 TO XDJL4153-O-STND-IDSTRY-CD-NAME(WK-I)
+      *        TEPEER구분코드
+               MOVE XQJL1531-O-TE-PEER-DSTCD(WK-I)
+                 TO XDJL4153-O-TE-PEER-DSTCD(WK-I)
+      *        PEER코드명
+               MOVE XQJL1531-O-PEER-CD-NAME(WK-I)
+                 TO XDJL4153-O-PEER-CD-NAME(WK-I)
+      *       대분류업종코드
+               MOVE XQJL1531-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO XDJL4153-O-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       대분류업종코드명
+               MOVE XQJL1531-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                 TO XDJL4153-O-LAG-C-BZTYP-CD-NAME(WK-I)
+      *       한신평재무업종구분
+               MOVE XQJL1531-O-KIS-F-BZTYP-DSTCD(WK-I)
+                 TO XDJL4153-O-KIS-F-BZTYP-DSTCD(WK-I)
+      *       등록년월일
+               MOVE XQJL1531-O-REGI-YMD(WK-I)
+                 TO XDJL4153-O-REGI-YMD(WK-I)
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT > 100
+      *        N고객식별자
+               MOVE XQJL1531-O-CUST-IDNFR(WK-I)
+                 TO WK-CUST-IDNFR
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+           .
+
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

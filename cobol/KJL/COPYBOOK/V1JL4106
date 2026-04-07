@@ -1,0 +1,146 @@
+      *================================================================*
+      *@ NAME : V1JL4106                                               *
+      *@ DESC : Exposure총괄조회                                     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-06-12 15:47:11                          *
+      *  생성일시     : 2018-06-12 15:47:15                          *
+      *  전체길이     : 00000712 BYTES                               *
+      *================================================================*
+      *--     차주명
+           07  V1JL4106-BRWR-NAME                PIC  X(042).
+      *--     대표사업자번호
+           07  V1JL4106-RPSNT-BZNO               PIC  X(010).
+      *--     매출액
+           07  V1JL4106-SALEPR                   PIC  9(015).
+      *--     신용등급
+           07  V1JL4106-CRDRAT                   PIC  X(004).
+      *--     기업규모
+           07  V1JL4106-CORP-SCAL                PIC  X(020).
+      *--     총자산
+           07  V1JL4106-TOTAL-ASST               PIC  9(015).
+      *--     신용등급평가일
+           07  V1JL4106-CRDRAT-VALUA-DD          PIC  X(008).
+      *--     TE기준한도
+           07  V1JL4106-TE-BASE-LIMT             PIC  9(015).
+      *--     관리대상여부
+           07  V1JL4106-MGT-TAGET-YN             PIC  X(008).
+      *--     관리한도설정일
+           07  V1JL4106-MGT-LIMT-STUP-DD         PIC  X(008).
+      *--     한도설정유효일
+           07  V1JL4106-LIMT-STUP-VALD-DD        PIC  X(008).
+      *--     여신성관리한도
+           07  V1JL4106-LNBZ-I-MGT-LIMT          PIC  9(015).
+      *--     여신성한도기준TE
+           07  V1JL4106-LNBZ-I-LIMT-BASE-TE      PIC  9(015).
+      *--     여신성한도여유액
+           07  V1JL4106-LNBZ-IL-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     시장성관리한도
+           07  V1JL4106-MRKTY-MGT-LIMT           PIC  9(015).
+      *--     시장성한도기준TE
+           07  V1JL4106-MRKTY-LIMT-BASE-TE       PIC  9(015).
+      *--     시장성한도여유액
+           07  V1JL4106-MRKTY-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     관리한도
+           07  V1JL4106-MGT-LIMT                 PIC  9(015).
+      *--     한도기준TE
+           07  V1JL4106-LIMT-BASE-TE             PIC  9(015).
+      *--     한도여유액
+           07  V1JL4106-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     외화신용공여한도금액
+           07  V1JL4106-FC-GRCR-CLAM             PIC  9(015).
+      *--     외화한도환산금액
+           07  V1JL4106-FC-LIMT-AUC              PIC  9(015).
+      *--     외화한도여유액
+           07  V1JL4106-FC-LIMT-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신용평가기관
+           07  V1JL4106-CRA                      PIC  X(002).
+      *--     그룹코드
+           07  V1JL4106-GROUP-CD                 PIC  X(006).
+      *--     그룹명
+           07  V1JL4106-GROUP-NAME               PIC  X(042).
+      *--     그룹등급
+           07  V1JL4106-GROUP-GRD                PIC  X(004).
+      *--     그룹순위
+           07  V1JL4106-GROUP-RANKG              PIC  9(003).
+      *--     주채무계열여부
+           07  V1JL4106-MAIN-DEBT-AFFLT-YN       PIC  X(010).
+      *--     그룹한도설정유효일
+           07  V1JL4106-GROUP-LS-VALD-DD         PIC  X(008).
+      *--     그룹관리한도
+           07  V1JL4106-GROUP-MGT-LIMT           PIC  9(015).
+      *--     그룹한도기준TE
+           07  V1JL4106-GROUP-LIMT-BASE-TE       PIC  9(015).
+      *--     그룹한도여유액
+           07  V1JL4106-GROUP-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     표준산업분류코드
+           07  V1JL4106-STND-I-CLSFI-CD          PIC  X(005).
+      *--     표준산업코드명
+           07  V1JL4106-STND-IDSTRY-CD-NAME      PIC  X(042).
+      *--     PEER업종
+           07  V1JL4106-PEER-BZTYP               PIC  X(102).
+      *--     산업등급
+           07  V1JL4106-IDSTRY-GRD               PIC  X(004).
+      *--     관리대상산업여부
+           07  V1JL4106-MGT-TAGET-IDSTRY-YN      PIC  X(020).
+      *--     업종대분류코드
+           07  V1JL4106-BZTYP-LAG-CLSFI-CD       PIC  X(003).
+      *--     업종대분류명
+           07  V1JL4106-BZTYP-E-CLSFI-NAME       PIC  X(032).
+      *--     업종대분류TE한도
+           07  V1JL4106-BZTYP-EC-TE-LIMT         PIC  9(015).
+      *--     업종대분류TE
+           07  V1JL4106-BZTYP-ERA-CLSFI-TE       PIC  9(015).
+      *--     업종한도여유액
+           07  V1JL4106-BZTYP-L-SEXTR-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  4  1  0  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4106-BRWR-NAME            ;차주명
+      *X  V1JL4106-RPSNT-BZNO           ;대표사업자번호
+      *N  V1JL4106-SALEPR               ;매출액
+      *X  V1JL4106-CRDRAT               ;신용등급
+      *X  V1JL4106-CORP-SCAL            ;기업규모
+      *N  V1JL4106-TOTAL-ASST           ;총자산
+      *X  V1JL4106-CRDRAT-VALUA-DD      ;신용등급평가일
+      *N  V1JL4106-TE-BASE-LIMT         ;TE기준한도
+      *X  V1JL4106-MGT-TAGET-YN         ;관리대상여부
+      *X  V1JL4106-MGT-LIMT-STUP-DD     ;관리한도설정일
+      *X  V1JL4106-LIMT-STUP-VALD-DD    ;한도설정유효일
+      *N  V1JL4106-LNBZ-I-MGT-LIMT      ;여신성관리한도
+      *N  V1JL4106-LNBZ-I-LIMT-BASE-TE  ;여신성한도기준TE
+      *S  V1JL4106-LNBZ-IL-SEXTR-AMT    ;여신성한도여유액
+      *N  V1JL4106-MRKTY-MGT-LIMT       ;시장성관리한도
+      *N  V1JL4106-MRKTY-LIMT-BASE-TE   ;시장성한도기준TE
+      *S  V1JL4106-MRKTY-L-SEXTR-AMT    ;시장성한도여유액
+      *N  V1JL4106-MGT-LIMT             ;관리한도
+      *N  V1JL4106-LIMT-BASE-TE         ;한도기준TE
+      *S  V1JL4106-LIMT-SEXTR-AMT       ;한도여유액
+      *N  V1JL4106-FC-GRCR-CLAM         ;외화신용공여한도금액
+      *N  V1JL4106-FC-LIMT-AUC          ;외화한도환산금액
+      *S  V1JL4106-FC-LIMT-SEXTR-AMT    ;외화한도여유액
+      *X  V1JL4106-CRA                  ;신용평가기관
+      *X  V1JL4106-GROUP-CD             ;그룹코드
+      *X  V1JL4106-GROUP-NAME           ;그룹명
+      *X  V1JL4106-GROUP-GRD            ;그룹등급
+      *N  V1JL4106-GROUP-RANKG          ;그룹순위
+      *X  V1JL4106-MAIN-DEBT-AFFLT-YN   ;주채무계열여부
+      *X  V1JL4106-GROUP-LS-VALD-DD     ;그룹한도설정유효일
+      *N  V1JL4106-GROUP-MGT-LIMT       ;그룹관리한도
+      *N  V1JL4106-GROUP-LIMT-BASE-TE   ;그룹한도기준TE
+      *S  V1JL4106-GROUP-L-SEXTR-AMT    ;그룹한도여유액
+      *X  V1JL4106-STND-I-CLSFI-CD      ;표준산업분류코드
+      *X  V1JL4106-STND-IDSTRY-CD-NAME  ;표준산업코드명
+      *X  V1JL4106-PEER-BZTYP           ;PEER업종
+      *X  V1JL4106-IDSTRY-GRD           ;산업등급
+      *X  V1JL4106-MGT-TAGET-IDSTRY-YN  ;관리대상산업여부
+      *X  V1JL4106-BZTYP-LAG-CLSFI-CD   ;업종대분류코드
+      *X  V1JL4106-BZTYP-E-CLSFI-NAME   ;업종대분류명
+      *N  V1JL4106-BZTYP-EC-TE-LIMT     ;업종대분류TE한도
+      *N  V1JL4106-BZTYP-ERA-CLSFI-TE   ;업종대분류TE
+      *S  V1JL4106-BZTYP-L-SEXTR-AMT    ;업종한도여유액

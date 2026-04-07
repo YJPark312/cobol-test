@@ -1,0 +1,58 @@
+//TKJLP010 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0010 CP차주관리한도기본 TABLE LOAD
+//*********************************************************************
+//LOAD01   EXEC DSNUPROC,PARM='DAPG,KJL0010',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0010,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0010
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "고객식별자"                         POSITION(      12         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      22         )
+   CHAR(                     13)                ,
+   "기업규모구분"                       POSITION(      35         )
+   CHAR(                      1)                ,
+   "고객관리부점코드"                   POSITION(      36         )
+   CHAR(                      4)                ,
+   "내부신용평가등급구분"               POSITION(      40         )
+   CHAR(                      4)                ,
+   "신용평가년월일"                     POSITION(      44         )
+   CHAR(                      8)                ,
+   "신표준산업분류코드"                 POSITION(      52         )
+   CHAR(                      5)                ,
+   "기준한도"                           POSITION(      57:      64)
+   DECIMAL                                      ,
+   "기준한도산출년월일"                 POSITION(      65         )
+   CHAR(                      8)                ,
+   "관리한도"                           POSITION(      73:      80)
+   DECIMAL                                      ,
+   "관리한도설정년월일"                 POSITION(      81         )
+   CHAR(                      8)                ,
+   "관리한도유효년월일"                 POSITION(      89         )
+   CHAR(                      8)                ,
+   "시스템최종처리일시"                 POSITION(      97         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     117         )
+   CHAR(                      7)
+   )
+//

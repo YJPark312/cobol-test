@@ -1,0 +1,119 @@
+      *================================================================*
+      *@ NAME : XIJL4008                                               *
+      *@ DESC : ICTE관리한도및익스포져조회 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2011-10-13 10:37:33                          *
+      *  생성일시     : 2011-10-13 10:37:36                          *
+      *  전체길이     : 00000028 BYTES                               *
+      *================================================================*
+           03  XIJL4008-RETURN.
+             05  XIJL4008-R-STAT                 PIC  X(002).
+                 88  COND-XIJL4008-OK            VALUE  '00'.
+                 88  COND-XIJL4008-KEYDUP        VALUE  '01'.
+                 88  COND-XIJL4008-NOTFOUND      VALUE  '02'.
+                 88  COND-XIJL4008-SPVSTOP       VALUE  '05'.
+                 88  COND-XIJL4008-ERROR         VALUE  '09'.
+                 88  COND-XIJL4008-ABNORMAL      VALUE  '98'.
+                 88  COND-XIJL4008-SYSERROR      VALUE  '99'.
+             05  XIJL4008-R-LINE                 PIC  9(006).
+             05  XIJL4008-R-ERRCD                PIC  X(008).
+             05  XIJL4008-R-TREAT-CD             PIC  X(008).
+             05  XIJL4008-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XIJL4008-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XIJL4008-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준일자
+             05  XIJL4008-I-BASE-YMD             PIC  X(008).
+      *--       채무자번호
+             05  XIJL4008-I-BRWR-NO              PIC  X(013).
+      *--       표준산업분류코드
+             05  XIJL4008-I-STND-I-CLSFI-CD      PIC  X(005).
+      *----------------------------------------------------------------*
+           03  XIJL4008-OUT.
+      *----------------------------------------------------------------*
+      *--       한도고객구분
+             05  XIJL4008-O-LIMT-CUST-DSTCD      PIC  X(001).
+      *--       TE관리한도
+             05  XIJL4008-O-TE-MGT-CLAM          PIC  9(015).
+      *--       여신성TE관리한도
+             05  XIJL4008-O-LNBZ-I-TE-MGT-LIMT   PIC  9(015).
+      *--       명목액기준한도
+             05  XIJL4008-O-TTL-AMT-BASE-CLAM    PIC  9(015).
+      *--       TE
+             05  XIJL4008-O-TE                   PIC  9(015).
+      *--       여신성TE
+             05  XIJL4008-O-TE-LNBZ-INCLIN-AMT   PIC  9(015).
+      *--       그룹여부
+             05  XIJL4008-O-GROUP-YN             PIC  X(001).
+      *--       그룹명
+             05  XIJL4008-O-GROUP-NAME           PIC  X(042).
+      *--       그룹관리한도
+             05  XIJL4008-O-GROUP-MGT-LIMT       PIC  9(015).
+      *--       그룹익스포져
+             05  XIJL4008-O-GROUP-EXPSR          PIC  9(015).
+      *--       대분류업종코드
+             05  XIJL4008-O-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--       대분류업종코드명
+             05  XIJL4008-O-LAG-C-BZTYP-CD-NAME  PIC  X(032).
+      *--       산업TE기업규모구분
+             05  XIJL4008-O-IDSTRY-TCS-DSTCD     PIC  X(001).
+      *--       SUB한도관리대상여부
+             05  XIJL4008-O-SUB-L-MGT-TAGET-YN   PIC  X(001).
+      *--       산업별규모별SUB한도
+             05  XIJL4008-O-IDSTRY-PSP-SUB-CLAM  PIC  9(015).
+      *--       산업별규모별익스포져
+             05  XIJL4008-O-IDSTRY-PSP-TE-AMT    PIC  9(015).
+      *--       한도초과년월일
+             05  XIJL4008-O-LIMT-EXCS-YMD        PIC  X(008).
+      *--       예외적용년월일
+             05  XIJL4008-O-ECEPT-APLY-YMD       PIC  X(008).
+      *--       산업업종코드
+             05  XIJL4008-O-IDSTRY-BZTYP-CD      PIC  X(003).
+      *--       산업업종코드명
+             05  XIJL4008-O-IDSTRY-B-CD-NAME     PIC  X(032).
+      *--       산업관리대상여부
+             05  XIJL4008-O-IDSTRY-MGT-TAGET-YN  PIC  X(001).
+      *--       산업토탈익스포져한도
+             05  XIJL4008-O-IDSTRY-TE-LIMT       PIC  9(015).
+      *--       산업토탈익스포져
+             05  XIJL4008-O-IDSTRY-TE            PIC  9(015).
+      *--       산업취급중단년월일
+             05  XIJL4008-O-IDSTRY-H-DSCN-YMD    PIC  X(008).
+      *--       산업예외적용년월일
+             05  XIJL4008-O-IDSTRY-E-APLY-YMD    PIC  X(008).
+      *================================================================*
+      *        X  I  J  L  4  0  0  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XIJL4008-I-PRCSS-DSTIC        ;처리구분
+      *X  XIJL4008-I-BASE-YMD           ;조회기준일자
+      *X  XIJL4008-I-BRWR-NO            ;채무자번호
+      *X  XIJL4008-I-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XIJL4008-O-LIMT-CUST-DSTCD    ;한도고객구분
+      *N  XIJL4008-O-TE-MGT-CLAM        ;TE관리한도
+      *N  XIJL4008-O-LNBZ-I-TE-MGT-LIMT ;여신성TE관리한도
+      *N  XIJL4008-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *N  XIJL4008-O-TE                 ;TE
+      *N  XIJL4008-O-TE-LNBZ-INCLIN-AMT ;여신성TE
+      *X  XIJL4008-O-GROUP-YN           ;그룹여부
+      *X  XIJL4008-O-GROUP-NAME         ;그룹명
+      *N  XIJL4008-O-GROUP-MGT-LIMT     ;그룹관리한도
+      *N  XIJL4008-O-GROUP-EXPSR        ;그룹익스포져
+      *X  XIJL4008-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XIJL4008-O-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *X  XIJL4008-O-IDSTRY-TCS-DSTCD   ;산업TE기업규모구분
+      *X  XIJL4008-O-SUB-L-MGT-TAGET-YN ;SUB한도관리대상여부
+      *N  XIJL4008-O-IDSTRY-PSP-SUB-CLAM
+      * 산업별규모별SUB한도
+      *N  XIJL4008-O-IDSTRY-PSP-TE-AMT  ;산업별규모별익스포져
+      *X  XIJL4008-O-LIMT-EXCS-YMD      ;한도초과년월일
+      *X  XIJL4008-O-ECEPT-APLY-YMD     ;예외적용년월일
+      *X  XIJL4008-O-IDSTRY-BZTYP-CD    ;산업업종코드
+      *X  XIJL4008-O-IDSTRY-B-CD-NAME   ;산업업종코드명
+      *X  XIJL4008-O-IDSTRY-MGT-TAGET-YN;산업관리대상여부
+      *N  XIJL4008-O-IDSTRY-TE-LIMT     ;산업토탈익스포져한도
+      *N  XIJL4008-O-IDSTRY-TE          ;산업토탈익스포져
+      *X  XIJL4008-O-IDSTRY-H-DSCN-YMD  ;산업취급중단년월일
+      *X  XIJL4008-O-IDSTRY-E-APLY-YMD  ;산업예외적용년월일

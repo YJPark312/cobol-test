@@ -1,0 +1,527 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB273 (포괄신용공여한도신청저장)
+      *@처리유형  : DC
+      *@처리개요  : 포괄신용공여한도신청저장
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081216: 신규작성
+      *김진태:20090624: 프로그램수정
+      *김진태:20090825: 메신저전송추가
+      *김진태:20091007: 최종처리일시／최종사용자　삭제
+      *김진태:20091211: 에러메세지정비
+      *김진태:20091218: 미처리내역존재시비정상종료후단말에서처리
+      * YBH    :20140818: 한도설정가능금액 입력값검증 제외
+      * PJH    :20170201:  KB-PIN전환（２차）
+      * PJH    :20170626:  KB-PIN전환（３차）
+      *박정수:20230914:산업평가등급구분 추가/쪽지발송 삭제
+      *박정수:20231012: 설정해제 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  한도신청사유실적        : THKJL0006            : CRUD
+      **  CP관리한도신청이력      : THKJL0007            : CRUD
+      **  시그널기본              : THKJL0052            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB273.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/16.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3800039             PIC  X(008) VALUE 'B3800039'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB273'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-4                PIC  X(001) VALUE '4'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-002              PIC  X(003) VALUE '002'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-STAT                 PIC X(002).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통채번
+       01  XCJICN03-CA.
+           COPY  XCJICN03.
+      *SQLIO
+       01  XQJL2732-CA.
+           COPY    XQJL2732.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO  INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      *    SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *한도신청사유실적 테이블(KEY)
+       01  TKJL0006-KEY.
+           COPY  TKJL0006.
+      *한도신청사유실적 테이블(RECORD)
+       01  TRJL0006-REC.
+           COPY  TRJL0006.
+      *CP관리한도신청이력 테이블(KEY)
+       01  TKJL0007-KEY.
+           COPY  TKJL0007.
+      *CP관리한도신청이력 테이블(RECORD)
+       01  TRJL0007-REC.
+           COPY  TRJL0007.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK AREA
+       01  XDJLB273-CA.
+           COPY  XDJLB273.
+      *=================================================================
+       PROCEDURE                       DIVISION
+      *=================================================================
+                                       USING       YCCOMMON-CA
+                                                   XDJLB273-CA.
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               DBIO
+                      YCDBIOCA-CA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJLB273-OUT
+                      XDJLB273-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@처리구분체크
+           IF XDJLB273-I-PRCSS-DSTIC NOT = CO-CHA-01
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@채무자번호체크
+           IF XDJLB273-I-BRWR-NO = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@신청구분
+           IF XDJLB273-I-LIMT-A-KND-DSTCD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@신청년월일
+           IF XDJLB273-I-APLCN-YMD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@신청부점코드
+           IF XDJLB273-I-APLCN-BRNCD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@신청직원번호
+           IF XDJLB273-I-APLCN-EMPID = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+           IF XDJLB273-I-LIMT-A-KND-DSTCD = '8'
+               CONTINUE
+           ELSE
+      *@    한도신청금액
+               IF XDJLB273-I-LIMT-APLCN-AMT = ZERO
+      *     에러메세지 : 필수항목미입력오류입니다．
+      *     조치메세지 : 전산업무담당자에게　문의바랍니다.
+                  #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+           END-IF
+
+      *@신청의견
+           IF XDJLB273-I-APLCN-RESN-CTNT = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신청등록
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@2 업무처리
+      *@2.1 등록선택시 CP관리한도신청실적 등록한다.
+
+      *Client에서는 백만단위로 보여지므로 Server쪽에서
+      *정상단위로 환원한다.
+
+      *@   한도설정가능금액
+           COMPUTE  XDJLB273-I-LIMT-STUP-ABLAMT
+                 =  XDJLB273-I-LIMT-STUP-ABLAMT
+                 *  1000000
+
+      *@   한도신청금액
+           COMPUTE XDJLB273-I-LIMT-APLCN-AMT
+                 = XDJLB273-I-LIMT-APLCN-AMT
+                 * 1000000
+
+      *@포괄한도를 신청하기전에 신청가능여부를 체크한다.
+           PERFORM S3310-QJL2732-CALL-RTN
+              THRU S3310-QJL2732-CALL-EXT
+
+      *@한도신청번호를 채번한다
+           PERFORM S3330-CJICN03-CALL-RTN
+              THRU S3330-CJICN03-CALL-EXT
+
+      *@본건여신금액 필드에 한도설정가능액을 INSERT
+           PERFORM S3340-THKJL0007-INSERT-RTN
+              THRU S3340-THKJL0007-INSERT-EXT
+
+      *@신청사유 INSERT
+           PERFORM S3350-THKJL0006-INSERT-RTN
+              THRU S3350-THKJL0006-INSERT-EXT
+
+      *@처리결과 MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  포괄한도 신청 DATA CHECK
+      *-----------------------------------------------------------------
+       S3310-QJL2732-CALL-RTN.
+
+      *@   SQLIO 초기화
+           INITIALIZE XQJL2732-IN
+
+      *@   DATA MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL2732-I-GROUP-CO-CD
+170201*@   고객식별자
+170626     MOVE XDJLB273-I-BRWR-NO
+             TO XQJL2732-I-KB-PIN
+
+      *@2.2.1 프로그램 호출
+      *@처리내용 : 포괄한도 신청 DATA CHECK SQLIO
+      *@프로그램 호출
+
+           #DYSQLA QJL2732 XQJL2732-CA
+
+      *@2.2.2 SQLIO 에러처리
+      *@처리내용 : IF 포괄한도 신청 DATA CHECK
+      *@SQLIO.리턴코드=오류면 에러처리
+      *    호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@해당차주에대한　미처리내역이　존재하면　신청　불가！！
+           IF XQJL2732-O-LIMT-P-STUS-DSTCD = '2'
+              MOVE CO-STAT-ABNORMAL
+                TO WK-STAT
+      *@미처리내역존재시비정상종료결과셋팅후단말에서처리한다
+              PERFORM S9000-FINAL-RTN
+                 THRU S9000-FINAL-EXT
+           ELSE
+              CONTINUE
+           END-IF
+
+           .
+       S3310-QJL2732-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신청번호채번
+      *-----------------------------------------------------------------
+       S3330-CJICN03-CALL-RTN.
+
+      *@   초기화
+           INITIALIZE XCJICN03-IN
+
+      *@　그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJICN03-I-GROUP-CO-CD
+      *@　어플리케이션구분코드
+           MOVE 'KJL'
+             TO XCJICN03-I-UAPPL-CD
+      *@　채번식별코드
+           MOVE CO-CHA-002
+             TO XCJICN03-I-NBRING-IDNFI-CD
+      *@　부점코드
+           MOVE SPACE
+             TO XCJICN03-I-BRNCD
+
+      *@2.2 DC프로그램 호출 (CJICN03)
+      *@처리내용 : IC고객검증
+           #DYCALL CJICN03 YCCOMMON-CA XCJICN03-CA
+
+      *@2.3 호출결과 확인
+      *@처리내용 : IF 공통영역.리턴코드가 정상이 아니면
+      *@에러처리한다.
+
+           IF NOT COND-XCJICN03-OK
+              #ERROR XCJICN03-R-ERRCD
+                     XCJICN03-R-TREAT-CD
+                     XCJICN03-R-STAT
+           END-IF
+
+           MOVE XCJICN03-O-MGT-NO
+             TO XDJLB273-O-APLCN-NO
+           .
+       S3330-CJICN03-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  CP관리한도신청실적(THKJL0007)등록
+      *-----------------------------------------------------------------
+       S3340-THKJL0007-INSERT-RTN.
+
+      *@   DBIO 초기화
+           INITIALIZE TKJL0007-KEY
+                      TRJL0007-REC
+
+      *@2.1.2 원장등록
+      *@관련테이블 : CP관리한도신청실적  접근유형 : CREATE
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0007-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XCJICN03-O-MGT-NO
+             TO RJL0007-LIMT-APLCN-NO
+
+170201*@   고객식별자
+170626     MOVE XDJLB273-I-BRWR-NO
+             TO RJL0007-CUST-IDNFR
+
+      *@   한도신청종류구분
+           MOVE XDJLB273-I-LIMT-A-KND-DSTCD
+             TO RJL0007-LIMT-A-KND-DSTCD
+
+      *@   한도진행상태구분
+           MOVE CO-CHA-2
+             TO RJL0007-LIMT-P-STUS-DSTCD
+
+      *@   신청년월일
+           MOVE XDJLB273-I-APLCN-YMD
+             TO RJL0007-APLCN-YMD
+
+      *@   신청부점코드
+           MOVE XDJLB273-I-APLCN-BRNCD
+             TO RJL0007-APLCN-BRNCD
+
+      *@   신청직원번호
+           MOVE XDJLB273-I-APLCN-EMPID
+             TO RJL0007-APLCN-EMPID
+
+      *@   한도설정가능금액
+           MOVE XDJLB273-I-LIMT-STUP-ABLAMT
+             TO RJL0007-LIMT-STUP-ABLAMT
+
+231012*    설정해제일 경우
+           IF XDJLB273-I-LIMT-A-KND-DSTCD = '8'
+      *@       한도신청금액
+               MOVE ZERO
+                 TO RJL0007-LIMT-APLCN-AMT
+           ELSE
+      *@       한도신청금액
+               MOVE XDJLB273-I-LIMT-APLCN-AMT
+                 TO RJL0007-LIMT-APLCN-AMT
+           END-IF
+
+      *@   승인년월일
+           MOVE SPACE
+             TO RJL0007-ATHOR-YMD
+
+      *@   승인직원번호
+           MOVE SPACE
+             TO RJL0007-ATHOR-EMPID
+
+      *@   한도승인구분
+           MOVE SPACE
+             TO RJL0007-LIMT-ATHOR-DSTCD
+
+      *@   한도승인금액
+           MOVE ZERO
+             TO RJL0007-LIMT-ATHOR-AMT
+
+      *@   한도설정유효년월일
+           MOVE SPACE
+             TO RJL0007-LIMT-STUP-VALD-YMD
+
+230914*@   산업평가등급구분
+           MOVE XDJLB273-I-IDSTRY-V-GRD-DSTCD
+             TO RJL0007-IDSTRY-V-GRD-DSTCD
+
+      *@   SQLIO CALL
+           #DYDBIO INSERT-CMD-Y  TKJL0007-PK TRJL0007-REC
+
+      *@   호출결과확인
+           IF COND-DBIO-OK
+              CONTINUE
+           ELSE
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3340-THKJL0007-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한도신청사유실적(THKJL0006)등록
+      *-----------------------------------------------------------------
+       S3350-THKJL0006-INSERT-RTN.
+
+      *@   DBIO 초기화
+           INITIALIZE TKJL0006-KEY
+                      TRJL0006-REC
+
+      *@2.1.2 원장등록
+      *@관련테이블 : 한도신청사유실적  접근유형 : CREATE
+
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0006-GROUP-CO-CD
+
+      *@   한도신청번호
+           MOVE XCJICN03-O-MGT-NO
+             TO RJL0006-LIMT-APLCN-NO
+
+      *@   신청사유내용
+           MOVE XDJLB273-I-APLCN-RESN-CTNT
+             TO RJL0006-APLCN-RESN-CTNT
+
+      *@   승인사유내용
+           MOVE SPACE
+             TO RJL0006-ATHOR-RESN-CTNT
+
+      *@   DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0006-PK TRJL0006-REC
+
+      *@   처리결과확인
+           IF COND-DBIO-OK
+              CONTINUE
+           ELSE
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3350-THKJL0006-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@처리결과 MOVE
+           MOVE WK-STAT
+             TO XDJLB273-O-PRCSS-RSULT
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

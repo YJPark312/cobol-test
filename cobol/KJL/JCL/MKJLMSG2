@@ -1,0 +1,23 @@
+//MKJLMSG2 JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=B                   JOB01633
+//********************************************************************/   000201
+//* 작업개요 : SMS SEND  (상품 미등록  통지전송)             */
+//* ZABA NDM SEND                                                    */
+//*------------------------------------------------------------------*/   000201
+//NDMPROC1  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD SYSOUT=*
+//SYSIN     DD *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+  SUBMIT PROC=KJLSMS02 MAXDELAY=UNLIMITED           -
+         &FTDSN=KJL.SD.MKJLDSMS.DATA                -
+         &TODSN=/fsfile/BNC/recv/ndm/sms/ ||        -
+                KJL_D_SM_017_%%$ODATE.%%TIME.DAT    -
+         &TASK1=/fsbatch/bnc/shell/nbncz001.sh      -
+         &TASK2=KJL101                              -
+         &TASK3=/fsfile/BNC/recv/ndm/sms/           -
+         &TASK4=KJL_D_SM_017_%%$ODATE.%%TIME.DAT
+ SIGNOFF
+/*
+//

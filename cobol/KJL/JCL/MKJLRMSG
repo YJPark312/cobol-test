@@ -1,0 +1,112 @@
+//MKJLRMSG JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//********************************************************************/
+//* %%GLOBAL PARMGLB1                                                */
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2                                */
+//*********************************************************************
+//*                   배치실행JCL                                  */
+//*********************************************************************
+//*배치작업기준일 :영업일                                        */
+//*선행작업명     : MKJLRMSF                                       */
+//*********************************************************************
+//*   지주사　제공　자료　－　금액검증　제공자료                   */
+//********************************************************************/
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRRMS.SKJL0000.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0005,0002),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0004'),1,7)
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("TE한도환산금액"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0029 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준일       = '%%A'
+     AND  AA.기준년월     = '%%$OYEAR.%%OMONTH'
+     AND NOT EXISTS (SELECT 1
+                       FROM DB2DBA.THKJL0015
+                      WHERE 그룹회사코드 = AA.그룹회사코드
+                        AND 차주번호     = AA.차주번호
+                        AND 차주번호구분 = '1'
+                     )
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0005'),1,7)
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM(간접익스포져금액),0),15)),2,15)
+    FROM  DB2DBA.THKJL0031 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준일       = '%%A'
+     AND  AA.기준년월     = '%%$OYEAR.%%OMONTH'
+     AND NOT EXISTS (SELECT 1
+                       FROM DB2DBA.THKJL0015
+                      WHERE 그룹회사코드 = AA.그룹회사코드
+                        AND 차주번호     = AA.담보보증차주번호
+                        AND 차주번호구분 = '1'
+                     )
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0009'),1,7)
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("TE한도환산금액"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0039 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월일   = '%%$ODATE'
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0011'),1,7)
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("USD한도"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0055 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월일   = '%%$ODATE'
+     AND NOT EXISTS (SELECT 1
+                       FROM DB2DBA.THKJL0015
+                      WHERE 그룹회사코드 = AA.그룹회사코드
+                        AND 차주번호     = AA.차주번호
+                        AND 차주번호구분 = '1'
+                    )
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0012'),1,7)
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM(전체관리한도),0),15)),2,15)
+    FROM  DB2DBA.THKJL0056 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월     = '%%$OYEAR.%%OMONTH'
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0013'),1,7)
+      , SUBSTR(CHAR(DECIMAL(VALUE(SUM("CA담보환산금액"),0),15)),2,15)
+   FROM  DB2DBA.THKJL0033 AA
+  WHERE  AA.그룹회사코드 = 'KB0'
+    AND  AA.기준일       = '%%A'
+    AND  AA.기준년월     = '%%$OYEAR.%%OMONTH'
+    AND NOT EXISTS (SELECT 1
+                      FROM DB2DBA.THKJL0015
+                     WHERE 그룹회사코드 = AA.그룹회사코드
+                       AND 차주번호     = AA.차주번호
+                       AND 차주번호구분 = '1'
+                   )
+ UNION ALL
+  SELECT SUBSTR(CHAR('%%$ODATE'),1,8),SUBSTR(CHAR('TE-0015'),1,7)
+    , SUBSTR(CHAR(DECIMAL(VALUE(SUM("한도기준TE금액"),0),15)),2,15)
+   FROM  DB2DBA.THKJL0129 AA
+  WHERE  AA.그룹회사코드 = 'KB0'
+    AND  AA.기준일       = '%%A'
+    AND  AA.기준년월     = '%%$OYEAR.%%OMONTH'
+    AND NOT EXISTS (SELECT 1
+                      FROM DB2DBA.THKJL0015
+                     WHERE 그룹회사코드 = AA.그룹회사코드
+                       AND 차주번호     = AA.차주번호
+                       AND 차주번호구분 = '1'
+                   )
+    WITH  UR;
+/*

@@ -1,0 +1,87 @@
+      *================================================================*
+      *@ NAME : XDJL4033                                               *
+      *@ DESC : DC동일차주별신용공여조회 COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-10-07 17:04:47                          *
+      *  생성일시     : 2009-10-07 17:04:51                          *
+      *================================================================*
+           03  XDJL4033-RETURN.
+             05  XDJL4033-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4033-OK            VALUE  '00'.
+                 88  COND-XDJL4033-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4033-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4033-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4033-ERROR         VALUE  '09'.
+                 88  COND-XDJL4033-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4033-SYSERROR      VALUE  '99'.
+             05  XDJL4033-R-LINE                 PIC  9(006).
+             05  XDJL4033-R-ERRCD                PIC  X(008).
+             05  XDJL4033-R-TREAT-CD             PIC  X(008).
+             05  XDJL4033-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4033-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4033-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준년월
+             05  XDJL4033-I-BASE-YM              PIC  X(006).
+      *--       구분
+             05  XDJL4033-I-INQURY-DSTIC         PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJL4033-OUT.
+      *----------------------------------------------------------------*
+      *--       업무규제자기자본
+             05  XDJL4033-O-ONCP-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본기준년월
+             05  XDJL4033-O-ONCP-BASE-YM         PIC  X(006).
+      *--       출력라인수1
+             05  XDJL4033-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       그리드1
+             05  XDJL4033-O-GRID1                OCCURS 000100 TIMES.
+      *--         그룹코드
+               07  XDJL4033-O-AFFLT-CORP-GROUP-CD
+                                                 PIC  X(006).
+      *--         그룹명
+               07  XDJL4033-O-AFFLT-C-GROUP-NAME PIC  X(042).
+      *--         전년말
+               07  XDJL4033-O-PYY-END-GRCR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         전월
+               07  XDJL4033-O-LSMN-END-GRCR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         당월
+               07  XDJL4033-O-TTMM-END-GRCR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         전월말대비증감
+               07  XDJL4033-O-LSMN-E-CNTST-INCRDC
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         전년말대비증감
+               07  XDJL4033-O-PYY-E-CNTST-INCRDC PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         자기자본대비신용공여율
+               07  XDJL4033-O-ONCP-CNTST-GRCR-RT PIC  9(003)V9(02).
+      *--         신용공여규모순위
+               07  XDJL4033-O-GRCR-SCAL-RANKG    PIC  9(003).
+      *================================================================*
+      *        X  D  J  L  4  0  3  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4033-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4033-I-BASE-YM            ;조회기준년월
+      *X  XDJL4033-I-INQURY-DSTIC       ;구분
+      *S  XDJL4033-O-ONCP-BSAMT         ;업무규제자기자본
+      *X  XDJL4033-O-ONCP-BASE-YM       ;자기자본기준년월
+      *N  XDJL4033-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *A  XDJL4033-O-GRID1              ;그리드1
+      *X  XDJL4033-O-AFFLT-CORP-GROUP-CD;그룹코드
+      *X  XDJL4033-O-AFFLT-C-GROUP-NAME ;그룹명
+      *S  XDJL4033-O-PYY-END-GRCR       ;전년말
+      *S  XDJL4033-O-LSMN-END-GRCR      ;전월
+      *S  XDJL4033-O-TTMM-END-GRCR      ;당월
+      *S  XDJL4033-O-LSMN-E-CNTST-INCRDC;전월말대비증감
+      *S  XDJL4033-O-PYY-E-CNTST-INCRDC ;전년말대비증감
+      *N  XDJL4033-O-ONCP-CNTST-GRCR-RT
+      * 자기자본대비신용공여율
+      *N  XDJL4033-O-GRCR-SCAL-RANKG    ;신용공여규모순위

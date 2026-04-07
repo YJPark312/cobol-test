@@ -1,0 +1,52 @@
+      *================================================================*
+      *@ NAME : V1JLB057                                               *
+      *@ DESC : 산업별지역별SUB한도관리                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2013-04-17 15:48:08                          *
+      *  생성일시     : 2013-04-17 15:48:13                          *
+      *  전체길이     : 00010907 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB057-PRCSS-RSULT              PIC  X(002).
+      *--     그리드
+           07  V1JLB057-GRID.
+      *--       총라인수
+ROWCNT       09  V1JLB057-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  V1JLB057-DATA-BOOK              OCCURS 0 TO 000100
+                 DEPENDING ON V1JLB057-TOTAL-LINE-CNT.
+      *--         대분류업종코드
+               11  V1JLB057-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--         대분류업종코드명
+               11  V1JLB057-LAG-C-BZTYP-CD-NAME  PIC  X(020).
+      *--         지역구분
+               11  V1JLB057-AREA-DSTIC           PIC  X(002).
+      *--         지역구분명
+               11  V1JLB057-AREA-DSTIC-NAME      PIC  X(020).
+      *--         전년도말익스포져금액
+               11  V1JLB057-PYY-X-END-EXPSR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역별익스포져금액
+               11  V1JLB057-AREA-PER-EXPSR-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         증가익스포져금액
+               11  V1JLB057-INCRSE-EXPSR-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역별SUB한도
+               11  V1JLB057-AREA-PER-SUB-LIMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        V  1  J  L  B  0  5  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB057-PRCSS-RSULT          ;처리결과
+      *G  V1JLB057-GRID                 ;그리드
+      *L  V1JLB057-TOTAL-LINE-CNT       ;총라인수
+      *A  V1JLB057-DATA-BOOK            ;데이터부
+      *X  V1JLB057-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JLB057-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *X  V1JLB057-AREA-DSTIC           ;지역구분
+      *X  V1JLB057-AREA-DSTIC-NAME      ;지역구분명
+      *S  V1JLB057-PYY-X-END-EXPSR-AMT  ;전년도말익스포져금액
+      *S  V1JLB057-AREA-PER-EXPSR-AMT   ;지역별익스포져금액
+      *S  V1JLB057-INCRSE-EXPSR-AMT     ;증가익스포져금액
+      *S  V1JLB057-AREA-PER-SUB-LIMT    ;지역별SUB한도

@@ -1,0 +1,2370 @@
+//MKJLZDL1 JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*   2단계보안조치 관련 정보삭제 대상UNLOAD
+//*********************************************************************
+//*   THKJL0001
+//*********************************************************************
+//DELETE1  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ001.KJL0001.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ001.KJL0001.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0001 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0002
+//*********************************************************************
+//DELETE2  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ002.KJL0002.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD2  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ002.KJL0002.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0002 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0003
+//*********************************************************************
+//DELETE3  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ003.KJL0003.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD3  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ003.KJL0003.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0003 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0004
+//*********************************************************************
+//DELETE4  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ004.KJL0004.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD4  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ004.KJL0004.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0004 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0006
+//*********************************************************************
+//DELETE6  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ006.KJL0006.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD6  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ006.KJL0006.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT C.그룹회사코드
+      ,C.한도신청번호
+      ,CHAR(SUBSTR(C.신청사유내용,   1,250))
+      ,CHAR(SUBSTR(C.신청사유내용, 251,250))
+      ,CHAR(SUBSTR(C.신청사유내용, 501,250))
+      ,CHAR(SUBSTR(C.신청사유내용, 751,250))
+      ,CHAR(SUBSTR(C.신청사유내용,1001,250))
+      ,CHAR(SUBSTR(C.신청사유내용,1251,250))
+      ,CHAR(SUBSTR(C.신청사유내용,1501,102))
+      ,CHAR(SUBSTR(C.승인사유내용,   1,250))
+      ,CHAR(SUBSTR(C.승인사유내용, 251, 52))
+      ,C.시스템최종처리일시
+      ,C.시스템최종사용자번호
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0003 B
+      ,DB2DBA.THKJL0006 C
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND B.그룹회사코드     = C.그룹회사코드
+   AND B.한도신청번호     = C.한도신청번호
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0007
+//*********************************************************************
+//DELETE7  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ007.KJL0007.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD7  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ007.KJL0007.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0007 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0008
+//*********************************************************************
+//DELETE8  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ008.KJL0008.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD8  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ008.KJL0008.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0008 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0009
+//*********************************************************************
+//DELETE9  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ009.KJL0009.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD9  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ009.KJL0009.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0009 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0010
+//*********************************************************************
+//DELETE10 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ010.KJL0010.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD10 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ010.KJL0010.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0010 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0011
+//*********************************************************************
+//DELETE11 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ011.KJL0011.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD11 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ011.KJL0011.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0011 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0014
+//*********************************************************************
+//DELETE14 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ014.KJL0014.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD14 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ014.KJL0014.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0014 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0015
+//*********************************************************************
+//DELETE15 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ015.KJL0015.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD15 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ015.KJL0015.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0015 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.그룹회사코드     = 'KB0'
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0016
+//*********************************************************************
+//DELETE16 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ016.KJL0016.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD16 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ016.KJL0016.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0016 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0017
+//*********************************************************************
+//DELETE17 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ017.KJL0017.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD17 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ017.KJL0017.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0017 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0018
+//*********************************************************************
+//DELETE18 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ018.KJL0018.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD18 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ018.KJL0018.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0018 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0020
+//*********************************************************************
+//DELETE20 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ020.KJL0020.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD20 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ020.KJL0020.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.그룹회사코드
+      ,B.계좌번호
+      ,B.고객식별자
+      ,B.고객관리번호
+      ,B.차주번호
+      ,B.상품대분류코드
+      ,B.상품중분류코드
+      ,B.상품템플릿코드
+      ,B.상품번호
+      ,B.대출자격구분
+      ,B.신규년월일
+      ,B.만기년월일
+      ,B.통화코드
+      ,B.통화한도
+      ,B.통화잔액
+      ,B.등록직원번호
+      ,B.관리부점코드
+      ,B.과목코드
+      ,B.시스템최종처리일시
+      ,B.시스템최종사용자번호
+      ,CHAR(SUBSTR(B.비고,1,250))
+      ,CHAR(SUBSTR(B.비고,251,250))
+      ,CHAR(SUBSTR(B.비고,501,102))
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0020 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0021
+//*********************************************************************
+//DELETE21 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ021.KJL0021.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD21 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ021.KJL0021.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0021 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0024
+//*********************************************************************
+//DELETE24 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ024.KJL0024.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD24 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ024.KJL0024.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0024 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0025
+//*********************************************************************
+//DELETE25 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ025.KJL0025.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD25 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ025.KJL0025.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0025 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0027
+//*********************************************************************
+//DELETE27 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ027.KJL0027.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD27 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ027.KJL0027.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0027 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0028
+//*********************************************************************
+//DELETE28 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ028.KJL0028.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD28 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ028.KJL0028.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0028 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0031
+//*********************************************************************
+//DELETE31 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ031.KJL0031.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD31 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ031.KJL0031.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0031 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0032
+//*********************************************************************
+//DELETE32 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ032.KJL0032.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD32 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ032.KJL0032.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0032 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.담보보증고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0033
+//*********************************************************************
+//DELETE33 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ033.KJL0033.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD33 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ033.KJL0033.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0033 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0034
+//*********************************************************************
+//DELETE34 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ034.KJL0034.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD34 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ034.KJL0034.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0034 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0040
+//*********************************************************************
+//DELETE40 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ040.KJL0040.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD40 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ040.KJL0040.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0040 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0041
+//*********************************************************************
+//DELETE41 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ041.KJL0041.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD41 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ041.KJL0041.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0041 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0042
+//*********************************************************************
+//DELETE42 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ042.KJL0042.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD42 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ042.KJL0042.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0042 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0055
+//*********************************************************************
+//DELETE55 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ055.KJL0055.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD55 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ055.KJL0055.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0055 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0058
+//*********************************************************************
+//DELETE58 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ058.KJL0058.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD58 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ058.KJL0058.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0058 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0059
+//*********************************************************************
+//DELETE59 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ059.KJL0059.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD59 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ059.KJL0059.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0059 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0062
+//*********************************************************************
+//DELETE62 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ062.KJL0062.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD62 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ062.KJL0062.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0062 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0071
+//*********************************************************************
+//DELETE71 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ071.KJL0071.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD71 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ071.KJL0071.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0071 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.보증기관고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0074
+//*********************************************************************
+//DELETE74 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ074.KJL0074.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD74 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ074.KJL0074.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0074 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0075
+//*********************************************************************
+//DELETE75 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ075.KJL0075.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD75 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ075.KJL0075.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0075 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0076
+//*********************************************************************
+//DELETE76 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ076.KJL0076.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD76 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ076.KJL0076.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0076 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0077
+//*********************************************************************
+//DELETE77 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ077.KJL0077.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD77 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ077.KJL0077.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0077 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0078
+//*********************************************************************
+//DELETE78 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ078.KJL0078.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD78 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ078.KJL0078.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0078 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0081
+//*********************************************************************
+//DELETE81 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ081.KJL0081.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD81 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ081.KJL0081.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0081 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0082
+//*********************************************************************
+//DELETE82 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ082.KJL0082.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD82 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ082.KJL0082.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0082 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0083
+//*********************************************************************
+//DELETE83 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ083.KJL0083.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD83 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ083.KJL0083.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0083 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0084
+//*********************************************************************
+//DELETE84 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ084.KJL0084.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD84 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ084.KJL0084.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0084 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0125
+//*********************************************************************
+//DEL0125  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ125.KJL0125.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0125  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ125.KJL0125.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0125 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0126
+//*********************************************************************
+//DEL0126  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ126.KJL0126.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0126  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ126.KJL0126.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0126 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0127
+//*********************************************************************
+//DEL0127  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ127.KJL0127.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0127  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ127.KJL0127.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0127 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0128
+//*********************************************************************
+//DEL0128  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ128.KJL0128.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0128  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ128.KJL0128.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0128 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0129
+//*********************************************************************
+//DEL0129  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ129.KJL0129.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0129  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ129.KJL0129.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0129 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0130
+//*********************************************************************
+//DEL0130  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ130.KJL0130.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0130  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ130.KJL0130.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0130 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0131
+//*********************************************************************
+//DEL0131  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ131.KJL0131.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0131  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ131.KJL0131.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0131 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0132
+//*********************************************************************
+//DEL0132  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ132.KJL0132.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0132  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ132.KJL0132.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0132 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.차주고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0151
+//*********************************************************************
+//DEL0151  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ151.KJL0151.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0151  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ151.KJL0151.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0151 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준일          >= '01'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0152
+//*********************************************************************
+//DEL0152  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ152.KJL0152.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0152  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ152.KJL0152.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0152 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월        >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0153
+//*********************************************************************
+//DEL0153  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ153.KJL0153.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0153  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ153.KJL0153.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0153 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0161
+//*********************************************************************
+//DEL0161  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ161.KJL0161.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0161  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ161.KJL0161.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0161 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0162
+//*********************************************************************
+//DEL0162  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ162.KJL0162.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNL0162  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ162.KJL0162.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJL0162 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLG001
+//*********************************************************************
+//DELG001  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZG01.KJLG001.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLG001  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZG01.KJLG001.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLG001 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR003
+//*********************************************************************
+//DELR003  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR03.KJLR003.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR003  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR03.KJLR003.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR003 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.심사고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR004
+//*********************************************************************
+//DELR004  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR04.KJLR004.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR004  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR04.KJLR004.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR004 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR005
+//*********************************************************************
+//DELR005  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR05.KJLR005.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR005  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR05.KJLR005.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR005 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR006
+//*********************************************************************
+//DELR006  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR06.KJLR006.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR006  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR06.KJLR006.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR006 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR007
+//*********************************************************************
+//DELR007  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR07.KJLR007.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR007  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR07.KJLR007.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR007 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR009
+//*********************************************************************
+//DELR009  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR09.KJLR009.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR009  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR09.KJLR009.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR009 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR011
+//*********************************************************************
+//DELR011  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR11.KJLR011.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR011  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR11.KJLR011.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR011 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR012
+//*********************************************************************
+//DELR012  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR12.KJLR012.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR012  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR12.KJLR012.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR012 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR017
+//*********************************************************************
+//DELR017  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR17.KJLR017.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR017  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR17.KJLR017.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR017 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR019
+//*********************************************************************
+//DELR019  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR19.KJLR019.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLR019  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR19.KJLR019.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLR019 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+   AND B.그룹회사코드     = 'KB0'
+   AND B.기준년월일      >= '19000101'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLRM05
+//*********************************************************************
+//DELRM05  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZRM5.KJLRM05.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLRM05  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZRM5.KJLRM05.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKAABPEC A
+      ,DB2DBA.THKJLRM05 B
+ WHERE A.그룹회사코드     = B.그룹회사코드
+   AND A.고객식별자       = B.고객식별자
+   AND A.고객종료상태구분 = '2'
+   AND A.등록년월일      >= '%%$OYEAR.%%OMONTH%%.01'
+  WITH UR;
+/*
+//

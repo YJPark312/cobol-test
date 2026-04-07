@@ -1,0 +1,67 @@
+      *===========================================================
+      *  프로그램명    : QJL1124
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL1124
+      *  사용예        : 01  XQJL1124-CA.
+      *                      COPY  XQJL1124.
+      *  최종변경일시  : 2018년12월28일10시52분58초
+      *===========================================================
+           03  XQJL1124-IN.
+      *            그룹회사코드
+               05  XQJL1124-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL1124-I-BASE-YMD
+                                          PIC  X(00008).
+      *            KB-PIN
+               05  XQJL1124-I-KB-PIN
+                                          PIC  X(00010).
+      *            계좌번호
+               05  XQJL1124-I-NEXT-ACNO
+                                          PIC  X(00020).
+      *            중복일련번호
+               05  XQJL1124-I-NEXT-SQ
+                                          PIC S9(00007) COMP-3.
+      *            계약식별자
+               05  XQJL1124-I-NEXT-PIN
+                                          PIC  X(00025).
+           03  XQJL1124-OUT.
+      *            계좌번호
+               05  XQJL1124-O-ACNO
+                           OCCURS  00101  PIC  X(00020).
+      *            상품코드
+               05  XQJL1124-O-PRDCT-CD
+                           OCCURS  00101  PIC  X(00012).
+      *            상품명
+               05  XQJL1124-O-PRDCT-NAME
+                           OCCURS  00101  PIC  X(00252).
+      *            자산구분
+               05  XQJL1124-O-ASST-DSTIC
+                           OCCURS  00101  PIC  X(00010).
+      *            약정구분
+               05  XQJL1124-O-AGRE-DSTIC
+                           OCCURS  00101  PIC  X(00010).
+      *            명목액기준한도
+               05  XQJL1124-O-TTL-AMT-BASE-LIMT
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            명목액기준잔액
+               05  XQJL1124-O-TTL-AMT-BASE-BAL
+                           OCCURS  00101  PIC S9(00015) COMP-3.
+      *            관리부점
+               05  XQJL1124-O-MGTBRN
+                           OCCURS  00101  PIC  X(00022).
+      *            시작년월일
+               05  XQJL1124-O-START-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            만기년월일
+               05  XQJL1124-O-EXPIR-YMD
+                           OCCURS  00101  PIC  X(00008).
+      *            계좌중복일련번호
+               05  XQJL1124-O-ACN-DUP-SERNO
+                           OCCURS  00101  PIC S9(00007) COMP-3.
+      *            계약식별자
+               05  XQJL1124-O-CTRC-IDNFR
+                           OCCURS  00101  PIC  X(00025).
+      *===========================================================
+      *  XQJL1124   C O P Y B O O K   E N D
+      *===========================================================

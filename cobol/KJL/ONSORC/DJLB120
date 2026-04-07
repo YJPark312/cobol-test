@@ -1,0 +1,848 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJLB120 (EAD-상품정보원장)
+      *@처리유형  : DC
+      *@처리개요  : 상품정보를　등록／수정／삭제하는　프로그램
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *김진태:20101101: 신규작성
+      *정윤섭:20200330: 국외영업점편중관리대상여부
+      * YBH    :20231130: 거액/신용공여CCF환산률 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  상품정보원장            : THKJL0118            : CRUD
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJLB120.
+       AUTHOR.                         김진태.
+       DATE-WRITTEN.                   10/11/01.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      * 에러메세지
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      * 조치메세지
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB120'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-1                PIC  X(002) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-FI               PIC  X(002) VALUE 'FI'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * DBIO  INTERFACE PARAMETER
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *상품정보　테이블(KEY)
+       01  TKJL0118-KEY.
+           COPY  TKJL0118.
+      *상품정보　테이블(RECORD)
+       01  TRJL0118-REC.
+           COPY  TRJL0118.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJLB120-CA.
+           COPY  XDJLB120.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJLB120-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *@  상품정보원장　수정처리하는　메인기능
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@ 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@ 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@ 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@ 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *@  호출프로그램　파라미터　초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *    WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      * DBIO
+                      YCDBIOCA-CA
+
+      *   출력영역　및　결과코드　초기화
+           INITIALIZE XDJLB120-OUT
+                      XDJLB120-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *@  필수입력파라미터값에대한　검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@ 처리구분이　＇등록＇／＇삭제＇이외는　에러처리               01680001
+           IF XDJLB120-I-PRCSS-DSTIC = CO-CHA-02 OR                     01690006
+                                       CO-CHA-04                        01700006
+              CONTINUE                                                  01710001
+           ELSE                                                         01720001
+      *@ 에러메세지 : 처리구분오류입니다．                          01720106
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.             01720206
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR              01730006
+           END-IF                                                       01740001
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *@  상품정보　등록／삭제
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@ 처리구분이　０２인경우
+           IF XDJLB120-I-PRCSS-DSTIC = CO-CHA-02
+      *@ 상품정보원장　등록
+              PERFORM S3100-INSERT-PROC-RTN
+                 THRU S3100-INSERT-PROC-EXT
+           ELSE
+      *@ 처리구분이　０４인경우
+           IF XDJLB120-I-PRCSS-DSTIC = CO-CHA-04
+      *@ 상품정보원장　삭제
+              PERFORM S3200-DELETE-PROC-RTN
+                 THRU S3200-DELETE-PROC-EXT
+           END-IF
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  신규등록처리　프로세스
+      *@  상품정보원장에상품정보를신규등록
+      *-----------------------------------------------------------------
+       S3100-INSERT-PROC-RTN.
+
+      *@ 필수입력항목을체크
+           PERFORM S3110-INPUT-DATA-CHECK-RTN
+              THRU S3110-INPUT-DATA-CHECK-EXT
+
+      *@ 상품정보가원장에존재하는지체크
+      *@ 존재하면갱신그렇지않으면신규등록
+           PERFORM S3120-THKJL0118-SELECT-RTN
+              THRU S3120-THKJL0118-SELECT-EXT
+           .
+       S3100-INSERT-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------02200001
+      *@  입력항목　필수입력　체크                                    02210001
+      *@  상품정보신규등록시필수입력항목검증                          02210001
+      *-----------------------------------------------------------------02220001
+       S3110-INPUT-DATA-CHECK-RTN.                                      02230001
+                                                                        02240001
+      *@ 기준년월입력값검증                                           02250001
+           IF XDJLB120-I-BASE-YM = SPACE                                02260006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02261006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02262006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02263006
+           END-IF                                                       02280001
+                                                                        02290003
+      *@ 회계구분입력값검증                                           02300001
+           IF XDJLB120-I-ACCTG-DSTIC = SPACE                            02310006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02311006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02312006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02313006
+           END-IF                                                       02330001
+                                                                        02340003
+      *@ 상품대분류코드입력값검증                                     350003
+           IF XDJLB120-I-PRDCT-LAG-CLSFI-CD = SPACE                     02360006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02361006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02362006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02363006
+           END-IF                                                       02380003
+                                                                        02390003
+      *@ 상품중분류코드입력값검증                                     400003
+           IF XDJLB120-I-PRDCT-MEDM-CLSFI-CD = SPACE                    02410006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02411006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02412006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02413006
+           END-IF                                                       02430003
+                                                                        02440003
+      *@ 상품템플릿코드입력값검증                                     450003
+           IF XDJLB120-I-PRDCT-TMPLT-CD = SPACE                         02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 상품번호입력값검증                                           450003
+           IF XDJLB120-I-PRDCT-NO = SPACE                               02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 상품명입력값검증                                             02450003
+           IF XDJLB120-I-PRDCT-NAME = SPACE                             02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 자산구분입력값검증                                           02450003
+           IF XDJLB120-I-ASST-DSTIC = SPACE                             02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류코드입력값검증(EAD)                                    02450003
+           IF XDJLB120-I-EAD-MEDM-CLSFI-CD = SPACE                      02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류명입력값검증(EAD)                                      02450003
+           IF XDJLB120-I-EAD-MEDM-CLSFI-NAME = SPACE                    02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류코드입력값검증(TE)                                     02450003
+           IF XDJLB120-I-TE-MEDM-CLSFI-CD = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류명입력값검증(TE)                                       02450003
+           IF XDJLB120-I-TE-MEDM-CLSFI-NAME = SPACE                     02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여대상계정여부입력값검증                               02450003
+           IF XDJLB120-I-CA-TAGET-ACITM-YN = SPACE                      02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여중분류코드입력값검증                                 02450003
+           IF XDJLB120-I-CA-MEDM-CLSFI-CD = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여중분류명입력값검증                                   02450003
+           IF XDJLB120-I-CA-MEDM-CLSFI-NAME = SPACE                     02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 포괄대상계정여부입력값검증                                   02450003
+           IF XDJLB120-I-INLS-GT-ACITM-YN = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+200330*@ 국외영업점편중관리대상여부 체크
+           IF XDJLB120-I-PRDCT-LAG-CLSFI-CD = CO-CHA-FI
+              AND XDJLB120-I-PRDCT-LAG-CLSFI-CD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+           .                                                            02630001
+       S3110-INPUT-DATA-CHECK-EXT.                                      02650001
+           EXIT.                                                        02660001
+      *-----------------------------------------------------------------02860001
+      *@  상품정보(THKJL0118)검색                                   02870001
+      *-----------------------------------------------------------------02880001
+       S3120-THKJL0118-SELECT-RTN.                                      02890001
+
+      *@ 카피북초기화
+           INITIALIZE TKJL0118-KEY                                      02910001
+                      TRJL0118-REC                                      02920001
+
+      *@ 입력파라미터　조립
+      *@ 그룹회사코드                                                 02930001
+           MOVE BICOM-GROUP-CO-CD                                       02940001
+             TO KJL0118-PK-GROUP-CO-CD                                  02940001
+      *@ 기준년월                                                     02950001
+           MOVE XDJLB120-I-BASE-YM                                      02960001
+             TO KJL0118-PK-BASE-YM                                      02960001
+      *@ 상품대분류코드                                               02970001
+           MOVE XDJLB120-I-PRDCT-LAG-CLSFI-CD                           02980001
+             TO KJL0118-PK-PRDCT-LAG-CLSFI-CD                           02990001
+      *@ 상품중분류코드                                               03000001
+           MOVE XDJLB120-I-PRDCT-MEDM-CLSFI-CD                          03010001
+             TO KJL0118-PK-PRDCT-MEDM-CLSFI-CD                          03020001
+      *@ 상품템플릿코드                                               03000001
+           MOVE XDJLB120-I-PRDCT-TMPLT-CD                               03010001
+             TO KJL0118-PK-PRDCT-TMPLT-CD                               03020001
+      *@ 상품번호                                                     03000001
+           MOVE XDJLB120-I-PRDCT-NO                                     03010001
+             TO KJL0118-PK-PRDCT-NO                                     03020001
+
+      *@ DBIO프로그램　호출                                           03030001
+           #DYDBIO SELECT-CMD-Y TKJL0118-PK TRJL0118-REC                03040007
+                                                                        03050001
+      *@ 호출결과확인
+           EVALUATE TRUE                                                03051006
+      *@ 원장에존재하는상품일경우
+               WHEN COND-DBIO-OK                                        03052006
+      *@ 상품정보갱신
+                    PERFORM S3140-THKJL0118-UPDATE-RTN                  03053006
+                       THRU S3140-THKJL0118-UPDATE-EXT                  03054006
+      *@ 원장에존재하지않을경우
+               WHEN COND-DBIO-MRNF                                      03070006
+      *@ 상품정보신규등록
+                    PERFORM S3130-THKJL0118-INSERT-RTN                  03071006
+                       THRU S3130-THKJL0118-INSERT-EXT                  03072006
+      *@ 원장에러일경우　에러처리
+               WHEN OTHER                                               03073006
+      *@ 에러메세지 : DBIO 오류입니다.                              03074006
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다              03075006
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        03076006
+           END-EVALUATE                                                 03076106
+           .                                                            03230001
+       S3120-THKJL0118-SELECT-EXT.                                      03250002
+           EXIT.                                                        03260001
+      *-----------------------------------------------------------------
+      *@  상품목록(THKJL0118)등록
+      *-----------------------------------------------------------------
+       S3130-THKJL0118-INSERT-RTN.
+
+      *@원장등록
+      *@관련테이블 : 상품정보원장  접근유형 : CREATE
+
+      *@ 입력값조립
+      *@ 그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0118-GROUP-CO-CD
+
+      *@ 기준년월
+           MOVE XDJLB120-I-BASE-YM
+             TO RJL0118-BASE-YM
+
+      *@ 상품대분류코드
+           MOVE XDJLB120-I-PRDCT-LAG-CLSFI-CD
+             TO RJL0118-PRDCT-LAG-CLSFI-CD
+
+      *@ 상품중분류코드
+           MOVE XDJLB120-I-PRDCT-MEDM-CLSFI-CD
+             TO RJL0118-PRDCT-MEDM-CLSFI-CD
+
+      *@ 상품템플릿코드
+           MOVE XDJLB120-I-PRDCT-TMPLT-CD
+             TO RJL0118-PRDCT-TMPLT-CD
+
+      *@ 상품번호
+           MOVE XDJLB120-I-PRDCT-NO
+             TO RJL0118-PRDCT-NO
+
+      *@ TE회계구분
+           MOVE XDJLB120-I-ACCTG-DSTIC
+             TO RJL0118-TE-ACCTG-DSTCD
+
+      *@ 통합계정과목코드
+           MOVE XDJLB120-I-INTGRA-TIACC-CD
+             TO RJL0118-INTGRA-TIACC-CD
+
+      *@ TE자산구분
+           MOVE XDJLB120-I-ASST-DSTIC
+             TO RJL0118-TE-ASST-DSTCD
+
+      *@ 잔액CCF환산율
+           MOVE XDJLB120-I-BAL-CCF-UTCRT
+             TO RJL0118-BAL-CCF-UTCRT
+
+      *@ EAD한도CCF환산율
+           MOVE XDJLB120-I-EAD-LIMT-CCF-UTCRT
+             TO RJL0118-EAD-LIMT-CCF-UTCRT
+
+      *@ EAD한도NCCF환산율
+           MOVE XDJLB120-I-EAD-LIMT-NCCF-UTCRT
+             TO RJL0118-EAD-LIMT-NCCF-UTCRT
+
+      *@ 한도기준TE환산율
+           MOVE XDJLB120-I-LIMT-BASE-TE-UTCRT
+             TO RJL0118-LIMT-BASE-TE-UTCRT
+
+      *@ CP대상계정여부
+           MOVE XDJLB120-I-INLS-GT-ACITM-YN
+             TO RJL0118-INLS-CT-ACITM-YN
+
+      *@ CA대상계정여부
+           MOVE XDJLB120-I-CA-TAGET-ACITM-YN
+             TO RJL0118-CA-TAGET-ACITM-YN
+
+      *@ 신용공여한도환산율
+           MOVE XDJLB120-I-GRCR-LIMT-UTCRT
+             TO RJL0118-GRCR-LIMT-UTCRT
+
+      *@ EAD중분류코드
+           MOVE XDJLB120-I-EAD-MEDM-CLSFI-CD
+             TO RJL0118-EAD-M-CLSFI-DSTCD
+
+      *@ EAD중분류명
+           MOVE XDJLB120-I-EAD-MEDM-CLSFI-NAME
+             TO RJL0118-EAD-MEDM-CLSFI-NAME
+
+      *@ TE중분류구분
+           MOVE XDJLB120-I-TE-MEDM-CLSFI-CD
+             TO RJL0118-TE-MIDL-CLSFI-DSTCD
+
+      *@ TE중분류명
+           MOVE XDJLB120-I-TE-MEDM-CLSFI-NAME
+             TO RJL0118-TE-MEDM-CLSFI-NAME
+
+      *@ CA중분류구분
+           MOVE XDJLB120-I-CA-MEDM-CLSFI-CD
+             TO RJL0118-CRACT-M-CLSFI-DSTCD
+
+      *@ CA중분류명
+           MOVE XDJLB120-I-CA-MEDM-CLSFI-NAME
+             TO RJL0118-CA-MEDM-CLSFI-NAME
+
+      *@ 상품명
+           MOVE XDJLB120-I-PRDCT-NAME
+             TO RJL0118-TE-PRDCT-NAME
+
+200330*@ 국외영업점편중관리대상여부
+           MOVE XDJLB120-I-ABRD-L-MGT-TAGET-YN
+             TO RJL0118-ABRD-L-MGT-TAGET-YN
+
+231130*@  바젤기준신용환산률
+           MOVE XDJLB120-I-BSL-B-CRDT-UTCNG-RT
+             TO RJL0118-BSL-B-CRDT-UTCNG-RT
+
+231130*@  거액익스포져대상여부
+           MOVE XDJLB120-I-BSM-EXPSR-TAGET-YN
+             TO RJL0118-BSM-EXPSR-TAGET-YN
+
+231130*@  신용익스포져대상여부
+           MOVE XDJLB120-I-CRDT-EXPSR-TAGET-YN
+             TO RJL0118-CRDT-EXPSR-TAGET-YN
+
+      *@ 프로그램호출
+           #DYDBIO INSERT-CMD-Y TKJL0118-PK TRJL0118-REC
+
+      *@ DBIO호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@ 원장에러일경우에러처리
+      *@ 에러메세지 : 테이블 INSERT 오류입니다．
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3130-THKJL0118-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  상품목록(THKJL0118)수정
+      *-----------------------------------------------------------------
+       S3140-THKJL0118-UPDATE-RTN.
+
+      *@ 원장갱신
+      *@ 관련테이블 : 상품정보원장  접근유형 : UPDATE
+
+      *@ 입력값조립
+      *@ TE회계구분
+           MOVE XDJLB120-I-ACCTG-DSTIC
+             TO RJL0118-TE-ACCTG-DSTCD
+
+      *@ 통합계정과목코드
+           MOVE XDJLB120-I-INTGRA-TIACC-CD
+             TO RJL0118-INTGRA-TIACC-CD
+
+      *@ TE자산구분
+           MOVE XDJLB120-I-ASST-DSTIC
+             TO RJL0118-TE-ASST-DSTCD
+
+      *@ 잔액CCF환산율
+           MOVE XDJLB120-I-BAL-CCF-UTCRT
+             TO RJL0118-BAL-CCF-UTCRT
+
+      *@ EAD한도CCF환산율
+           MOVE XDJLB120-I-EAD-LIMT-CCF-UTCRT
+             TO RJL0118-EAD-LIMT-CCF-UTCRT
+
+      *@ EAD한도NCCF환산율
+           MOVE XDJLB120-I-EAD-LIMT-NCCF-UTCRT
+             TO RJL0118-EAD-LIMT-NCCF-UTCRT
+
+      *@ 한도기준TE환산율
+           MOVE XDJLB120-I-LIMT-BASE-TE-UTCRT
+             TO RJL0118-LIMT-BASE-TE-UTCRT
+
+      *@ CP대상계정여부
+           MOVE XDJLB120-I-INLS-GT-ACITM-YN
+             TO RJL0118-INLS-CT-ACITM-YN
+
+      *@ CA대상계정여부
+           MOVE XDJLB120-I-CA-TAGET-ACITM-YN
+             TO RJL0118-CA-TAGET-ACITM-YN
+
+      *@ 신용공여한도환산율
+           MOVE XDJLB120-I-GRCR-LIMT-UTCRT
+             TO RJL0118-GRCR-LIMT-UTCRT
+
+      *@ EAD중분류코드
+           MOVE XDJLB120-I-EAD-MEDM-CLSFI-CD
+             TO RJL0118-EAD-M-CLSFI-DSTCD
+
+      *@ EAD중분류명
+           MOVE XDJLB120-I-EAD-MEDM-CLSFI-NAME
+             TO RJL0118-EAD-MEDM-CLSFI-NAME
+
+      *@ TE중분류구분
+           MOVE XDJLB120-I-TE-MEDM-CLSFI-CD
+             TO RJL0118-TE-MIDL-CLSFI-DSTCD
+
+      *@ TE중분류명
+           MOVE XDJLB120-I-TE-MEDM-CLSFI-NAME
+             TO RJL0118-TE-MEDM-CLSFI-NAME
+
+      *@ CA중분류구분
+           MOVE XDJLB120-I-CA-MEDM-CLSFI-CD
+             TO RJL0118-CRACT-M-CLSFI-DSTCD
+
+      *@ CA중분류명
+           MOVE XDJLB120-I-CA-MEDM-CLSFI-NAME
+             TO RJL0118-CA-MEDM-CLSFI-NAME
+
+      *@ 상품명
+           MOVE XDJLB120-I-PRDCT-NAME
+             TO RJL0118-TE-PRDCT-NAME
+
+200330*@ 국외영업점편중관리대상여부
+           MOVE XDJLB120-I-ABRD-L-MGT-TAGET-YN
+             TO RJL0118-ABRD-L-MGT-TAGET-YN
+
+231130*@  바젤기준신용환산률
+           MOVE XDJLB120-I-BSL-B-CRDT-UTCNG-RT
+             TO RJL0118-BSL-B-CRDT-UTCNG-RT
+
+231130*@  거액익스포져대상여부
+           MOVE XDJLB120-I-BSM-EXPSR-TAGET-YN
+             TO RJL0118-BSM-EXPSR-TAGET-YN
+
+231130*@  신용익스포져대상여부
+           MOVE XDJLB120-I-CRDT-EXPSR-TAGET-YN
+             TO RJL0118-CRDT-EXPSR-TAGET-YN
+
+      *@ DBIO프로그램호출
+           #DYDBIO UPDATE-CMD-Y TKJL0118-PK TRJL0118-REC
+
+      *@ 처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@ 원장에러일경우에러처리
+      *@ 에러메세지 : 테이블 UPDATE 오류입니다．
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200224 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3140-THKJL0118-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  삭제처리　프로세스
+      *-----------------------------------------------------------------
+       S3200-DELETE-PROC-RTN.
+
+      *@ 입력값검증                                                   04210001
+           PERFORM S3210-INPUT-DATA-CHECK-RTN                           04220001
+              THRU S3210-INPUT-DATA-CHECK-EXT                           04230001
+      *@ 원장삭제                                                     04240001
+           PERFORM S3220-THKJL0118-DELETE-RTN                           04250001
+              THRU S3220-THKJL0118-DELETE-EXT                           04260001
+           .
+       S3200-DELETE-PROC-EXT.
+           EXIT.
+      *-----------------------------------------------------------------02200001
+      *@  입력항목　필수입력　체크                                    02210001
+      *-----------------------------------------------------------------02220001
+       S3210-INPUT-DATA-CHECK-RTN.                                      02230001
+                                                                        02240001
+      *@ 원장삭제시필요한필수키값검증
+      *@ 기준년월입력값검증                                           02250001
+           IF XDJLB120-I-BASE-YM = SPACE                                02260006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02261006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02262006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02263006
+           END-IF                                                       02280001
+                                                                        02290003
+      *@ 회계구분입력값검증                                           02300001
+           IF XDJLB120-I-ACCTG-DSTIC = SPACE                            02310006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02311006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02312006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02313006
+           END-IF                                                       02330001
+                                                                        02340003
+      *@ 상품대분류코드입력값검증                                   02350003
+           IF XDJLB120-I-PRDCT-LAG-CLSFI-CD = SPACE                     02360006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02361006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02362006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02363006
+           END-IF                                                       02380003
+                                                                        02390003
+      *@ 상품중분류코드입력값검증                                   02400003
+           IF XDJLB120-I-PRDCT-MEDM-CLSFI-CD = SPACE                    02410006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02411006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02412006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02413006
+           END-IF                                                       02430003
+                                                                        02440003
+      *@ 상품템플릿코드입력값검증                                   02450003
+           IF XDJLB120-I-PRDCT-TMPLT-CD = SPACE                         02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 상품번호입력값검증                                         02450003
+           IF XDJLB120-I-PRDCT-NO = SPACE                               02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 상품명입력값검증                                             02450003
+           IF XDJLB120-I-PRDCT-NAME = SPACE                             02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 자산구분입력값검증                                           02450003
+           IF XDJLB120-I-ASST-DSTIC = SPACE                             02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류코드입력값검증(EAD)                                    02450003
+           IF XDJLB120-I-EAD-MEDM-CLSFI-CD = SPACE                      02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류명입력값검증(EAD)                                      02450003
+           IF XDJLB120-I-EAD-MEDM-CLSFI-NAME = SPACE                    02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류코드입력값검증(TE)                                     02450003
+           IF XDJLB120-I-TE-MEDM-CLSFI-CD = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 중분류명입력값검증(TE)                                       02450003
+           IF XDJLB120-I-TE-MEDM-CLSFI-NAME = SPACE                     02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여대상계정여부입력값검증                               02450003
+           IF XDJLB120-I-CA-TAGET-ACITM-YN = SPACE                      02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여중분류코드입력값검증                                 02450003
+           IF XDJLB120-I-CA-MEDM-CLSFI-CD = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 신용공여중분류명입력값검증                                   02450003
+           IF XDJLB120-I-CA-MEDM-CLSFI-NAME = SPACE                     02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+                                                                        02540003
+      *@ 포괄대상계정여부입력값검증                                   02450003
+           IF XDJLB120-I-INLS-GT-ACITM-YN = SPACE                       02460006
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF                                                       02480003
+
+200330*@ 국외영업점편중관리대상여부 체크
+           IF XDJLB120-I-PRDCT-LAG-CLSFI-CD = CO-CHA-FI
+              AND XDJLB120-I-PRDCT-LAG-CLSFI-CD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．                     02461006
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              02462006
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              02463006
+           END-IF
+           .                                                            02630001
+       S3210-INPUT-DATA-CHECK-EXT.                                      02650001
+           EXIT.                                                        02660001
+      *-----------------------------------------------------------------04480001
+      *@  상품정보(THKJL0118)삭제처리                               04490001
+      *-----------------------------------------------------------------04500001
+       S3220-THKJL0118-DELETE-RTN.                                      04510001
+
+      *@ 원장삭제
+      *@ 관련테이블 : 상품정보원장  접근유형 : DELETE
+
+      *@ 카피북초기화
+           INITIALIZE TKJL0118-KEY                                      02910001
+                      TRJL0118-REC                                      02920001
+
+      *@ 입력값조립
+      *@ 그룹회사코드                                                 02930001
+           MOVE BICOM-GROUP-CO-CD                                       02940001
+             TO KJL0118-PK-GROUP-CO-CD                                  02940001
+      *@ 기준년월                                                     02950001
+           MOVE XDJLB120-I-BASE-YM                                      02960001
+             TO KJL0118-PK-BASE-YM                                      02960001
+      *@ 상품대분류코드                                               02970001
+           MOVE XDJLB120-I-PRDCT-LAG-CLSFI-CD                           02980001
+             TO KJL0118-PK-PRDCT-LAG-CLSFI-CD                           02990001
+      *@ 상품중분류코드                                               03000001
+           MOVE XDJLB120-I-PRDCT-MEDM-CLSFI-CD                          03010001
+             TO KJL0118-PK-PRDCT-MEDM-CLSFI-CD                          03020001
+      *@ 상품템플릿코드                                               03000001
+           MOVE XDJLB120-I-PRDCT-TMPLT-CD                               03010001
+             TO KJL0118-PK-PRDCT-TMPLT-CD                               03020001
+      *@ 상품번호                                                     03000001
+           MOVE XDJLB120-I-PRDCT-NO                                     03010001
+             TO KJL0118-PK-PRDCT-NO                                     03020001
+
+      *@ DBIO프로그램호출                                             03030001
+           #DYDBIO SELECT-CMD-Y TKJL0118-PK TRJL0118-REC                03040007
+                                                                        03050001
+      *@ 호출결과확인
+           EVALUATE TRUE                                                03051006
+               WHEN COND-DBIO-OK                                        03052006
+                    CONTINUE                                            03053006
+               WHEN COND-DBIO-MRNF                                      03052006
+      * 에러메세지 : 원장없음오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200066 CO-UKJL0036 CO-STAT-ERROR
+               WHEN OTHER                                               03073006
+      *@ 원장조회오류일경우는에러처리
+      *@ 에러메세지 : 테이블 SELECT 오류입니다．                  03074006
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다              03075006
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        03076006
+           END-EVALUATE                                                 03076106
+
+      *@ 원장삭제를위한DBIO프로그램호출                             04650001
+           #DYDBIO DELETE-CMD-Y TKJL0118-PK TRJL0118-REC                04660001
+                                                                        04670001
+      *@ 호출결과확인
+           EVALUATE TRUE                                                04671007
+               WHEN COND-DBIO-OK                                        04672007
+                    CONTINUE                                            04673007
+               WHEN OTHER                                               04674007
+      *@ 원장삭제오류일경우는에러처리
+      *@ 에러메세지 : 테이블 DELETE 오류입니다．                  04675007
+      *@ 조치메세지 : 전산업무담당자에게　문의바랍니다.             04676007
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR        04677007
+           END-EVALUATE                                                 04678007
+           .                                                            04770001
+       S3220-THKJL0118-DELETE-EXT.                                      04790001
+           EXIT.                                                        04800001
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@ 종료처리
+
+      *@ 프로그램 종료
+      *@ 처리내용 : 프로그램을 정상 종료 함
+
+           MOVE CO-STAT-OK
+             TO XDJLB120-O-PRCSS-RSULT
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

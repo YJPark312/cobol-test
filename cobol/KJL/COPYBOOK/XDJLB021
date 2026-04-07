@@ -1,0 +1,84 @@
+      *================================================================*
+      *@ NAME : XDJLB021                                               *
+      *@ DESC : DC표준산업코드정보등록COPYBOOK                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-10-05 15:26:09                          *
+      *  생성일시     : 2021-10-05 15:26:09                          *
+      *  전체길이     : 00510013 BYTES                               *
+      *================================================================*
+           03  XDJLB021-RETURN.
+             05  XDJLB021-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB021-OK            VALUE  '00'.
+                 88  COND-XDJLB021-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB021-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB021-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB021-ERROR         VALUE  '09'.
+                 88  COND-XDJLB021-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB021-SYSERROR      VALUE  '99'.
+             05  XDJLB021-R-LINE                 PIC  9(006).
+             05  XDJLB021-R-ERRCD                PIC  X(008).
+             05  XDJLB021-R-TREAT-CD             PIC  X(008).
+             05  XDJLB021-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB021-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB021-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월
+             05  XDJLB021-I-BASE-YM              PIC  X(006).
+      *--       총라인수
+             05  XDJLB021-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB021-I-GRID1                OCCURS 002000 TIMES.
+      *--         신표준산업분류코드
+               07  XDJLB021-I-NEW-SI-CLSFI-CD    PIC  X(005).
+      *--         표준산업분류코드명
+               07  XDJLB021-I-STND-IC-CD-NAME    PIC  X(042).
+      *--         토탈익스포져PEER구분코드
+               07  XDJLB021-I-TE-PEER-DSTCD      PIC  X(005).
+      *--         PEER코드명
+               07  XDJLB021-I-PEER-CD-NAME       PIC  X(102).
+      *--         대분류업종코드
+               07  XDJLB021-I-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         대분류업종코드명
+               07  XDJLB021-I-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(032).
+      *--         산업평가등급구분
+               07  XDJLB021-I-IDSTRY-V-GRD-DSTIC PIC  X(004).
+      *--         IR등급평가년월일
+               07  XDJLB021-I-INRT-GRD-VALUA-YMD PIC  X(008).
+      *--         한국은행매칭코드
+               07  XDJLB021-I-BOK-MTCN-CD        PIC  X(006).
+      *--         SUB업종코드
+               07  XDJLB021-I-SUB-BZTYP-CD       PIC  X(003).
+      *--         SUB업종코드명
+               07  XDJLB021-I-SUB-BZTYP-CD-NAME  PIC  X(042).
+      *--         TE산업분류코드
+               07  XDJLB021-I-TE-IDSTRY-CLSFI-CD PIC  X(003).
+      *----------------------------------------------------------------*
+           03  XDJLB021-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB021-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  2  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB021-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB021-I-BASE-YM            ;기준년월
+      *N  XDJLB021-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB021-I-GRID1              ;그리드1
+      *X  XDJLB021-I-NEW-SI-CLSFI-CD    ;신표준산업분류코드
+      *X  XDJLB021-I-STND-IC-CD-NAME    ;표준산업분류코드명
+      *X  XDJLB021-I-TE-PEER-DSTCD
+      * 토탈익스포져PEER구분코드
+      *X  XDJLB021-I-PEER-CD-NAME       ;PEER코드명
+      *X  XDJLB021-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJLB021-I-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *X  XDJLB021-I-IDSTRY-V-GRD-DSTIC ;산업평가등급구분
+      *X  XDJLB021-I-INRT-GRD-VALUA-YMD ;IR등급평가년월일
+      *X  XDJLB021-I-BOK-MTCN-CD        ;한국은행매칭코드
+      *X  XDJLB021-I-SUB-BZTYP-CD       ;SUB업종코드
+      *X  XDJLB021-I-SUB-BZTYP-CD-NAME  ;SUB업종코드명
+      *X  XDJLB021-I-TE-IDSTRY-CLSFI-CD ;TE산업분류코드
+      *X  XDJLB021-O-PRCSS-RSULT        ;처리결과

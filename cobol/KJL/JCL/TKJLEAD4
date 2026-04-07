@@ -1,0 +1,26 @@
+//TKJLEAD4 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  TKJLEAD3
+//*********************************************************************
+//*   한도환산금액산출
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLI25I,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLI257.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI258.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI259.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI25A.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI25B.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI25C.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI25D.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI25H.V001
+//OTFILE   DD DSN=KJL.SD.BJLI25I.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=300)
+//SYSIN    DD *
+KB0-20101117-TKJLEAD4-001-ONLBAT-KB STAR-20101117
+//*자료기준년월일

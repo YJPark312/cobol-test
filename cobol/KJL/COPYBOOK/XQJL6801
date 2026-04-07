@@ -1,0 +1,82 @@
+      *===========================================================
+      *  프로그램명    : QJL6801
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL6801
+      *  사용예        : 01  XQJL6801-CA.
+      *                      COPY  XQJL6801.
+      *  최종변경일시  : 2022년10월21일13시33분25초
+      *===========================================================
+           03  XQJL6801-IN.
+      *            기준년월
+               05  XQJL6801-I-BASE-YM
+                                          PIC  X(00006).
+      *            그룹회사코드
+               05  XQJL6801-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            대분류업종코드
+               05  XQJL6801-I-LAG-CLSFI-BZTYP-CD
+                                          PIC  X(00003).
+      *            조회기준시작년월일
+               05  XQJL6801-I-INQURY-B-START-YMD
+                                          PIC  X(00008).
+      *            조회기준종료년월일
+               05  XQJL6801-I-INQURY-BASE-END-YMD
+                                          PIC  X(00008).
+           03  XQJL6801-OUT.
+      *            대분류업종코드
+               05  XQJL6801-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  01000  PIC  X(00003).
+      *            대분류업종코드명
+               05  XQJL6801-O-LAG-C-BZTYP-CD-NAME
+                           OCCURS  01000  PIC  X(00032).
+      *            일련번호
+               05  XQJL6801-O-SERNO
+                           OCCURS  01000  PIC S9(00007) COMP-3.
+      *            취급중단년월일
+               05  XQJL6801-O-HNDLN-DSCN-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *            예외적용년월일
+               05  XQJL6801-O-ECEPT-APLY-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *            산업등록해제구분
+               05  XQJL6801-O-LIMT-EIRR-DSTCD
+                           OCCURS  01000  PIC  X(00001).
+      *            등록직원번호
+               05  XQJL6801-O-REGI-EMPID
+                           OCCURS  01000  PIC  X(00007).
+      *            등록직원명
+               05  XQJL6801-O-REGI-EMNM
+                           OCCURS  01000  PIC  X(00042).
+      *            등록년월일
+               05  XQJL6801-O-REGI-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *            등록결재직원번호
+               05  XQJL6801-O-REGI-APRVAL-EMPID
+                           OCCURS  01000  PIC  X(00007).
+      *            등록결재직원명
+               05  XQJL6801-O-REGI-APRVAL-EMNM
+                           OCCURS  01000  PIC  X(00042).
+      *            등록결재년월일
+               05  XQJL6801-O-REGI-APRVAL-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *            해제직원번호
+               05  XQJL6801-O-REVOC-EMPID
+                           OCCURS  01000  PIC  X(00007).
+      *            해제직원명
+               05  XQJL6801-O-REVOC-EMNM
+                           OCCURS  01000  PIC  X(00042).
+      *            해제년월일
+               05  XQJL6801-O-REVOC-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *            해제결재직원번호
+               05  XQJL6801-O-REVOC-APRVAL-EMPID
+                           OCCURS  01000  PIC  X(00007).
+      *            해제결재직원명
+               05  XQJL6801-O-REVOC-APRVAL-EMNM
+                           OCCURS  01000  PIC  X(00042).
+      *            해제결재년월일
+               05  XQJL6801-O-REVOC-APRVAL-YMD
+                           OCCURS  01000  PIC  X(00008).
+      *===========================================================
+      *  XQJL6801   C O P Y B O O K   E N D
+      *===========================================================

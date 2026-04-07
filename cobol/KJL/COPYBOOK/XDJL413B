@@ -1,0 +1,75 @@
+      *================================================================*
+      *@ NAME : XDJL413B                                               *
+      *@ DESC : DCTE한신평관리대상그룹조회COPYBOOK                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2012-11-02 13:43:40                          *
+      *  생성일시     : 2012-11-02 13:43:42                          *
+      *  전체길이     : 00000071 BYTES                               *
+      *================================================================*
+           03  XDJL413B-RETURN.
+             05  XDJL413B-R-STAT                 PIC  X(002).
+                 88  COND-XDJL413B-OK            VALUE  '00'.
+                 88  COND-XDJL413B-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL413B-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL413B-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL413B-ERROR         VALUE  '09'.
+                 88  COND-XDJL413B-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL413B-SYSERROR      VALUE  '99'.
+             05  XDJL413B-R-LINE                 PIC  9(006).
+             05  XDJL413B-R-ERRCD                PIC  X(008).
+             05  XDJL413B-R-TREAT-CD             PIC  X(008).
+             05  XDJL413B-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL413B-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL413B-I-PRCSS-DSTIC          PIC  X(001).
+      *--       고객식별자
+             05  XDJL413B-I-CUST-IDNFR           PIC  X(010).
+      *--       고객관리번호
+             05  XDJL413B-I-CUST-MGT-NO          PIC  X(005).
+      *--       차주번호
+             05  XDJL413B-I-BRWR-NO              PIC  X(013).
+      *--       한신평그룹명
+             05  XDJL413B-I-AFFLT-C-GROUP-NAME   PIC  X(042).
+      *----------------------------------------------------------------*
+           03  XDJL413B-OUT.
+      *----------------------------------------------------------------*
+      *--       그리드
+             05  XDJL413B-O-GRID.
+      *--         총라인수
+               07  XDJL413B-O-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJL413B-O-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           계열기업군코드
+                 09  XDJL413B-O-AFFLT-CORP-GROUP-CD
+                                                 PIC  X(003).
+      *--           계열기업군명
+                 09  XDJL413B-O-AFFLT-C-GROUP-NAME
+                                                 PIC  X(042).
+      *--           그룹사신용등급구분
+                 09  XDJL413B-O-CMGR-CRTDSCD     PIC  X(003).
+      *--           계열기업순위
+                 09  XDJL413B-O-AFFLT-CORP-RANKG PIC  9(003).
+      *--           차주번호
+                 09  XDJL413B-O-BRWR-NO          PIC  X(013).
+      *--           채무자명
+                 09  XDJL413B-O-DBTRZ-NAME       PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  4  1  3  B    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL413B-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL413B-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL413B-I-CUST-MGT-NO        ;고객관리번호
+      *X  XDJL413B-I-BRWR-NO            ;차주번호
+      *X  XDJL413B-I-AFFLT-C-GROUP-NAME ;한신평그룹명
+      *G  XDJL413B-O-GRID               ;그리드
+      *N  XDJL413B-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL413B-O-DATA-BOOK          ;데이터부
+      *X  XDJL413B-O-AFFLT-CORP-GROUP-CD;계열기업군코드
+      *X  XDJL413B-O-AFFLT-C-GROUP-NAME ;계열기업군명
+      *X  XDJL413B-O-CMGR-CRTDSCD       ;그룹사신용등급구분
+      *N  XDJL413B-O-AFFLT-CORP-RANKG   ;계열기업순위
+      *X  XDJL413B-O-BRWR-NO            ;차주번호
+      *X  XDJL413B-O-DBTRZ-NAME         ;채무자명

@@ -1,0 +1,301 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4095 (AS금융기관기준한도산출)
+      *@처리유형  : AS
+      *@처리개요  : 금융기관기준한도산출하는 프로그램이다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090428: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091210: PC 삭제
+      * YBH    :20211029: 프로세스 개선
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4095.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/04/28.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4095 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE
+       01  XDJL4095-CA.
+           COPY  XDJL4095.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4095-CA.
+           COPY  YNJL4095.
+      *    AS COPYBOOK
+       01  YPJL4095-CA.
+           COPY  YPJL4095.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4095-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-RTN
+              THRU S6000-OUTPUT-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4095-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+170706*    고객번호(KB-PIN)
+           MOVE YNJL4095-KB-PIN        TO AACOM-CUST-IDNFR
+
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:YNJL4095-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:전산업무담당자에게　문의바랍니다.
+           IF YNJL4095-PRCSS-DSTIC NOT = CO-CHA-01
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL4095-CALL-RTN
+              THRU S3100-DJL4095-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4095-CALL-RTN.
+
+           INITIALIZE    XDJL4095-IN
+
+      *@3.1.1 입력파라미터 조립
+      *@처리내용:처리DC입력파라미터=
+      *@SET(처리구분,고객구분,차주번호,수정신용등급,
+      *@수정결산년월,수정업종코드,수정업종명,
+      *@수정업종평균기준년,수정신용등급별지원비율,
+      *@수정전전기법인세비율차감전계속사업이익,
+      *@수정전기법인세비율차감전계속사업이익,
+      *@수정당기법인세비율차감전계속사업이익,
+      *@수정전전기자기자본,수정전기자기자본,
+      *@수정당기자기자본,수정최근업종평균자기자본비율)
+      *    처리구분
+           MOVE YNJL4095-PRCSS-DSTIC
+             TO XDJL4095-I-PRCSS-DSTIC
+
+      *    고객구분
+           MOVE YNJL4095-CUST-DSTIC
+             TO XDJL4095-I-CUST-DSTIC
+
+      *    KB-PIN
+           MOVE YNJL4095-KB-PIN
+             TO XDJL4095-I-KB-PIN
+
+      *    수정신용등급별지원비율
+           MOVE YNJL4095-AMND-CP-SPORT-RATO
+             TO XDJL4095-I-AMND-CP-SPORT-RATO
+
+      *    수정전전기법인세비율차감전계속사업이익
+           MOVE YNJL4095-AMND-BPCRSBCB-PRFT
+             TO XDJL4095-I-AMND-BPCRSBCB-PRFT
+
+      *    수정전기법인세비율차감전계속사업이익
+           MOVE YNJL4095-AMND-PCRSBCB-PRFT
+             TO XDJL4095-I-AMND-PCRSBCB-PRFT
+
+      *    수정당기법인세비율차감전계속사업이익
+           MOVE YNJL4095-AMND-CCRSBCB-PRFT
+             TO XDJL4095-I-AMND-CCRSBCB-PRFT
+
+      *    수정최근업종평균자기자본비율
+           MOVE YNJL4095-AMND-LBA-ONCP-RATO
+             TO XDJL4095-I-AMND-LBA-ONCP-RATO
+
+      *    수정전전기자기자본
+           MOVE YNJL4095-AMND-BF-PRPRID-ONCP
+             TO XDJL4095-I-AMND-BF-PRPRID-ONCP
+
+      *    수정전기자기자본
+           MOVE YNJL4095-AMND-PRPRID-ONCP
+             TO XDJL4095-I-AMND-PRPRID-ONCP
+
+      *    수정당기자기자본
+           MOVE YNJL4095-AMND-CRTM-ONCP
+             TO XDJL4095-I-AMND-CRTM-ONCP
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4095 YCCOMMON-CA XDJL4095-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJL4095-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF COND-XDJL4095-OK
+              CONTINUE
+           ELSE
+              #ERROR XDJL4095-R-ERRCD
+                     XDJL4095-R-TREAT-CD
+                     XDJL4095-R-STAT
+           END-IF
+           .
+       S3100-DJL4095-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력항목 조립
+211029*    수정Y3평균사업이익비율
+           MOVE XDJL4095-O-AMND-Y3AB-PRFT-RATO
+             TO YPJL4095-AMND-Y3AB-PRFT-RATO
+
+211029*    수정이익가중치값
+           MOVE XDJL4095-O-AMND-PRFT-WGHT-VAL
+             TO YPJL4095-AMND-PRFT-WGHT-VAL
+
+      *    수정상환능력기준한도
+           MOVE XDJL4095-O-AMND-S-BASE-LIMT
+             TO YPJL4095-AMND-S-BASE-LIMT
+
+211029*    수정Y3평균자기자본비율
+           MOVE XDJL4095-O-AMND-Y3A-ONCP-RATO
+             TO YPJL4095-AMND-Y3A-ONCP-RATO
+
+211029*    수정자본가중치값
+           MOVE XDJL4095-O-AMND-CAPTL-WGHT-VAL
+             TO YPJL4095-AMND-CAPTL-WGHT-VAL
+
+      *    수정규모기준한도
+           MOVE XDJL4095-O-AMND-SCAL-BASE-LIMT
+             TO YPJL4095-AMND-SCAL-BASE-LIMT
+
+      *    수정기준한도
+           MOVE XDJL4095-O-AMND-BASE-LIMT
+             TO YPJL4095-AMND-BASE-LIMT
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11009000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

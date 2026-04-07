@@ -1,0 +1,221 @@
+      *================================================================*
+      *@ NAME : XPJL4027                                               *
+      *@ DESC : PC3.포괄신용공여한도신청및승인조회 COPYBOOK          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-02 18:44:53                          *
+      *  생성일시     : 2009-03-02 18:44:54                          *
+      *================================================================*
+           03  XPJL4027-RETURN.
+             05  XPJL4027-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4027-OK            VALUE  '00'.
+                 88  COND-XPJL4027-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4027-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4027-ERROR         VALUE  '09'.
+                 88  COND-XPJL4027-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4027-SYSERROR      VALUE  '99'.
+             05  XPJL4027-R-LINE                 PIC  9(006).
+             05  XPJL4027-R-ERRCD                PIC  X(008).
+             05  XPJL4027-R-TREAT-CD             PIC  X(008).
+             05  XPJL4027-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4027-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4027-I-PRCSS-DSTIC          PIC  X(002).
+      *--       fld채무자번호
+             05  XPJL4027-I-BRWR-NO              PIC  X(013).
+      *--       fld신청번호
+             05  XPJL4027-I-LIMT-APLCN-NO        PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XPJL4027-OUT.
+      *----------------------------------------------------------------*
+      *--       fld채무자명
+             05  XPJL4027-O-DBTRZ-NAME           PIC  X(042).
+      *--       fld포괄한도
+             05  XPJL4027-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld기사용액
+             05  XPJL4027-O-PRVIUS-AMUS          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld한도여유액
+             05  XPJL4027-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld계열명
+             05  XPJL4027-O-AFFLT-C-GROUP-NAME   PIC  X(042).
+      *--       fld계열신용등급
+             05  XPJL4027-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       fld기업신용등급
+             05  XPJL4027-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       fld유효기일
+             05  XPJL4027-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       fld업종명
+             05  XPJL4027-O-STND-IDSTRY-CD-NAME  PIC  X(042).
+      *--       fld관리한도
+             05  XPJL4027-O-MGT-CLAM1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld총자산1
+             05  XPJL4027-O-TOTAL-ASST           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld총자산2
+             05  XPJL4027-O-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld매출액1
+             05  XPJL4027-O-SALEPR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld매출액2
+             05  XPJL4027-O-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본1
+             05  XPJL4027-O-BASE-YR-ONCP-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본2
+             05  XPJL4027-O-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld금융차입금1
+             05  XPJL4027-O-FNCS-AMBR            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld금융차입금2
+             05  XPJL4027-O-AMND-FNCS-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld당행차입금1
+             05  XPJL4027-O-OWBNK-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld당행차입금2
+             05  XPJL4027-O-AMND-OWBNK-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업흐름액1
+             05  XPJL4027-O-BZOPR-ACF            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업흐름액2
+             05  XPJL4027-O-AMND-BZOPR-ACF       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld평균이자율1
+             05  XPJL4027-O-ENTP-AVG-INT-RT      PIC  9(003)V9(02).
+      *--       fld평균이자율2
+             05  XPJL4027-O-AMND-ENTP-AVG-IRT    PIC  9(003)V9(02).
+      *--       fld여신성한도1
+             05  XPJL4027-O-LNBZ-I-ASST-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld여신성한도2
+             05  XPJL4027-O-AMND-LI-ASST-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도1
+             05  XPJL4027-O-ONCP-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도2
+             05  XPJL4027-O-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도1
+             05  XPJL4027-O-BZOPR-A-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도2
+             05  XPJL4027-O-AMND-BA-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도1
+             05  XPJL4027-O-INLS-STUP-ABLAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도2
+             05  XPJL4027-O-AMND-I-STUP-ABLAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld신용등급지원비율
+             05  XPJL4027-O-CRDRAT-SPORT-RATO    PIC  9(003).
+      *--       cbo신청구분
+             05  XPJL4027-O-LIMT-A-KND-DSTCD     PIC  X(001).
+      *--       fld신청일자
+             05  XPJL4027-O-APLCN-YMD            PIC  X(008).
+      *--       fld영업점코드
+             05  XPJL4027-O-APLCN-BRNCD          PIC  X(004).
+      *--       fld영업점명
+             05  XPJL4027-O-BRN-HANGL-NAME       PIC  X(022).
+      *--       fld신청자
+             05  XPJL4027-O-APLCN-EMPID          PIC  X(007).
+      *--       fld신청자명
+             05  XPJL4027-O-EMNM                 PIC  X(040).
+      *--       fld한도설정가능액
+             05  XPJL4027-O-MAIN-CAS-LNBZ-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld한도신청액
+             05  XPJL4027-O-LIMT-APLCN-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       mln신청사유
+             05  XPJL4027-O-APLCN-RESN-CTNT      PIC  X(252).
+      *--       fld승인번호
+             05  XPJL4027-O-ATHOR-LIMT-APLCN-NO  PIC  X(010).
+      *--       fld승인신청일자
+             05  XPJL4027-O-ATHOR-APLCN-YMD      PIC  X(008).
+      *--       fld승인일자
+             05  XPJL4027-O-ATHOR-YMD            PIC  X(008).
+      *--       fld승인한도
+             05  XPJL4027-O-LIMT-ATHOR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld신청구분
+             05  XPJL4027-O-LIMT-AK-DSTIC-NAME   PIC  X(042).
+      *--       fld승인유효기일
+             05  XPJL4027-O-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       fld승인신청자
+             05  XPJL4027-O-ATHOR-APLCN-EMPID    PIC  X(007).
+      *--       fld승인신청자명
+             05  XPJL4027-O-ATHOR-APLCN-EMNM     PIC  X(042).
+      *--       cbo승인구분
+             05  XPJL4027-O-LIMT-ATHOR-DSTCD     PIC  X(001).
+      *--       mln승인의견
+             05  XPJL4027-O-ATHOR-RESN-CTNT      PIC  X(252).
+      *================================================================*
+      *        X  P  J  L  4  0  2  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4027-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4027-I-BRWR-NO            ;fld채무자번호
+      *X  XPJL4027-I-LIMT-APLCN-NO      ;fld신청번호
+      *X  XPJL4027-O-DBTRZ-NAME         ;fld채무자명
+      *S  XPJL4027-O-MGT-CLAM           ;fld포괄한도
+      *S  XPJL4027-O-PRVIUS-AMUS        ;fld기사용액
+      *S  XPJL4027-O-LIMT-SEXTR-AMT     ;fld한도여유액
+      *X  XPJL4027-O-AFFLT-C-GROUP-NAME ;fld계열명
+      *X  XPJL4027-O-INTNL-CV-GRD-DSTCD ;fld계열신용등급
+      *X  XPJL4027-O-INTNL-CV-GRD-DSTCD1;fld기업신용등급
+      *X  XPJL4027-O-MGT-LIMT-VALD-YMD  ;fld유효기일
+      *X  XPJL4027-O-STND-IDSTRY-CD-NAME;fld업종명
+      *S  XPJL4027-O-MGT-CLAM1          ;fld관리한도
+      *S  XPJL4027-O-TOTAL-ASST         ;fld총자산1
+      *S  XPJL4027-O-AMND-TOTAL-ASST    ;fld총자산2
+      *S  XPJL4027-O-SALEPR             ;fld매출액1
+      *S  XPJL4027-O-AMND-SALEPR        ;fld매출액2
+      *S  XPJL4027-O-BASE-YR-ONCP-AMT   ;fld자기자본1
+      *S  XPJL4027-O-AMND-B-YR-ONCP-AMT ;fld자기자본2
+      *S  XPJL4027-O-FNCS-AMBR          ;fld금융차입금1
+      *S  XPJL4027-O-AMND-FNCS-AMBR     ;fld금융차입금2
+      *S  XPJL4027-O-OWBNK-AMBR         ;fld당행차입금1
+      *S  XPJL4027-O-AMND-OWBNK-AMBR    ;fld당행차입금2
+      *S  XPJL4027-O-BZOPR-ACF          ;fld영업흐름액1
+      *S  XPJL4027-O-AMND-BZOPR-ACF     ;fld영업흐름액2
+      *N  XPJL4027-O-ENTP-AVG-INT-RT    ;fld평균이자율1
+      *N  XPJL4027-O-AMND-ENTP-AVG-IRT  ;fld평균이자율2
+      *S  XPJL4027-O-LNBZ-I-ASST-CLAM   ;fld여신성한도1
+      *S  XPJL4027-O-AMND-LI-ASST-CLAM  ;fld여신성한도2
+      *S  XPJL4027-O-ONCP-BSAMT         ;fld자기자본한도1
+      *S  XPJL4027-O-AMND-O-CAPTL-BSAMT ;fld자기자본한도2
+      *S  XPJL4027-O-BZOPR-A-BASE-CLAM  ;fld영업한도1
+      *S  XPJL4027-O-AMND-BA-BASE-CLAM  ;fld영업한도2
+      *S  XPJL4027-O-INLS-STUP-ABLAMT   ;fld포괄한도1
+      *S  XPJL4027-O-AMND-I-STUP-ABLAMT ;fld포괄한도2
+      *N  XPJL4027-O-CRDRAT-SPORT-RATO  ;fld신용등급지원비율
+      *X  XPJL4027-O-LIMT-A-KND-DSTCD   ;cbo신청구분
+      *X  XPJL4027-O-APLCN-YMD          ;fld신청일자
+      *X  XPJL4027-O-APLCN-BRNCD        ;fld영업점코드
+      *X  XPJL4027-O-BRN-HANGL-NAME     ;fld영업점명
+      *X  XPJL4027-O-APLCN-EMPID        ;fld신청자
+      *X  XPJL4027-O-EMNM               ;fld신청자명
+      *S  XPJL4027-O-MAIN-CAS-LNBZ-AMT  ;fld한도설정가능액
+      *S  XPJL4027-O-LIMT-APLCN-AMT     ;fld한도신청액
+      *X  XPJL4027-O-APLCN-RESN-CTNT    ;mln신청사유
+      *X  XPJL4027-O-ATHOR-LIMT-APLCN-NO;fld승인번호
+      *X  XPJL4027-O-ATHOR-APLCN-YMD    ;fld승인신청일자
+      *X  XPJL4027-O-ATHOR-YMD          ;fld승인일자
+      *S  XPJL4027-O-LIMT-ATHOR-AMT     ;fld승인한도
+      *X  XPJL4027-O-LIMT-AK-DSTIC-NAME ;fld신청구분
+      *X  XPJL4027-O-LIMT-STUP-VALD-YMD ;fld승인유효기일
+      *X  XPJL4027-O-ATHOR-APLCN-EMPID  ;fld승인신청자
+      *X  XPJL4027-O-ATHOR-APLCN-EMNM   ;fld승인신청자명
+      *X  XPJL4027-O-LIMT-ATHOR-DSTCD   ;cbo승인구분
+      *X  XPJL4027-O-ATHOR-RESN-CTNT    ;mln승인의견

@@ -1,0 +1,523 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4054 (DC거액익스포져(LEX)총액조회)
+      *@처리유형  : DC
+      *@처리개요  : 거액익스포져(LEX)총액조회하는 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240201: 신규작성
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  거액익스포져차주그룹명세: THKJL0078            : R
+      ******************************************************************
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4054.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   24/02/01.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200066             PIC  X(008) VALUE 'B4200066'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4054'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-NUM-100              PIC  9(003) VALUE 100 COMP.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-J                    PIC  9(005) COMP.
+      *    총익스포져
+           03  WK-TOTAL-EXPSR          PIC  9(015).
+      *    총익스포져(전영업일)
+           03  WK-BF-TOTAL-EXPSR       PIC  9(015).
+      *    거액익스포져비율
+           03  WK-BSM-EXPSR-RATO       PIC  9(014)V9(002) COMP-3.
+      *    반올림용 변수
+           03  WK-RND-RATO             PIC  9(010)V9(006) COMP-3.
+      *    거액익스포져비율(전영업일)
+           03  WK-BF-BSM-EXPSR-RATO    PIC  9(014)V9(002) COMP-3.
+      *    은행기본자본
+           03  WK-BNK-BASC-CAPTL       PIC  9(015).
+      *    은행기본자본(전영업일)
+           03  WK-BF-BNK-BASC-CAPTL    PIC  9(015).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *전영업일추출매크로
+       01  XCJIDT16-CA.
+           COPY  XCJIDT16.
+
+      *본부부서기준값조회
+       01  XQJL0391-CA.
+           COPY  XQJL0391.
+
+      *거액익스포져(LEX)총액조회
+       01  XQJL4054-CA.
+           COPY  XQJL4054.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      * DBIO  INTERFACE PARAMETER
+           COPY  YCDBIOCA.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      * LIBRARY : KJL.DDB2.DBCOPY
+      *-----------------------------------------------------------------
+      * DBIO ACCESS KEY관리
+      *거액익스포져차주그룹명세 테이블(KEY)
+       01  TKJL0078-KEY.
+           COPY  TKJL0078.
+      *거액익스포져차주그룹명세 테이블(RECORD)
+       01  TRJL0078-REC.
+           COPY  TRJL0078.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4054-CA.
+           COPY  XDJL4054.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4054-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4054-OUT
+                      XDJL4054-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   기준년월일
+           IF XDJL4054-I-INQURY-BASE-DD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  신용공여자기자본기본정보조회
+           PERFORM S3100-QJL0391-CALL-RTN
+              THRU S3100-QJL0391-CALL-EXT
+
+      *@1  거액익스포져(LEX)총액조회
+           PERFORM S3200-QJL4054-CALL-RTN
+              THRU S3200-QJL4054-CALL-EXT
+
+      *@1  전영업년월일 익스포져 조회
+           PERFORM S3300-QJL4054-CALL-RTN
+              THRU S3300-QJL4054-CALL-EXT
+
+      *@1  출력값 세팅
+           PERFORM S3500-OUTPUT-RTN
+              THRU S3500-OUTPUT-EXT
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@ 신용공여자기자본기본정보조회
+      *-----------------------------------------------------------------
+       S3100-QJL0391-CALL-RTN.
+
+      *@1.1 변수초기화
+           INITIALIZE XQJL0391-IN
+
+      *@1.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0391-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XDJL4054-I-INQURY-BASE-DD(1:6)
+             TO XQJL0391-I-BASE-YM
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL0391 XQJL0391-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+
+      *@   기준년월
+           MOVE XQJL0391-O-BASE-YM
+             TO XDJL4054-O-BASC-CAPTL-BASE-YM
+
+      *@   은행기본자본 ( 보통주자본 + 기타자본 )
+           COMPUTE XDJL4054-O-BNK-BASC-CAPTL
+                = XQJL0391-O-OSHR-CAPTL +
+                  XQJL0391-O-ETC-CAPTL
+
+           COMPUTE WK-BNK-BASC-CAPTL
+                = XDJL4054-O-BNK-BASC-CAPTL / 100000000
+
+      *@   한도규제(기본자본x25%)
+           COMPUTE XDJL4054-O-LIMT-REGUL1
+                = WK-BNK-BASC-CAPTL * 0.25
+
+      *@   한도규제(기본자본x20%)
+           COMPUTE XDJL4054-O-LIMT-REGUL2
+                = WK-BNK-BASC-CAPTL * 0.2
+           .
+       S3100-QJL0391-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 거액익스포져(LEX)총액조회
+      *-----------------------------------------------------------------
+       S3200-QJL4054-CALL-RTN.
+
+      *@1.1 변수초기화
+           INITIALIZE XQJL4054-IN
+
+      *@1.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4054-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE XDJL4054-I-INQURY-BASE-DD
+             TO XQJL4054-I-BASE-YMD
+
+      *@   차주고객식별자
+           MOVE '%%%%%%%%%%'
+             TO XQJL4054-I-BRWR-CUST-IDNFR
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL4054 XQJL4054-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4054-O-PRSNT-NOITM1
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4054-O-PRSNT-NOITM1
+
+      *@       순서
+               MOVE XQJL4054-O-RANKG(WK-I)
+                 TO XDJL4054-O-RANKG(WK-I)
+
+      *@       차주고객식별자
+               MOVE XQJL4054-O-BRWR-CUST-IDNFR(WK-I)
+                 TO XDJL4054-O-BRWR-CUST-IDNFR(WK-I)
+
+      *@       단일거래상대방
+               MOVE XQJL4054-O-DBTRZ-NAME(WK-I)
+                 TO XDJL4054-O-UNY-TRAN-CNPRT(WK-I)
+
+      *@       단일거래상대방구분
+               IF XQJL4054-O-BSM-T-CNPRT-DSTCD(WK-I) = '1'
+                 MOVE '단일거래상대방'
+                   TO XDJL4054-O-BSM-T-CNPRT-DSTCD(WK-I)
+               ELSE
+                 MOVE '거래상대방그룹'
+                   TO XDJL4054-O-BSM-T-CNPRT-DSTCD(WK-I)
+               END-IF
+
+      *@       총익스포져
+               MOVE XQJL4054-O-BSM-CCF-AUC(WK-I)
+                 TO XDJL4054-O-TOTAL-EXPSR(WK-I)
+
+      *@       거액익스포져비율(총익스포져/은행기본자본)
+               IF XDJL4054-O-BNK-BASC-CAPTL > 0
+
+                   COMPUTE WK-RND-RATO
+                        =  XDJL4054-O-TOTAL-EXPSR(WK-I)
+                           / XDJL4054-O-BNK-BASC-CAPTL
+
+                   COMPUTE WK-BSM-EXPSR-RATO ROUNDED
+                        =  WK-RND-RATO * CO-NUM-100
+
+                   MOVE WK-BSM-EXPSR-RATO
+                     TO XDJL4054-O-BSM-EXPSR-RATO(WK-I)
+               ELSE
+                   MOVE 0
+                     TO XDJL4054-O-BSM-EXPSR-RATO(WK-I)
+               END-IF
+           END-PERFORM
+           .
+       S3200-QJL4054-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  전영업년월일을 구한다.
+      *-----------------------------------------------------------------
+       S3210-CJIDT16-CALL-RTN.
+
+      *@    초기화
+           INITIALIZE XCJIDT16-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD         TO XCJIDT16-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4054-I-INQURY-BASE-DD TO XCJIDT16-I-YMD
+      *@   구분코드
+           MOVE CO-CHA-1                  TO XCJIDT16-I-DSTCD
+      *@   공통 UTILITY CALL
+           #DYCALL CJIDT16 YCCOMMON-CA XCJIDT16-CA
+      *@    호출결과　확인
+           IF XCJIDT16-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIDT16-R-ERRCD
+                     XCJIDT16-R-TREAT-CD
+                     XCJIDT16-R-STAT
+           END-IF
+           .
+       S3210-CJIDT16-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  전영업년월일 익스포져 조회
+      *-----------------------------------------------------------------
+       S3300-QJL4054-CALL-RTN.
+
+      *@   전영업년월일구하기
+           PERFORM S3210-CJIDT16-CALL-RTN
+              THRU S3210-CJIDT16-CALL-EXT
+
+      *    신용공여자기자본기본정보조회(전영업일)
+           PERFORM S3400-QJL0391-CALL-RTN
+              THRU S3400-QJL0391-CALL-EXT
+
+           PERFORM VARYING WK-J FROM 1 BY 1
+             UNTIL WK-J > XDJL4054-O-PRSNT-NOITM1
+
+               INITIALIZE XQJL4054-IN
+
+      *@       입력값조립
+      *@       그룹회사코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL4054-I-GROUP-CO-CD
+
+      *@       기준년월일(전영업일)
+               MOVE XCJIDT16-O-BF-BZOPR-YMD
+                 TO XQJL4054-I-BASE-YMD
+
+      *@       차주고객식별자
+               MOVE XDJL4054-O-BRWR-CUST-IDNFR(WK-J)
+                 TO XQJL4054-I-BRWR-CUST-IDNFR
+
+      *@       프로그램　호출
+               #DYSQLA QJL4054 XQJL4054-CA
+
+      *@       호출결과　확인
+               EVALUATE TRUE
+                   WHEN COND-DBSQL-OK
+                   WHEN COND-DBSQL-MRNF
+                        CONTINUE
+                   WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                        #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+      *        총익스포져(전영업일)
+               MOVE XQJL4054-O-BSM-CCF-AUC(1)
+                 TO WK-BF-TOTAL-EXPSR
+
+      *@       총익스포져변동
+               COMPUTE XDJL4054-O-TOTAL-EXPSR-FLXBL(WK-J)
+                    =  (XDJL4054-O-TOTAL-EXPSR(WK-J)
+                         - WK-BF-TOTAL-EXPSR) / 100000000
+
+               IF WK-BF-BNK-BASC-CAPTL > 0
+      *            거액익스포져비율(전영업일)
+                   COMPUTE WK-RND-RATO
+                        =  (WK-BF-TOTAL-EXPSR
+                           / WK-BF-BNK-BASC-CAPTL)
+
+                   COMPUTE WK-BF-BSM-EXPSR-RATO ROUNDED
+                        =  WK-RND-RATO * CO-NUM-100
+
+               ELSE
+                   MOVE 0
+                     TO WK-BF-BSM-EXPSR-RATO
+               END-IF
+
+      *@       거액익스포져비율변동
+               COMPUTE XDJL4054-O-BSM-E-RATO-FLXBL(WK-J)
+                    =  XDJL4054-O-BSM-EXPSR-RATO(WK-J)
+                        - WK-BF-BSM-EXPSR-RATO
+
+           END-PERFORM
+           .
+       S3300-QJL4054-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 신용공여자기자본기본정보조회(전영업일)
+      *-----------------------------------------------------------------
+       S3400-QJL0391-CALL-RTN.
+
+      *@1.1 변수초기화
+           INITIALIZE XQJL0391-IN
+
+      *@1.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0391-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XCJIDT16-O-BF-BZOPR-YMD(1:6)
+             TO XQJL0391-I-BASE-YM
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL0391 XQJL0391-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+
+      *@   은행기본자본 ( 보통주자본 + 기타자본 )
+           COMPUTE WK-BF-BNK-BASC-CAPTL
+                = XQJL0391-O-OSHR-CAPTL +
+                  XQJL0391-O-ETC-CAPTL
+           .
+       S3400-QJL0391-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 출력값 세팅
+      *-----------------------------------------------------------------
+       S3500-OUTPUT-RTN.
+      *   은행기본자본
+           COMPUTE XDJL4054-O-BNK-BASC-CAPTL
+                = XDJL4054-O-BNK-BASC-CAPTL / 100000000
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4054-O-PRSNT-NOITM1
+
+      *@       총익스포져
+               COMPUTE XDJL4054-O-TOTAL-EXPSR(WK-I)
+                    =  XDJL4054-O-TOTAL-EXPSR(WK-I) / 100000000
+
+           END-PERFORM
+
+            .
+       S3500-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@정상종료
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

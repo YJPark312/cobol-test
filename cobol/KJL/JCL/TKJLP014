@@ -1,0 +1,52 @@
+//TKJLP014 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0014 계열사기본 TABLE LOAD
+//*********************************************************************
+//LOAD14  EXEC DSNUPROC,PARM='DAPG,KJL0014',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC14 DD  DSN=KJL.PT.PIN.LOAD.KJL0014,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC14 INTO TABLE
+      DB2DBA.THKJL0014
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월"                           POSITION(       4         )
+   CHAR(                      6)                ,
+   "고객식별자"                         POSITION(      10         )
+   CHAR(                     10)                ,
+   "계열적용구분"                       POSITION(      20         )
+   CHAR(                      1)                ,
+   "차주번호"                           POSITION(      21         )
+   CHAR(                     13)                ,
+   "계열기업군코드"                     POSITION(      34         )
+   CHAR(                      6)                ,
+   "기업규모구분"                       POSITION(      40         )
+   CHAR(                      1)                ,
+   "등록직원번호"                       POSITION(      41         )
+   CHAR(                      7)                ,
+   "등록년월일"                         POSITION(      48         )
+   CHAR(                      8)                ,
+   "변경여부"                           POSITION(      56         )
+   CHAR(                      1)                ,
+   "채무자명"                           POSITION(      57         )
+   CHAR(                     52)                ,
+   "시스템최종처리일시"                 POSITION(     109         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     129         )
+   CHAR(                      7)
+   )
+//

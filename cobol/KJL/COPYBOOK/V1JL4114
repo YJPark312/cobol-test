@@ -1,0 +1,146 @@
+      *================================================================*
+      *@ NAME : V1JL4114                                               *
+      *@ DESC : (EAD)개별그룹TE현황조회                            *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2014-05-21 18:23:00                          *
+      *  생성일시     : 2014-05-21 18:23:06                          *
+      *  전체길이     : 00448198 BYTES                               *
+      *================================================================*
+      *--     그룹명
+           07  V1JL4114-GROUP-NAME               PIC  X(052).
+      *--     그룹순위
+           07  V1JL4114-GROUP-RANKG              PIC  9(003).
+      *--     그룹등급
+           07  V1JL4114-GROUP-GRD                PIC  X(004).
+      *--     그룹등급평가일
+           07  V1JL4114-GROUP-GRD-VALUA-DD       PIC  X(008).
+      *--     소속기업수
+           07  V1JL4114-BELNG-CORP-CNT           PIC  9(015).
+      *--     그룹관리한도
+           07  V1JL4114-GROUP-MGT-LIMT           PIC  9(015).
+      *--     한도기준TE
+           07  V1JL4114-LIMT-BASE-TE             PIC  9(015).
+      *--     잔액기준TE
+           07  V1JL4114-BAL-BASE-TE              PIC  9(015).
+      *--     한도여유액
+           07  V1JL4114-LIMT-SEXTR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     그룹직접익스포져
+           07  V1JL4114-GROUP-DRCT-EXPSR         PIC  9(015).
+      *--     그룹간접익스포져
+           07  V1JL4114-GROUP-INDR-EXPSR         PIC  9(015).
+      *--     그룹내간접익스포져
+           07  V1JL4114-GROUP-W-INDR-EXPSR       PIC  9(015).
+      *--     출력라인수1
+ROWCNT     07  V1JL4114-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+ROWCNT     07  V1JL4114-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     그리드1
+           07  V1JL4114-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4114-OUTPT-LINE-CNT1.
+      *--       차주번호
+             09  V1JL4114-BRWR-NO                PIC  X(013).
+      *--       차주명
+             09  V1JL4114-BRWR-NAME              PIC  X(052).
+      *--       기업신용등급
+             09  V1JL4114-CORP-CRDRAT            PIC  X(004).
+      *--       관리한도금액
+             09  V1JL4114-MGT-CLAM               PIC  9(015).
+      *--       명목액직접한도
+             09  V1JL4114-TTL-AMT-DRCT-LIMT      PIC  9(015).
+      *--       명목액간접한도
+             09  V1JL4114-TTL-AMT-INDR-LIMT      PIC  9(015).
+      *--       명목액기준합계한도
+             09  V1JL4114-TTL-AB-SUM-LIMT        PIC  9(015).
+      *--       명목액직접잔액
+             09  V1JL4114-TTL-AMT-DRCT-BAL       PIC  9(015).
+      *--       명목액간접잔액
+             09  V1JL4114-TTL-AMT-INDR-BAL       PIC  9(015).
+      *--       명목액기준합계잔액
+             09  V1JL4114-TTL-A-BASE-BALSUM      PIC  9(015).
+      *--       직접한도금액
+             09  V1JL4114-DRCT-CLAM              PIC  9(015).
+      *--       간접한도금액
+             09  V1JL4114-INDR-CLAM              PIC  9(015).
+      *--       합계한도기준금액
+             09  V1JL4114-SUM-LIMT-BSAMT         PIC  9(015).
+      *--       소진율
+             09  V1JL4114-EXHS-RT                PIC  9(003)V9(02).
+      *--     그리드2
+           07  V1JL4114-GRID2                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4114-OUTPT-LINE-CNT2.
+      *--       차주번호2
+             09  V1JL4114-BRWR-NO2               PIC  X(013).
+      *--       차주명2
+             09  V1JL4114-BRWR-NAME2             PIC  X(052).
+      *--       기업신용등급2
+             09  V1JL4114-CORP-CRDRAT2           PIC  X(004).
+      *--       관리한도금액2
+             09  V1JL4114-MGT-CLAM2              PIC  9(015).
+      *--       명목액직접한도2
+             09  V1JL4114-TTL-AMT-DRCT-LIMT2     PIC  9(015).
+      *--       명목액간접한도2
+             09  V1JL4114-TTL-AMT-INDR-LIMT2     PIC  9(015).
+      *--       명목액기준합계한도2
+             09  V1JL4114-TTL-AB-SUM-LIMT2       PIC  9(015).
+      *--       명목액직접잔액2
+             09  V1JL4114-TTL-AMT-DRCT-BAL2      PIC  9(015).
+      *--       명목액간접잔액2
+             09  V1JL4114-TTL-AMT-INDR-BAL2      PIC  9(015).
+      *--       명목액기준합계잔액2
+             09  V1JL4114-TTL-A-BASE-BALSUM2     PIC  9(015).
+      *--       직접한도금액2
+             09  V1JL4114-DRCT-CLAM2             PIC  9(015).
+      *--       간접한도금액2
+             09  V1JL4114-INDR-CLAM2             PIC  9(015).
+      *--       합계한도기준금액2
+             09  V1JL4114-SUM-LIMT-BSAMT2        PIC  9(015).
+      *--       소진율2
+             09  V1JL4114-EXHS-RT2               PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  4  1  1  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4114-GROUP-NAME           ;그룹명
+      *N  V1JL4114-GROUP-RANKG          ;그룹순위
+      *X  V1JL4114-GROUP-GRD            ;그룹등급
+      *X  V1JL4114-GROUP-GRD-VALUA-DD   ;그룹등급평가일
+      *N  V1JL4114-BELNG-CORP-CNT       ;소속기업수
+      *N  V1JL4114-GROUP-MGT-LIMT       ;그룹관리한도
+      *N  V1JL4114-LIMT-BASE-TE         ;한도기준TE
+      *N  V1JL4114-BAL-BASE-TE          ;잔액기준TE
+      *S  V1JL4114-LIMT-SEXTR-AMT       ;한도여유액
+      *N  V1JL4114-GROUP-DRCT-EXPSR     ;그룹직접익스포져
+      *N  V1JL4114-GROUP-INDR-EXPSR     ;그룹간접익스포져
+      *N  V1JL4114-GROUP-W-INDR-EXPSR   ;그룹내간접익스포져
+      *L  V1JL4114-OUTPT-LINE-CNT1      ;출력라인수1
+      *L  V1JL4114-OUTPT-LINE-CNT2      ;출력라인수2
+      *A  V1JL4114-GRID1                ;그리드1
+      *X  V1JL4114-BRWR-NO              ;차주번호
+      *X  V1JL4114-BRWR-NAME            ;차주명
+      *X  V1JL4114-CORP-CRDRAT          ;기업신용등급
+      *N  V1JL4114-MGT-CLAM             ;관리한도금액
+      *N  V1JL4114-TTL-AMT-DRCT-LIMT    ;명목액직접한도
+      *N  V1JL4114-TTL-AMT-INDR-LIMT    ;명목액간접한도
+      *N  V1JL4114-TTL-AB-SUM-LIMT      ;명목액기준합계한도
+      *N  V1JL4114-TTL-AMT-DRCT-BAL     ;명목액직접잔액
+      *N  V1JL4114-TTL-AMT-INDR-BAL     ;명목액간접잔액
+      *N  V1JL4114-TTL-A-BASE-BALSUM    ;명목액기준합계잔액
+      *N  V1JL4114-DRCT-CLAM            ;직접한도금액
+      *N  V1JL4114-INDR-CLAM            ;간접한도금액
+      *N  V1JL4114-SUM-LIMT-BSAMT       ;합계한도기준금액
+      *N  V1JL4114-EXHS-RT              ;소진율
+      *A  V1JL4114-GRID2                ;그리드2
+      *X  V1JL4114-BRWR-NO2             ;차주번호2
+      *X  V1JL4114-BRWR-NAME2           ;차주명2
+      *X  V1JL4114-CORP-CRDRAT2         ;기업신용등급2
+      *N  V1JL4114-MGT-CLAM2            ;관리한도금액2
+      *N  V1JL4114-TTL-AMT-DRCT-LIMT2   ;명목액직접한도2
+      *N  V1JL4114-TTL-AMT-INDR-LIMT2   ;명목액간접한도2
+      *N  V1JL4114-TTL-AB-SUM-LIMT2     ;명목액기준합계한도2
+      *N  V1JL4114-TTL-AMT-DRCT-BAL2    ;명목액직접잔액2
+      *N  V1JL4114-TTL-AMT-INDR-BAL2    ;명목액간접잔액2
+      *N  V1JL4114-TTL-A-BASE-BALSUM2   ;명목액기준합계잔액2
+      *N  V1JL4114-DRCT-CLAM2           ;직접한도금액2
+      *N  V1JL4114-INDR-CLAM2           ;간접한도금액2
+      *N  V1JL4114-SUM-LIMT-BSAMT2      ;합계한도기준금액2
+      *N  V1JL4114-EXHS-RT2             ;소진율2

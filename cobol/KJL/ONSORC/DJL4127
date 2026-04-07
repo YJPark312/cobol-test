@@ -1,0 +1,207 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4127 (DC법인번호별한도및잔액조회)
+      *@처리유형  : DC
+      *@처리개요  : 법인번호별 한도 및 잔액 조회하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20121012: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4127.
+       AUTHOR.                         하윤희.
+       DATE-WRITTEN.                   12/10/12.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4127'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-B2700093             PIC  X(008) VALUE 'B2700093'.
+           03  CO-UKJL0002             PIC  X(008) VALUE 'UKJL0002'.
+           03  CO-B2100001             PIC  X(008) VALUE 'B2100001'.
+           03  CO-UKJL0033             PIC  X(008) VALUE 'UKJL0033'.
+           03  CO-B3900001             PIC  X(008) VALUE 'B3900001'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL4127-CA.
+           COPY  XQJL4127.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4127-CA.
+           COPY  XDJL4127.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4127-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@1 입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@1 업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4127-OUT
+                            XDJL4127-RETURN
+      *@1  DBIO, SQLIO PARAMETER 초기화
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *    차주번호
+           IF XDJL4127-I-BRWR-NO = SPACE
+               #ERROR CO-B2100001 CO-UKJL0033 CO-STAT-ERROR
+           END-IF
+
+      *    기준년월일
+           IF XDJL4127-I-BASE-YMD = (SPACE OR '00000000')
+               #ERROR CO-B2700093 CO-UKJL0002 CO-STAT-ERROR
+           END-IF
+
+                           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+           INITIALIZE       XQJL4127-IN
+
+      *   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4127-I-GROUP-CO-CD
+
+      *   차주번호
+           MOVE XDJL4127-I-BRWR-NO
+             TO XQJL4127-I-BRWR-NO
+
+      *   기준일
+           MOVE XDJL4127-I-BASE-YMD(7:2)
+             TO XQJL4127-I-BASE-DD
+
+      *   기준년월
+           MOVE XDJL4127-I-BASE-YMD(1:6)
+             TO XQJL4127-I-BASE-YM
+
+           #DYSQLA  QJL4127  SELECT  XQJL4127-CA
+
+      *   조회결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+      *@      조회자료MOVE
+
+      *       명목액기준한도
+               MOVE XQJL4127-O-TTL-AMT-BASE-CLAM
+                 TO XDJL4127-O-TTL-BASE-CLAM-SUM
+      *       명목액기준잔액
+               MOVE XQJL4127-O-TTL-AMT-BASE-BAL
+                 TO XDJL4127-O-TTL-BASE-BAL-SUM
+      *       고객관리부점코드
+               MOVE XQJL4127-O-CUST-MGT-BRNCD
+                 TO XDJL4127-O-CUST-MGT-BRNCD
+
+           WHEN COND-DBSQL-MRNF
+
+      *       명목액기준한도
+               MOVE ZERO
+                 TO XDJL4127-O-TTL-BASE-CLAM-SUM
+      *       명목액기준잔액
+               MOVE ZERO
+                 TO XDJL4127-O-TTL-BASE-BAL-SUM
+      *       고객관리부점코드
+               MOVE SPACE
+                 TO XDJL4127-O-CUST-MGT-BRNCD
+
+               #OKEXIT  CO-STAT-NOTFND
+           WHEN OTHER
+      *       원장에러일경우　에러처리
+               #ERROR CO-B3900001 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

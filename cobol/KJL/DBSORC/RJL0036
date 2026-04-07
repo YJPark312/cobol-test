@@ -1,0 +1,3065 @@
+      *=================================================================
+      *@업무명    : KLA     (프레임워크)
+      *@프로그램명: RJL0036 (그룹익스포져월집계)
+      *@처리유형  : DBIO
+      *@처리개요  : TABLE의 등록, 수정, 삭제, 조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 :일자  : 변　경　내　용
+      * -------:--------:----------------------------------------------
+      *큐로컴:20080401:커스터마이징
+      *=================================================================
+      ******************************************************************
+      **
+      **  프로그램명 : # TABLE DBIO
+      **
+      ******************************************************************
+      **
+      **  서브프로그램     : 설명
+      **  ----------------   -------------------------------------------
+      **                   :
+      **
+      ******************************************************************
+      **
+      **  TABLE-ID         : 테이블명                           : CRUD
+      **  ---------  ---------------------------------------------------
+      **  THKJL0036 :(그룹익스포져월집계)
+      **
+      ******************************************************************
+      **
+      **  COPY BOOK        : 설명
+      **  ----------------   -------------------------------------------
+      **  < 테이블 & 테이블키 & 파일 >----------------------------
+      **  YCDBIOCA     : 테이블 CRUD 처리를 위한 공통정보
+      **  DBIOPRIV     : 업무코드별 권한검증
+      **  TRJL0036     : 테이블의 내용을 담을 변수
+      **
+      **  < 인터페이스 >----------------------------------------------
+      **
+      **  < 입출력 >--------------------------------------------------
+      **
+      **----------------------------------------------------------------
+      ** 일자       : 작성자     : 사유
+      ** ----------   ----------   -------------------------------------
+      ** 2010-01-23 : KB         : 최초작성
+      **            :            :
+      ******************************************************************
+       IDENTIFICATION                       DIVISION.
+      ******************************************************************
+       PROGRAM-ID.                          RJL0036.
+       AUTHOR.                              KB.
+       INSTALLATION.                        KB.
+       DATE-WRITTEN.                        2010-01-23-17.07.01.823966.
+       SECURITY.
+      ******************************************************************
+       ENVIRONMENT                          DIVISION.
+      ******************************************************************
+      *=================================================================
+       CONFIGURATION                        SECTION.
+      *=================================================================
+       SOURCE-COMPUTER.                     IBM.
+       OBJECT-COMPUTER.                     IBM.
+      *
+      ******************************************************************
+       DATA                                 DIVISION.
+      ******************************************************************
+      *=================================================================
+       WORKING-STORAGE                      SECTION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *  상수영역
+      *-----------------------------------------------------------------
+       77  CONT-PROGRAM-ID                  PIC  X(08) VALUE "RJL0036".
+       77  CONT-SYNONYM-NM                  PIC  X(09)  VALUE
+                                           "THKJL0036".
+       77  CONT-TABLE-NM                    PIC  X(09)  VALUE
+                                           "THKJL0036".
+       77  CONT-DBIO-ID                     PIC  X(03)  VALUE "KJL".
+       77  CONT-OK                          PIC  X(02)  VALUE "00".
+       77  CONT-DUPM                        PIC  X(02)  VALUE "01".
+       77  CONT-MRNF                        PIC  X(02)  VALUE "02".
+       77  CONT-SQLER                       PIC  X(02)  VALUE "09".
+       77  CONT-ABNORMAL                    PIC  X(02)  VALUE "98".
+       77  CONT-SYSERROR                    PIC  X(02)  VALUE "99".
+       77  CONT-QUOTA                       PIC  X(01)  VALUE "'".
+       77  CONT-Y                           PIC  X(01)  VALUE "Y".
+       77  CONT-N                           PIC  X(01)  VALUE "N".
+       77  CONT-SO                          PIC  X(01)  VALUE X"0E".
+       77  CONT-SI                          PIC  X(01)  VALUE X"0F".
+       77  CONT-NULL                        PIC  X(01)  VALUE X"00".
+      *
+      *
+      * 조회거래의 갱신/LOCK READ여부를 분석하기 위함
+      * I:조회,   U:조회시 UPDATE,   L:조회시 LOCK READ
+      *77  CONT-INQ                         PIC  X(01)  VALUE "I".
+      *77  CONT-MOD                         PIC  X(01)  VALUE "U".
+      *77  CONT-LOK                         PIC  X(01)  VALUE "L".
+      *
+       77  CONT-DAY                         PIC  X(01)  VALUE "D".
+       77  CONT-TEMP                        PIC  X(01)  VALUE "T".
+       77  CONT-STOP                        PIC  X(01)  VALUE "S".
+      *
+       77  CONT-PK                          PIC  X(02)  VALUE "PK".
+      *
+       77  ERROR-TEXT-LEN                   PIC S9(009) COMP VALUE +72.
+       01  ERROR-MESSAGE.
+           03  ERROR-LEN                    PIC S9(004) COMP VALUE +720.
+           03  ERROR-TEXT                   PIC  X(072) OCCURS 10 TIMES
+                                            INDEXED BY ERR-IDX.
+      *-----------------------------------------------------------------
+      *  변수영역
+      *-----------------------------------------------------------------
+      *
+       01  WORK-AREA.
+           03  WORK-SQLCODE                 PIC  S9(08) COMP.
+           03  WORK-ERR-SET-YN              PIC  X(001).
+           03  WORK-MSG-GET-FLAG            PIC  X(001).
+           03  WORK-FLAG                    PIC  X(001).
+           03  WORK-STRT-POINT              PIC  9(005).
+           03  WORK-INT                     PIC  9(015).
+           03  WORK-POINT                   PIC  9(005).
+           03  WORK-LEN                     PIC  9(005).
+           03  WORK-SO-CNT                  PIC  9(003).
+           03  WORK-SI-CNT                  PIC  9(003).
+           03  WORK-NULL-CNT                PIC  9(005).
+           03  WORK-QUOTA-CNT               PIC  9(005).
+      *
+           03  WORK-APPL-ID                 PIC  X(02).
+           03  WORK-APPL-ID-G               PIC  X(02).
+           03  WORK-DBIO-ID                 PIC  X(02).
+           03  WORK-DBIO-ID-G               PIC  X(02).
+
+           03  WORK-PRIVS-STAT              PIC  X(01).
+
+           03  H-PROC-TIME                  PIC  X(12).
+
+           03  BSGDISP-TEXT                 PIC  X(200).
+      *
+      *    03  WORK-IN-HEX                  PIC  X(128).
+      *    03  WORK-OUT-CHAR                PIC  X(256).
+      *
+      *    03 WORK-IDX-GR.
+      *       05 WORK-IN-IDX                PIC S9(004) COMP VALUE +0.
+      *       05 WORK-OUT-IDX               PIC S9(004) COMP VALUE +0.
+      *
+      *    03 WORK-VARIABLES.
+      *       05 WORK-BYTE-DEFINE.
+      *          10 WORK-BINARY             PIC S9(004) COMP.
+      *          10 WORK-BINARY-R REDEFINES WORK-BINARY.
+      *             15 FILLER               PIC  X(001).
+      *             15 WORK-BYTE            PIC  X(001).
+      *
+           03 WORK-TMP-NUM                  PIC S9(003) COMP-3.
+           03 WORK-MOD                      PIC S9(003) COMP-3.
+           03 WORK-REM                      PIC S9(003) COMP-3.
+           03 WORK-IN-LENG                  PIC  9(004).
+      *
+       01  WORK-NUMBER.
+           03  WORK-DECIMAL-D               PIC +9(08).
+      *
+      *01  HEX-CSV-AREA.
+      *    03  CO-REF-TABLE.
+      *        05 FILLER                    PIC  X(001) VALUE '0'.
+      *        05 FILLER                    PIC  X(001) VALUE '1'.
+      *        05 FILLER                    PIC  X(001) VALUE '2'.
+      *        05 FILLER                    PIC  X(001) VALUE '3'.
+      *        05 FILLER                    PIC  X(001) VALUE '4'.
+      *        05 FILLER                    PIC  X(001) VALUE '5'.
+      *        05 FILLER                    PIC  X(001) VALUE '6'.
+      *        05 FILLER                    PIC  X(001) VALUE '7'.
+      *        05 FILLER                    PIC  X(001) VALUE '8'.
+      *        05 FILLER                    PIC  X(001) VALUE '9'.
+      *        05 FILLER                    PIC  X(001) VALUE 'A'.
+      *        05 FILLER                    PIC  X(001) VALUE 'B'.
+      *        05 FILLER                    PIC  X(001) VALUE 'C'.
+      *        05 FILLER                    PIC  X(001) VALUE 'D'.
+      *        05 FILLER                    PIC  X(001) VALUE 'E'.
+      *        05 FILLER                    PIC  X(001) VALUE 'F'.
+      *    03  CO-REF             REDEFINES CO-REF-TABLE
+      *                                     PIC  X(001) OCCURS 16 TIMES
+      *                                     INDEXED BY WORK-REF-IDX.
+
+
+      *I/O데이터를EDIT-TYPE으로편집하는영역
+       01  DBRECORD-TRAN.
+           03 GROUP-CO-CD                    PIC  X(00003).
+           03 BASE-YM                        PIC  X(00006).
+           03 AFFLT-CORP-GROUP-CD            PIC  X(00006).
+           03 PRDCT-LAG-CLSFI-CD             PIC  X(00002).
+           03 PRDCT-MEDM-CLSFI-CD            PIC  X(00002).
+           03 PRDCT-TMPLT-CD                 PIC  X(00003).
+           03 PRDCT-NO                       PIC  X(00005).
+           03 TTL-AMT-BASE-CLAM              PIC -9(00015).
+           03 TTL-AMT-BASE-BAL               PIC -9(00015).
+           03 TE-LIMT-AUC                    PIC -9(00015).
+           03 TE-BAL-AUC                     PIC -9(00015).
+           03 TE-LNBZ-INCLIN-AMT             PIC -9(00015).
+           03 TE-MRKTY-AMT                   PIC -9(00015).
+           03 SYS-LAST-PRCSS-YMS             PIC  X(00020).
+           03 SYS-LAST-UNO                   PIC  X(00007).
+      *
+      *TEMP/STOP모드에서VALUE상수EDIT하는영역
+      *01  DB-TABLE-BACKUP.
+      *
+      *테이블전체컬럼명을나열하는영역
+      *01  TABLE-COLUMN-VALUE.
+      *
+      *컬럼그룹별소스생성시컬럼그룹을나열하는영역
+
+      *-----------------------------------------------------------------
+      *  테이블(호스트변수)영역
+      *-----------------------------------------------------------------
+      *
+       01  WORK-LAST-DT                     PIC  X(020).
+       01  WORK-STRT-DT                     PIC  X(020).
+       01  WORK-LAST-CHNG-USID              PIC  X(007).
+       01  WORK-ACCECODE                    PIC  X(004).
+      *01  WORK-TABLE-NM                    PIC  X(040).
+       01  WORK-FUNC-CD                     PIC  X(002).
+      *01  WORK-DBIO-KEY                    PIC  X(150).
+       01  WORK-SYNONYM-NM                  PIC  X(009).
+       01  WORK-ACCESS-COND                 PIC S9(001) USAGE COMP.
+      *01  WORK-LENGTH                      PIC S9(004) USAGE COMP.
+      *01  WORK-TABLE-LEN                   PIC S9(005) USAGE COMP-3.
+      *01  WORK-TABLE-AREA.
+      *    03  WK-TABLE                     PIC  X(30000).
+
+       01  WORK-CORR-AREA.
+           03  WORK-CORRECTION              PIC  X(30000).
+
+      *01  WORK-COLUMN-AREA.
+      *    03  WORK-COL-VALUE               PIC  X(15000).
+
+       01  WORK-COND-DESC-AREA.
+           03  WORK-COND-DESC               PIC  X(2000).
+
+      *I/O데이터HOST영역
+       01  DB-TABLE.
+           03 GROUP-CO-CD                    PIC  X(00003).
+           03 BASE-YM                        PIC  X(00006).
+           03 AFFLT-CORP-GROUP-CD            PIC  X(00006).
+           03 PRDCT-LAG-CLSFI-CD             PIC  X(00002).
+           03 PRDCT-MEDM-CLSFI-CD            PIC  X(00002).
+           03 PRDCT-TMPLT-CD                 PIC  X(00003).
+           03 PRDCT-NO                       PIC  X(00005).
+           03 TTL-AMT-BASE-CLAM              PIC S9(00015) COMP-3.
+           03 TTL-AMT-BASE-BAL               PIC S9(00015) COMP-3.
+           03 TE-LIMT-AUC                    PIC S9(00015) COMP-3.
+           03 TE-BAL-AUC                     PIC S9(00015) COMP-3.
+           03 TE-LNBZ-INCLIN-AMT             PIC S9(00015) COMP-3.
+           03 TE-MRKTY-AMT                   PIC S9(00015) COMP-3.
+           03 SYS-LAST-PRCSS-YMS             PIC  X(00020).
+           03 SYS-LAST-UNO                   PIC  X(00007).
+      *
+      *
+      *AccessKey HOST영역
+       01  KEY-DB-TABLE.
+           03 PK-THKJL0036.
+            05 GROUP-CO-CDP0                  PIC  X(00003).
+            05 BASE-YMP0                      PIC  X(00006).
+            05 AFFLT-CORP-GROUP-CDP0          PIC  X(00006).
+            05 PRDCT-LAG-CLSFI-CDP0           PIC  X(00002).
+            05 PRDCT-MEDM-CLSFI-CDP0          PIC  X(00002).
+            05 PRDCT-TMPLT-CDP0               PIC  X(00003).
+            05 PRDCT-NOP0                     PIC  X(00005).
+      *
+      *
+           EXEC SQL INCLUDE SQLCA                   END-EXEC.
+      *
+      *
+      *
+           EXEC SQL
+           DECLARE SELECT_CURSOR           CURSOR FOR
+           SELECT
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+             FROM DB2DBA.THKJL0036
+            WHERE "그룹회사코드" = :GROUP-CO-CDP0
+              AND "기준년월" = :BASE-YMP0
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0
+              AND "상품번호" = :PRDCT-NOP0
+      *
+      *     OPTIMIZE FOR 1 ROWS
+            FOR UPDATE OF
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+           END-EXEC
+
+      *-----------------------------------------------------------------
+      *  인터페이스영역
+      *-----------------------------------------------------------------
+      *
+       01  BSGERORCA.
+      *----------------------------------------------------------------*
+           03  BSGEROR-PARA                 PIC  X(05).
+
+       01  XZSFDBLG-CA.
+           COPY  XZSFDBLG.
+      *=================================================================
+       LINKAGE                              SECTION.
+      *=================================================================
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *
+      *-----------------------------------------------------------------
+      *  DBIO 변수영역
+      *-----------------------------------------------------------------
+           COPY  YCDBIOCA.
+      *테이블컬럼나열
+       01  DBIO-RECORD.
+           03 GROUP-CO-CD                    PIC  X(00003).
+           03 BASE-YM                        PIC  X(00006).
+           03 AFFLT-CORP-GROUP-CD            PIC  X(00006).
+           03 PRDCT-LAG-CLSFI-CD             PIC  X(00002).
+           03 PRDCT-MEDM-CLSFI-CD            PIC  X(00002).
+           03 PRDCT-TMPLT-CD                 PIC  X(00003).
+           03 PRDCT-NO                       PIC  X(00005).
+           03 TTL-AMT-BASE-CLAM              PIC S9(00015) COMP-3.
+           03 TTL-AMT-BASE-BAL               PIC S9(00015) COMP-3.
+           03 TE-LIMT-AUC                    PIC S9(00015) COMP-3.
+           03 TE-BAL-AUC                     PIC S9(00015) COMP-3.
+           03 TE-LNBZ-INCLIN-AMT             PIC S9(00015) COMP-3.
+           03 TE-MRKTY-AMT                   PIC S9(00015) COMP-3.
+           03 SYS-LAST-PRCSS-YMS             PIC  X(00020).
+           03 SYS-LAST-UNO                   PIC  X(00007).
+      *
+      *
+           REPLACE   ==(COM)== BY ==COM==.
+       01  YCCSICOM-CA.
+           COPY    YCCSICOM.
+       01  YCCBICOM-CA.
+           COPY    YCCBICOM.
+      *01  YCCBOCOM-CA.
+      *    COPY    YCCBOCOM.
+           REPLACE OFF.
+
+      ******************************************************************
+       PROCEDURE                           DIVISION
+                                           USING     YCCOMMON-CA
+                                                     YCDBIOCA-CA
+                                                     DBIO-RECORD.
+      ******************************************************************
+      *
+       S0000-START-RTN.
+
+           SET     ADDRESS OF YCCSICOM-CA  TO  COMM-SICOM-ADDR
+           SET     ADDRESS OF YCCBICOM-CA  TO  COMM-BICOM-ADDR
+      *    SET     ADDRESS OF YCCBOCOM-CA  TO  COMM-BOCOM-ADDR
+           PERFORM S0000-MAIN-RTN        THRU  S0000-MAIN-EXT
+           .
+       S0000-START-EXT.
+           EXIT.
+
+       S0000-MAIN-RTN.
+      *
+           MOVE  "13"                       TO   YCFCTLAR-USR-LOG-CD
+           PERFORM  S0100-INITIAL-RTN     THRU   S0100-INITIAL-EXT
+           PERFORM  S0500-CHECK-RTN       THRU   S0500-CHECK-EXT
+      *
+      *
+      * DBIO-FUNCTION OF DBIOCA
+             EVALUATE  TRUE
+                 WHEN  COND-DBIO-SELECT
+                       PERFORM  S1000-SELECT-RTN THRU S1000-SELECT-EXT
+      *
+                 WHEN  COND-DBIO-SELFST
+                       PERFORM  S2000-SELFST-RTN THRU S2000-SELFST-EXT
+      *
+                 WHEN  COND-DBIO-INSERT
+                       PERFORM  S3000-INSERT-RTN THRU S3000-INSERT-EXT
+      *
+                 WHEN  COND-DBIO-UPDATE
+                       PERFORM  S4000-UPDATE-RTN THRU S4000-UPDATE-EXT
+      *
+                 WHEN  COND-DBIO-LKUPDT
+                       PERFORM  S5000-LKUPDT-RTN THRU S5000-LKUPDT-EXT
+      *
+                 WHEN  COND-DBIO-DELETE
+                 WHEN  COND-DBIO-DELFRC
+                       PERFORM  S6000-DELETE-RTN THRU S6000-DELETE-EXT
+      *
+                 WHEN  COND-DBIO-OPEN
+                       PERFORM  S7100-OPEN-RTN   THRU S7100-OPEN-EXT
+      *
+                 WHEN  COND-DBIO-FETCH
+                       PERFORM  S7200-FETCH-RTN  THRU S7200-FETCH-EXT
+      *
+                 WHEN  COND-DBIO-CLOSE
+                       PERFORM  S7300-CLOSE-RTN  THRU S7300-CLOSE-EXT
+      *
+                 WHEN  OTHER
+                       MOVE  CONT-SYSERROR  TO   DBIO-STAT
+      *{E} DBIO입력항목 검증오류입니다(DBIO-FUNCTION)
+                       MOVE  "S9000001"     TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-FUNCTION코드 오류 입니다.(@1@)
+                       MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+                       MOVE   0101          TO   XZUGEROR-I-LINE
+                       MOVE
+           "DBIO입력항목 검증오류입니다(DBIO-FUNCTION)"
+                                            TO   XZUGEROR-I-MSG
+                       PERFORM  S9100-ERROR-END-RTN
+                          THRU  S9100-ERROR-END-EXT
+             END-EVALUATE
+      *
+           PERFORM  S9000-NOMAL-END-RTN THRU S9000-NOMAL-END-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 시작전 기본설정 및 초기화
+      *  처리기능 : 프로그램초기화
+      *-----------------------------------------------------------------
+       S0100-INITIAL-RTN.
+      *
+           MOVE  "S0100"                    TO   BSGEROR-PARA
+      *
+           INITIALIZE                            DBIO-OUT
+                                                 DBIO-RESULT
+                                                 XZUGEROR-CA
+                                                 BSGDISP-TEXT
+                                                 BSGERORCA
+
+           INITIALIZE                            WORK-AREA
+                                                 DB-TABLE
+      *
+           PERFORM  S0110-INITIALIZE-RTN    THRU S0110-INITIALIZE-EXT
+      *
+           PERFORM  S0120-PRIVS-RTN         THRU S0120-PRIVS-EXT
+           PERFORM  S0130-KEYVALUE-MOVE-RTN THRU S0130-KEYVALUE-MOVE-EXT
+           PERFORM  S0140-KEYVALUE-DISP-RTN THRU S0140-KEYVALUE-DISP-EXT
+      *
+           IF  COND-DBIO-INSERT OR COND-DBIO-UPDATE OR
+               COND-DBIO-LKUPDT OR
+               COND-DBIO-DELETE OR COND-DBIO-DELFRC
+           THEN
+               PERFORM S0150-USID-INFO-SET-RTN
+                  THRU S0150-USID-INFO-SET-EXT
+           END-IF
+           .
+       S0100-INITIAL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 시작전 기본설정 및 초기화
+      *  처리기능 : 프로그램 변수 초기화
+      *-----------------------------------------------------------------
+       S0110-INITIALIZE-RTN.
+      *
+           MOVE  "S0110"                    TO   BSGEROR-PARA
+      *
+           IF  COMM-DB-II-OUTPT-DSTCD            =    "1" OR "9"
+           THEN
+               #USRLOG            DBIO-CALL-PGM-ID "/"
+                                  DBIO-PROGRAM-ID  "/"
+                                  DBIO-FUNCTION    "/"
+                                  DBIO-ACCESS-KEY  "/"
+                                  DBIO-LOCK-YN     "/"
+                                  DBIO-ACCESS-COND "/"
+                                  SICOM-OPER-DSTCD "/"
+
+           END-IF
+      *
+
+           MOVE  CONT-PROGRAM-ID            TO   DBIO-PROGRAM-ID
+           MOVE  CONT-ABNORMAL              TO   DBIO-STAT
+      *
+           MOVE  ZERO                       TO   SQLCODE
+      *
+           MOVE  SPACE                      TO   SQLERRMC
+           MOVE  DBIO-ACCESS-KEY            TO   WORK-ACCECODE
+           MOVE  CONT-SYNONYM-NM            TO   WORK-SYNONYM-NM
+      *                                          DBIO-SYNONYM-NM
+
+           MOVE  CONT-TABLE-NM              TO   DBIO-TABLE-NM
+      *                                          WORK-TABLE-NM
+           MOVE  DBIO-FUNCTION(1:2)         TO   WORK-FUNC-CD
+           MOVE  SPACE                      TO   WORK-LAST-DT
+                                                 WORK-STRT-DT
+
+           .
+       S0110-INITIALIZE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 시작전 업무팀의 사용권한 검증
+      *  처리기능 : 호출 프로그램명 입력검증 및 프로그램
+      *             사용권한
+      *-----------------------------------------------------------------
+       S0120-PRIVS-RTN.
+      *
+           MOVE  "S0120"                    TO   BSGEROR-PARA
+      *
+      *    COPY  DBIOPRIV.
+      *
+      * Z-M-U-0000(F/W ON-LINE)
+      * Z-B-D-0000(F/W BATCH)
+      *
+           IF   DBIO-CALL-PGM-ID(1:1)       =   "Z"
+           THEN
+                GO TO S0120-PRIVS-EXT
+           END-IF
+      *
+      * A-FA-0000(ON-LINE)
+      * B-FA-0000(BATCH)
+      *
+           MOVE  DBIO-CALL-PGM-ID(2:2)      TO   WORK-APPL-ID
+      *
+           MOVE  CONT-PROGRAM-ID(2:2)       TO   WORK-DBIO-ID
+      *
+           IF  WORK-APPL-ID      = WORK-DBIO-ID
+           THEN
+               GO TO S0120-PRIVS-EXT
+           ELSE
+               MOVE  CONT-SYSERROR          TO   DBIO-STAT
+      *{E} DBIO모듈에서 에러종료 되었습니다.
+               MOVE  "S9000020"             TO   XZUGEROR-I-ERRCD
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE  SPACE                  TO   XZUGEROR-I-MSG
+               STRING  "("
+                       WORK-APPL-ID
+                       ")업무는 ("
+                       WORK-DBIO-ID
+                       ")DBIO를 사용할 권한이 없습니다"
+                                                 DELIMITED BY SIZE
+                     INTO  XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S0120-PRIVS-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIOCA를통해받은DBIO-키를각가의해당키로MOVE
+      *  처리기능 : DBIO-ACCESS-KEY에따라분기하여KEYVALUE를MOVE
+      *-----------------------------------------------------------------
+       S0130-KEYVALUE-MOVE-RTN.
+      *
+           MOVE  "S0130"                    TO   BSGEROR-PARA
+      *
+           INITIALIZE                            KEY-DB-TABLE
+      *
+           MOVE  DBIO-ACCESS-COND           TO   WORK-ACCESS-COND
+      *
+           IF  COND-DBIO-FETCH   OR  COND-DBIO-CLOSE
+           THEN
+               GO TO S0130-KEYVALUE-MOVE-EXT
+           END-IF
+      *
+           IF  COND-DBIO-INSERT  OR  COND-DBIO-LKUPDT
+           THEN
+           MOVE  GROUP-CO-CD  OF  DBIO-RECORD
+             TO  GROUP-CO-CDP0 OF KEY-DB-TABLE
+           MOVE  BASE-YM  OF  DBIO-RECORD
+             TO  BASE-YMP0 OF KEY-DB-TABLE
+           MOVE  AFFLT-CORP-GROUP-CD  OF  DBIO-RECORD
+             TO  AFFLT-CORP-GROUP-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-LAG-CLSFI-CD  OF  DBIO-RECORD
+             TO  PRDCT-LAG-CLSFI-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-MEDM-CLSFI-CD  OF  DBIO-RECORD
+             TO  PRDCT-MEDM-CLSFI-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-TMPLT-CD  OF  DBIO-RECORD
+             TO  PRDCT-TMPLT-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-NO  OF  DBIO-RECORD
+             TO  PRDCT-NOP0 OF KEY-DB-TABLE
+
+           MOVE  PK-THKJL0036               TO   DBIO-KEY
+
+
+           IF  GROUP-CO-CD OF DBIO-RECORD NOT = "KB0"
+           THEN
+               MOVE  CONT-SYSERROR  TO   DBIO-STAT
+               MOVE  "S9000099"     TO   XZUGEROR-I-ERRCD
+               MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+               MOVE   9901          TO   XZUGEROR-I-LINE
+               MOVE
+                     "그룹회사코드를 'KB0' 로 사용하세요!!!"
+                                    TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+
+           END-IF
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     MOVE  DBIO-KEY         TO
+                                            PK-THKJL0036
+                     MOVE  GROUP-CO-CDP0 OF KEY-DB-TABLE
+                       TO  GROUP-CO-CD  OF  DBIO-RECORD
+                     MOVE  BASE-YMP0 OF KEY-DB-TABLE
+                       TO  BASE-YM  OF  DBIO-RECORD
+                     MOVE  AFFLT-CORP-GROUP-CDP0 OF KEY-DB-TABLE
+                       TO  AFFLT-CORP-GROUP-CD  OF  DBIO-RECORD
+                     MOVE  PRDCT-LAG-CLSFI-CDP0 OF KEY-DB-TABLE
+                       TO  PRDCT-LAG-CLSFI-CD  OF  DBIO-RECORD
+                     MOVE  PRDCT-MEDM-CLSFI-CDP0 OF KEY-DB-TABLE
+                       TO  PRDCT-MEDM-CLSFI-CD  OF  DBIO-RECORD
+                     MOVE  PRDCT-TMPLT-CDP0 OF KEY-DB-TABLE
+                       TO  PRDCT-TMPLT-CD  OF  DBIO-RECORD
+                     MOVE  PRDCT-NOP0 OF KEY-DB-TABLE
+                       TO  PRDCT-NO  OF  DBIO-RECORD
+           END-EVALUATE
+           .
+       S0130-KEYVALUE-MOVE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIOCA를통해받은DBIO-키중접근조건범위에해
+      *             필드의 값을 찾아서 MOVE
+      *  처리기능 : DBIO-ACCESS-KEY에따라 KEY VALUE를 MOVE
+      *-----------------------------------------------------------------
+       S0140-KEYVALUE-DISP-RTN.
+      *
+           MOVE  "S0140"                    TO   BSGEROR-PARA
+      *
+           IF  COMM-DB-II-OUTPT-DSTCD       =    "1" OR "9"
+           THEN
+               CONTINUE
+           ELSE
+               GO TO S0140-KEYVALUE-DISP-EXT
+           END-IF
+      *
+           IF  COND-DBIO-FETCH   OR  COND-DBIO-CLOSE
+           THEN
+               GO TO S0140-KEYVALUE-DISP-EXT
+           END-IF
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     MOVE  "PK:그룹회사코드                ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  GROUP-CO-CDP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:기준년월                    ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  BASE-YMP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:계열기업군코드              ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  AFFLT-CORP-GROUP-CDP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:상품대분류코드              ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  PRDCT-LAG-CLSFI-CDP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:상품중분류코드              ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  PRDCT-MEDM-CLSFI-CDP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:상품템플릿코드              ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  PRDCT-TMPLT-CDP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+                     MOVE  "PK:상품번호                    ="
+                                            TO BSGDISP-TEXT(1:34)
+                     MOVE  PRDCT-NOP0 OF KEY-DB-TABLE
+                                            TO BSGDISP-TEXT(35:)
+                     PERFORM  S7700-BSGDISP-RTN
+                        THRU  S7700-BSGDISP-EXT
+           END-EVALUATE
+      *
+           MOVE  SPACE                      TO   BSGDISP-TEXT
+      *
+           .
+       S0140-KEYVALUE-DISP-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 시작전 기본설정 및 초기화
+      *  처리기능 : 사용자정보 변수 SET
+      *-----------------------------------------------------------------
+       S0150-USID-INFO-SET-RTN.
+      *
+      *    MOVE  "S0150"                    TO   BSGEROR-PARA
+      *
+      *VARLEN
+      *
+           IF  BICOM-TRAN-START-YMS = SPACE
+           THEN
+               MOVE  CONT-SYSERROR  TO   DBIO-STAT
+               MOVE  "S9000099"     TO   XZUGEROR-I-ERRCD
+               MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+               MOVE   9902          TO   XZUGEROR-I-LINE
+               MOVE
+                     "BICOM-TRAN-START-YMS 미입력"
+                                    TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+           IF  BICOM-USER-EMPID     = SPACE
+           THEN
+               MOVE  CONT-SYSERROR  TO   DBIO-STAT
+               MOVE  "S9000099"     TO   XZUGEROR-I-ERRCD
+               MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+               MOVE   9903          TO   XZUGEROR-I-LINE
+               MOVE
+                     "BICOM-USER-EMPID 미입력"
+                                    TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+      *
+           IF  COND-DBIO-INSERT OR COND-DBIO-UPDATE
+                                OR COND-DBIO-LKUPDT
+           THEN
+               MOVE  DBIO-RECORD    TO   DB-TABLE
+           END-IF
+      *
+      *-----------------------------------------------------------------
+      *    이하 프로그램은
+      *    호출한 프로그램에서SET된
+      *    SYS-LAST-PRCSS-YMS, SYS-LAST-UNO를
+      *    변경하지 않고 INSERT를 처리한다
+      *-----------------------------------------------------------------
+      *-- ZBD0500 : 배치원장 복원작업
+      *-- ZBD0510 : 배치원장 반영작업
+      *-- ZBD0550 : 계획정지후 본원장반영작업(업무별)
+      *-- ZBD0560 : 계획정지후 본원장반영작업(테이블별)
+      *---ZXXXXXX : 비상 예비용
+      *
+           IF DBIO-CALL-PGM-ID = "ZBD0500" OR "ZBD0510" OR
+                                 "ZBD0550" OR "ZBD0560" OR
+                                 "ZXXXXXX"
+           THEN
+              CONTINUE
+           ELSE
+      *
+              IF  COND-DBIO-INSERT OR COND-DBIO-UPDATE
+                                   OR COND-DBIO-LKUPDT
+              THEN
+                  MOVE  BICOM-USER-EMPID
+                    TO  SYS-LAST-UNO OF DB-TABLE
+                        SYS-LAST-UNO OF DBIO-RECORD
+      *
+                  IF    COND-DBIO-INSERT
+                  THEN
+                        MOVE  BICOM-TRAN-START-YMS
+                          TO  SYS-LAST-PRCSS-YMS OF DB-TABLE
+                              SYS-LAST-PRCSS-YMS OF DBIO-RECORD
+                  END-IF
+              END-IF
+      *
+           END-IF
+           .
+       S0150-USID-INFO-SET-EXT.
+           EXIT.
+      *
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 입력정보 및 기본정보 검증
+      *  처리기능 : 기본항목검증
+      *-----------------------------------------------------------------
+       S0500-CHECK-RTN.
+      *
+           MOVE  "S0500"                    TO   BSGEROR-PARA
+      *
+           IF  SICOM-OPER-DSTCD             =    CONT-TEMP  OR
+                                                 CONT-DAY   OR
+                                                 CONT-STOP
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SYSERROR          TO   DBIO-STAT
+      *{E} 정의되지 않은 거래모드입니다.(거래모드구분)
+               MOVE  "S9000002"             TO   XZUGEROR-I-ERRCD
+      *{E} BI거래모드구분 오류 입니다.(@1@)
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE
+           "정의되지 않은 거래모드입니다.(거래모드구분)"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+      * DBIO-키 입력 검증
+           IF  COND-DBIO-INSERT  OR
+               COND-DBIO-LKUPDT  OR
+               COND-DBIO-FETCH   OR
+               COND-DBIO-CLOSE
+           THEN
+               CONTINUE
+           ELSE
+               IF  DBIO-KEY                 =    SPACE
+               THEN
+                   MOVE  CONT-SYSERROR      TO   DBIO-STAT
+      *{E} DBIO-KEY 미입력 오류입니다.
+                   MOVE  "S9000003"         TO   XZUGEROR-I-ERRCD
+                   MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+                   MOVE   0301              TO   XZUGEROR-I-LINE
+                   MOVE
+           "DBIO-KEY 미입력 오류입니다."
+                                            TO   XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               END-IF
+           END-IF
+      *
+      * DBIO-FUNCTION 코드 정합성 검증
+           IF      COND-DBIO-SELECT  OR  COND-DBIO-UPDATE
+               OR  COND-DBIO-INSERT
+               OR  COND-DBIO-DELETE  OR  COND-DBIO-DELFRC
+               OR  COND-DBIO-SELFST  OR  COND-DBIO-LKUPDT
+               OR  COND-DBIO-OPEN    OR  COND-DBIO-FETCH
+               OR  COND-DBIO-CLOSE
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SYSERROR          TO   DBIO-STAT
+      *{E} DBIO-FUNCTION코드 오류입니다.
+               MOVE  "S9000001"             TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-FUNCTION코드 오류 입니다.(@1@)
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE   0102                  TO   XZUGEROR-I-LINE
+               MOVE
+           "DBIO-FUNCTION코드 오류입니다."
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+      * DBIO-ACCESS-KEY 정합성 검증
+           IF  COND-DBIO-PK
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SYSERROR          TO   DBIO-STAT
+      *{E} DBIO입력항목 검증오류입니다(DBIO-ACCESS-KEY)
+               MOVE  "S9000004"             TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-ACCESS-KEY 오류 입니다.(@1@)
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE
+           "DBIO입력항목 검증오류입니다(DBIO-ACCESS-KEY)"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+      * DBIO-ACCESS-COND 정합성 검증
+           IF  COND-DBIO-0  OR  COND-DBIO-1  OR
+               COND-DBIO-2  OR  COND-DBIO-3  OR
+               COND-DBIO-4
+           THEN
+               IF  COND-DBIO-SELFST  OR COND-DBIO-OPEN    OR
+                   COND-DBIO-FETCH   OR COND-DBIO-CLOSE
+               THEN
+                   IF  COND-DBIO-0
+                   THEN
+                       MOVE  CONT-SYSERROR  TO   DBIO-STAT
+      *{E} DBIO-ACCESS-COND 오류입니다
+                       MOVE  "S9000005"     TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-ACCESS-COND 오류 입니다.(@1@)
+                       MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+                       MOVE   0501          TO   XZUGEROR-I-LINE
+                       MOVE
+           "DBIO-ACCESS-COND 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+                       PERFORM  S9100-ERROR-END-RTN
+                          THRU  S9100-ERROR-END-EXT
+                   ELSE
+                       CONTINUE
+                   END-IF
+               ELSE
+                   CONTINUE
+               END-IF
+           ELSE
+               IF  COND-DBIO-SELECT  OR COND-DBIO-INSERT  OR
+                   COND-DBIO-UPDATE  OR COND-DBIO-LKUPDT  OR
+                   COND-DBIO-DELETE  OR COND-DBIO-DELFRC
+               THEN
+                   CONTINUE
+               ELSE
+                   MOVE  CONT-SYSERROR      TO   DBIO-STAT
+      *{E} DBIO-ACCESS-COND 오류입니다
+                   MOVE  "S9000005"         TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-ACCESS-COND 오류입니다.(@1@)
+                   MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+                   MOVE   0502              TO   XZUGEROR-I-LINE
+                   MOVE
+           "DBIO-ACCESS-COND 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               END-IF
+           END-IF
+      *
+      * DBIO-LOCK-YN 정합성검증
+           IF  COND-DBIO-LOCK      OR
+               COND-DBIO-UNLOCK
+           THEN
+               CONTINUE
+           ELSE
+      *        MOVE  "N"                    TO   DBIO-LOCK-YN
+      *{E} DBIO-LOCK-YN(조건) 오류입니다
+               MOVE  "S9000006"             TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-LOCK-YN 오류 입니다.(@1@)
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE   0601                  TO   XZUGEROR-I-LINE
+               MOVE
+           "DBIO-LOCK-YN(조건) 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+           IF  COND-DBIO-LOCK AND
+               DBIO-ACCESS-KEY(1:2)  NOT =  CONT-PK
+           THEN
+      *{E} DBIO-LOCK-YN(조건) 오류입니다
+               MOVE  "S9000006"             TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-LOCK-YN 오류 입니다.(@1@)
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE   0602                  TO   XZUGEROR-I-LINE
+               MOVE
+           "DBIO-LOCK-YN(조건) 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+      * 입력값의 조합검증
+           IF  DBIO-ACCESS-KEY(1:2)           =    CONT-PK
+           THEN
+               CONTINUE
+           ELSE
+               IF  COND-DBIO-INSERT         OR
+                   COND-DBIO-UPDATE         OR
+                   COND-DBIO-DELETE         OR
+                   COND-DBIO-DELFRC
+               THEN
+                   MOVE  CONT-SYSERROR      TO   DBIO-STAT
+      *{E} DBIO-FUNCTION 또는 DBIO-ACCESS-KEY 오류입니다
+                   MOVE  "S9000007"         TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-FUNCTION 또는 DBIO-ACCESS-KEY 오류 입니다.(@1@)
+                   MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+                   MOVE
+           "DBIO-FUNCTION 또는 DBIO-ACCESS-KEY 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               ELSE
+                   CONTINUE
+               END-IF
+           END-IF
+      *
+           IF  COND-DBIO-DELETE OR COND-DBIO-DELFRC
+           THEN
+               IF  COND-DBIO-LOCK
+               THEN
+                   CONTINUE
+               ELSE
+                   MOVE  CONT-SYSERROR      TO   DBIO-STAT
+      *{E} DBIO-LOCK-YN(조건) 오류입니다
+                   MOVE  "S9000006"         TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-FUNCTION(@1@)시 잠금조건 오류 입니다.
+                   MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+                   MOVE   0603              TO   XZUGEROR-I-LINE
+                   MOVE
+           "DBIO-LOCK-YN(조건) 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               END-IF
+           ELSE
+               IF  COND-DBIO-LOCK
+               THEN
+                   IF  COND-DBIO-OPEN       OR
+                       COND-DBIO-FETCH      OR
+                       COND-DBIO-SELFST
+                   THEN
+                       MOVE  CONT-SYSERROR  TO   DBIO-STAT
+      *{E} DBIO-LOCK-YN(조건) 오류입니다
+                       MOVE  "S9000006"     TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-FUNCTION(@1@)시 잠금조건 오류 입니다.
+                       MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+                       MOVE   0604          TO   XZUGEROR-I-LINE
+                       MOVE
+           "DBIO-LOCK-YN(조건) 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+                       PERFORM  S9100-ERROR-END-RTN
+                          THRU  S9100-ERROR-END-EXT
+                   ELSE
+                       CONTINUE
+                   END-IF
+               ELSE
+                   CONTINUE
+               END-IF
+           END-IF
+      *
+      *
+      *원장갱신불가여부(여)
+      *    IF  SICOM-LEDGR-UPDAT-PRHB-YN  =   "1"
+      *
+      *    THEN
+      *        IF  COND-DBIO-LOCK AND COND-DBIO-SELECT
+      *        THEN
+      *            MOVE  CONT-SYSERROR  TO   DBIO-STAT
+      *{E} 원장갱신불가 거래시 LOCK SELECT 불가 입니다
+      *            MOVE  "S9000021"     TO   XZUGEROR-I-ERRCD
+      *            MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+      *            MOVE
+      *    "원장갱신불가 거래시 LOCK SELECT 불가 입니다"
+      *                                 TO   XZUGEROR-I-MSG
+      *            PERFORM  S9100-ERROR-END-RTN
+      *               THRU  S9100-ERROR-END-EXT
+      *        ELSE
+      *            IF  COND-DBIO-UPDATE   OR
+      *                COND-DBIO-LKUPDT
+      *            THEN
+      *                MOVE  CONT-SYSERROR  TO   DBIO-STAT
+      *{E} 원장갱신불가 거래시 UPDATE 불가 입니다
+      *                MOVE  "S9000022"     TO   XZUGEROR-I-ERRCD
+      *                MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+      *                MOVE
+      *    "원장갱신불가 거래시 UPDATE 불가 입니다"
+      *                                     TO   XZUGEROR-I-MSG
+      *                PERFORM  S9100-ERROR-END-RTN
+      *                   THRU  S9100-ERROR-END-EXT
+      *            END-IF
+      *        END-IF
+      *    END-IF
+      *
+           IF  COND-DBIO-SELECT  OR COND-DBIO-INSERT  OR
+               COND-DBIO-UPDATE  OR
+               COND-DBIO-DELETE  OR COND-DBIO-DELFRC  OR
+               COND-DBIO-SELFST  OR COND-DBIO-OPEN
+           THEN
+               PERFORM  S0510-IN-CHECK-RTN THRU S0510-IN-CHECK-EXT
+           ELSE
+               CONTINUE
+           END-IF
+           .
+       S0500-CHECK-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-키 값 검증
+      *  처리기능 : DBIO-키 값에 NULL 입력시 에러처리
+      *-----------------------------------------------------------------
+       S0510-IN-CHECK-RTN.
+      *
+           MOVE  "S0510"                    TO   BSGEROR-PARA
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     IF  GROUP-CO-CDP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: GROUP-CO-CD"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  BASE-YMP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: BASE-YM"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  AFFLT-CORP-GROUP-CDP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: AFFLT-CORP-GROUP-CD"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  PRDCT-LAG-CLSFI-CDP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: PRDCT-LAG-CLSFI-CD"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  PRDCT-MEDM-CLSFI-CDP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: PRDCT-MEDM-CLSFI-CD"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  PRDCT-TMPLT-CDP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: PRDCT-TMPLT-CD"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  PRDCT-NOP0  =  SPACE
+                     THEN
+                         MOVE  "COL-NM: PRDCT-NO"
+                           TO   BSGDISP-TEXT
+                         PERFORM  S0511-ERROR-SET-RTN
+                            THRU  S0511-ERROR-SET-EXT
+                     ELSE
+                         CONTINUE
+                     END-IF
+                     IF  1 < DBIO-ACCESS-COND
+                     THEN
+                         PERFORM  S0512-ERROR-SET-RTN
+                            THRU  S0512-ERROR-SET-EXT
+                     END-IF
+           END-EVALUATE
+      *
+
+           .
+       S0510-IN-CHECK-EXT.
+           EXIT.
+
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-키 값 검증
+      *  처리기능 : DBIO-키 값에 NULL 입력시 에러처리
+      *-----------------------------------------------------------------
+       S0511-ERROR-SET-RTN.
+
+      *    MOVE  "S0511"                    TO   BSGEROR-PARA
+
+           MOVE  CONT-SYSERROR              TO   DBIO-STAT
+           MOVE  "S9000003"                 TO   XZUGEROR-I-ERRCD
+           MOVE  "UKLA0002"                 TO   XZUGEROR-I-TREAT-CD
+           MOVE   0302                      TO   XZUGEROR-I-LINE
+           MOVE
+           "DBIO-KEY 미입력 오류입니다."
+                                            TO   XZUGEROR-I-MSG
+           PERFORM  S9100-ERROR-END-RTN
+              THRU  S9100-ERROR-END-EXT
+           .
+       S0511-ERROR-SET-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-ACCESS-COND 값 검증
+      *  처리기능 : DBIO-ACCESS-COND 값이 > 설정값 에러처리
+      *-----------------------------------------------------------------
+       S0512-ERROR-SET-RTN.
+
+      *    MOVE  "S0512"                    TO   BSGEROR-PARA
+
+           MOVE  CONT-SYSERROR              TO   DBIO-STAT
+      *{E} DBIO-ACCESS-COND 오류입니다
+           MOVE  "S9000005"                 TO   XZUGEROR-I-ERRCD
+      *{E} DBIO-ACCESS-COND 오류 입니다.(@1@)
+           MOVE  "UKLA0002"                 TO   XZUGEROR-I-TREAT-CD
+           MOVE   0503                      TO   XZUGEROR-I-LINE
+           MOVE
+           "DBIO-ACCESS-COND(MAX) 오류입니다"
+                                            TO   XZUGEROR-I-MSG
+
+           MOVE
+           "BPG/DBIO/시작조건적용최대컬럼갯수 항목을 설정하세요"
+                                            TO   BSGDISP-TEXT
+           PERFORM  S9100-ERROR-END-RTN
+              THRU  S9100-ERROR-END-EXT
+           .
+       S0512-ERROR-SET-EXT.
+           EXIT.
+
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 SELECT일때 실행된다.
+      *  처리기능 : DBIO-ACCESS-KEY와 DBIO-LOCK-YN에따라
+      *             다른 조건으로 SELECT를 한다.
+      *-----------------------------------------------------------------
+       S1000-SELECT-RTN.
+      *
+           MOVE  "S1000"                    TO   BSGEROR-PARA
+      *
+           IF  DBIO-LOCK-YN                 =    CONT-Y
+           THEN
+               PERFORM  S8710-SEL-LOCK-RTN   THRU S8710-SEL-LOCK-EXT
+           ELSE
+               EVALUATE  TRUE
+                   WHEN  COND-DBIO-PK
+                         PERFORM  S8720-SEL-NOLOCK0-RTN
+                            THRU  S8720-SEL-NOLOCK0-EXT
+               END-EVALUATE
+
+           END-IF
+           .
+       S1000-SELECT-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION이 SELFST 일때 실행한다
+      *  처리기능 : 조건에 해당하는 첫번째 ROW를 RETURN 한다
+      *-----------------------------------------------------------------
+       S2000-SELFST-RTN.
+      *
+           MOVE  "S2000"                    TO   BSGEROR-PARA
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     PERFORM  S8740-SEL-FIRST0-RTN
+                        THRU  S8740-SEL-FIRST0-EXT
+
+           END-EVALUATE
+           .
+       S2000-SELFST-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 INSERT 일때 실행된다.
+      *  처리기능 : ST-BI거래모드구분에따라 분기하여 실행한다.
+      *-----------------------------------------------------------------
+       S3000-INSERT-RTN.
+      *
+           MOVE  "S3000"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8400-INSERT-RTN      THRU   S8400-INSERT-EXT
+      *
+           IF  SQLCODE                       =   ZERO
+           THEN
+      * 24-365 거래
+               IF (SICOM-OPER-DSTCD          =   CONT-TEMP OR CONT-STOP)
+
+               THEN
+                   PERFORM  S8800-IMAGE-INSERT-RTN
+                      THRU  S8800-IMAGE-INSERT-EXT
+      *
+      *            IF  SQLCODE               =   ZERO
+      *            THEN
+      *                CONTINUE
+      *            ELSE
+      *                MOVE  CONT-SQLER     TO   DBIO-STAT
+      *                MOVE "S3000:S8800-IMAGE-INSERT-RTN"
+      *                                     TO   BSGDISP-TEXT
+      *                PERFORM  S9100-ERROR-END-RTN
+      *                   THRU  S9100-ERROR-END-EXT
+      *            END-IF
+               ELSE
+                   CONTINUE
+               END-IF
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S3000-INSERT-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 UPDATE 일때 실행된다.
+      *  처리기능 : ST-BI거래모드구분에따라 분기하여 실행한다.
+      *-----------------------------------------------------------------
+       S4000-UPDATE-RTN.
+      *
+           MOVE  "S4000"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S7500-SEL-LOCK-RTN    THRU   S7500-SEL-LOCK-EXT
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               GO TO S4000-UPDATE-EXT
+           END-IF
+      *
+           PERFORM  S8500-UPDATE-RTN THRU S8500-UPDATE-EXT
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S4000-UPDATE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION구분이LOCK-UPDATE(LKUPDT)일때
+      *  처리기능 : UPDATE하기전읽은DATA와UPATE하기위해읽은
+      *             DATA의최종갱신일을비교하여같지않으면오류
+      *             처리하고같으면실행한다.
+      *-----------------------------------------------------------------
+       S5000-LKUPDT-RTN.
+      *
+           MOVE  "S5000"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8710-SEL-LOCK-RTN    THRU   S8710-SEL-LOCK-EXT
+      *
+           PERFORM  S7500-SEL-LOCK-RTN    THRU   S7500-SEL-LOCK-EXT
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               GO TO S5000-LKUPDT-EXT
+           END-IF
+      *
+           MOVE  GROUP-CO-CD  OF  DBIO-RECORD
+             TO  GROUP-CO-CDP0 OF KEY-DB-TABLE
+           MOVE  BASE-YM  OF  DBIO-RECORD
+             TO  BASE-YMP0 OF KEY-DB-TABLE
+           MOVE  AFFLT-CORP-GROUP-CD  OF  DBIO-RECORD
+             TO  AFFLT-CORP-GROUP-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-LAG-CLSFI-CD  OF  DBIO-RECORD
+             TO  PRDCT-LAG-CLSFI-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-MEDM-CLSFI-CD  OF  DBIO-RECORD
+             TO  PRDCT-MEDM-CLSFI-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-TMPLT-CD  OF  DBIO-RECORD
+             TO  PRDCT-TMPLT-CDP0 OF KEY-DB-TABLE
+           MOVE  PRDCT-NO  OF  DBIO-RECORD
+             TO  PRDCT-NOP0 OF KEY-DB-TABLE
+
+      *
+           PERFORM  S8500-UPDATE-RTN THRU S8500-UPDATE-EXT
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S5000-LKUPDT-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 DELETE 일때 실행된다.
+      *  처리기능 : DBIO-ACCESS-KEY와 DBIO-LOCK-YN에따라
+      *             실행 또는 오류 처리 한다.
+      *-----------------------------------------------------------------
+       S6000-DELETE-RTN.
+      *
+           MOVE  "S6000"                    TO   BSGEROR-PARA
+      *DBIO-DELFRC시 시스템최종처리일시,시스템최종사용자번호
+      *SELECT SKIP 처리합니다
+           IF  NOT COND-DBIO-DELFRC
+           THEN
+      *
+           PERFORM  S7500-SEL-LOCK-RTN    THRU   S7500-SEL-LOCK-EXT
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               GO TO S6000-DELETE-EXT
+           END-IF
+      *
+           END-IF
+      *
+           IF  COMM-DELETE-LOG-YN  = "1"
+           THEN
+      *삭제시 OLD 이미지를 기록하기 위해서 추가
+      *삭제자료를 사용자가 변경하는 것을 대응
+      *TEMP/STOP모드는 처리하는 곳에서 SELECT 함
+           IF SICOM-OPER-DSTCD             =    CONT-DAY
+           THEN
+               PERFORM  S8720-SEL-NOLOCK0-RTN THRU S8720-SEL-NOLOCK0-EXT
+           END-IF
+      *
+           MOVE  LENGTH OF DBIO-RECORD      TO   DBIO-TABLE-LEN
+           MOVE  DBIO-RECORD                TO   WORK-CORRECTION
+      *
+           EXEC SQL
+           INSERT INTO DB2DBA.THKLA9020  (
+                  "그룹회사코드",
+                  "처리일",
+                  "테이블명",
+                  "처리키명",
+                  "처리시각",
+                  "처리키길이",
+                  "처리데이터길이",
+                  "처리데이터내용",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+                      )
+           VALUES     (
+                 :BICOM-GROUP-CO-CD,
+                 :BICOM-TRAN-BASE-YMD,
+                 :DBIO-TABLE-NM,
+                 :DBIO-KEY,
+                 :BICOM-TRAN-BASE-HMS,
+                  LENGTH(:DBIO-KEY),
+                 :DBIO-TABLE-LEN,
+                  RTRIM(:WORK-CORRECTION),
+                 :BICOM-TRAN-START-YMS,
+                 :BICOM-USER-EMPID
+                      )
+           END-EXEC
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               MOVE "S6000:S6000-DELETE-RTN(INSERT THKLA9020)"
+                                            TO   BSGDISP-TEXT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+           END-IF
+      *    DELETE-LOG END-IF
+      *
+           EXEC SQL
+           DELETE
+             FROM DB2DBA.THKJL0036
+            WHERE "그룹회사코드" = :GROUP-CO-CDP0
+              AND "기준년월" = :BASE-YMP0
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0
+              AND "상품번호" = :PRDCT-NOP0
+      *
+           END-EXEC
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               MOVE "S6000:S6000-DELETE-RTN(DELETE)"
+                                            TO   BSGDISP-TEXT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S6000-DELETE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 OPEN 일때 실행된다.
+      *  처리기능 : CURSOR를 생성하고 OPEN하는 RTN으로 분기.
+      *-----------------------------------------------------------------
+       S7100-OPEN-RTN.
+      *
+           MOVE  "S7100"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8100-DECLARE-RTN     THRU   S8100-DECLARE-EXT
+           .
+       S7100-OPEN-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 FETCH 일때 실행된다.
+      *  처리기능 : DATA를 FETCH 하는 RTN으로 분기한다.
+      *-----------------------------------------------------------------
+       S7200-FETCH-RTN.
+      *
+           MOVE  "S7200"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8200-FETCH-RTN       THRU   S8200-FETCH-EXT
+           .
+       S7200-FETCH-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 CLOSE 일때 실행된다.
+      *  처리기능 : CURSOR를 CLOSE 하는 RTN으로 분기한다.
+      *-----------------------------------------------------------------
+       S7300-CLOSE-RTN.
+      *
+           MOVE  "S7300"                    TO   BSGEROR-PARA
+      *
+           PERFORM  S8300-CLOSE-RTN       THRU   S8300-CLOSE-EXT
+           .
+       S7300-CLOSE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION 구분이 UPDATE 일때 실행된다.
+      *  처리기능 : ST-BI거래모드구분에따라 분기하여 실행한다.
+      *-----------------------------------------------------------------
+       S7500-SEL-LOCK-RTN.
+      *
+           MOVE  "S7500"                    TO   BSGEROR-PARA
+      *
+      * TEMP MODE 이면서 UPDATE, LKUPDT 거래인경우
+      * 원장보정로그 를 생성 한다.
+      * (INSERT, DELETE시는 거래 종료전 로그를 생성)
+      *
+      * 24-365 거래
+           IF (SICOM-OPER-DSTCD             =    CONT-TEMP OR CONT-STOP)
+
+           THEN
+               EVALUATE  TRUE
+                   WHEN  COND-DBIO-UPDATE
+                   WHEN  COND-DBIO-DELETE
+                   WHEN  COND-DBIO-DELFRC
+                         PERFORM  S8720-SEL-NOLOCK0-RTN
+                            THRU  S8720-SEL-NOLOCK0-EXT
+                   WHEN  COND-DBIO-LKUPDT
+                         MOVE  ZERO    TO SQLCODE
+               END-EVALUATE
+      *
+      *        PERFORM  S8710-SEL-LOCK-RTN    THRU S8710-SEL-LOCK-EXT
+      *
+               IF  SQLCODE                  =    ZERO
+               THEN
+                   CONTINUE
+               ELSE
+                   MOVE  CONT-SQLER         TO   DBIO-STAT
+                   MOVE "S7500:S8710-SEL-LOCK-RTN"
+                                            TO   BSGDISP-TEXT
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               END-IF
+      *
+               MOVE  SYS-LAST-PRCSS-YMS           OF   DB-TABLE
+                 TO  WORK-LAST-DT
+               MOVE  SYS-LAST-UNO                 OF   DB-TABLE
+                 TO  WORK-LAST-CHNG-USID
+      *
+               IF  SYS-LAST-PRCSS-YMS OF DBIO-RECORD
+                                            =    WORK-LAST-DT
+               THEN
+                   IF BICOM-TRAN-START-YMS  = WORK-LAST-DT
+                   THEN
+                       IF  BICOM-USER-EMPID =  WORK-LAST-CHNG-USID
+                       THEN
+                           CONTINUE
+                       ELSE
+                           MOVE  CONT-SYSERROR   TO   DBIO-STAT
+      *{E} 시스템최종처리일시 불일치 UPDATE,DELETE
+      *{E} 타사용자가 자료를 변경하였습니다
+                           MOVE  "S9000008" TO   XZUGEROR-I-ERRCD
+                           MOVE  "UKLA0002" TO   XZUGEROR-I-TREAT-CD
+                           MOVE   0801      TO   XZUGEROR-I-LINE
+                           MOVE
+           "타사용자가 자료를 변경하였습니다"
+                                            TO   XZUGEROR-I-MSG
+                           PERFORM  S9100-ERROR-END-RTN
+                              THRU  S9100-ERROR-END-EXT
+                       END-IF
+                   ELSE
+                       CONTINUE
+                   END-IF
+               ELSE
+                   MOVE  CONT-SYSERROR   TO   DBIO-STAT
+      *{E} 시스템최종처리일시 불일치 UPDATE,DELETE
+      *{E} 타사용자가 자료를 변경하였습니다
+                   MOVE  "S9000008" TO   XZUGEROR-I-ERRCD
+                   MOVE  "UKLA0002" TO   XZUGEROR-I-TREAT-CD
+                   MOVE   0802      TO   XZUGEROR-I-LINE
+                   MOVE
+           "타사용자가 자료를 변경하였습니다"
+                                    TO   XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+               END-IF
+      *
+               PERFORM  S8800-IMAGE-INSERT-RTN
+                  THRU  S8800-IMAGE-INSERT-EXT
+      *        IF  SQLCODE    =    ZERO
+      *        THEN
+      *            CONTINUE
+      *        ELSE
+      *            MOVE  CONT-SQLER      TO   DBIO-STAT
+      *            MOVE "S7500:S8800-IMAGE-INSERT-RTN"
+      *                                  TO   BSGDISP-TEXT
+      *            PERFORM  S9100-ERROR-END-RTN
+      *               THRU  S9100-ERROR-END-EXT
+      *        END-IF
+      *
+           ELSE
+               PERFORM  S8730-SEL-LOCK-RTN THRU S8730-SEL-LOCK-EXT
+           END-IF
+      *
+      * 사용자 입력 데이타 복원
+      * DAY모드시LKUPDT가미처리되어공통으로이동
+           PERFORM S0130-KEYVALUE-MOVE-RTN
+              THRU S0130-KEYVALUE-MOVE-EXT
+           PERFORM S0150-USID-INFO-SET-RTN
+              THRU S0150-USID-INFO-SET-EXT
+           .
+       S7500-SEL-LOCK-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 디스플레이 하려는 내용이 있을때 실행된다
+      *  처리기능 : 디스플레이 처리 유틸리티 호출
+      *-----------------------------------------------------------------
+       S7700-BSGDISP-RTN.
+      *
+           #USRLOG BSGDISP-TEXT
+           .
+       S7700-BSGDISP-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  수행조건 : 추적및디스플레이내용이있을때실행된다.
+      *  처리기능 : BSGTRCE 유틸리티 호출
+      *-----------------------------------------------------------------
+       S7900-BSGTRCE-RTN.
+      *
+           IF  BSGDISP-TEXT NOT = SPACE
+           THEN
+               #USRLOG "ERROR-TEXT :" BSGDISP-TEXT
+           END-IF
+
+           .
+       S7900-BSGTRCE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 조건에 해당하는 SQL로 분기 한다
+      *  처리기능 : SELECT FIRST 와 SELECT 조건비교 후 분기
+      *-----------------------------------------------------------------
+       S8100-DECLARE-RTN.
+      *
+           MOVE  "S8100"                    TO   BSGEROR-PARA
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     PERFORM  S8110-DECLARE-KEY0-RTN
+                        THRU  S8110-DECLARE-KEY0-EXT
+
+           END-EVALUATE
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER            TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8100-DECLARE-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : PK/AK조건에 해당하는 데이타를 생성
+      *  처리기능 : CURSOR를 생성하고 OPEN시킨다.
+      *-----------------------------------------------------------------
+      *
+      *DECLARE & OPEN을 ACCESS-KEY별로 반복적으로 정의
+      *
+       S8110-DECLARE-KEY0-RTN.
+           EXEC SQL DECLARE CUR_MODE_KEY0 CURSOR FOR
+           SELECT                                                               
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+             FROM DB2DBA.THKJL0036
+            WHERE ( 'PK' = :WORK-ACCECODE AND 1 <= :WORK-ACCESS-COND            
+              AND "그룹회사코드" = :GROUP-CO-CDP0                             
+              AND "기준년월" = :BASE-YMP0                                     
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0                   
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0                    
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0                   
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0                        
+              AND "상품번호" > :PRDCT-NOP0 )                                  
+            ORDER BY                                                            
+                  "그룹회사코드" ASC                                          
+                 ,"기준년월" ASC                                              
+                 ,"계열기업군코드" ASC                                        
+                 ,"상품대분류코드" ASC                                        
+                 ,"상품중분류코드" ASC                                        
+                 ,"상품템플릿코드" ASC                                        
+                 ,"상품번호" ASC                                              
+           END-EXEC                                                             
+      *                                                                         
+           IF  SQLCODE                      =    ZERO                           
+           THEN                                                                 
+               CONTINUE                                                         
+           ELSE                                                                 
+               MOVE  CONT-SQLER            TO   DBIO-STAT                       
+               PERFORM  S9100-ERROR-END-RTN                                     
+                  THRU  S9100-ERROR-END-EXT                                     
+           END-IF                                                               
+      *                                                                         
+           EXEC SQL OPEN  CUR_MODE_KEY0 END-EXEC
+      *                                                                         
+           IF  SQLCODE                      =    -502                           
+           THEN                                                                 
+               EXEC SQL CLOSE  CUR_MODE_KEY0 END-EXEC
+               EXEC SQL OPEN   CUR_MODE_KEY0 END-EXEC
+           END-IF                                                               
+           .                                                                    
+       S8110-DECLARE-KEY0-EXT.
+           EXIT.
+      *
+
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 조건에 해당하는 데이타를 가져온다
+      *  처리기능 : 1ROW씩 가져와서 MOVE 한다.
+      *-----------------------------------------------------------------
+       S8200-FETCH-RTN.
+      *
+           MOVE  "S8200"                    TO   BSGEROR-PARA
+      *
+           INITIALIZE                            DB-TABLE
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     PERFORM  S8210-FETCH-KEY0-RTN
+                        THRU  S8210-FETCH-KEY0-EXT
+
+           END-EVALUATE
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               PERFORM  S8230-FETCH-MOVE-RTN
+                  THRU  S8230-FETCH-MOVE-EXT
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8200-FETCH-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : SELECT MODE PK/AK조건데이타를가져온다
+      *  처리기능 : 1ROW를 가져온다..
+      *-----------------------------------------------------------------
+      *
+      *FETCH 를 ACCESS-KEY별로 반복적으로 정의
+      *
+       S8210-FETCH-KEY0-RTN.
+           EXEC SQL FETCH CUR_MODE_KEY0 INTO
+                 :DB-TABLE.GROUP-CO-CD,
+                 :DB-TABLE.BASE-YM,
+                 :DB-TABLE.AFFLT-CORP-GROUP-CD,
+                 :DB-TABLE.PRDCT-LAG-CLSFI-CD,
+                 :DB-TABLE.PRDCT-MEDM-CLSFI-CD,
+                 :DB-TABLE.PRDCT-TMPLT-CD,
+                 :DB-TABLE.PRDCT-NO,
+                 :DB-TABLE.TTL-AMT-BASE-CLAM,
+                 :DB-TABLE.TTL-AMT-BASE-BAL,
+                 :DB-TABLE.TE-LIMT-AUC,
+                 :DB-TABLE.TE-BAL-AUC,
+                 :DB-TABLE.TE-LNBZ-INCLIN-AMT,
+                 :DB-TABLE.TE-MRKTY-AMT,
+                 :DB-TABLE.SYS-LAST-PRCSS-YMS,
+                 :DB-TABLE.SYS-LAST-UNO
+           END-EXEC
+           .
+       S8210-FETCH-KEY0-EXT.
+           EXIT.
+      *
+
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 가져온 데이타를 MOVE 한다.
+      *  처리기능 : FETCH한데이타를DBIO를호출한프로그램의
+      *             인터페이스 변수로 MOVE 한다.
+      *-----------------------------------------------------------------
+       S8230-FETCH-MOVE-RTN.
+      *
+           MOVE  "S8230"                    TO   BSGEROR-PARA
+      *
+           MOVE  GROUP-CO-CD  OF  DB-TABLE
+             TO  GROUP-CO-CD  OF  DBIO-RECORD
+           MOVE  BASE-YM  OF  DB-TABLE
+             TO  BASE-YM  OF  DBIO-RECORD
+           MOVE  AFFLT-CORP-GROUP-CD  OF  DB-TABLE
+             TO  AFFLT-CORP-GROUP-CD  OF  DBIO-RECORD
+           MOVE  PRDCT-LAG-CLSFI-CD  OF  DB-TABLE
+             TO  PRDCT-LAG-CLSFI-CD  OF  DBIO-RECORD
+           MOVE  PRDCT-MEDM-CLSFI-CD  OF  DB-TABLE
+             TO  PRDCT-MEDM-CLSFI-CD  OF  DBIO-RECORD
+           MOVE  PRDCT-TMPLT-CD  OF  DB-TABLE
+             TO  PRDCT-TMPLT-CD  OF  DBIO-RECORD
+           MOVE  PRDCT-NO  OF  DB-TABLE
+             TO  PRDCT-NO  OF  DBIO-RECORD
+           MOVE  TTL-AMT-BASE-CLAM  OF  DB-TABLE
+             TO  TTL-AMT-BASE-CLAM  OF  DBIO-RECORD
+           MOVE  TTL-AMT-BASE-BAL  OF  DB-TABLE
+             TO  TTL-AMT-BASE-BAL  OF  DBIO-RECORD
+           MOVE  TE-LIMT-AUC  OF  DB-TABLE
+             TO  TE-LIMT-AUC  OF  DBIO-RECORD
+           MOVE  TE-BAL-AUC  OF  DB-TABLE
+             TO  TE-BAL-AUC  OF  DBIO-RECORD
+           MOVE  TE-LNBZ-INCLIN-AMT  OF  DB-TABLE
+             TO  TE-LNBZ-INCLIN-AMT  OF  DBIO-RECORD
+           MOVE  TE-MRKTY-AMT  OF  DB-TABLE
+             TO  TE-MRKTY-AMT  OF  DBIO-RECORD
+           MOVE  SYS-LAST-PRCSS-YMS  OF  DB-TABLE
+             TO  SYS-LAST-PRCSS-YMS  OF  DBIO-RECORD
+           MOVE  SYS-LAST-UNO  OF  DB-TABLE
+             TO  SYS-LAST-UNO  OF  DBIO-RECORD
+      *
+
+           MOVE  SYS-LAST-PRCSS-YMS  OF  DB-TABLE
+             TO  DBIO-LAST-PRCSS-YMS
+           MOVE  SYS-LAST-UNO        OF  DB-TABLE
+             TO  DBIO-LAST-UNO
+           .
+       S8230-FETCH-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  수행조건 : 열려있는 CURSOR를 CLOSE 한다.
+      *  처리기능 : CURSOR를 CLOSE시킨다.
+      *-----------------------------------------------------------------
+       S8300-CLOSE-RTN.
+      *
+           MOVE  "S8300"                    TO   BSGEROR-PARA
+      *
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-PK
+                     EXEC SQL CLOSE CUR_MODE_KEY0 END-EXEC
+
+           END-EVALUATE
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8300-CLOSE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION이 INSERT 일때  실행된다.
+      *  처리기능 : 테이블내의 조건에 해당하는 DATA 1ROW INSERT
+      *-----------------------------------------------------------------
+       S8400-INSERT-RTN.
+      *
+           MOVE  "S8400"                    TO   BSGEROR-PARA
+      *
+           EXEC SQL
+           INSERT INTO DB2DBA.THKJL0036 (
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+                      )
+           VALUES          (
+                 :DB-TABLE.GROUP-CO-CD,
+                 :DB-TABLE.BASE-YM,
+                 :DB-TABLE.AFFLT-CORP-GROUP-CD,
+                 :DB-TABLE.PRDCT-LAG-CLSFI-CD,
+                 :DB-TABLE.PRDCT-MEDM-CLSFI-CD,
+                 :DB-TABLE.PRDCT-TMPLT-CD,
+                 :DB-TABLE.PRDCT-NO,
+                 :DB-TABLE.TTL-AMT-BASE-CLAM,
+                 :DB-TABLE.TTL-AMT-BASE-BAL,
+                 :DB-TABLE.TE-LIMT-AUC,
+                 :DB-TABLE.TE-BAL-AUC,
+                 :DB-TABLE.TE-LNBZ-INCLIN-AMT,
+                 :DB-TABLE.TE-MRKTY-AMT,
+                 :DB-TABLE.SYS-LAST-PRCSS-YMS,
+                 :DB-TABLE.SYS-LAST-UNO
+                      )
+           END-EXEC
+           .
+       S8400-INSERT-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION이 UPDATE 일때  실행된다.
+      *  처리기능 : 테이블내의 조건에 해당하는 DATA 1ROW UPDATE
+      *-----------------------------------------------------------------
+       S8500-UPDATE-RTN.
+      *
+           MOVE  "S8500"                    TO   BSGEROR-PARA
+      *
+           MOVE  BICOM-TRAN-START-YMS
+             TO  SYS-LAST-PRCSS-YMS OF DB-TABLE
+                 SYS-LAST-PRCSS-YMS OF DBIO-RECORD
+      *
+           EXEC SQL
+           UPDATE DB2DBA.THKJL0036 SET
+                  "그룹회사코드"
+                           = :DB-TABLE.GROUP-CO-CD ,
+                  "기준년월"
+                           = :DB-TABLE.BASE-YM ,
+                  "계열기업군코드"
+                           = :DB-TABLE.AFFLT-CORP-GROUP-CD ,
+                  "상품대분류코드"
+                           = :DB-TABLE.PRDCT-LAG-CLSFI-CD ,
+                  "상품중분류코드"
+                           = :DB-TABLE.PRDCT-MEDM-CLSFI-CD ,
+                  "상품템플릿코드"
+                           = :DB-TABLE.PRDCT-TMPLT-CD ,
+                  "상품번호"
+                           = :DB-TABLE.PRDCT-NO ,
+                  "명목액기준한도"
+                           = :DB-TABLE.TTL-AMT-BASE-CLAM ,
+                  "명목액기준잔액"
+                           = :DB-TABLE.TTL-AMT-BASE-BAL ,
+                  "TE한도환산금액"
+                           = :DB-TABLE.TE-LIMT-AUC ,
+                  "TE잔액환산금액"
+                           = :DB-TABLE.TE-BAL-AUC ,
+                  "TE여신성금액"
+                           = :DB-TABLE.TE-LNBZ-INCLIN-AMT ,
+                  "TE시장성금액"
+                           = :DB-TABLE.TE-MRKTY-AMT ,
+                  "시스템최종처리일시"
+                           = :DB-TABLE.SYS-LAST-PRCSS-YMS ,
+                  "시스템최종사용자번호"
+                           = :DB-TABLE.SYS-LAST-UNO
+           WHERE CURRENT OF SELECT_CURSOR
+           END-EXEC
+
+           IF  SQLCODE                 NOT  =   ZERO
+           THEN
+               MOVE  SQLCODE                TO  WORK-SQLCODE
+               PERFORM  S9300-SQL-MSG-GET-RTN THRU S9300-SQL-MSG-GET-EXT
+           END-IF
+
+           EXEC SQL
+               CLOSE SELECT_CURSOR
+           END-EXEC
+
+           IF  SQLCODE                 NOT  =   ZERO
+           THEN
+               MOVE  SQLCODE                TO  WORK-DECIMAL-D
+               #USRLOG "(S8500) CLOSE SELECT_CURSOR SQLCODE : "
+                         WORK-DECIMAL-D
+           END-IF
+      *
+           MOVE  WORK-SQLCODE               TO  SQLCODE
+           .
+       S8500-UPDATE-EXT.
+           EXIT.
+      *
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-LOCK-YN = "Y"  잠금상태일때 실행한다.
+      *  처리기능 : 테이블을 잠금 상태로 읽어온다.
+      *-----------------------------------------------------------------
+       S8710-SEL-LOCK-RTN.
+      *
+           MOVE  "S8710"                    TO   BSGEROR-PARA
+      *
+      *
+           EXEC SQL
+               OPEN SELECT_CURSOR
+           END-EXEC
+      *
+           IF  SQLCODE                      =    -502
+           THEN
+               EXEC SQL CLOSE SELECT_CURSOR END-EXEC
+               EXEC SQL OPEN  SELECT_CURSOR END-EXEC
+           END-IF
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+           EXEC SQL
+               FETCH SELECT_CURSOR
+               INTO
+                 :DB-TABLE.GROUP-CO-CD,
+                 :DB-TABLE.BASE-YM,
+                 :DB-TABLE.AFFLT-CORP-GROUP-CD,
+                 :DB-TABLE.PRDCT-LAG-CLSFI-CD,
+                 :DB-TABLE.PRDCT-MEDM-CLSFI-CD,
+                 :DB-TABLE.PRDCT-TMPLT-CD,
+                 :DB-TABLE.PRDCT-NO,
+                 :DB-TABLE.TTL-AMT-BASE-CLAM,
+                 :DB-TABLE.TTL-AMT-BASE-BAL,
+                 :DB-TABLE.TE-LIMT-AUC,
+                 :DB-TABLE.TE-BAL-AUC,
+                 :DB-TABLE.TE-LNBZ-INCLIN-AMT,
+                 :DB-TABLE.TE-MRKTY-AMT,
+                 :DB-TABLE.SYS-LAST-PRCSS-YMS,
+                 :DB-TABLE.SYS-LAST-UNO
+           END-EXEC
+
+           IF  SQLCODE                      =    ZERO
+           THEN
+      * 24-365 거래
+               IF  COND-DBIO-UPDATE     OR
+                   COND-DBIO-LKUPDT
+               THEN
+                   CONTINUE
+               ELSE
+                   PERFORM  S8230-FETCH-MOVE-RTN
+                      THRU  S8230-FETCH-MOVE-EXT
+               END-IF
+           ELSE
+               MOVE  SQLCODE                TO   WORK-SQLCODE
+               PERFORM  S9300-SQL-MSG-GET-RTN THRU S9300-SQL-MSG-GET-EXT
+               IF    SQLCODE            NOT =   -911
+               THEN
+                   EXEC  SQL
+                         CLOSE SELECT_CURSOR
+                   END-EXEC
+      *
+                   IF  SQLCODE                 NOT  =   ZERO
+                   THEN
+                       MOVE  SQLCODE                TO  WORK-DECIMAL-D
+                       #USRLOG "(S8710) CLOSE SELECT_CURSOR SQLCODE : "
+                                 WORK-DECIMAL-D
+                   END-IF
+               END-IF
+      *
+               MOVE  WORK-SQLCODE           TO   SQLCODE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8710-SEL-LOCK-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-잡금여부가 잠금해지 상태일때 실행한다
+      *  처리기능 : 테이블을 일반 상태로 읽어온다.
+      *-----------------------------------------------------------------
+      *
+      *SELECT-NOLOCK을 ACCESS-KEY별로 반복적으로 정의
+      *
+       S8720-SEL-NOLOCK0-RTN.
+           EXEC SQL
+           SELECT
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+             INTO
+                 :DB-TABLE.GROUP-CO-CD,
+                 :DB-TABLE.BASE-YM,
+                 :DB-TABLE.AFFLT-CORP-GROUP-CD,
+                 :DB-TABLE.PRDCT-LAG-CLSFI-CD,
+                 :DB-TABLE.PRDCT-MEDM-CLSFI-CD,
+                 :DB-TABLE.PRDCT-TMPLT-CD,
+                 :DB-TABLE.PRDCT-NO,
+                 :DB-TABLE.TTL-AMT-BASE-CLAM,
+                 :DB-TABLE.TTL-AMT-BASE-BAL,
+                 :DB-TABLE.TE-LIMT-AUC,
+                 :DB-TABLE.TE-BAL-AUC,
+                 :DB-TABLE.TE-LNBZ-INCLIN-AMT,
+                 :DB-TABLE.TE-MRKTY-AMT,
+                 :DB-TABLE.SYS-LAST-PRCSS-YMS,
+                 :DB-TABLE.SYS-LAST-UNO
+             FROM DB2DBA.THKJL0036
+            WHERE "그룹회사코드" = :GROUP-CO-CDP0
+              AND "기준년월" = :BASE-YMP0
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0
+              AND "상품번호" = :PRDCT-NOP0
+           END-EXEC
+      *
+           PERFORM  S8725-SEL-COMMON-RTN
+              THRU  S8725-SEL-COMMON-EXT
+           .
+       S8720-SEL-NOLOCK0-EXT.
+           EXIT.
+      *
+
+      *
+       S8725-SEL-COMMON-RTN.
+      *
+           IF  SQLCODE                      =    ZERO
+           THEN
+      * 24-365 거래
+               IF  COND-DBIO-UPDATE     OR
+                   COND-DBIO-LKUPDT
+               THEN
+                   CONTINUE
+               ELSE
+                   PERFORM  S8230-FETCH-MOVE-RTN
+                      THRU  S8230-FETCH-MOVE-EXT
+               END-IF
+           ELSE
+               MOVE  CONT-SQLER             TO   DBIO-STAT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8725-SEL-COMMON-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : DBIO-FUNCTION이"UPDATE","LKUPDT","DELETE"일때
+      *             LOCK UPDATE검증을위해실행한다.
+      *  처리기능 : UPDATE할대상의LAST-MODFI-YMS를가져온다
+      *-----------------------------------------------------------------
+       S8730-SEL-LOCK-RTN.
+      *
+           MOVE  "S8730"                    TO  BSGEROR-PARA
+      *
+           IF  COND-DBIO-LKUPDT
+           THEN
+               MOVE  SYS-LAST-PRCSS-YMS     OF  DB-TABLE
+                 TO  WORK-LAST-DT
+               MOVE  SYS-LAST-UNO           OF  DB-TABLE
+                 TO  WORK-LAST-CHNG-USID
+           ELSE
+           EXEC SQL
+           SELECT
+                   시스템최종처리일시,  시스템최종사용자번호
+             INTO :WORK-LAST-DT      , :WORK-LAST-CHNG-USID
+             FROM DB2DBA.THKJL0036
+            WHERE "그룹회사코드" = :GROUP-CO-CDP0
+              AND "기준년월" = :BASE-YMP0
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0
+              AND "상품번호" = :PRDCT-NOP0
+      *
+           END-EXEC
+      *
+           IF  SQLCODE                      =   ZERO
+           THEN
+               CONTINUE
+           ELSE
+               MOVE  CONT-SQLER             TO  DBIO-STAT
+               MOVE "S8730:S8730-SEL-LOCK-RTN"
+                                            TO  BSGDISP-TEXT
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           END-IF
+      *
+           IF  SYS-LAST-PRCSS-YMS OF DBIO-RECORD  =   WORK-LAST-DT
+           THEN
+               IF  BICOM-TRAN-START-YMS   =   WORK-LAST-DT
+               THEN
+                   IF  BICOM-USER-EMPID   =   WORK-LAST-CHNG-USID
+                   THEN
+                       CONTINUE
+                   ELSE
+                       MOVE  CONT-SYSERROR  TO  DBIO-STAT
+      *{E} 시스템최종처리일시 불일치 UPDATE,DELETE
+      *{E} 타사용자가 자료를 변경하였습니다
+                       MOVE  "S9000008"     TO   XZUGEROR-I-ERRCD
+                       MOVE  "UKLA0002"     TO   XZUGEROR-I-TREAT-CD
+                       MOVE   0803          TO   XZUGEROR-I-LINE
+                       MOVE
+           "타사용자가 자료를 변경하였습니다"
+                                            TO   XZUGEROR-I-MSG
+                       PERFORM  S9100-ERROR-END-RTN
+                          THRU  S9100-ERROR-END-EXT
+                   END-IF
+               ELSE
+                   CONTINUE
+               END-IF
+           ELSE
+               MOVE  CONT-SYSERROR          TO  DBIO-STAT
+      *{E} 시스템최종처리일시 불일치 UPDATE,DELETE
+      *{E} 타사용자가 자료를 변경하였습니다
+               MOVE  "S9000008"             TO   XZUGEROR-I-ERRCD
+               MOVE  "UKLA0002"             TO   XZUGEROR-I-TREAT-CD
+               MOVE   0804                  TO   XZUGEROR-I-LINE
+               MOVE
+           "타사용자가 자료를 변경하였습니다"
+                                            TO   XZUGEROR-I-MSG
+               PERFORM  S9100-ERROR-END-RTN
+                  THRU  S9100-ERROR-END-EXT
+           END-IF
+           .
+       S8730-SEL-LOCK-EXT.
+           EXIT.
+      *
+      *SELECT-FIRST을 ACCESS-KEY별로 반복적으로 정의
+      *
+       S8740-SEL-FIRST0-RTN.
+           EXEC SQL
+           SELECT
+                  "그룹회사코드",
+                  "기준년월",
+                  "계열기업군코드",
+                  "상품대분류코드",
+                  "상품중분류코드",
+                  "상품템플릿코드",
+                  "상품번호",
+                  "명목액기준한도",
+                  "명목액기준잔액",
+                  "TE한도환산금액",
+                  "TE잔액환산금액",
+                  "TE여신성금액",
+                  "TE시장성금액",
+                  "시스템최종처리일시",
+                  "시스템최종사용자번호"
+             INTO
+                 :DB-TABLE.GROUP-CO-CD,
+                 :DB-TABLE.BASE-YM,
+                 :DB-TABLE.AFFLT-CORP-GROUP-CD,
+                 :DB-TABLE.PRDCT-LAG-CLSFI-CD,
+                 :DB-TABLE.PRDCT-MEDM-CLSFI-CD,
+                 :DB-TABLE.PRDCT-TMPLT-CD,
+                 :DB-TABLE.PRDCT-NO,
+                 :DB-TABLE.TTL-AMT-BASE-CLAM,
+                 :DB-TABLE.TTL-AMT-BASE-BAL,
+                 :DB-TABLE.TE-LIMT-AUC,
+                 :DB-TABLE.TE-BAL-AUC,
+                 :DB-TABLE.TE-LNBZ-INCLIN-AMT,
+                 :DB-TABLE.TE-MRKTY-AMT,
+                 :DB-TABLE.SYS-LAST-PRCSS-YMS,
+                 :DB-TABLE.SYS-LAST-UNO
+             FROM DB2DBA.THKJL0036
+            WHERE ( 'PK' = :WORK-ACCECODE AND 1 <= :WORK-ACCESS-COND
+              AND "그룹회사코드" = :GROUP-CO-CDP0
+              AND "기준년월" = :BASE-YMP0
+              AND "계열기업군코드" = :AFFLT-CORP-GROUP-CDP0
+              AND "상품대분류코드" = :PRDCT-LAG-CLSFI-CDP0
+              AND "상품중분류코드" = :PRDCT-MEDM-CLSFI-CDP0
+              AND "상품템플릿코드" = :PRDCT-TMPLT-CDP0
+              AND "상품번호" > :PRDCT-NOP0 )
+            ORDER BY
+                  "그룹회사코드" ASC
+                 ,"기준년월" ASC
+                 ,"계열기업군코드" ASC
+                 ,"상품대분류코드" ASC
+                 ,"상품중분류코드" ASC
+                 ,"상품템플릿코드" ASC
+                 ,"상품번호" ASC
+            FETCH FIRST 1 ROWS ONLY
+           END-EXEC
+      *
+           PERFORM  S8725-SEL-COMMON-RTN
+              THRU  S8725-SEL-COMMON-EXT
+           .
+       S8740-SEL-FIRST0-EXT.
+           EXIT.
+      *
+
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : TEMP,STOP MODE 일때 이미지복원을
+      *             위해 실행한다.
+      *  처리기능 : 거래모드가 TEMP/STOP이며
+      *             INSERT,UPDATE,DELETE 가 발행하면
+      *             원장보정로그/원장반영로그
+      *             에 INSERT 하여 기록을 남긴다.
+      *-----------------------------------------------------------------
+       S8800-IMAGE-INSERT-RTN.
+      *
+           MOVE  "S8800"                    TO   BSGEROR-PARA
+      *
+           STRING  BICOM-TRAN-BASE-YMD
+                   BICOM-TRAN-BASE-HMS      DELIMITED BY SIZE
+             INTO  WORK-LAST-DT
+      *
+           MOVE    BICOM-TRAN-START-YMS     TO   WORK-STRT-DT
+      *    MOVE    DBIO-KEY                 TO   WORK-DBIO-KEY
+      *PK 영역에 "'" 데이터 존재검증
+           INSPECT  PK-THKJL0036   TALLYING
+                    WORK-QUOTA-CNT FOR  ALL CONT-QUOTA
+      *
+           IF  WORK-QUOTA-CNT > ZERO
+           THEN
+                   MOVE  ZERO               TO  SQLCODE
+                   MOVE  CONT-SYSERROR      TO  DBIO-STAT
+      *{E} PK 영역에 "'" 데이터 존재
+                   MOVE  "S9000099"         TO   XZUGEROR-I-ERRCD
+                   MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+                   MOVE   9904              TO   XZUGEROR-I-LINE
+                   MOVE  SPACE              TO   XZUGEROR-I-MSG
+                   STRING  'PK 영역에 "'
+                           CONT-QUOTA
+                           '" 데이터 존재'  DELIMITED BY SIZE
+                     INTO  XZUGEROR-I-MSG
+                   PERFORM  S9100-ERROR-END-RTN
+                      THRU  S9100-ERROR-END-EXT
+           END-IF
+      *
+           MOVE  SPACE                      TO   WORK-COND-DESC
+           MOVE  1                          TO   WORK-STRT-POINT
+           MOVE 'WHERE "그룹회사코드" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00029)
+           ADD   00029                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF GROUP-CO-CDP0
+             TO  WORK-LEN
+           MOVE  GROUP-CO-CDP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "기준년월" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00022)
+           ADD   00022                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF BASE-YMP0
+             TO  WORK-LEN
+           MOVE  BASE-YMP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "계열기업군코드" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00031)
+           ADD   00031                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF AFFLT-CORP-GROUP-CDP0
+             TO  WORK-LEN
+           MOVE  AFFLT-CORP-GROUP-CDP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "상품대분류코드" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00031)
+           ADD   00031                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF PRDCT-LAG-CLSFI-CDP0
+             TO  WORK-LEN
+           MOVE  PRDCT-LAG-CLSFI-CDP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "상품중분류코드" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00031)
+           ADD   00031                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF PRDCT-MEDM-CLSFI-CDP0
+             TO  WORK-LEN
+           MOVE  PRDCT-MEDM-CLSFI-CDP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "상품템플릿코드" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00031)
+           ADD   00031                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF PRDCT-TMPLT-CDP0
+             TO  WORK-LEN
+           MOVE  PRDCT-TMPLT-CDP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE ' AND "상품번호" = '
+             TO  WORK-COND-DESC(WORK-STRT-POINT:00022)
+           ADD   00022                      TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+           MOVE  LENGTH OF PRDCT-NOP0
+             TO  WORK-LEN
+           MOVE  PRDCT-NOP0
+             TO  WORK-COND-DESC(WORK-STRT-POINT:WORK-LEN)
+           ADD   WORK-LEN                  TO   WORK-STRT-POINT
+           MOVE  "'"       TO  WORK-COND-DESC(WORK-STRT-POINT:1)
+           ADD   1                          TO   WORK-STRT-POINT
+      *
+
+      *
+      *VARMOV
+      *
+           INITIALIZE  XZSFDBLG-CA
+
+           MOVE  LENGTH OF DBIO-RECORD      TO   DBIO-TABLE-LEN
+      *
+           EVALUATE  SICOM-OPER-DSTCD
+      *
+               WHEN  CONT-TEMP
+                     PERFORM  S8810-TEMP-INSERT-RTN
+                        THRU  S8810-TEMP-INSERT-EXT
+               WHEN  CONT-STOP
+                     PERFORM  S8820-STOP-SELECT-RTN
+                        THRU  S8820-STOP-SELECT-EXT
+               WHEN  OTHER
+                     CONTINUE
+           END-EVALUATE
+           .
+       S8800-IMAGE-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : TEMP MODE 일때 원장복원을 위해 실행한다.
+      *  처리기능 : 거래모드가 TEMP이며
+      *             INSERT,UPDATE,DELETE 가 발행하면
+      *             원장보정로그
+      *             에 INSERT 하여 기록을 남긴다.
+      *-----------------------------------------------------------------
+
+       S8810-TEMP-INSERT-RTN.
+
+      *    MOVE  CORR  DB-TABLE             TO   DBRECORD-TRAN
+      *    MOVE  CORR  DBRECORD-TRAN        TO   DB-TABLE-BACKUP
+      *    PERFORM  S8825-HEX-CONV-RTN    THRU   S8825-HEX-CONV-EXT
+      *    MOVE  DB-TABLE-BACKUP            TO   WORK-CORRECTION
+      *
+           MOVE  DB-TABLE                   TO   WORK-CORRECTION
+      *
+           ADD   LENGTH OF YCCOMMON-CA
+                 LENGTH OF YCDBIOCA-CA
+                 LENGTH OF XZSFDBLG-CA
+                 LENGTH OF WORK-CORRECTION
+                 LENGTH OF WORK-COND-DESC
+            GIVING  COMM-CALLG-SCOP-LEN
+      *
+           MOVE  "ZSFDBLG"                  TO   YCFCTLAR-CALL-PGM
+           CALL  YCFCTLAR-CALL-PGM        USING  DFHEIBLK
+                                                 YCCOMMON-CA
+                                                 YCDBIOCA-CA
+                                                 XZSFDBLG-CA
+                                                 WORK-CORRECTION
+                                                 WORK-COND-DESC
+           END-CALL
+      *
+           MOVE  DBIO-SQLCODE               TO   SQLCODE
+      *
+      *
+      *    EXEC SQL
+      *    INSERT INTO DB2DBA.THKLA9010  (
+      *           "그룹회사코드",
+      *           "처리일",
+      *           "테이블명",
+      *           "처리키명",
+      *           "처리시각",
+      *           "처리키길이",
+      *           "처리구분코드",
+      *           "완료여부",
+      *           "처리조건내용",
+      *           "처리데이터내용",
+      *           "처리데이터길이",
+      *           "시스템최종처리일시",
+      *           "시스템최종사용자번호"
+      *               )
+      *    VALUES     (
+      *          :BICOM-GROUP-CO-CD,
+      *          :BICOM-TRAN-BASE-YMD,
+      *          :DBIO-TABLE-NM,
+      *          :DBIO-KEY,
+      *          :BICOM-TRAN-BASE-HMS,
+      *           LENGTH(:DBIO-KEY),
+      *          :WORK-FUNC-CD,
+      *          'N',
+      *           RTRIM(:WORK-COND-DESC),
+      *           RTRIM(:WORK-CORRECTION),
+      *          :DBIO-TABLE-LEN,
+      *          :BICOM-TRAN-START-YMS,
+      *          :BICOM-USER-EMPID
+      *               )
+      *    END-EXEC
+      *
+           EVALUATE  SQLCODE
+               WHEN  ZERO
+                     CONTINUE
+               WHEN  -803
+                     MOVE  ZERO             TO   SQLCODE
+               WHEN  -805
+                     MOVE  "ZSFDBLG"        TO   CONT-PROGRAM-ID
+                     MOVE  CONT-SQLER       TO   DBIO-STAT
+                     PERFORM  S9100-ERROR-END-RTN
+                        THRU  S9100-ERROR-END-EXT
+               WHEN  OTHER
+                     MOVE  CONT-SQLER       TO   DBIO-STAT
+                     PERFORM  S9100-ERROR-END-RTN
+                        THRU  S9100-ERROR-END-EXT
+           END-EVALUATE
+           .
+       S8810-TEMP-INSERT-EXT.
+           EXIT.
+      *
+       S8820-STOP-SELECT-RTN.
+      *
+
+      *
+           IF  COND-DBIO-INSERT OR COND-DBIO-UPDATE OR COND-DBIO-LKUPDT
+           THEN
+               MOVE  BICOM-TRAN-START-YMS   TO   SYS-LAST-PRCSS-YMS
+                                                 OF DBIO-RECORD
+           END-IF
+      *
+      *HOST영역->편집영역
+      *    MOVE  CORR  DBIO-RECORD          TO   DBRECORD-TRAN
+      *편집영역->BACKUP영역
+      *    MOVE  CORR  DBRECORD-TRAN        TO   DB-TABLE-BACKUP
+      *HEX_DATA->TEXT 문자변환
+      *    PERFORM  S8825-HEX-CONV-RTN    THRU   S8825-HEX-CONV-EXT
+      *
+      *{I} 한글 데이터 정합성 검증
+      *    INSPECT  DB-TABLE-BACKUP TALLYING
+      *               WORK-SO-CNT   FOR  ALL CONT-SO
+      *               WORK-SI-CNT   FOR  ALL CONT-SI
+      *               WORK-NULL-CNT FOR  ALL CONT-NULL
+      *
+      *    IF  WORK-SO-CNT NOT = WORK-SI-CNT
+      *    THEN
+      *            MOVE  ZERO               TO  SQLCODE
+      *            MOVE  CONT-SYSERROR      TO  DBIO-STAT
+      *{E} 한글 데이터 정합성 오류
+      *            MOVE  "S9000099"         TO   XZUGEROR-I-ERRCD
+      *            MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+      *            MOVE   9905              TO   XZUGEROR-I-LINE
+      *            MOVE
+      *           "한글 데이터 정합성 오류(SO/SI)"
+      *                                     TO   XZUGEROR-I-MSG
+      *
+      *            MOVE  "9"                TO   COMM-DB-II-OUTPT-DSTCD
+      *
+      *            PERFORM  S9100-ERROR-END-RTN
+      *               THRU  S9100-ERROR-END-EXT
+      *    END-IF
+      *
+      *    IF  WORK-NULL-CNT > ZERO
+      *    THEN
+      *            MOVE  ZERO               TO  SQLCODE
+      *            MOVE  CONT-SYSERROR      TO  DBIO-STAT
+      *{E} 테이블 COPYBOOK 영역에 NULL 데이터 존재
+      *            MOVE  "S9000099"         TO   XZUGEROR-I-ERRCD
+      *            MOVE  "UKLA0002"         TO   XZUGEROR-I-TREAT-CD
+      *            MOVE   9906              TO   XZUGEROR-I-LINE
+      *            MOVE
+      *           "테이블 COPYBOOK 영역에 NULL 데이터 존재"
+      *                                     TO   XZUGEROR-I-MSG
+      *
+      *            MOVE  "9"                TO   COMM-DB-II-OUTPT-DSTCD
+      *
+      *            PERFORM  S9100-ERROR-END-RTN
+      *               THRU  S9100-ERROR-END-EXT
+      *    END-IF
+      *
+      *HEX_DATA 보정완료된 자료를 로그영역으로
+      *    MOVE  DB-TABLE-BACKUP            TO   WORK-CORRECTION
+
+           MOVE  DBIO-RECORD                TO   WORK-CORRECTION
+      *
+           ADD   LENGTH OF YCCOMMON-CA
+                 LENGTH OF YCDBIOCA-CA
+                 LENGTH OF XZSFDBLG-CA
+                 LENGTH OF WORK-CORRECTION
+                 LENGTH OF WORK-COND-DESC
+            GIVING  COMM-CALLG-SCOP-LEN
+      *
+           MOVE  "ZSFDBLG"                  TO   YCFCTLAR-CALL-PGM
+           CALL  YCFCTLAR-CALL-PGM        USING  DFHEIBLK
+                                                 YCCOMMON-CA
+                                                 YCDBIOCA-CA
+                                                 XZSFDBLG-CA
+                                                 WORK-CORRECTION
+                                                 WORK-COND-DESC
+           END-CALL
+      *
+           MOVE  DBIO-SQLCODE               TO   SQLCODE
+      *
+           EVALUATE  SQLCODE
+               WHEN  ZERO
+                     CONTINUE
+               WHEN  -805
+                     MOVE  "ZSFDBLG"        TO   CONT-PROGRAM-ID
+                     MOVE  CONT-SQLER       TO   DBIO-STAT
+                     PERFORM  S9100-ERROR-END-RTN
+                        THRU  S9100-ERROR-END-EXT
+               WHEN  OTHER
+                     MOVE  CONT-SQLER       TO   DBIO-STAT
+                     PERFORM  S9100-ERROR-END-RTN
+                        THRU  S9100-ERROR-END-EXT
+           END-EVALUATE
+
+      *
+      *    EXEC SQL
+      *    SELECT
+      *           "처리시각"
+      *      INTO :H-PROC-TIME
+      *      FROM DB2DBA.THKLA9030
+      *    WHERE  "그룹회사코드"     = :BICOM-GROUP-CO-CD
+      *      AND  "처리일"           = :BICOM-TRAN-BASE-YMD
+      *      AND  "어플리케이션코드" = :CONT-DBIO-ID
+      *      AND  "테이블명"         = :DBIO-TABLE-NM
+      *      AND  "처리키명"         = :DBIO-KEY
+      *    END-EXEC
+      *
+      *    EVALUATE  SQLCODE
+      *        WHEN  +100
+      *               PERFORM  S8821-STOP-INSERT-RTN
+      *                  THRU  S8821-STOP-INSERT-EXT
+      *        WHEN  ZERO
+      *               PERFORM  S8823-STOP-UPDATE-RTN
+      *                  THRU  S8823-STOP-UPDATE-EXT
+      *        WHEN  OTHER
+      *               MOVE "S8820:S8820-STOP-SELECT-RTN"
+      *                                   TO BSGDISP-TEXT
+      *               PERFORM  S9100-ERROR-END-RTN
+      *                  THRU  S9100-ERROR-END-EXT
+      *
+      *    END-EVALUATE
+           .
+       S8820-STOP-SELECT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : STOP MODE 일때 원장반영을 위해 실행한다.
+      *  처리기능 : 거래모드가 STOP이며
+      *             INSERT,UPDATE,DELETE 가 발행하면
+      *             원장반영로그
+      *             에 INSERT 하여 기록을 남긴다.
+      *-----------------------------------------------------------------
+      *S8821-STOP-INSERT-RTN.
+      *
+      *    EXEC SQL
+      *    INSERT INTO DB2DBA.THKLA9030  (
+      *           "그룹회사코드",
+      *           "처리일",
+      *           "어플리케이션코드",
+      *           "테이블명",
+      *           "처리키명",
+      *           "처리시각",
+      *           "거래횟수",
+      *           "처리키길이",
+      *           "처리구분코드",
+      *           "완료여부",
+      *           "처리조건내용",
+      *           "처리데이터내용",
+      *           "처리데이터길이",
+      *           "시스템최종처리일시",
+      *           "시스템최종사용자번호"
+      *               )
+      *    VALUES     (
+      *          :BICOM-GROUP-CO-CD,
+      *          :BICOM-TRAN-BASE-YMD,
+      *          :CONT-DBIO-ID,
+      *          :DBIO-TABLE-NM,
+      *          :DBIO-KEY,
+      *          :BICOM-TRAN-BASE-HMS,
+      *           1,
+      *           LENGTH(:DBIO-KEY),
+      *          :WORK-FUNC-CD,
+      *          'N',
+      *           RTRIM(:WORK-COND-DESC),
+      *           RTRIM(:WORK-CORRECTION),
+      *          :DBIO-TABLE-LEN,
+      *          :BICOM-TRAN-START-YMS,
+      *          :BICOM-USER-EMPID
+      *               )
+      *    END-EXEC
+      *
+      *    EVALUATE  SQLCODE
+      *        WHEN  ZERO
+      *              CONTINUE
+      *        WHEN  OTHER
+      *              MOVE "S8821:S8821-STOP-INSERT-RTN"
+      *                                  TO   BSGDISP-TEXT
+      *              PERFORM  S9100-ERROR-END-RTN
+      *                 THRU  S9100-ERROR-END-EXT
+      *    END-EVALUATE
+      *    .
+      *S8821-STOP-INSERT-EXT.
+      *    EXIT.
+      *
+      *S8822-STOP-SUB-INSERT-RTN.
+      *
+      *    MOVE  TABLE-COLUMN-VALUE         TO   WORK-COL-VALUE
+      *
+      *    EXEC SQL
+      *    INSERT INTO DB2DBA.THKLA9040  (
+      *           "그룹회사코드",
+      *           "처리일",
+      *           "테이블명",
+      *           "처리컬럼내용",
+      *           "시스템최종처리일시",
+      *           "시스템최종사용자번호"
+      *               )
+      *    VALUES     (
+      *          :BICOM-GROUP-CO-CD,
+      *          :BICOM-TRAN-BASE-YMD,
+      *          :DBIO-TABLE-NM,
+      *          RTRIM(:WORK-COL-VALUE),
+      *          :BICOM-TRAN-START-YMS,
+      *          :BICOM-USER-EMPID
+      *               )
+      *    END-EXEC
+      *
+      *    EVALUATE  SQLCODE
+      *        WHEN  ZERO
+      *              CONTINUE
+      *        WHEN  -803
+      *              MOVE  ZERO  TO SQLCODE
+      *        WHEN  OTHER
+      *              MOVE "S8822:S8822-STOP-SUB-INSERT-RTN"
+      *                                  TO   BSGDISP-TEXT
+      *              PERFORM  S9100-ERROR-END-RTN
+      *                 THRU  S9100-ERROR-END-EXT
+      *    END-EVALUATE
+      *    .
+      *S8822-STOP-SUB-INSERT-EXT.
+      *    EXIT.
+
+      *-----------------------------------------------------------------
+      *  수행조건 : STOP MODE 일때 원장반영을 위해 실행한다.
+      *  처리기능 : 거래모드가 STOP이며
+      *             INSERT,UPDATE,DELETE 가 발행하면
+      *             원장반영로그
+      *             에 UPDATE 하여 기록을 남긴다.
+      *-----------------------------------------------------------------
+      *S8823-STOP-UPDATE-RTN.
+      *
+      *    EXEC SQL
+      *    UPDATE DB2DBA.THKLA9030 SET
+      *           "처리시각"
+      *                  = :BICOM-TRAN-BASE-HMS,
+      *           "거래횟수"
+      *                  = "거래횟수" + 1,
+      *           "처리키길이"
+      *                  = LENGTH(:DBIO-KEY),
+      *           "처리구분코드"
+      *                  = :WORK-FUNC-CD,
+      *           "완료여부"
+      *                  = 'N',
+      *           "처리조건내용"
+      *                  = RTRIM(:WORK-COND-DESC),
+      *           "처리데이터내용"
+      *                  = RTRIM(:WORK-CORRECTION),
+      *           "처리데이터길이"
+      *                  = :DBIO-TABLE-LEN,
+      *           "시스템최종처리일시"
+      *                  = :BICOM-TRAN-START-YMS,
+      *           "시스템최종사용자번호"
+      *                  = :BICOM-USER-EMPID
+      *    WHERE  "그룹회사코드"     = :BICOM-GROUP-CO-CD
+      *      AND  "처리일"           = :BICOM-TRAN-BASE-YMD
+      *      AND  "어플리케이션코드" = :CONT-DBIO-ID
+      *      AND  "테이블명"         = :DBIO-TABLE-NM
+      *      AND  "처리키명"         = :DBIO-KEY
+      *    END-EXEC
+      *
+      *    EVALUATE  SQLCODE
+      *        WHEN  ZERO
+      *              CONTINUE
+      *        WHEN  OTHER
+      *              MOVE "S8823:S8823-STOP-UPDATE-RTN"
+      *                                  TO   BSGDISP-TEXT
+      *              PERFORM  S9100-ERROR-END-RTN
+      *                 THRU  S9100-ERROR-END-EXT
+      *    END-EVALUATE
+      *    .
+      *S8823-STOP-UPDATE-EXT.
+      *    EXIT.
+
+      *S8825-HEX-CONV-RTN.
+      *
+      *    .
+      *S8825-HEX-CONV-EXT.
+      *    EXIT.
+      *
+      *S8830-CONV-RTN.
+      *
+      *    MOVE  SPACE                      TO WORK-OUT-CHAR
+      *
+      *    MOVE  1                          TO WORK-IN-IDX
+      *                                        WORK-OUT-IDX
+      *
+      *    PERFORM  S8835-CONV-CHAR-RTN
+      *       THRU  S8835-CONV-CHAR-EXT    128 TIMES.
+      *
+      *S8830-CONV-EXT.
+      *    EXIT.
+      *
+      *S8835-CONV-CHAR-RTN.
+      *
+      *    MOVE WORK-IN-HEX(WORK-IN-IDX:1)  TO WORK-BYTE
+      *    MOVE WORK-BINARY                 TO WORK-TMP-NUM
+      *    DIVIDE WORK-TMP-NUM BY 16    GIVING WORK-MOD
+      *                              REMAINDER WORK-REM
+      *
+      *    ADD  +1                      TO WORK-MOD WORK-REM
+      *    MOVE CO-REF(WORK-MOD)        TO WORK-OUT-CHAR(WORK-OUT-IDX:1)
+      *    ADD  +1                      TO WORK-OUT-IDX
+      *    MOVE CO-REF(WORK-REM)        TO WORK-OUT-CHAR(WORK-OUT-IDX:1)
+      *    ADD  +1                      TO WORK-OUT-IDX
+      *    ADD  +1                      TO WORK-IN-IDX
+      *    .
+      *S8835-CONV-CHAR-EXT.
+      *    EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램 종료시 컬럼정보를 보여준다.
+      *  처리기능 : 호출된 테이블의 컬럼 값을 제공한다.
+      *-----------------------------------------------------------------
+       S8900-COLUMN-DISPLAY-RTN.
+      *
+      *    COPY  DBIODISP-COLUMN.
+           .
+       S8900-COLUMN-DISPLAY-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램을정상적으로수행후정상종료를함
+      *  처리기능 : 처리결과를정상으로MOVE한후종료RTN호출
+      *-----------------------------------------------------------------
+       S9000-NOMAL-END-RTN.
+      *
+           MOVE  CONT-OK                    TO DBIO-STAT
+                                               XZUGEROR-I-STAT
+      *OPEN,CLOSE 제외
+      *    IF  COMM-DB-II-OUTPT-DSTCD            =    "9" AND
+      *        NOT (WORK-FUNC-CD = "OP" OR "CL" )
+      *    THEN
+      *        PERFORM  S8900-COLUMN-DISPLAY-RTN
+      *           THRU  S8900-COLUMN-DISPLAY-EXT
+      *    END-IF
+      *
+           IF      COMM-START-EIO-DSTCD = '9'
+           THEN
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END OK :'
+                           'STAT=' XZUGEROR-I-STAT    DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+      *
+           GOBACK
+           .
+       S9000-NOMAL-END-EXT.
+           EXIT.
+      *
+      *-----------------------------------------------------------------
+      *  수행조건 : 프로그램내부에서에러발생시처리함
+      *  처리기능 : 에러에관련된정보를XZUGEROR-CA에MOVE후
+      *             XZUGEROR을호출하고에러정보를DISPLAY한다.
+      *-----------------------------------------------------------------
+       S9100-ERROR-END-RTN.
+      *
+           MOVE  CONT-Y                     TO   WORK-ERR-SET-YN
+      *
+           MOVE  DBIO-CALL-PGM-ID           TO   XZUGEROR-I-TBL-ID
+           MOVE  DBIO-FUNCTION              TO   XZUGEROR-I-FUNC-CD
+
+           MOVE  SQLCODE                    TO   XZUGEROR-I-SQL-CD
+                                                 DBIO-SQLCODE
+      *
+           IF    XZUGEROR-I-TREAT-CD = SPACE
+           THEN
+                 MOVE  "UKLA0002"           TO   XZUGEROR-I-TREAT-CD
+           END-IF
+
+           MOVE  SPACE                      TO   XZUGEROR-I-MULT
+      *
+           EVALUATE  SQLCODE
+               WHEN  ZERO
+                     MOVE  ZERO             TO   XZUGEROR-I-SQL-CD
+               WHEN  +100
+                     MOVE  CONT-MRNF        TO   DBIO-STAT
+                     INITIALIZE                  DBIO-RECORD
+      *{E} DB에 데이타가 없습니다.
+      *              MOVE  "D9900100"       TO   XZUGEROR-I-ERRCD
+               WHEN  -803
+                     MOVE  CONT-DUPM        TO   DBIO-STAT
+      *{E} DB에 데이타가 존재 합니다.
+      *              MOVE  "D9900803"       TO   XZUGEROR-I-ERRCD
+               WHEN  OTHER
+                     IF  DBIO-SQLCODE(4:1) = "9" OR DBIO-SQLCODE = -805
+                     THEN
+                         MOVE CONT-SYSERROR TO   DBIO-STAT
+                     ELSE
+                         MOVE CONT-SQLER    TO   DBIO-STAT
+                     END-IF
+      *{E} DBIO SQL 에러입니다
+                     MOVE  "D9900000"       TO   XZUGEROR-I-ERRCD
+                     MOVE  XZUGEROR-I-SQL-CD(2:)
+                                            TO   XZUGEROR-I-ERRCD(4:)
+                     MOVE  "UKLA0002"       TO   XZUGEROR-I-TREAT-CD
+                     MOVE
+           " DBIO SQL 에러입니다"
+                                            TO   XZUGEROR-I-MSG
+           END-EVALUATE
+      *
+           IF  XZUGEROR-I-TREAT-CD          =    "UKLA9999"
+           THEN
+               MOVE  "DBIO    "             TO   XZUGEROR-I-PGM-ID
+           ELSE
+      *        MOVE  DBIO-CALL-PGM-ID       TO   XZUGEROR-I-PGM-ID
+               MOVE  CONT-PROGRAM-ID        TO   XZUGEROR-I-PGM-ID
+           END-IF
+      *
+           IF  XZUGEROR-I-ERRCD         =    SPACE
+           THEN
+      *{E} DBIO모듈에서 에러종료 되었습니다.
+               MOVE  "S9000017"             TO   XZUGEROR-I-ERRCD
+                     MOVE
+           "DBIO모듈에서에러종료되었습니다"
+                                            TO   XZUGEROR-I-MSG
+           ELSE
+               CONTINUE
+           END-IF
+      *
+           IF  COND-DBIO-DUPM               OR
+               COND-DBIO-MRNF
+           THEN
+               MOVE  CONT-N                 TO   WORK-ERR-SET-YN
+      *        MOVE "결과코드{01}과{02}는에러처리를하지않습니다."
+           ELSE
+               CONTINUE
+           END-IF
+      *
+           IF  COMM-DB-II-OUTPT-DSTCD            =    "1" OR "9"
+           THEN
+               PERFORM  S7900-BSGTRCE-RTN THRU S7900-BSGTRCE-EXT
+               IF  WORK-ERR-SET-YN = CONT-Y
+               THEN
+                   MOVE  XZUGEROR-I-MSG     TO   BSGDISP-TEXT
+                   PERFORM  S7900-BSGTRCE-RTN    THRU S7900-BSGTRCE-EXT
+               END-IF
+           END-IF
+      *
+      *    IF  COMM-DB-II-OUTPT-DSTCD            =    "9"   AND
+      *       (WORK-FUNC-CD = "IN" OR "UP" OR "LK" OR "DE")
+      *    THEN
+      *        PERFORM  S8900-COLUMN-DISPLAY-RTN
+      *           THRU  S8900-COLUMN-DISPLAY-EXT
+      *    END-IF
+
+      *
+           MOVE  DBIO-STAT                  TO   XZUGEROR-I-STAT
+      *
+           IF  WORK-ERR-SET-YN              =    CONT-Y
+           THEN
+               IF  (XZUGEROR-I-SQL-CD NOT = ZERO)  AND
+                   (XZUGEROR-I-SQL-CD NOT = -805)
+               THEN
+                   IF  WORK-MSG-GET-FLAG = SPACE
+                   THEN
+                       PERFORM  S9300-SQL-MSG-GET-RTN
+                          THRU  S9300-SQL-MSG-GET-EXT
+                   END-IF
+                   PERFORM  S9400-SQL-MSG-DIS-RTN
+                      THRU  S9400-SQL-MSG-DIS-EXT
+               END-IF
+               MOVE    'ZUGEROR'            TO   YCFCTLAR-CALL-LOG
+               CALL    YCFCTLAR-CALL-LOG USING   YCCOMMON-CA
+                                                 XZUGEROR-CA
+               END-CALL
+           END-IF
+      *
+           IF      COMM-START-EIO-DSTCD = '9'
+           THEN
+                   MOVE '11'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  'PGM END ER :'
+                           'STAT=' XZUGEROR-I-STAT  DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-IF
+
+           GOBACK
+           .
+       S9100-ERROR-END-EXT.
+           EXIT.
+      *
+       S9300-SQL-MSG-GET-RTN.
+           CALL    'DSNTIAR'    USING    SQLCA
+                                         ERROR-MESSAGE
+                                         ERROR-TEXT-LEN
+           END-CALL
+
+           MOVE  CONT-Y             TO   WORK-MSG-GET-FLAG
+           .
+       S9300-SQL-MSG-GET-EXT.
+           EXIT.
+      *
+       S9400-SQL-MSG-DIS-RTN.
+      *
+           PERFORM VARYING ERR-IDX FROM 1 BY 1
+             UNTIL ERR-IDX > 10
+                   MOVE '13'                TO   YCFCTLAR-USR-LOG-CD
+                   MOVE 999999              TO   YCFCTLAR-LOG-LINE-NO
+                   STRING  ERROR-TEXT(ERR-IDX)   DELIMITED BY SIZE
+                     INTO  YCFCTLAR-LOG-CTNT  POINTER YCFCTLAR-LOG-PTR
+                   PERFORM Z9990-USER-LOG-RTN THRU    Z9990-USER-LOG-EXT
+           END-PERFORM
+           .
+       S9400-SQL-MSG-DIS-EXT.
+           EXIT.
+      *
+      ******************************************************************
+      **        R J L 0 0 3 6     P R O G R A M   E N D
+      ******************************************************************

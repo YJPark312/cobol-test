@@ -1,0 +1,71 @@
+      *================================================================*
+      *@ NAME : XBJLEXPO                                               *
+      *@ DESC : 은행TOTALEXPOSURE한도산출                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-09 14:53:55                          *
+      *  생성일시     : 2009-03-09 14:53:57                          *
+      *================================================================*
+           03  XBJLEXPO-RETURN.
+             05  XBJLEXPO-R-STAT                 PIC  X(002).
+                 88  COND-XBJLEXPO-OK            VALUE  '00'.
+                 88  COND-XBJLEXPO-KEYDUP        VALUE  '01'.
+                 88  COND-XBJLEXPO-NOTFOUND      VALUE  '02'.
+                 88  COND-XBJLEXPO-ERROR         VALUE  '09'.
+                 88  COND-XBJLEXPO-ABNORMAL      VALUE  '98'.
+                 88  COND-XBJLEXPO-SYSERROR      VALUE  '99'.
+             05  XBJLEXPO-R-LINE                 PIC  9(006).
+             05  XBJLEXPO-R-ERRCD                PIC  X(008).
+             05  XBJLEXPO-R-TREAT-CD             PIC  X(008).
+             05  XBJLEXPO-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XBJLEXPO-IN.
+      *----------------------------------------------------------------*
+      *--       기준년월
+             05  XBJLEXPO-I-BASE-YM              PIC  X(006).
+      *--       신표준산업분류코드
+             05  XBJLEXPO-I-NEW-SI-CLSFI-CD      PIC  X(005).
+      *--       상품대분류코드
+             05  XBJLEXPO-I-PRDCT-LAG-CLSFI-CD   PIC  X(002).
+      *--       상품중분류코드
+             05  XBJLEXPO-I-PRDCT-MEDM-CLSFI-CD  PIC  X(002).
+      *--       상품템플릿코드
+             05  XBJLEXPO-I-PRDCT-TMPLT-CD       PIC  X(003).
+      *--       상품번호
+             05  XBJLEXPO-I-PRDCT-NO             PIC  X(005).
+      *--       한도환산금액
+             05  XBJLEXPO-I-LIMT-AUC             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       잔액환산금액
+             05  XBJLEXPO-I-BAL-AUC              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XBJLEXPO-OUT.
+      *----------------------------------------------------------------*
+      *--       TE한도환산금액
+             05  XBJLEXPO-O-TE-LIMT-AUC          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       TE잔액환산금액
+             05  XBJLEXPO-O-TE-BAL-AUC           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       CP한도환산금액
+             05  XBJLEXPO-O-CP-LIMT-AUC          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       CP잔액환산금액
+             05  XBJLEXPO-O-CP-BAL-AUC           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  B  J  L  E  X  P  O    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XBJLEXPO-I-BASE-YM            ;기준년월
+      *X  XBJLEXPO-I-PRDCT-LAG-CLSFI-CD :상품대분류코드
+      *X  XBJLEXPO-I-PRDCT-MEDM-CLSFI-CD:상품중분류코드
+      *X  XBJLEXPO-I-PRDCT-TMPLT-CD     :상품템플릿코드
+      *X  XBJLEXPO-I-PRDCT-NO           :상품번호
+      *X  XBJLEXPO-I-LIMT-I-TIACC-CD    ;한도통합계정과목코드
+      *S  XBJLEXPO-I-LIMT-AUC           ;한도환산금액
+      *S  XBJLEXPO-I-BAL-AUC            ;잔액환산금액
+      *S  XBJLEXPO-O-TE-LIMT-AUC        ;TE한도환산금액
+      *S  XBJLEXPO-O-TE-BAL-AUC         ;TE잔액환산금액
+      *S  XBJLEXPO-O-CP-LIMT-AUC        ;CP한도환산금액
+      *S  XBJLEXPO-O-CP-BAL-AUC         ;CP잔액환산금액

@@ -1,0 +1,697 @@
+      *=================================================================00010043
+      *@업무명    : KJL     (Total Exposure)                          00020043
+      *@프로그램명: DJL4008 (DC신청접수내역및승인결과조회)          00030043
+      *@처리유형  : DC                                                00040043
+      *@처리개요  : 신청접수내역및승인결과조회                      00050043
+      *@구현방법  : OPEN-FETCH-CLOSE
+      *-----------------------------------------------------------------00060043
+      *                 P R O G R A M   변　경　이　력                00070043
+      *-----------------------------------------------------------------00080043
+      *@성명 : 일자 : 변　경　내　용                              00090043
+      * ----------------------------------------------------------------00100043
+      *이동구:20090116: 신규작성                                    00110043
+      *김진태:20090605: 프로그램수정                                00110043
+      *김진태:20090911: 테이블변경 THKJL0012 THKJL0013              00110043
+      *김진태:20091120: 에러메세지정비                              00110043
+      *김진태:20100212: 공통유틸리티경고리턴코드처리                00110043
+      *김진태:20101110: THKJL0003 컬럼추가로인한변경내용수정        00110043
+      *                   SQLIO 변경-QJL0081                          00110043
+      * YBH    :20150522: KB-PIN 처리
+      * YBH    :20170224: KB-PIN 처리(2차)
+      * PJH    :20170529: KB-PIN 처리(3차)
+      * YBH    :20200625: 승인구분 추가
+      *최주원:20211005:출력항목추가
+      * YBH    :20211216: 승인년월일 처리보완
+      *박정수:20241205:관리한도 설정해제시 한도승인금액 0원
+      *=================================================================00120043
+      ******************************************************************00130043
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00150043
+      **  ------------------------- ------------------------------------00160043
+      **  TE관리한도신청이력      : THKJL0003            : R          00190043
+      **  한도승인결의록관리      : THKJL0005            : R
+      **  차주관리한도실적        : THKJL0011            : R          00210043
+      **  그룹관리한도월보기본    : THKJL0012            : R          00220043
+      **  그룹사기본              : THKJL0013            : R          00180043
+      **  채무자고객기본          : THKJL0015            : R          00170043
+      **  부점정보                : THKJIBR01            : R          00220043
+      ******************************************************************00240043
+       IDENTIFICATION                  DIVISION.                        00250043
+      *=================================================================00260043
+       PROGRAM-ID.                     DJL4008.                         00270043
+       AUTHOR.                         이동구.                        00280043
+       DATE-WRITTEN.                   09/01/16.                        00290043
+      *=================================================================00310043
+       ENVIRONMENT                     DIVISION.                        00320043
+      *=================================================================00330043
+       CONFIGURATION                   SECTION.                         00340043
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00360043
+       DATA                            DIVISION.                        00370043
+      *=================================================================00380043
+       WORKING-STORAGE                 SECTION.                         00390043
+      *-----------------------------------------------------------------00410043
+      *CONSTANT ERROR AREA                                              00420043
+      *-----------------------------------------------------------------00430043
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200220             PIC  X(008) VALUE 'B4200220'.
+           03  CO-B4200231             PIC  X(008) VALUE 'B4200231'.
+      *        전산업무담당자에게　문의하시기　바랍니다．
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00540043
+      * CONSTANT AREA                                                   00550043
+      *-----------------------------------------------------------------00560043
+       01  CO-AREA.                                                     00570043
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4008'.     00580043
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00590043
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00600043
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00610043
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00620043
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00630043
+                                                                        00640043
+           03  CO-MAX-CNT              PIC  9(005) VALUE 1000.          00650043
+           03  CO-NUM-10               PIC  9(002) VALUE 10.            00670043
+                                                                        00700043
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00750043
+           03  CO-CHA-Y                PIC  X(001) VALUE 'Y'.           00750043
+           03  CO-CHA-N                PIC  X(001) VALUE 'N'.           00750043
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00750043
+
+241205     03  CO-CHA-8                PIC  X(001) VALUE '8'.
+           03  CO-CHA-9                PIC  X(001) VALUE '9'.
+           03  CO-CHA-9999             PIC  X(004) VALUE '9999'.
+      *-----------------------------------------------------------------00770043
+      * WORKING AREA                                                    00780043
+      *-----------------------------------------------------------------00790043
+       01  WK-AREA.                                                     00520007
+           03  WK-I                    PIC S9(004) COMP.                00530007
+           03  WK-BIT                  PIC  X(001).                     00550007
+           03  WK-LEN                  PIC  9(005).                     00550007
+           03  WK-HANDO                PIC  9(015).                     00550007
+           03  WK-CUR-CNT              PIC S9(004) COMP.                00560007
+           03  WK-DBTRZ-NAME           PIC  X(052).
+170224     03  WK-SELECT-CNT           PIC  9(005).
+      *-----------------------------------------------------------------01030043
+      * PGM INTERFACE PARAMETER                                         01040043
+      *-----------------------------------------------------------------01050043
+      * UTILITY COPYBOOK
+       01  XCJIBR01-CA.
+           COPY  XCJIBR01.
+      * SQLIO COPYBOOK
+       01  XQJL0081-CA.                                                 01060043
+           COPY  XQJL0081.                                              01070043
+      *-----------------------------------------------------------------00970043
+      * DBIO SQLIO INTERFACE PARAMETER                                  00980043
+      *-----------------------------------------------------------------00990043
+      * DBIO
+           COPY  YCDBIOCA.                                              01000043
+      * SQLIO
+           COPY  YCDBSQLA.                                              01010043
+      *-----------------------------------------------------------------01150043
+      * TABLE INTERFACE PARAMETER                                       01160043
+      *-----------------------------------------------------------------01170043
+      * KEY COPYBOOK
+       01  TKJL0011-KEY.                                                01180043
+           COPY  TKJL0011.                                              01190043
+      * RECORD COPYBOOK
+       01  TRJL0011-REC.                                                01210043
+           COPY  TRJL0011.                                              01220043
+                                                                        01230043
+      * KEY COPYBOOK
+       01  TKJL0012-KEY.                                                01240043
+           COPY  TKJL0012.                                              01250043
+      * RECORD COPYBOOK
+       01  TRJL0012-REC.                                                01270043
+           COPY  TRJL0012.                                              01280043
+
+      * KEY COPYBOOK
+       01  TKJL0013-KEY.                                                01240043
+           COPY  TKJL0013.                                              01250043
+      * RECORD COPYBOOK
+       01  TRJL0013-REC.                                                01270043
+           COPY  TRJL0013.                                              01280043
+
+170529* KEY COPYBOOK
+       01  TKJL0015-KEY.                                                01240043
+           COPY  TKJL0015.                                              01250043
+      * RECORD COPYBOOK
+       01  TRJL0015-REC.                                                01270043
+           COPY  TRJL0015.                                              01280043
+
+      *-----------------------------------------------------------------01300043
+       LINKAGE                         SECTION.                         01310043
+      *-----------------------------------------------------------------01320043
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.                                                 01330043
+           COPY  YCCOMMON.                                              01340043
+                                                                        01350043
+      * DC COPYBOOK
+       01  XDJL4008-CA.                                                 01360043
+           COPY  XDJL4008.                                              01370043
+      *=================================================================01390043
+       PROCEDURE                       DIVISION                         01400043
+                                       USING       YCCOMMON-CA          01410043
+                                                   XDJL4008-CA          01420043
+                                                   .                    01430043
+      *=================================================================01440043
+                                                                        01450043
+      *-----------------------------------------------------------------01460043
+      *@  처리메인                                                    01470043
+      *-----------------------------------------------------------------01480043
+       S0000-MAIN-RTN.                                                  01490043
+                                                                        01500043
+      *@  초기화                                                      01510043
+           PERFORM  S1000-INITIALIZE-RTN                                01520043
+              THRU  S1000-INITIALIZE-EXT                                01530043
+                                                                        01540043
+      *@  입력값　CHECK                                               01550043
+           PERFORM  S2000-VALIDATION-RTN                                01560043
+              THRU  S2000-VALIDATION-EXT                                01570043
+                                                                        01580043
+      *@  업무처리                                                    01590043
+           PERFORM  S3000-PROCESS-RTN                                   01600043
+              THRU  S3000-PROCESS-EXT                                   01610043
+                                                                        01620043
+      *@  처리종료                                                    01670043
+           PERFORM S9000-FINAL-RTN                                      01680043
+              THRU S9000-FINAL-EXT                                      01690043
+           .                                                            01700043
+       S0000-MAIN-EXT.                                                  01720043
+           EXIT.                                                        01730043
+      *-----------------------------------------------------------------01740043
+      *@  초기화                                                      01750043
+      *-----------------------------------------------------------------01760043
+       S1000-INITIALIZE-RTN.                                            01770043
+                                                                        01780043
+      *@   WK-AREA 및　프로그램파라미터　초기화                       01790043
+           INITIALIZE WK-AREA                                           01800043
+      *               DBIO
+                      YCDBIOCA-CA                                       01810043
+      *               SQLIO
+                      YCDBSQLA-CA                                       01820043
+                                                                        01900043
+      *@  출력영역　및　결과코드　초기화                              01910043
+           INITIALIZE XDJL4008-OUT                                      01920043
+                      XDJL4008-RETURN                                   01930043
+           .                                                            01950043
+       S1000-INITIALIZE-EXT.                                            01960043
+           EXIT.                                                        01970043
+      *-----------------------------------------------------------------01980043
+      *@  입력값검증                                                  01990043
+      *-----------------------------------------------------------------02000043
+       S2000-VALIDATION-RTN.                                            02010043
+
+      *@   처리구분                                                   01871007
+           IF XDJL4008-I-PRCSS-DSTIC = CO-CHA-01                        01872007
+              CONTINUE                                                  01874007
+           ELSE                                                         01875007
+      * 에러메세지 : 처리구분오류입니다．                           01876007
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01877007
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR              01878007
+           END-IF                                                       01879007
+                                                                        01879107
+      *@   영업점코드                                                 01879207
+           IF XDJL4008-I-BRNCD = SPACE                                  01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+                                                                        01879807
+      *@   신청구분                                                   01879207
+           IF XDJL4008-I-LIMT-APLCN-DSTCD = SPACE                       01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+                                                                        01879807
+      *@   진행상태                                                   01879207
+           IF XDJL4008-I-LIMT-P-STUS-DSTCD = SPACE                      01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+
+      *@   조회기준일자１                                             01879207
+           IF XDJL4008-I-BASEDD1 = SPACE                                01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+
+      *@   조회기준일자２                                             01879207
+           IF XDJL4008-I-BASEDD2 = SPACE                                01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+           .                                                            02060043
+       S2000-VALIDATION-EXT.                                            02080043
+           EXIT.                                                        02090043
+      *-----------------------------------------------------------------02100043
+      *@  업무처리                                                    02110043
+      *-----------------------------------------------------------------02120043
+       S3000-PROCESS-RTN.                                               02130043
+
+      *@1  부점명조회
+           IF XDJL4008-I-BRNCD = CO-CHA-9999
+               MOVE '부점전체'
+                 TO XDJL4008-O-BRN-NAME
+           ELSE
+      *@      부점명 ROUTINE CALL
+               PERFORM S3100-CJIBR01-CALL-RTN
+                  THRU S3100-CJIBR01-CALL-EXT
+           END-IF
+                                                                        02140043
+      *@2  차주명조회
+           IF  XDJL4008-I-KB-PIN = SPACE
+               MOVE  SPACE
+                 TO  XDJL4008-O-DBTRZ-NAME
+           ELSE
+               PERFORM S3500-THKJL0015-SELECT-RTN
+                  THRU S3500-THKJL0015-SELECT-EXT
+               MOVE  WK-DBTRZ-NAME                                      02198407
+                 TO  XDJL4008-O-DBTRZ-NAME
+           END-IF
+
+      *@3  관리한도신청및승인결과조회                                 02079007
+           PERFORM S3400-QJL0081-CALL-RTN                               02080007
+              THRU S3400-QJL0081-CALL-EXT                               02090007
+
+           .                                                            02170043
+       S3000-PROCESS-EXT.                                               02220043
+           EXIT.                                                        02230043
+      *-----------------------------------------------------------------
+      *@  부점명을조회한다
+      *-----------------------------------------------------------------
+       S3100-CJIBR01-CALL-RTN.
+
+      *@1.1 초기화
+           INITIALIZE XCJIBR01-IN
+
+      *@1.2 변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIBR01-I-GROUP-CO-CD
+           MOVE XDJL4008-I-BRNCD
+             TO XCJIBR01-I-BRNCD
+           MOVE BICOM-TRAN-BASE-YMD
+             TO XCJIBR01-I-YMD
+
+      *@1.3 프로그램호출
+           #DYCALL CJIBR01 YCCOMMON-CA XCJIBR01-CA
+
+      *@1.4 호출결과확인
+      *@  호출결과가경고인경우도정상처리한다
+      *@  폐쇠점인경우리턴코드０７（경고）
+           IF COND-XCJIBR01-OK OR COND-XCJIBR01-WARN
+               MOVE XCJIBR01-O-BRN-HANGL-NAME
+                 TO XDJL4008-O-BRN-NAME
+           ELSE
+               #ERROR XCJIBR01-R-ERRCD
+                      XCJIBR01-R-TREAT-CD
+                      XCJIBR01-R-STAT
+           END-IF
+           .
+       S3100-CJIBR01-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------02186807
+      *@  관리한도신청및승인결과조회                                  02186907
+      *-----------------------------------------------------------------02187007
+       S3400-QJL0081-CALL-RTN.                                          02187107
+                                                                        02187207
+      *@   SQLIO OPEN
+           PERFORM S3410-QJL0081-OPEN-RTN                               02187307
+              THRU S3410-QJL0081-OPEN-EXT                               02187407
+                                                                        02187507
+           MOVE CO-CHA-Y                                                02187607
+             TO WK-BIT                                                  02187707
+                                                                        02187807
+      *@   SQLIO FETCH
+           PERFORM UNTIL WK-BIT     = CO-CHA-N OR                       02187907
+                         WK-CUR-CNT = CO-MAX-CNT                        02188007
+      *@      SQLIO FETCH ROUTINE CALL
+              PERFORM S3420-QJL0081-FETCH-RTN                           02188107
+                 THRU S3420-QJL0081-FETCH-EXT                           02188207
+           END-PERFORM                                                  02188307
+                                                                        02188407
+      *@   SQLIO CLOSE
+           PERFORM S3430-QJL0081-CLOSE-RTN                              02188507
+              THRU S3430-QJL0081-CLOSE-EXT                              02188607
+      *@건수MOVE                                                      02188707
+           MOVE WK-CUR-CNT                                              02188807
+             TO XDJL4008-O-OUTPT-LINE-CNT1                              02188907
+           .                                                            02189007
+       S3400-QJL0081-CALL-EXT.                                          02189107
+           EXIT.                                                        02189207
+      *-----------------------------------------------------------------02189307
+      *@  SQLIO QJL0081 OPEN                                            02189407
+      *-----------------------------------------------------------------02189507
+       S3410-QJL0081-OPEN-RTN.                                          02189607
+                                                                        02189707
+      *@   초기화
+           INITIALIZE XQJL0081-IN
+
+      *@   그룹회사코드                                               02189807
+           MOVE BICOM-GROUP-CO-CD                                       02189907
+             TO XQJL0081-I-GROUP-CO-CD                                  02190007
+170224*@   KB-PIN
+           IF XDJL4008-I-KB-PIN = SPACE
+               MOVE ALL '%'
+                 TO XQJL0081-I-KB-PIN
+           ELSE
+               MOVE XDJL4008-I-KB-PIN
+                 TO XQJL0081-I-KB-PIN
+           END-IF
+      *@   신청부점코드                                               02190707
+           IF XDJL4008-I-BRNCD = CO-CHA-9999
+               MOVE ALL '%'
+                 TO XQJL0081-I-APLCN-BRNCD
+           ELSE
+               MOVE XDJL4008-I-BRNCD
+                 TO XQJL0081-I-APLCN-BRNCD
+           END-IF
+      *@   한도신청종류구분                                           02190707
+           IF XDJL4008-I-LIMT-APLCN-DSTCD = CO-CHA-9
+               MOVE ALL '%'
+                 TO XQJL0081-I-LIMT-A-KND-DSTCD
+           ELSE
+               MOVE XDJL4008-I-LIMT-APLCN-DSTCD
+                 TO XQJL0081-I-LIMT-A-KND-DSTCD
+           END-IF
+      *@   한도진행상태구분                                           02190707
+           MOVE XDJL4008-I-LIMT-P-STUS-DSTCD                            02190807
+             TO XQJL0081-I-LIMT-P-STUS-DSTCD                            02190907
+      *@   신청년월일１                                               02190707
+           MOVE XDJL4008-I-BASEDD1                                      02190807
+             TO XQJL0081-I-APLCN-YMD1                                   02190907
+      *@   신청년월일２                                               02190707
+           MOVE XDJL4008-I-BASEDD2                                      02190807
+             TO XQJL0081-I-APLCN-YMD2                                   02190907
+200625*   승인위원직원번호(협의위원직원번호)
+           MOVE XDJL4008-I-DSCS-CMMB-EMPID
+             TO XQJL0081-I-ATHOR-CMMB-EMPID
+                                                                        02191007
+      *@   SQLIO CALL
+           #DYSQLA QJL0081 OPEN XQJL0081-CA                             02191107
+                                                                        02191207
+      *@   호출결과　확인
+           EVALUATE TRUE                                                02191307
+               WHEN COND-DBSQL-OK                                       02191407
+                    CONTINUE                                            02191507
+               WHEN OTHER                                               02191607
+      *@커서오픈에러일경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．                     02191707
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02191807
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02191907
+           END-EVALUATE                                                 02192007
+           .                                                            02192107
+       S3410-QJL0081-OPEN-EXT.                                          02192207
+           EXIT.                                                        02192307
+      *-----------------------------------------------------------------02192407
+      *@  SQLIO QJL0081 FETCH                                           02192507
+      *-----------------------------------------------------------------02192607
+       S3420-QJL0081-FETCH-RTN.                                         02192707
+                                                                        02192807
+      *@   SQLIO FETCH                                                  02192907
+           #DYSQLA QJL0081 FETCH XQJL0081-CA                            02193007
+      *@   결과확인                                                   02193107
+           EVALUATE TRUE                                                02193207
+               WHEN COND-DBSQL-OK                                       02193307
+      *@            출력 ROUTINE CALL
+                    PERFORM S6000-OUTPUT-SET-RTN                        02193407
+                       THRU S6000-OUTPUT-SET-EXT                        02193507
+               WHEN COND-DBSQL-MRNF                                     02193607
+                    MOVE CO-CHA-N TO WK-BIT                             02193707
+               WHEN OTHER                                               02193807
+      *@커서패치에러인경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．                    02193907
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02194007
+                    #ERROR CO-B4200220 CO-UKJL0036 CO-STAT-ERROR        02194107
+           END-EVALUATE                                                 02194207
+           .                                                            02194307
+       S3420-QJL0081-FETCH-EXT.                                         02194407
+           EXIT.                                                        02194507
+      *-----------------------------------------------------------------02194607
+      *@  SQLIO QJL0081 CLOSE                                           02194707
+      *-----------------------------------------------------------------02194807
+       S3430-QJL0081-CLOSE-RTN.                                         02194907
+                                                                        02195007
+      *@   SQLIO CLOSE                                                  02195107
+           #DYSQLA QJL0081 CLOSE XQJL0081-CA                            02195207
+      *@   결과확인                                                   02195307
+           EVALUATE TRUE                                                02195407
+               WHEN COND-DBSQL-OK                                       02195507
+                    CONTINUE                                            02195607
+               WHEN OTHER                                               02195707
+      *@커서클로즈에러인경우
+      *@에러메세지 : 테이블 CLOSE 오류입니다．                    02195807
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.              02195907
+                    #ERROR CO-B4200231 CO-UKJL0036 CO-STAT-ERROR        02196007
+           END-EVALUATE                                                 02196107
+           .                                                            02196207
+       S3430-QJL0081-CLOSE-EXT.                                         02196307
+           EXIT.                                                        02196407
+170529*-----------------------------------------------------------------
+      *@  그룹명추출
+      *-----------------------------------------------------------------
+       S3500-THKJL0015-SELECT-RTN.
+
+      *@   변수초기화
+           INITIALIZE TKJL0015-KEY
+                      TRJL0015-REC
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0015-PK-GROUP-CO-CD
+      *@   고객식별자
+           MOVE XDJL4008-I-KB-PIN
+             TO KJL0015-PK-CUST-IDNFR
+
+      *@   DBIO CALL
+           #DYDBIO SELECT-CMD-N TKJL0015-PK TRJL0015-REC
+      *@   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBIO-OK
+      *       채무자명
+               MOVE RJL0015-DBTRZ-NAME
+                 TO WK-DBTRZ-NAME
+           WHEN COND-DBIO-MRNF
+               MOVE SPACE
+                 TO WK-DBTRZ-NAME
+           WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+               #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3500-THKJL0015-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------02196507
+      *@ 관리한도신청및승인결과조회출력                               02196607
+      *-----------------------------------------------------------------02196707
+       S6000-OUTPUT-SET-RTN.                                            02196807
+                                                                        02196907
+170224     MOVE DBSQL-SELECT-CNT
+             TO WK-SELECT-CNT
+
+      *@   출력
+           PERFORM VARYING WK-I FROM 1 BY 1                             02197007
+170224             UNTIL WK-I > WK-SELECT-CNT
+                                                                        02197207
+               ADD 1 TO WK-CUR-CNT                                      02197307
+                                                                        02197407
+      *@       부점명                                                 02197507
+               MOVE XQJL0081-O-BRN-HANGL-NAME(WK-I)                     02197607
+                 TO XDJL4008-O-BRN-NAME1(WK-CUR-CNT)                    02197707
+
+150522*@       KB-PIN
+170224         MOVE XQJL0081-O-CUST-IDNFR(WK-I)
+                 TO XDJL4008-O-KB-PIN(WK-CUR-CNT)
+
+170224*@       차주명                                                 02198307
+170529         MOVE XQJL0081-O-CUST-DBTRZ-NAME(WK-I)                    02198407
+                 TO XDJL4008-O-DBTRZ-NAME1(WK-CUR-CNT)                  02198507
+
+      *@       진행상태                                               02198707
+               MOVE XQJL0081-O-LIMT-P-STUS-DSTCD(WK-I)
+                 TO XDJL4008-O-LIMT-P-STUS-DSTCD(WK-CUR-CNT)
+
+200625*        승인구분
+               MOVE XQJL0081-O-LIMT-ATHOR-DSTCD(WK-I)
+                 TO XDJL4008-O-ATHOR-DSTIC(WK-CUR-CNT)
+
+211216         IF XQJL0081-O-ATHOR-YMD(WK-I) NOT = SPACE
+                  MOVE ZERO
+                    TO WK-LEN
+
+170529            INSPECT XQJL0081-O-CUST-IDNFR(WK-I)
+                                       TALLYING WK-LEN
+                      FOR CHARACTERS BEFORE X'40'
+
+                  IF WK-LEN >= CO-NUM-10
+      *@             개별기업관리한도조회
+                     PERFORM S6300-THKJL0011-SELECT-RTN
+                        THRU S6300-THKJL0011-SELECT-EXT
+                  ELSE
+      *@             그룹관리한도조회
+                     PERFORM S6400-THKJL0012-SELECT-RTN
+                        THRU S6400-THKJL0012-SELECT-EXT
+                  END-IF
+
+                  MOVE WK-HANDO
+                    TO XDJL4008-O-MGT-CLAM(WK-CUR-CNT)
+
+      *THKJL0003테이블에　관리한도　컬럼추가로인한　로직　추가됨
+      *QJL0081 SQLIO 호출후
+      *THKJL0003테이블의　관리한도　컬럼의　값이　０보다　크면
+      *컬럼추가후　발생된　거래로　판단하여
+      *THKJL0003테이블의　컬럼을　사용한다
+      *０보다크지않을경우는　컬럼추가전에　발생된　거래로　판단하여
+      *THKJL0011또는THKJL0012테이블의관리한도를사용한다
+      *2010.11.10
+                  IF XQJL0081-O-LIMT-ATHOR-AMT(WK-I) > 0
+                     COMPUTE XDJL4008-O-MGT-CLAM(WK-CUR-CNT)
+                           = XQJL0081-O-LIMT-ATHOR-AMT(WK-I) / 1000000
+                  END-IF
+
+241205*           관리한도설정해제시 한도승인금액 0원 세팅
+                  IF XQJL0081-O-LIMT-APLCN-DSTCD(WK-I) = CO-CHA-8
+                      MOVE ZERO
+                        TO XDJL4008-O-MGT-CLAM(WK-CUR-CNT)
+                  END-IF
+               ELSE
+      *@          관리한도금액                                        02199307
+                  MOVE ZERO                                             02199407
+                    TO XDJL4008-O-MGT-CLAM(WK-CUR-CNT)                  02199507
+               END-IF
+                                                                        02199807
+      *@       신청번호                                               02199907
+               MOVE XQJL0081-O-LIMT-APLCN-NO(WK-I)                      02200007
+                 TO XDJL4008-O-LIMT-APLCN-NO(WK-CUR-CNT)                02200107
+                                                                        02200407
+      *@       승인번호                                               02200507
+               MOVE XQJL0081-O-ATHOR-NO(WK-I)                           02200607
+                 TO XDJL4008-O-ATHOR-NO(WK-CUR-CNT)                     02200707
+                                                                        02201007
+      *@       승인권자                                               02201107
+               MOVE XQJL0081-O-LIMT-ATRZ-DSTCD(WK-I)                    02201207
+                 TO XDJL4008-O-LIMT-ATRZ-DSTCD(WK-CUR-CNT)              02201307
+211005                                                                  02201807
+<     *@       승인년월일
+               MOVE XQJL0081-O-ATHOR-YMD(WK-I)
+                 TO XDJL4008-O-ATHOR-YMD(WK-CUR-CNT)
+
+      *@       기존T/E관리한도
+               COMPUTE XDJL4008-O-EXSTN-TE-MGT-LIMT(WK-CUR-CNT)
+                       = XQJL0081-O-EXSTN-TE-MGT-LIMT(WK-I) / 1000000
+
+      *        MOVE XQJL0081-O-EXSTN-TE-MGT-LIMT(WK-I)
+      *          TO XDJL4008-O-EXSTN-TE-MGT-LIMT(WK-CUR-CNT)
+
+      *@       기준한도
+               COMPUTE XDJL4008-O-BASE-CLAM(WK-CUR-CNT)
+                       = XQJL0081-O-BASE-CLAM(WK-I) / 1000000
+
+      *        MOVE XQJL0081-O-BASE-CLAM(WK-I)
+      *          TO XDJL4008-O-BASE-CLAM(WK-CUR-CNT)
+
+      *@       내부신용평가등급구분
+               MOVE XQJL0081-O-INTNL-CV-GRD-DSTCD(WK-I)
+>                TO XDJL4008-O-INTNL-CV-GRD-DSTCD(WK-CUR-CNT)
+
+
+           END-PERFORM                                                  02201907
+           .                                                            02202007
+       S6000-OUTPUT-SET-EXT.                                            02202107
+           EXIT.                                                        02202207
+
+      *-----------------------------------------------------------------
+      *@ 차주관리한도기본　원장을　조회한다
+      *-----------------------------------------------------------------
+       S6300-THKJL0011-SELECT-RTN.
+
+      *@4.1.1 초기화
+           INITIALIZE TKJL0011-KEY
+                      TRJL0011-REC
+      *@4.1.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0011-PK-GROUP-CO-CD
+      *@   기준년월(승인년월일)
+           MOVE XQJL0081-O-ATHOR-YMD(WK-I)(1:6)
+             TO KJL0011-PK-BASE-YM
+170224*@   고객식별자
+           MOVE XQJL0081-O-CUST-IDNFR(WK-I)
+             TO KJL0011-PK-CUST-IDNFR
+      *@4.1.3 프로그램　호출
+           #DYDBIO SELECT-CMD-N TKJL0011-PK TRJL0011-REC
+      *@4.1.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    COMPUTE WK-HANDO
+                          = RJL0011-MGT-CLAM / 1000000
+               WHEN COND-DBIO-MRNF
+                    MOVE ZERO
+                      TO WK-HANDO
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S6300-THKJL0011-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 그룹관리한도기본　원장을　조회한다
+      *-----------------------------------------------------------------
+       S6400-THKJL0012-SELECT-RTN.
+
+      *@4.3.1 초기화
+           INITIALIZE TKJL0012-KEY
+                      TRJL0012-REC
+      *@4.3.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO KJL0012-PK-GROUP-CO-CD
+      *@   기준년월(승인년월일)
+           MOVE XQJL0081-O-ATHOR-YMD(WK-I)(1:6)
+             TO KJL0012-PK-BASE-YM
+      *@   계열기업군코드
+170224     MOVE XQJL0081-O-CUST-IDNFR(WK-I)(1:6)
+             TO KJL0012-PK-AFFLT-CORP-GROUP-CD
+      *@4.3.3 프로그램　호출
+           #DYDBIO SELECT-CMD-N TKJL0012-PK TRJL0012-REC
+      *@4.3.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    COMPUTE WK-HANDO
+                          = RJL0012-MGT-CLAM / 1000000
+               WHEN COND-DBIO-MRNF
+                    MOVE ZERO
+                      TO WK-HANDO
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S6400-THKJL0012-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------05390043
+      *@  처리종료                                                    05400043
+      *-----------------------------------------------------------------05410043
+       S9000-FINAL-RTN.                                                 05420043
+      *@3 종료처리                                                    05430043
+                                                                        05440043
+      *@3.1 프로그램 종료                                           05450043
+      *@처리내용 : 프로그램을 정상 종료 함                    05460043
+                                                                        05470043
+           #OKEXIT  CO-STAT-OK                                          05480043
+           .                                                            05490043
+       S9000-FINAL-EXT.                                                 05510043
+           EXIT.                                                        05520043

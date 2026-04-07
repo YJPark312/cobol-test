@@ -1,0 +1,23 @@
+//TKJLEAD2 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  TKJLEAD1
+//*********************************************************************
+//*   고객정보추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLI25H,OPT=&SYSUID
+//INFILE   DD DISP=SHR,DSN=KJL.SD.BJLI251.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI253.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI254.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI255.V001
+//         DD DISP=SHR,DSN=KJL.SD.BJLI256.V001
+//OTFILE   DD DSN=KJL.SD.BJLI25H.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=300)
+//SYSIN    DD *
+KB0-20101117-TKJLEAD2-001-ONLBAT-KB STAR-20101117
+//*자료기준년월일

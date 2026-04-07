@@ -1,0 +1,162 @@
+      *================================================================*
+      *@ NAME : XPJL4271                                               *
+      *@ DESC : PC포괄신용공여한도기준한도조회 COPYBOOK              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-22 14:49:27                          *
+      *  생성일시     : 2009-06-22 14:49:29                          *
+      *================================================================*
+           03  XPJL4271-RETURN.
+             05  XPJL4271-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4271-OK            VALUE  '00'.
+                 88  COND-XPJL4271-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4271-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4271-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4271-ERROR         VALUE  '09'.
+                 88  COND-XPJL4271-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4271-SYSERROR      VALUE  '99'.
+             05  XPJL4271-R-LINE                 PIC  9(006).
+             05  XPJL4271-R-ERRCD                PIC  X(008).
+             05  XPJL4271-R-TREAT-CD             PIC  X(008).
+             05  XPJL4271-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4271-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4271-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XPJL4271-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJL4271-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XPJL4271-OUT.
+      *----------------------------------------------------------------*
+      *--       fld채무자명
+             05  XPJL4271-O-DBTRZ-NAME           PIC  X(052).
+      *--       fld포괄한도
+             05  XPJL4271-O-MGT-CLAM             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld기사용액
+             05  XPJL4271-O-PRVIUS-AMUS          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld한도여유액
+             05  XPJL4271-O-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld계열명
+             05  XPJL4271-O-AFFLT-C-GROUP-NAME   PIC  X(052).
+      *--       fld계열신용등급
+             05  XPJL4271-O-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *--       fld기업신용등급
+             05  XPJL4271-O-INTNL-CV-GRD-DSTCD1  PIC  X(004).
+      *--       fld유효기일
+             05  XPJL4271-O-MGT-LIMT-VALD-YMD    PIC  X(008).
+      *--       fld업종명
+             05  XPJL4271-O-STND-IDSTRY-CD-NAME  PIC  X(052).
+      *--       fld관리한도
+             05  XPJL4271-O-MGT-CLAM1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld총자산1
+             05  XPJL4271-O-TOTAL-ASST           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld총자산2
+             05  XPJL4271-O-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld매출액1
+             05  XPJL4271-O-SALEPR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld매출액2
+             05  XPJL4271-O-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본1
+             05  XPJL4271-O-BASE-YR-ONCP-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본2
+             05  XPJL4271-O-AMND-B-YR-ONCP-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld금융차입금1
+             05  XPJL4271-O-FNCS-AMBR            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld금융차입금2
+             05  XPJL4271-O-AMND-FNCS-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld당행차입금1
+             05  XPJL4271-O-OWBNK-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld당행차입금2
+             05  XPJL4271-O-AMND-OWBNK-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업흐름액1
+             05  XPJL4271-O-BZOPR-ACF            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업흐름액2
+             05  XPJL4271-O-AMND-BZOPR-ACF       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld평균이자율1
+             05  XPJL4271-O-ENTP-AVG-INT-RT      PIC  9(003)V9(02).
+      *--       fld평균이자율2
+             05  XPJL4271-O-AMND-ENTP-AVG-IRT    PIC  9(003)V9(02).
+      *--       fld여신성한도1
+             05  XPJL4271-O-LNBZ-I-ASST-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld여신성한도2
+             05  XPJL4271-O-AMND-LI-ASST-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도1
+             05  XPJL4271-O-ONCP-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld자기자본한도2
+             05  XPJL4271-O-AMND-O-CAPTL-BSAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도1
+             05  XPJL4271-O-BZOPR-A-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld영업한도2
+             05  XPJL4271-O-AMND-BA-BASE-CLAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도1
+             05  XPJL4271-O-INLS-STUP-ABLAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld포괄한도2
+             05  XPJL4271-O-AMND-I-STUP-ABLAMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       fld신용등급지원비율
+             05  XPJL4271-O-CRDRAT-SPORT-RATO    PIC  9(003).
+      *================================================================*
+      *        X  P  J  L  4  2  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4271-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4271-I-BRWR-NO            ;차주번호
+      *X  XPJL4271-I-APLCN-NO           ;신청번호
+      *X  XPJL4271-O-DBTRZ-NAME         ;fld채무자명
+      *S  XPJL4271-O-MGT-CLAM           ;fld포괄한도
+      *S  XPJL4271-O-PRVIUS-AMUS        ;fld기사용액
+      *S  XPJL4271-O-LIMT-SEXTR-AMT     ;fld한도여유액
+      *X  XPJL4271-O-AFFLT-C-GROUP-NAME ;fld계열명
+      *X  XPJL4271-O-INTNL-CV-GRD-DSTCD ;fld계열신용등급
+      *X  XPJL4271-O-INTNL-CV-GRD-DSTCD1;fld기업신용등급
+      *X  XPJL4271-O-MGT-LIMT-VALD-YMD  ;fld유효기일
+      *X  XPJL4271-O-STND-IDSTRY-CD-NAME;fld업종명
+      *S  XPJL4271-O-MGT-CLAM1          ;fld관리한도
+      *S  XPJL4271-O-TOTAL-ASST         ;fld총자산1
+      *S  XPJL4271-O-AMND-TOTAL-ASST    ;fld총자산2
+      *S  XPJL4271-O-SALEPR             ;fld매출액1
+      *S  XPJL4271-O-AMND-SALEPR        ;fld매출액2
+      *S  XPJL4271-O-BASE-YR-ONCP-AMT   ;fld자기자본1
+      *S  XPJL4271-O-AMND-B-YR-ONCP-AMT ;fld자기자본2
+      *S  XPJL4271-O-FNCS-AMBR          ;fld금융차입금1
+      *S  XPJL4271-O-AMND-FNCS-AMBR     ;fld금융차입금2
+      *S  XPJL4271-O-OWBNK-AMBR         ;fld당행차입금1
+      *S  XPJL4271-O-AMND-OWBNK-AMBR    ;fld당행차입금2
+      *S  XPJL4271-O-BZOPR-ACF          ;fld영업흐름액1
+      *S  XPJL4271-O-AMND-BZOPR-ACF     ;fld영업흐름액2
+      *N  XPJL4271-O-ENTP-AVG-INT-RT    ;fld평균이자율1
+      *N  XPJL4271-O-AMND-ENTP-AVG-IRT  ;fld평균이자율2
+      *S  XPJL4271-O-LNBZ-I-ASST-CLAM   ;fld여신성한도1
+      *S  XPJL4271-O-AMND-LI-ASST-CLAM  ;fld여신성한도2
+      *S  XPJL4271-O-ONCP-BSAMT         ;fld자기자본한도1
+      *S  XPJL4271-O-AMND-O-CAPTL-BSAMT ;fld자기자본한도2
+      *S  XPJL4271-O-BZOPR-A-BASE-CLAM  ;fld영업한도1
+      *S  XPJL4271-O-AMND-BA-BASE-CLAM  ;fld영업한도2
+      *S  XPJL4271-O-INLS-STUP-ABLAMT   ;fld포괄한도1
+      *S  XPJL4271-O-AMND-I-STUP-ABLAMT ;fld포괄한도2
+      *N  XPJL4271-O-CRDRAT-SPORT-RATO  ;fld신용등급지원비율

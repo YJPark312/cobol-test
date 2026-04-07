@@ -1,0 +1,277 @@
+//MKJLG018 JOB (Z-KESA),CLASS=B,MSGCLASS=X,USER=KJL000X
+//*********************************************************************
+//* 지주사 리스크분석DATA 구축 UNLOAD
+//*  채무자고객기본 (THKJL0015)
+//*  KJL.SD.KJL0015.EXPD29.G018 => KB0_FBJ_EXP_D29_YYYYMMDD.DAT
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%$ODATE
+//*  %%SET %%B = %%SUBSTR %%A 7 2
+//*  %%SET %%C = %%SUBSTR %%A 1 6
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.CHKTMP'
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.CHK'
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.DATTMP2'
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.DATTMP3'
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.DATTMP4'
+  DELETE  'KJL.SD.KJL0015.EXPD29.G018.DAT'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.KJL0015.EXPD29.G018.CHKTMP,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0010,0010),RLSE),
+//            DCB=(RECFM=FB,LRECL=28,BLKSIZE=27944)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR('%%A')
+        ,CHAR(',')
+        ,HEX(CURRENT DATE)
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0015    A
+   WHERE 그룹회사코드 = 'KB0'
+     AND 차주번호구분 NOT IN ('1','2')
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SD.KJL0015.EXPD29.G018.CHKTMP,DISP=SHR
+//SORTOUT  DD DSN=KJL.SD.KJL0015.EXPD29.G018.CHK,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(10,10),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=28,BLKSIZE=27944)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP2,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=354,BLKSIZE=27966)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR('%%A')
+        ,CHAR(',')
+        ,그룹회사코드
+        ,CHAR(',')
+        ,CHAR(VALUE((SELECT 양방향고객암호화번호
+                      FROM  DB2DBA.THKAABPCB
+                     WHERE 그룹회사코드 = A.그룹회사코드
+                       AND 고객식별자   = A.고객식별자
+                     ),SPACE(44)),44) AS 차주번호
+        ,CHAR(',')
+        ,CHAR(VALUE((SELECT 양방향고객암호화번호
+                      FROM  DB2DBA.THKAABPCB
+                     WHERE 그룹회사코드 = A.그룹회사코드
+                       AND 고객식별자   = A.고객식별자
+                     ),SPACE(44)),44) AS 법인등록번호
+        ,CHAR(',')
+        ,차주번호구분
+        ,CHAR(',')
+        ,고객식별자
+        ,CHAR(',')
+        ,신표준산업분류코드
+        ,CHAR(',')
+        ,내부신용평가등급구분
+        ,CHAR(',')
+        ,신용평가년월일
+        ,CHAR(',')
+        ,신용평가유효년월일                              T
+        ,CHAR(',')
+        ,고객관리부점코드
+        ,CHAR(',')
+        ,"TE기업규모구분"
+        ,CHAR(',')
+        ,"TEPEER구분"
+        ,CHAR(',')
+        ,대분류업종코드
+        ,CHAR(',')
+        ,산업평가등급구분
+        ,CHAR(',')
+        ,CHAR(CASE 차주번호구분
+                  WHEN '1' THEN ' '
+                           ELSE REPLACE(채무자명  ,',',' ')
+              END) AS 채무자명
+        ,CHAR(',')
+        ,계열기업군코드
+        ,CHAR(',')
+        ,CHAR(REPLACE(계열기업군명  ,',',' '))
+        ,CHAR(',')
+        ,CHAR(SPACE(10)) AS 대표사업자번호
+        ,CHAR(',')
+        ,CHAR(DIGITS(매출액))
+        ,CHAR(',')
+        ,CHAR(DIGITS(총자산))
+        ,CHAR(',')
+        ,한도고객구분
+        ,CHAR(',')
+        ,CHAR(SPACE(13)) AS 모기업법인등록번호
+        ,CHAR(',')
+        ,"모기업ISO국가코드"
+        ,CHAR(',')
+        ,CHAR(SPACE(6)) AS 연합회차주번호
+        ,CHAR(',')
+        ,"고객ID구분"
+        ,CHAR(',')
+        ,한도그룹번호
+        ,CHAR(',')
+        ,그룹사신용등급구분
+        ,CHAR(',')
+        ,CHAR(SPACE(52)) AS 차주대표자명
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 그룹회사코드
+                                    ,고객식별자) AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0015   A
+   WHERE 그룹회사코드 = 'KB0'
+     AND 차주번호구분 NOT IN ('1','2')
+    WITH  UR;
+/*
+//*--------------------------------------------------------------
+//*COLUMN 복호화
+//*ZAPA
+//*STEPLIB  DD DSN=SEC.XCPS.ZAP0.LOADLIB,DISP=SHR
+//*         DD DSN=KLA.PONLINE.LOAD,DISP=SHR
+//*ZABA
+//*STEPLIB  DD DSN=SEC.XCPS.ZAB0.LOADLIB,DISP=SHR
+//*         DD DSN=KLA.BONLINE.LOAD,DISP=SHR
+//*ZADA
+//*STEPLIB  DD DSN=SEC.XCPS.ZAD0.LOADLIB,DISP=SHR
+//*         DD DSN=KLA.DONLINE.LOAD,DISP=SHR
+//*--------------------------------------------------------------
+//STEP04   EXEC PGM=SCPXUTL,COND=(4,LT),
+//            PARM='DEC,14:44,59:44'
+//STEPLIB  DD DSN=SEC.XCPS.ZAP0.LOADLIB,DISP=SHR
+//         DD DSN=KLA.PONLINE.LOAD,DISP=SHR
+//INPUT    DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP2,DISP=SHR
+//OUTPUT   DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP3,
+//            DISP=(NEW,CATLG,DELETE),DCB=(RECFM=FB,LRECL=369),
+//            SPACE=(CYL,(100,10),RLSE),DSORG=PS,DSNTYPE=LARGE
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//CEEDUMP  DD SYSOUT=*
+/*
+//STEP05   EXEC PGM=ICEMAN,COND=(4,LT)
+//SYSOUT   DD SYSOUT=*
+//SORTIN   DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP3,DISP=SHR
+//SORTOUT  DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP4,
+//            DISP=(NEW,CATLG,DELETE),SPACE=(CYL,(300,100),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=355,BLKSIZE=0)
+//SORTWK01 DD UNIT=SYSPA,SPACE=(CYL,(300,100))
+//SORTWK02 DD UNIT=SYSPA,SPACE=(CYL,(300,100))
+//SORTWK03 DD UNIT=SYSPA,SPACE=(CYL,(300,100))
+//SORTWK04 DD UNIT=SYSPA,SPACE=(CYL,(300,100))
+//SORTWK05 DD UNIT=SYSPA,SPACE=(CYL,(300,100))
+//SYSIN    DD *
+  SORT   FIELDS=COPY
+  OUTREC FIELDS=(1,26,34,14,55,315)
+  END
+/*
+//STEP06    EXEC JZBDEXEC,MBR=BJLG001,OPT=&SYSUID
+//INFILE01  DD DUMMY
+//OTFILE01  DD DUMMY
+//INFILE02  DD DUMMY
+//OTFILE02  DD DUMMY
+//INFILE03  DD DUMMY
+//OTFILE03  DD DUMMY
+//INFILE04  DD DUMMY
+//OTFILE04  DD DUMMY
+//INFILE05  DD DUMMY
+//OTFILE05  DD DUMMY
+//INFILE06  DD DUMMY
+//OTFILE06  DD DUMMY
+//INFILE07  DD DUMMY
+//OTFILE07  DD DUMMY
+//INFILE15  DD DUMMY
+//OTFILE15  DD DUMMY
+//INFILE16  DD DUMMY
+//OTFILE16  DD DUMMY
+//INFILE18  DD DSN=KJL.SD.KJL0015.EXPD29.G018.DATTMP4,DISP=SHR
+//OTFILE18  DD DSN=KJL.SD.KJL0015.EXPD29.G018.DAT,
+//             DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(500,100),RLSE),
+//             UNIT=SYSPA,DCB=(RECFM=FB,LRECL=536,BLKSIZE=27872)
+//INFILE19  DD DUMMY
+//OTFILE19  DD DUMMY
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLG018-001-EXPD29-KB ZAPA-%%$ODATE
+/*
+//

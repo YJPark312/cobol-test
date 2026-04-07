@@ -1,0 +1,543 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD681 (산업별TE한도초과기준일관리)
+      *@처리유형  : BATCH
+      *@처리개요  :산업별TE한도초과기준일관리（입력／수정／삭제）
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20111004: 신규작성
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM               : 테이블명         : 접근유형
+      **  -------------------------   ----------------------------------
+      **산업별TE한도초과기준일관리: THKJL0068          : RCD
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD681.
+       AUTHOR.                         백현정.
+       DATE-WRITTEN.                   11/10/04.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       CONFIGURATION                   SECTION.
+      *-----------------------------------------------------------------
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD681'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.
+
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-FE-CNT            PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-SEL-CNT           PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-INT-CNT           PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-UPT-CNT           PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-DEL-CNT           PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  IN-EOF-Y                        VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *       그룹회사코드
+           03 WK-GROUP-CO-CD           PIC  X(003).
+      *       기준년월일
+           03 WK-BASE-YMD              PIC  X(008).
+      *      작업처리구분（１：입력，２：수정，３：삭제）
+           03 WK-JOBPRO-CD             PIC  X(001).
+      *       대분류업종코드
+           03 WK-LAG-CLSFI-BZTYP-CD    PIC  X(003).
+      *      취급중단년월일
+           03 WK-HNDLN-DSCN-YMD        PIC  X(008).
+      *      예외적용년월일
+           03 WK-ECEPT-APLY-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업처리구분（１：입력，２：수정，３：삭제）
+           03  WK-SYSIN-JOBPRO-CD      PIC  X(001).
+           03  FILLER                  PIC  X(001).
+      *대분류업종코드
+           03  WK-SYSIN-LAG-CD         PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *취급중단년월일
+           03  WK-SYSIN-HNDLN-YMD      PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *예외적용년월일
+           03  WK-SYSIN-ECEPT-YMD      PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      *-----------------------------------------------------------------
+      * TABLE ACCESS INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TKJL0068-KEY.
+           COPY    TKJL0068.
+       01  TRJL0068-REC.
+           COPY    TRJL0068.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+      *EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+      *EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+      *EXEC  SQL  END    DECLARE            SECTION  END-EXEC.
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1.초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@2.입력값 CHECK(SYSIN)
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@3. SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@4.업무처리
+           PERFORM  S4000-PROCESS-RTN
+              THRU  S4000-PROCESS-EXT
+
+      *@5.처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@  초기화
+           INITIALIZE       WK-AREA
+                            WK-SYSIN
+
+      *@1.1 JCL SYSIN ACCEPT
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD681 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *-----------------------------------------------------------------
+      *@1  공통영역기준일자 SET
+      *-----------------------------------------------------------------
+      *@1.1입력파라미터 조립
+      *    (그룹회사코드,작업실행일)
+      *   그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *   작업실행일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *@1.2프로그램호출:공통영역기준일자 SET
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  XBJISTDT-R-STAT = ZEROS
+           THEN
+               CONTINUE
+           ELSE
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@2 입력값 CHECK(SYSIN)
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@  그룹회사구분코드 미입력시 에러
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  자료기준년월일 미입력시 에러
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  작업처리구분 미입력시 에러
+           IF  WK-SYSIN-JOBPRO-CD = SPACE
+               MOVE '산업TE기업규모구분 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@  대분류업종코드 미입력시 에러
+           IF  WK-SYSIN-LAG-CD = SPACE
+               MOVE '대분류업종코드 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@3  SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-AREA
+
+      *@3.1  HOST INPUT에 값 SET
+
+      *@  그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-GROUP-CO-CD
+
+      *@  기준년월일
+           MOVE  WK-SYSIN-BASE-YMD
+             TO  WK-BASE-YMD
+
+      *@  작업처리구분（１：입력，２：수정，３：삭제）
+           MOVE  WK-SYSIN-JOBPRO-CD
+             TO  WK-JOBPRO-CD
+
+      *@  대분류업종코드
+           MOVE  WK-SYSIN-LAG-CD
+             TO  WK-LAG-CLSFI-BZTYP-CD
+
+      *@  취급중단년월일
+           MOVE  WK-SYSIN-HNDLN-YMD
+             TO  WK-HNDLN-DSCN-YMD
+
+      *@  예외적용년월일
+           MOVE  WK-SYSIN-ECEPT-YMD
+             TO  WK-ECEPT-APLY-YMD
+           .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4  PROCESS ROUTINE분기
+      *-----------------------------------------------------------------
+       S4000-PROCESS-RTN.
+
+      *@4.1작업처리구분（１：입력，２：수정，３：삭제）
+           EVALUATE  WK-JOBPRO-CD
+               WHEN  CO-CHA-1
+                     PERFORM  S4100-KJL0068-INSERT-RTN
+                        THRU  S4100-KJL0068-INSERT-EXT
+               WHEN  CO-CHA-2
+                     PERFORM  S4200-KJL0068-SELUPT-RTN
+                        THRU  S4200-KJL0068-SELUPT-EXT
+               WHEN  CO-CHA-3
+                     PERFORM  S4300-KJL0068-SELDEL-RTN
+                        THRU  S4300-KJL0068-SELDEL-EXT
+               WHEN  OTHER
+                     #USRLOG '작업처리구분확인요망: '
+                             WK-JOBPRO-CD
+           END-EVALUATE
+
+           .
+       S4000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4.1산업별TE한도초과기준일관리　입력
+      *-----------------------------------------------------------------
+       S4100-KJL0068-INSERT-RTN.
+
+           INITIALIZE    TKJL0068-KEY
+                         TRJL0068-REC
+
+      *    그룹회사코드－조립
+           MOVE  WK-GROUP-CO-CD
+             TO  RJL0068-GROUP-CO-CD
+
+      *    대분류업종코드
+           MOVE  WK-LAG-CLSFI-BZTYP-CD
+             TO  RJL0068-LAG-CLSFI-BZTYP-CD
+
+      *    취급중단년월일
+           MOVE  WK-HNDLN-DSCN-YMD
+             TO  RJL0068-HNDLN-DSCN-YMD
+
+      *    예외적용년월일
+           MOVE  WK-ECEPT-APLY-YMD
+             TO  RJL0068-ECEPT-APLY-YMD
+
+           #DYDBIO  INSERT-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-INT-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0068'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'INSERT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'INSERT시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S4100-KJL0068-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4.2산업별TE한도초과기준일관리　조회－수정
+      *-----------------------------------------------------------------
+       S4200-KJL0068-SELUPT-RTN.
+
+           INITIALIZE    TKJL0068-KEY
+                         TRJL0068-REC
+
+      *    그룹회사코드－조립
+           MOVE  WK-GROUP-CO-CD
+             TO  KJL0068-PK-GROUP-CO-CD
+
+      *    대분류업종코드
+           MOVE  WK-LAG-CLSFI-BZTYP-CD
+             TO  KJL0068-PK-LAG-CLSFI-BZTYP-CD
+
+           #DYDBIO  SELECT-CMD-Y  TKJL0068-PK  TRJL0068-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-SEL-CNT
+                     PERFORM  S4210-KJL0068-UPDATE-RTN
+                        THRU  S4210-KJL0068-UPDATE-EXT
+               WHEN  COND-DBIO-MRNF
+                     #USRLOG 'DB자료없음-수정불가'
+                     #USRLOG '대분류업종코드: '
+                               WK-LAG-CLSFI-BZTYP-CD
+               WHEN  OTHER
+                     MOVE  'KJL0068'   TO  XZUGEROR-I-TBL-ID
+                     MOVE  'SELECT '   TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE  'DB작업시　오류가　발생'
+                                       TO  XZUGEROR-I-MSG
+      *사용자정의 에러코드 설정(13: DB작업 오류)
+      *@DB작업　오류
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S4200-KJL0068-SELUPT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4.2.1산업별TE한도초과기준일관리　수정
+      *-----------------------------------------------------------------
+       S4210-KJL0068-UPDATE-RTN.
+
+      *    취급중단년월일
+           MOVE  WK-HNDLN-DSCN-YMD
+             TO  RJL0068-HNDLN-DSCN-YMD
+
+      *    예외적용년월일
+           MOVE  WK-ECEPT-APLY-YMD
+             TO  RJL0068-ECEPT-APLY-YMD
+
+           #DYDBIO  UPDATE-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-UPT-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0068'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'UPDATE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'UPDATE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S4210-KJL0068-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4.3산업별TE한도초과기준일관리　조회－삭제
+      *-----------------------------------------------------------------
+       S4300-KJL0068-SELDEL-RTN.
+
+           INITIALIZE    TKJL0068-KEY
+                         TRJL0068-REC
+
+      *    그룹회사코드－조립
+           MOVE  WK-GROUP-CO-CD
+             TO  KJL0068-PK-GROUP-CO-CD
+
+      *    대분류업종코드
+           MOVE  WK-LAG-CLSFI-BZTYP-CD
+             TO  KJL0068-PK-LAG-CLSFI-BZTYP-CD
+
+           #DYDBIO  SELECT-CMD-Y  TKJL0068-PK  TRJL0068-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-SEL-CNT
+                     PERFORM  S4310-KJL0068-DELETE-RTN
+                        THRU  S4310-KJL0068-DELETE-EXT
+               WHEN  COND-DBIO-MRNF
+                     #USRLOG 'DB자료없음-삭제불가'
+                     #USRLOG '대분류업종코드: '
+                               WK-LAG-CLSFI-BZTYP-CD
+               WHEN  OTHER
+                     MOVE  'KJL0068'   TO  XZUGEROR-I-TBL-ID
+                     MOVE  'SELECT '   TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE  'DB작업시　오류가　발생'
+                                       TO  XZUGEROR-I-MSG
+      *사용자정의 에러코드 설정(13: DB작업 오류)
+      *@DB작업　오류
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S4300-KJL0068-SELDEL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@4.3.1산업별TE한도초과기준일관리　삭제
+      *-----------------------------------------------------------------
+       S4310-KJL0068-DELETE-RTN.
+
+           #DYDBIO  DELETE-CMD-Y TKJL0068-PK TRJL0068-REC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-DEL-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0068'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'DELETE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'UPDATE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S4310-KJL0068-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@5 처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@1 처리결과DISPLAY
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* KJL0068 SELECT  COUNT  = ' WK-AC-SEL-CNT
+           #USRLOG '*         INSERT  COUNT  = ' WK-AC-INT-CNT
+           #USRLOG '*         UPDATE  COUNT  = ' WK-AC-UPT-CNT
+           #USRLOG '*         DELETE  COUNT  = ' WK-AC-DEL-CNT
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD681 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+      *@1 정상종료
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

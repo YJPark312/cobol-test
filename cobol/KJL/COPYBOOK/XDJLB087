@@ -1,0 +1,70 @@
+      *================================================================*
+      *@ NAME : XDJLB087                                               *
+      *@ DESC : DC외화타점예치Depo별대주주등록COPYBOOK             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-08-19 15:38:26                          *
+      *  생성일시     : 2024-08-19 15:38:26                          *
+      *  전체길이     : 00010207 BYTES                               *
+      *================================================================*
+           03  XDJLB087-RETURN.
+             05  XDJLB087-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB087-OK            VALUE  '00'.
+                 88  COND-XDJLB087-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB087-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB087-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB087-ERROR         VALUE  '09'.
+                 88  COND-XDJLB087-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB087-SYSERROR      VALUE  '99'.
+             05  XDJLB087-R-LINE                 PIC  9(006).
+             05  XDJLB087-R-ERRCD                PIC  X(008).
+             05  XDJLB087-R-TREAT-CD             PIC  X(008).
+             05  XDJLB087-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB087-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB087-I-PRCSS-DSTIC          PIC  X(002).
+      *--       현재건수1
+             05  XDJLB087-I-PRSNT-NOITM1         PIC  9(005).
+      *--       그리드1
+             05  XDJLB087-I-GRID1                OCCURS 000100 TIMES.
+      *--         기준년월일
+               07  XDJLB087-I-BASE-YMD           PIC  X(008).
+      *--         통화코드
+               07  XDJLB087-I-CNCYCD             PIC  X(003).
+      *--         거래은행BIC코드
+               07  XDJLB087-I-TRAN-BNK-BIC       PIC  X(011).
+      *--         통합계정과목코드
+               07  XDJLB087-I-INTGRA-TIACC-CD    PIC  X(013).
+      *--         외화잔액
+               07  XDJLB087-I-FC-BAL             PIC  9(015)V9(03).
+      *--         원화환산금액
+               07  XDJLB087-I-WONC-AUC           PIC  9(015)V9(03).
+      *--         고객식별자
+               07  XDJLB087-I-CUST-IDNFR         PIC  X(010).
+      *--         등록직원번호
+               07  XDJLB087-I-REGI-EMPID         PIC  X(007).
+      *--         등록일시
+               07  XDJLB087-I-REGI-YMS           PIC  X(014).
+      *----------------------------------------------------------------*
+           03  XDJLB087-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB087-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  8  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB087-I-PRCSS-DSTIC        ;처리구분
+      *N  XDJLB087-I-PRSNT-NOITM1       ;현재건수1
+      *A  XDJLB087-I-GRID1              ;그리드1
+      *X  XDJLB087-I-BASE-YMD           ;기준년월일
+      *X  XDJLB087-I-CNCYCD             ;통화코드
+      *X  XDJLB087-I-TRAN-BNK-BIC       ;거래은행BIC코드
+      *X  XDJLB087-I-INTGRA-TIACC-CD    ;통합계정과목코드
+      *N  XDJLB087-I-FC-BAL             ;외화잔액
+      *N  XDJLB087-I-WONC-AUC           ;원화환산금액
+      *X  XDJLB087-I-CUST-IDNFR         ;고객식별자
+      *X  XDJLB087-I-REGI-EMPID         ;등록직원번호
+      *X  XDJLB087-I-REGI-YMS           ;등록일시
+      *X  XDJLB087-O-PRCSS-RSULT        ;처리결과

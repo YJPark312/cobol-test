@@ -1,0 +1,61 @@
+      *================================================================*
+      *@ NAME : V1JL4107                                               *
+      *@ DESC : TE한도관리대상조회                                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-09-24 16:09:43                          *
+      *  생성일시     : 2021-09-24 16:09:49                          *
+      *  전체길이     : 01030067 BYTES                               *
+      *================================================================*
+      *--     부점명
+           07  V1JL4107-BRN-NAME                 PIC  X(062).
+      *--     출력라인수1
+ROWCNT     07  V1JL4107-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4107-GRID1                    OCCURS 0 TO 005000
+               DEPENDING ON V1JL4107-OUTPT-LINE-CNT1.
+      *--       차주번호
+             09  V1JL4107-BRWR-NO                PIC  X(013).
+      *--       채무자명
+             09  V1JL4107-DBTRZ-NAME             PIC  X(042).
+      *--       기업규모
+             09  V1JL4107-CORP-SCAL              PIC  X(020).
+      *--       관리한도금액
+             09  V1JL4107-MGT-CLAM               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준한도금액
+             09  V1JL4107-TTL-AMT-BASE-CLAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       명목액기준잔액
+             09  V1JL4107-TTL-AMT-BASE-BAL       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도기준토탈익스포져금액
+             09  V1JL4107-LIMT-BASE-TE-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도소진율
+             09  V1JL4107-LIMT-EXHS-RT           PIC  9(003)V9(02).
+      *--       신용평가유효년월일
+             09  V1JL4107-CRDT-VALUA-VALD-YMD    PIC  X(008).
+      *--       관리한도유효년월일
+             09  V1JL4107-MGT-LIMT-VALD-YMD      PIC  X(008).
+      *--       관리부점코드
+             09  V1JL4107-MGT-BRNCD              PIC  X(004).
+      *--       관리부점명
+             09  V1JL4107-MGT-BRN-NAME           PIC  X(042).
+      *================================================================*
+      *        V  1  J  L  4  1  0  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4107-BRN-NAME             ;부점명
+      *L  V1JL4107-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4107-GRID1                ;그리드1
+      *X  V1JL4107-BRWR-NO              ;차주번호
+      *X  V1JL4107-DBTRZ-NAME           ;채무자명
+      *X  V1JL4107-CORP-SCAL            ;기업규모
+      *S  V1JL4107-MGT-CLAM             ;관리한도금액
+      *S  V1JL4107-TTL-AMT-BASE-CLAM    ;명목액기준한도금액
+      *S  V1JL4107-TTL-AMT-BASE-BAL     ;명목액기준잔액
+      *S  V1JL4107-LIMT-BASE-TE-AMT     ;한도기준토탈익스포져금액
+      *N  V1JL4107-LIMT-EXHS-RT         ;한도소진율
+      *X  V1JL4107-CRDT-VALUA-VALD-YMD  ;신용평가유효년월일
+      *X  V1JL4107-MGT-LIMT-VALD-YMD    ;관리한도유효년월일
+      *X  V1JL4107-MGT-BRNCD            ;관리부점코드
+      *X  V1JL4107-MGT-BRN-NAME         ;관리부점명

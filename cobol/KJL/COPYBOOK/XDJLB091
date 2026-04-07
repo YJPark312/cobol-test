@@ -1,0 +1,377 @@
+      *================================================================*
+      *@ NAME : XDJLB091                                               *
+      *@ DESC : DC기업및그룹한도신청및승인(개별그룹기준한도저장    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-26 17:46:07                          *
+      *  생성일시     : 2021-11-26 17:46:07                          *
+      *  전체길이     : 00001003 BYTES                               *
+      *================================================================*
+           03  XDJLB091-RETURN.
+             05  XDJLB091-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB091-OK            VALUE  '00'.
+                 88  COND-XDJLB091-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB091-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB091-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB091-ERROR         VALUE  '09'.
+                 88  COND-XDJLB091-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB091-SYSERROR      VALUE  '99'.
+             05  XDJLB091-R-LINE                 PIC  9(006).
+             05  XDJLB091-R-ERRCD                PIC  X(008).
+             05  XDJLB091-R-TREAT-CD             PIC  X(008).
+             05  XDJLB091-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB091-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB091-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJLB091-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJLB091-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJLB091-I-APLCN-NO             PIC  X(010).
+      *--       신용등급
+             05  XDJLB091-I-CRDRAT               PIC  X(004).
+      *--       결산년월
+             05  XDJLB091-I-STLACC-YM            PIC  X(006).
+      *--       표준산업분류코드
+             05  XDJLB091-I-STND-I-CLSFI-CD      PIC  X(005).
+      *--       TE산업분류코드
+             05  XDJLB091-I-TE-IDSTRY-CLSFI-CD   PIC  X(003).
+      *--       업종평균기준년
+             05  XDJLB091-I-BZTYP-AVG-BASE-YR    PIC  X(004).
+      *--       신용등급별지원비율
+             05  XDJLB091-I-CRDRAT-P-SPORT-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전전년영업이익
+             05  XDJLB091-I-BF-PYY-OPRFT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년영업이익
+             05  XDJLB091-I-PYY-OPRFT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       영업이익
+             05  XDJLB091-I-OPRFT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년수입이자
+             05  XDJLB091-I-BF-PYY-IMPRT-INT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년수입이자
+             05  XDJLB091-I-PYY-IMPRT-INT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수입이자
+             05  XDJLB091-I-IMPRT-INT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년감가상각비
+             05  XDJLB091-I-BF-PYY-DPRC-CST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년감가상각비
+             05  XDJLB091-I-PYY-DPRC-CST         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       감가상각비
+             05  XDJLB091-I-DPRC-CST             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년금융비용
+             05  XDJLB091-I-BF-PYY-FNCS          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년금융비용
+             05  XDJLB091-I-PYY-FNCS             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       금융비용
+             05  XDJLB091-I-FNCS                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년단기차입금
+             05  XDJLB091-I-BF-PYY-SHTRM-AMBR    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년단기차입금
+             05  XDJLB091-I-PYY-SHTRM-AMBR       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       단기차입금
+             05  XDJLB091-I-SHTRM-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       차입금상환예상액
+             05  XDJLB091-I-AMBR-R-ANTICI-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3차입금상환예상액
+             05  XDJLB091-I-Y-3S-AMBR-RPAYAMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       가중평균이자율
+             05  XDJLB091-I-WGHTG-AVGZ-IRT       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전전년금융총비용비율
+             05  XDJLB091-I-BF-PFT-CST-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전년금융총비용비율
+             05  XDJLB091-I-PYY-FT-CST-RATO      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       금융총비용비율
+             05  XDJLB091-I-FINAC-T-CST-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       금융비용가중치값
+             05  XDJLB091-I-FNCS-WGHT-VAL        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3금융비용가중치값
+             05  XDJLB091-I-Y-3-FNCS-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       현금흐름기준액
+             05  XDJLB091-I-CSFW-BASE-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3현금흐름기준액
+             05  XDJLB091-I-Y-3-CSFW-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년자기자본금
+             05  XDJLB091-I-BF-PYY-ONCP-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년자기자본금
+             05  XDJLB091-I-PYY-ONCP-AMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본
+             05  XDJLB091-I-ONCP                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       자기자본산업적용비율
+             05  XDJLB091-I-ONCP-I-APLY-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입금자기자본율
+             05  XDJLB091-I-AMBR-ONCP-RT         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전전년업체총차입금
+             05  XDJLB091-I-BF-PE-TOTAL-AMBR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년업체총차입금
+             05  XDJLB091-I-PYY-ENTP-TOTAL-AMBR  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       총차입금
+             05  XDJLB091-I-TOTAL-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       총차입금자기자본비율
+             05  XDJLB091-I-TOTAL-A-ONCP-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3총차입금자기자본비율
+             05  XDJLB091-I-Y-3T-AMBR-ONCP-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입금자본가중치값
+             05  XDJLB091-I-AMBR-CAPTL-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3차입금자본가중치값
+             05  XDJLB091-I-Y-3A-CAPTL-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       자기자본기준액
+             05  XDJLB091-I-ONCP-BASE-AMT        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3자기자본기준금액
+             05  XDJLB091-I-Y-3-ONCP-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       상환능력기준한도
+             05  XDJLB091-I-SOLVN-BASE-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3상환능력기준한도
+             05  XDJLB091-I-Y-3-SOLVN-BASE-CLAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전전년매출액
+             05  XDJLB091-I-BF-PYY-SALEPR        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년매출액
+             05  XDJLB091-I-PYY-SALEPR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       매출액
+             05  XDJLB091-I-SALEPR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       매출액산업적용비율
+             05  XDJLB091-I-SALEPR-I-APLY-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3평균매출금액
+             05  XDJLB091-I-Y-3-AVG-ASALE-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3평균매출액비율
+             05  XDJLB091-I-Y-3-AVG-SALEPR-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       매출가중치값
+             05  XDJLB091-I-ASALE-WGHT-VAL       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전전년매출채권회전률
+             05  XDJLB091-I-BF-PAB-ROTAT-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전년매출채권회전비율
+             05  XDJLB091-I-PYY-AB-ROTAT-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       매출채권회전비율
+             05  XDJLB091-I-ASALE-B-ROTAT-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       매출채권회전가중치값
+             05  XDJLB091-I-ASALE-BR-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3매출채권회전가중값
+             05  XDJLB091-I-Y-3ABR-WGHTG-VAL     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       매출기준금액
+             05  XDJLB091-I-ASALE-BSAMT          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3매출기준금액
+             05  XDJLB091-I-Y-3-ASALE-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준전전년총자산
+             05  XDJLB091-I-BASE-BP-TOTAL-ASST   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준전년총자산
+             05  XDJLB091-I-BASE-PYY-TOTAL-ASST  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       총자산
+             05  XDJLB091-I-TOTAL-ASST           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       총자산산업적용비율
+             05  XDJLB091-I-TOTAL-AI-APLY-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입금총자산비율
+             05  XDJLB091-I-AMBR-T-ASST-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       총차입금총자산비율
+             05  XDJLB091-I-TOTAL-AT-ASST-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3총차입금총자산비율
+             05  XDJLB091-I-Y-3TAT-ASST-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       전전년현금성자산금액
+             05  XDJLB091-I-BF-PC-INCLIN-ASAM    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       전년현금성자산금액
+             05  XDJLB091-I-PYY-CSH-INCLIN-ASAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       현금성자산금액
+             05  XDJLB091-I-CSH-INCLIN-ASAM      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       평균현금성자산금액
+             05  XDJLB091-I-AVG-CSH-INCLIN-ASAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       평균총자산금액
+             05  XDJLB091-I-AVG-TOTAL-ASAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       평균현금성자산비율
+             05  XDJLB091-I-AVG-CI-ASST-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       차입자산비율가중치값
+             05  XDJLB091-I-BRRW-AR-WGHT-VAL     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       Y3차입자산비율가중값
+             05  XDJLB091-I-Y-3BA-RATO-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       현금성자산가중치값
+             05  XDJLB091-I-CSH-I-ASST-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       자산기준금액
+             05  XDJLB091-I-ASST-BSAMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3자산기준금액
+             05  XDJLB091-I-Y-3-ASST-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       규모기준한도
+             05  XDJLB091-I-SCAL-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3규모기준한도금액
+             05  XDJLB091-I-Y-3-SCAL-BASE-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기준한도
+             05  XDJLB091-I-BASE-LIMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       Y3기준한도금액
+             05  XDJLB091-I-Y-3-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB091-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB091-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  9  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB091-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB091-I-CUST-DSTIC         ;고객구분
+      *X  XDJLB091-I-KB-PIN             ;KB-PIN
+      *X  XDJLB091-I-APLCN-NO           ;신청번호
+      *X  XDJLB091-I-CRDRAT             ;신용등급
+      *X  XDJLB091-I-STLACC-YM          ;결산년월
+      *X  XDJLB091-I-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XDJLB091-I-TE-IDSTRY-CLSFI-CD ;TE산업분류코드
+      *X  XDJLB091-I-BZTYP-AVG-BASE-YR  ;업종평균기준년
+      *S  XDJLB091-I-CRDRAT-P-SPORT-RATO;신용등급별지원비율
+      *S  XDJLB091-I-BF-PYY-OPRFT       ;전전년영업이익
+      *S  XDJLB091-I-PYY-OPRFT          ;전년영업이익
+      *S  XDJLB091-I-OPRFT              ;영업이익
+      *S  XDJLB091-I-BF-PYY-IMPRT-INT   ;전전년수입이자
+      *S  XDJLB091-I-PYY-IMPRT-INT      ;전년수입이자
+      *S  XDJLB091-I-IMPRT-INT          ;수입이자
+      *S  XDJLB091-I-BF-PYY-DPRC-CST    ;전전년감가상각비
+      *S  XDJLB091-I-PYY-DPRC-CST       ;전년감가상각비
+      *S  XDJLB091-I-DPRC-CST           ;감가상각비
+      *S  XDJLB091-I-BF-PYY-FNCS        ;전전년금융비용
+      *S  XDJLB091-I-PYY-FNCS           ;전년금융비용
+      *S  XDJLB091-I-FNCS               ;금융비용
+      *S  XDJLB091-I-BF-PYY-SHTRM-AMBR  ;전전년단기차입금
+      *S  XDJLB091-I-PYY-SHTRM-AMBR     ;전년단기차입금
+      *S  XDJLB091-I-SHTRM-AMBR         ;단기차입금
+      *S  XDJLB091-I-AMBR-R-ANTICI-AMT  ;차입금상환예상액
+      *S  XDJLB091-I-Y-3S-AMBR-RPAYAMT  ;Y3차입금상환예상액
+      *S  XDJLB091-I-WGHTG-AVGZ-IRT     ;가중평균이자율
+      *S  XDJLB091-I-BF-PFT-CST-RATO    ;전전년금융총비용비율
+      *S  XDJLB091-I-PYY-FT-CST-RATO    ;전년금융총비용비율
+      *S  XDJLB091-I-FINAC-T-CST-RATO   ;금융총비용비율
+      *S  XDJLB091-I-FNCS-WGHT-VAL      ;금융비용가중치값
+      *S  XDJLB091-I-Y-3-FNCS-WGHT-VAL  ;Y3금융비용가중치값
+      *S  XDJLB091-I-CSFW-BASE-AMT      ;현금흐름기준액
+      *S  XDJLB091-I-Y-3-CSFW-BSAMT     ;Y3현금흐름기준액
+      *S  XDJLB091-I-BF-PYY-ONCP-AMT    ;전전년자기자본금
+      *S  XDJLB091-I-PYY-ONCP-AMT       ;전년자기자본금
+      *S  XDJLB091-I-ONCP               ;자기자본
+      *S  XDJLB091-I-ONCP-I-APLY-RATO   ;자기자본산업적용비율
+      *S  XDJLB091-I-AMBR-ONCP-RT       ;차입금자기자본율
+      *S  XDJLB091-I-BF-PE-TOTAL-AMBR   ;전전년업체총차입금
+      *S  XDJLB091-I-PYY-ENTP-TOTAL-AMBR;전년업체총차입금
+      *S  XDJLB091-I-TOTAL-AMBR         ;총차입금
+      *S  XDJLB091-I-TOTAL-A-ONCP-RATO  ;총차입금자기자본비율
+      *S  XDJLB091-I-Y-3T-AMBR-ONCP-RATO
+      * Y3총차입금자기자본비율
+      *S  XDJLB091-I-AMBR-CAPTL-WGHT-VAL;차입금자본가중치값
+      *S  XDJLB091-I-Y-3A-CAPTL-WGHT-VAL
+      * Y3차입금자본가중치값
+      *S  XDJLB091-I-ONCP-BASE-AMT      ;자기자본기준액
+      *S  XDJLB091-I-Y-3-ONCP-BSAMT     ;Y3자기자본기준금액
+      *S  XDJLB091-I-SOLVN-BASE-LIMT    ;상환능력기준한도
+      *S  XDJLB091-I-Y-3-SOLVN-BASE-CLAM;Y3상환능력기준한도
+      *S  XDJLB091-I-BF-PYY-SALEPR      ;전전년매출액
+      *S  XDJLB091-I-PYY-SALEPR         ;전년매출액
+      *S  XDJLB091-I-SALEPR             ;매출액
+      *S  XDJLB091-I-SALEPR-I-APLY-RATO ;매출액산업적용비율
+      *S  XDJLB091-I-Y-3-AVG-ASALE-AMT  ;Y3평균매출금액
+      *S  XDJLB091-I-Y-3-AVG-SALEPR-RATO;Y3평균매출액비율
+      *S  XDJLB091-I-ASALE-WGHT-VAL     ;매출가중치값
+      *S  XDJLB091-I-BF-PAB-ROTAT-RATO  ;전전년매출채권회전률
+      *S  XDJLB091-I-PYY-AB-ROTAT-RATO  ;전년매출채권회전비율
+      *S  XDJLB091-I-ASALE-B-ROTAT-RATO ;매출채권회전비율
+      *S  XDJLB091-I-ASALE-BR-WGHT-VAL  ;매출채권회전가중치값
+      *S  XDJLB091-I-Y-3ABR-WGHTG-VAL   ;Y3매출채권회전가중값
+      *S  XDJLB091-I-ASALE-BSAMT        ;매출기준금액
+      *S  XDJLB091-I-Y-3-ASALE-BSAMT    ;Y3매출기준금액
+      *S  XDJLB091-I-BASE-BP-TOTAL-ASST ;기준전전년총자산
+      *S  XDJLB091-I-BASE-PYY-TOTAL-ASST;기준전년총자산
+      *S  XDJLB091-I-TOTAL-ASST         ;총자산
+      *S  XDJLB091-I-TOTAL-AI-APLY-RATO ;총자산산업적용비율
+      *S  XDJLB091-I-AMBR-T-ASST-RATO   ;차입금총자산비율
+      *S  XDJLB091-I-TOTAL-AT-ASST-RATO ;총차입금총자산비율
+      *S  XDJLB091-I-Y-3TAT-ASST-RATO   ;Y3총차입금총자산비율
+      *S  XDJLB091-I-BF-PC-INCLIN-ASAM  ;전전년현금성자산금액
+      *S  XDJLB091-I-PYY-CSH-INCLIN-ASAM;전년현금성자산금액
+      *S  XDJLB091-I-CSH-INCLIN-ASAM    ;현금성자산금액
+      *S  XDJLB091-I-AVG-CSH-INCLIN-ASAM;평균현금성자산금액
+      *S  XDJLB091-I-AVG-TOTAL-ASAM     ;평균총자산금액
+      *S  XDJLB091-I-AVG-CI-ASST-RATO   ;평균현금성자산비율
+      *S  XDJLB091-I-BRRW-AR-WGHT-VAL   ;차입자산비율가중치값
+      *S  XDJLB091-I-Y-3BA-RATO-WGHT-VAL
+      * Y3차입자산비율가중값
+      *S  XDJLB091-I-CSH-I-ASST-WGHT-VAL;현금성자산가중치값
+      *S  XDJLB091-I-ASST-BSAMT         ;자산기준금액
+      *S  XDJLB091-I-Y-3-ASST-BSAMT     ;Y3자산기준금액
+      *S  XDJLB091-I-SCAL-BASE-LIMT     ;규모기준한도
+      *S  XDJLB091-I-Y-3-SCAL-BASE-CLAM ;Y3규모기준한도금액
+      *S  XDJLB091-I-BASE-LIMT          ;기준한도
+      *S  XDJLB091-I-Y-3-BASE-CLAM      ;Y3기준한도금액
+      *X  XDJLB091-O-PRCSS-RSULT        ;처리결과

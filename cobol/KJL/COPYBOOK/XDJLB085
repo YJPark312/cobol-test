@@ -1,0 +1,136 @@
+      *================================================================*
+      *@ NAME : XDJLB085                                               *
+      *@ DESC : DC신용공여계좌등록COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-08-22 13:59:10                          *
+      *  생성일시     : 2024-08-22 13:59:10                          *
+      *  전체길이     : 00018913 BYTES                               *
+      *================================================================*
+           03  XDJLB085-RETURN.
+             05  XDJLB085-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB085-OK            VALUE  '00'.
+                 88  COND-XDJLB085-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB085-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB085-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB085-ERROR         VALUE  '09'.
+                 88  COND-XDJLB085-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB085-SYSERROR      VALUE  '99'.
+             05  XDJLB085-R-LINE                 PIC  9(006).
+             05  XDJLB085-R-ERRCD                PIC  X(008).
+             05  XDJLB085-R-TREAT-CD             PIC  X(008).
+             05  XDJLB085-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB085-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB085-I-PRCSS-DSTIC          PIC  X(002).
+      *--       이사회승인번호
+             05  XDJLB085-I-BRDC-ATHOR-NO        PIC  X(010).
+      *--       고객식별자
+             05  XDJLB085-I-CUST-IDNFR           PIC  X(010).
+      *--       계좌번호
+             05  XDJLB085-I-ACNO                 PIC  X(020).
+      *--       약정계좌번호
+             05  XDJLB085-I-AGRE-ACNO            PIC  X(020).
+      *--       통합계정과목코드
+             05  XDJLB085-I-INTGRA-TIACC-CD      PIC  X(013).
+      *--       통화코드
+             05  XDJLB085-I-CNCYCD               PIC  X(003).
+      *--       통화한도
+             05  XDJLB085-I-CRNCY-CLAM           PIC  9(018).
+      *--       통화잔액
+             05  XDJLB085-I-CRNCY-BAL            PIC  9(018).
+      *--       신용공여익스포져금액
+             05  XDJLB085-I-GRCR-EXPSR-AMT       PIC  9(015).
+      *--       시작년월일
+             05  XDJLB085-I-START-YMD            PIC  X(008).
+      *--       만기년월일
+             05  XDJLB085-I-EXPIR-YMD            PIC  X(008).
+      *--       금리내용
+             05  XDJLB085-I-IRTZ-CTNT            PIC  X(042).
+      *--       담보형태구분
+             05  XDJLB085-I-SCURTY-FORM-DSTCD    PIC  X(001).
+      *--       담보설정금액
+             05  XDJLB085-I-SCURTY-SETAMT        PIC  9(015).
+      *--       취급부점코드
+             05  XDJLB085-I-HNDLN-BRNCD          PIC  X(004).
+      *--       대출취급형태구분
+             05  XDJLB085-I-LN-HNDLN-DSTCD       PIC  X(001).
+      *--       현재건수2
+             05  XDJLB085-I-PRSNT-NOITM2         PIC  9(005).
+      *--       그리드2
+             05  XDJLB085-I-GRID2                OCCURS 000100 TIMES.
+      *--         계좌번호2
+               07  XDJLB085-I-ACNO2              PIC  X(020).
+      *--         약정계좌번호2
+               07  XDJLB085-I-AGRE-ACNO2         PIC  X(020).
+      *--         통합계정과목코드2
+               07  XDJLB085-I-INTGRA-TIACC-CD2   PIC  X(013).
+      *--         통화코드2
+               07  XDJLB085-I-CNCYCD2            PIC  X(003).
+      *--         통화한도2
+               07  XDJLB085-I-CRNCY-CLAM2        PIC  9(018).
+      *--         통화잔액2
+               07  XDJLB085-I-CRNCY-BAL2         PIC  9(018).
+      *--         신용공여익스포져금액2
+               07  XDJLB085-I-GRCR-EXPSR-AMT2    PIC  9(015).
+      *--         시작년월일2
+               07  XDJLB085-I-START-YMD2         PIC  X(008).
+      *--         만기년월일2
+               07  XDJLB085-I-EXPIR-YMD2         PIC  X(008).
+      *--         금리내용2
+               07  XDJLB085-I-IRTZ-CTNT2         PIC  X(042).
+      *--         담보형태구분2
+               07  XDJLB085-I-SCURTY-FORM-DSTCD2 PIC  X(001).
+      *--         담보설정금액2
+               07  XDJLB085-I-SCURTY-SETAMT2     PIC  9(015).
+      *--         취급부점코드2
+               07  XDJLB085-I-HNDLN-BRNCD2       PIC  X(004).
+      *--         대출취급형태구분2
+               07  XDJLB085-I-LN-HNDLN-DSTCD2    PIC  X(001).
+      *--         수기계좌여부2
+               07  XDJLB085-I-HWRT-ACN-YN2       PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB085-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB085-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  8  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB085-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB085-I-BRDC-ATHOR-NO      ;이사회승인번호
+      *X  XDJLB085-I-CUST-IDNFR         ;고객식별자
+      *X  XDJLB085-I-ACNO               ;계좌번호
+      *X  XDJLB085-I-AGRE-ACNO          ;약정계좌번호
+      *X  XDJLB085-I-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJLB085-I-CNCYCD             ;통화코드
+      *N  XDJLB085-I-CRNCY-CLAM         ;통화한도
+      *N  XDJLB085-I-CRNCY-BAL          ;통화잔액
+      *N  XDJLB085-I-GRCR-EXPSR-AMT     ;신용공여익스포져금액
+      *X  XDJLB085-I-START-YMD          ;시작년월일
+      *X  XDJLB085-I-EXPIR-YMD          ;만기년월일
+      *X  XDJLB085-I-IRTZ-CTNT          ;금리내용
+      *X  XDJLB085-I-SCURTY-FORM-DSTCD  ;담보형태구분
+      *N  XDJLB085-I-SCURTY-SETAMT      ;담보설정금액
+      *X  XDJLB085-I-HNDLN-BRNCD        ;취급부점코드
+      *X  XDJLB085-I-LN-HNDLN-DSTCD     ;대출취급형태구분
+      *N  XDJLB085-I-PRSNT-NOITM2       ;현재건수2
+      *A  XDJLB085-I-GRID2              ;그리드2
+      *X  XDJLB085-I-ACNO2              ;계좌번호2
+      *X  XDJLB085-I-AGRE-ACNO2         ;약정계좌번호2
+      *X  XDJLB085-I-INTGRA-TIACC-CD2   ;통합계정과목코드2
+      *X  XDJLB085-I-CNCYCD2            ;통화코드2
+      *N  XDJLB085-I-CRNCY-CLAM2        ;통화한도2
+      *N  XDJLB085-I-CRNCY-BAL2         ;통화잔액2
+      *N  XDJLB085-I-GRCR-EXPSR-AMT2    ;신용공여익스포져금액2
+      *X  XDJLB085-I-START-YMD2         ;시작년월일2
+      *X  XDJLB085-I-EXPIR-YMD2         ;만기년월일2
+      *X  XDJLB085-I-IRTZ-CTNT2         ;금리내용2
+      *X  XDJLB085-I-SCURTY-FORM-DSTCD2 ;담보형태구분2
+      *N  XDJLB085-I-SCURTY-SETAMT2     ;담보설정금액2
+      *X  XDJLB085-I-HNDLN-BRNCD2       ;취급부점코드2
+      *X  XDJLB085-I-LN-HNDLN-DSTCD2    ;대출취급형태구분2
+      *X  XDJLB085-I-HWRT-ACN-YN2       ;수기계좌여부2
+      *X  XDJLB085-O-PRCSS-RSULT        ;처리결과

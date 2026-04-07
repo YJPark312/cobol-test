@@ -1,0 +1,704 @@
+//TKJLTULD JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  자료UNLOAD
+//*  수행호기 : ZABA
+//*********************************************************************
+//*  보고서　자료UNLOAD
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.KJLRPT1.UNLD,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD DSN=KJL.SY.SQL,DISP=SHR
+/*
+//
+//
+//********************************************************************/
+//* IBM HIGH PERFORMANCE UNLOAD SAMPLE JCL                           */
+//* IT WILL DON'T WRITE 2 BYTE FOR THE VARCHAR LENGTH VALUE          */
+//********************************************************************/
+//*   지주사　제공　자료　－　금액검증　제공자료                   */
+//********************************************************************/
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRRMS.SKJL0000.P00001,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0005,0002),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT '20100823','TE-0004'
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("TE한도환산금액"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0029 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준일       = '23'
+     AND  AA.기준년월     = '201008'
+ UNION ALL
+  SELECT '20100823','TE-0005'
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM(간접익스포져금액),0),15)),2,15)
+    FROM  DB2DBA.THKJL0031 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준일       = '23'
+     AND  AA.기준년월     = '201008'
+ UNION ALL
+  SELECT '20100823','TE-0009'
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("TE한도환산금액"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0039 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월일   = '20100823'
+ UNION ALL
+  SELECT '20100823','TE-0011'
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM("USD한도"),0),15)),2,15)
+    FROM  DB2DBA.THKJL0055 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월일   = '20100823'
+ UNION ALL
+  SELECT '20100823','TE-0012'
+       , SUBSTR(CHAR(DECIMAL(VALUE(SUM(전체관리한도),0),15)),2,15)
+    FROM  DB2DBA.THKJL0056 AA
+   WHERE  AA.그룹회사코드 = 'KB0'
+     AND  AA.기준년월     = '201008'
+ UNION ALL
+  SELECT '20100823','TE-0013'
+      , SUBSTR(CHAR(DECIMAL(VALUE(SUM("CA담보환산금액"),0),15)),2,15)
+   FROM  DB2DBA.THKJL0033 AA
+  WHERE  AA.그룹회사코드 = 'KB0'
+    AND  AA.기준일       = '23'
+    AND  AA.기준년월     = '201008'
+    WITH  UR;
+//
+//
+//********************************************************************/
+//*   그룹관리한도원장UNLOAD - DW제공자료                        */
+//********************************************************************/
+//STEP01   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0012'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0012.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월
+           , 계열기업군코드
+           , 그룹사신용등급구분
+           , 신용평가년월일
+           ,  SUBSTR(CHAR(기준한도),2,15)
+           , 기준한도산출년월일
+           ,  SUBSTR(CHAR(관리한도),2,15)
+           , 관리한도설정년월일
+           , 관리한도유효년월일
+           ,  SUBSTR(CHAR(여신성관리한도),2,15)
+           ,  SUBSTR(CHAR(시장성관리한도),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0012
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   그룹사기본원장UNLOAD - DW제공자료                          */
+//********************************************************************/
+//STEP02   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0013'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0013.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT  그룹회사코드
+           ,  기준년월
+           ,  계열적용구분
+           ,  계열기업군코드
+           ,   SUBSTR(CHAR(계열기업순위),2,3)
+           ,  주채권은행코드
+           ,  계열기업군명
+           ,  그룹사신용등급구분
+           ,  등록직원번호
+           ,  등록년월일
+           ,  시스템최종처리일시
+           ,  시스템최종사용자번호
+        FROM  DB2DBA.THKJL0013
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   계열사기본원장UNLOAD - DW제공자료                          */
+//********************************************************************/
+//STEP03   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0014'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0014.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT  그룹회사코드
+           ,  기준년월
+           ,  차주번호
+           ,  계열적용구분
+           ,  계열기업군코드
+           ,  기업규모구분
+           ,  등록직원번호
+           ,  등록년월일
+           ,  변경여부
+           ,  채무자명
+           ,  시스템최종처리일시
+           ,  시스템최종사용자번호
+        FROM  DB2DBA.THKJL0014
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   상품코드목록원장UNLOAD - DW제공자료                        */
+//********************************************************************/
+//STEP05   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0018'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0018.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT  그룹회사코드
+            , 기준년월
+            , 상품대분류코드
+            , 상품중분류코드
+            , 상품템플릿코드
+            , 상품번호
+            , 회계구분
+            , 통합계정과목코드
+            , "TE자산구분"
+            ,  SUBSTR(CHAR("TE환산율"),2,3)
+            ,  SUBSTR(CHAR("TE금융환산율"),2,3)
+            , "CA대상계정여부"
+            ,  SUBSTR(CHAR("신용공여한도환산율"),2,3)
+            , "CP대상계정여부"
+            ,  SUBSTR(CHAR("포괄신용공여환산율"),2,3)
+            , 상품명
+            , "TE중분류구분"
+            , "TE중분류명"
+            , "CA중분류구분"
+            , "CA중분류명"
+            , 시스템최종처리일시
+            , 시스템최종사용자번호
+      FROM  DB2DBA.THKJL0018
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   간접익스포져상품코드목록원장UNLOAD - DW제공자료            */
+//********************************************************************/
+//STEP06   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0019'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0019.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+       SELECT 그룹회사코드
+            , 기준년월
+            , 상품대분류코드
+            , 상품중분류코드
+            , 상품템플릿코드
+            , 상품번호
+            , 간접중분류구분
+            , 간접중분류구분명
+            , 간접상품명
+            ,  SUBSTR(CHAR("간접TE환산율"),2,3)
+            , 시스템최종처리일시
+            , 시스템최종사용자번호
+         FROM  DB2DBA.THKJL0019
+        WHERE 그룹회사코드= 'KB0'
+          AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   차주익스포져일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP07   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0029'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0029.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+       SELECT 그룹회사코드
+            ,  '30' 기준일
+            , 기준년월
+            , 차주번호
+            , 상품대분류코드
+            , 상품중분류코드
+            , 상품템플릿코드
+            , 상품번호
+            ,  SUBSTR(CHAR(명목액기준한도),2,15)
+            ,  SUBSTR(CHAR(명목액기준잔액),2,15)
+            ,  SUBSTR(CHAR("TE한도환산금액"),2,15)
+            ,  SUBSTR(CHAR("TE잔액환산금액"),2,15)
+            ,  SUBSTR(CHAR("CP한도환산금액"),2,15)
+            ,  SUBSTR(CHAR("CP잔액환산금액"),2,15)
+            ,  SUBSTR(CHAR(외화한도환산금액),2,15)
+            ,  SUBSTR(CHAR(외화잔액환산금액),2,15)
+            , 시스템최종처리일시
+            , 시스템최종사용자번호
+         FROM  DB2DBA.THKJL0030
+        WHERE 그룹회사코드= 'KB0'
+          AND 기준년월  = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   간접익스포져일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP08   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0031'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0031.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           ,  '30'  기준일
+           , 기준년월
+           , 담보보증차주번호
+           , 상품대분류코드
+           , 상품중분류코드
+           , 상품템플릿코드
+           , 상품번호
+           , 간접중분류구분
+           ,  SUBSTR(CHAR(간접명목금액),2,15)
+           ,  SUBSTR(CHAR(간접익스포져금액),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0032
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월  = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   차주신용공여일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP09   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0033'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0033.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           ,  '30'  기준일
+           , 기준년월
+           , 차주번호
+           , 상품대분류코드
+           , 상품중분류코드
+           , 상품템플릿코드
+           , 상품번호
+           ,  SUBSTR(CHAR("BS기준잔액"),2,15)
+           ,  SUBSTR(CHAR("CA담보환산금액"),2,15)
+           ,  SUBSTR(CHAR(제외자산금액),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0034
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   그룹익스포져일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP10   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0035'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0035.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월|| '30'
+           , 계열기업군코드
+           , 상품대분류코드
+           , 상품중분류코드
+           , 상품템플릿코드
+           , 상품번호
+           ,  SUBSTR(CHAR(명목액기준한도),2,15)
+           ,  SUBSTR(CHAR(명목액기준잔액),2,15)
+           ,  SUBSTR(CHAR("TE한도환산금액"),2,15)
+           ,  SUBSTR(CHAR("TE잔액환산금액"),2,15)
+           ,  SUBSTR(CHAR("TE여신성금액"),2,15)
+           ,  SUBSTR(CHAR("TE시장성금액"),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0036
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월  = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   그룹신용공여일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP11   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0037'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0037.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월|| '30'
+           , 계열기업군코드
+           , 상품대분류코드
+           , 상품중분류코드
+           , 상품템플릿코드
+           , 상품번호
+           ,  SUBSTR(CHAR("BS기준잔액"),2,15)
+           ,  SUBSTR(CHAR("CA담보환산금액"),2,15)
+           ,  SUBSTR(CHAR(제외자산금액),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0038
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월  = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   산업등급별익스포져일집계원장UNLOAD - DW제공자료            */
+//********************************************************************/
+//STEP12   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0039'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0039.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월일
+           , 산업평가등급구분
+           , 대분류업종코드
+           ,  "TEPEER구분"
+           ,  SUBSTR(CHAR(대상업체건수),2,5)
+           ,  SUBSTR(CHAR(산업관리한도),2,15)
+           ,  SUBSTR(CHAR(명목액기준한도),2,15)
+           ,  SUBSTR(CHAR(명목액기준잔액),2,15)
+           ,  SUBSTR(CHAR( "TE한도환산금액"),2,15)
+           ,  SUBSTR(CHAR( "TE잔액환산금액"),2,15)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0039
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월일  = '20100730'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   표준산업코드목록원장UNLOAD - DW제공자료                    */
+//********************************************************************/
+//STEP13   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0044'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0044.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월
+           , 신표준산업분류코드
+           ,  "TEPEER구분"
+           , 대분류업종코드
+           , 산업평가등급구분
+           ,  "IR등급평가년월일"
+           , 한은매칭코드
+           , 표준산업코드명
+           ,  "PEER코드명"
+           , 대분류업종코드명
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0044
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   국별익스포져일집계원장UNLOAD - DW제공자료                  */
+//********************************************************************/
+//STEP14   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0055'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0055.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월일
+           , 계좌번호
+           ,  SUBSTR(CHAR(계좌중복일련번호),2,7)
+           , 고객식별자
+           , 고객관리번호
+           , 차주번호
+           , 계약한도구분
+           , 상품대분류코드
+           , 상품중분류코드
+           , 상품템플릿코드
+           , 상품번호
+           , 대출자격구분
+           , "ISO국가코드"
+           , 관리부점코드
+           , 시작년월일
+           , 만기년월일
+           , 종료년월일
+           , 과목코드
+           , 통화코드
+           ,  SUBSTR(CHAR(통화한도),2,19)
+           ,  SUBSTR(CHAR(통화금일잔액),2,19)
+           ,  SUBSTR(CHAR("USD한도"),2,19)
+           ,  SUBSTR(CHAR("USD금일잔액"),2,19)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0055
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월일  = '20100730'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//********************************************************************/
+//*   국별관리한도원장UNLOAD - DW제공자료                        */
+//********************************************************************/
+//STEP15   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0056'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0056.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 기준년월
+           ,  "ISO국가코드"
+           , 영문국가명
+           , 한도관리지역구분
+           , 한도국가체질구분
+           , 경보발령여부
+           , 경보발령등록년월일
+           , 모니터링여부
+           , 모니터링등록년월일
+           ,  "SNP등급구분"
+           , 무디스등급구분
+           , 피치등급구분
+           ,  SUBSTR(CHAR(전체관리한도),2,19)
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0056
+       WHERE 그룹회사코드= 'KB0'
+         AND 기준년월    = '201007'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*
+//
+//
+//
+//********************************************************************/
+//*   채무자고객기본원장UNLOAD - DW제공자료                      */
+//********************************************************************/
+//STEP04   EXEC PGM=INZUTILB,REGION=0M,DYNAMNBR=99,
+//         PARM='DAPG,KJL0015'
+//STEPLIB  DD  DSN=DB2APS.DSND10.SDSNEXIT,DISP=SHR
+//         DD  DSN=DB2APS.DSND10.SDSNLOAD,DISP=SHR
+//UNLDDN1  DD  DSN=KJL.SD.SHRRMS.SKJL0015.P10071,
+//             DISP=(NEW,CATLG,CATLG),UNIT=3390,
+//             SPACE=(CYL,(500,100),RLSE),VOL=SER=ZAPUTD
+//LOADDDN1 DD  SYSOUT=*
+//*
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+     UNLOAD TABLESPACE
+     DB2 NO LOCK NO
+     QUIESCE NO  QUIESCECAT NO
+     OPTIONS LENGTHBYTE NO
+      SELECT 그룹회사코드
+           , 차주번호
+           , 차주번호구분
+           , 고객식별자
+           , 신표준산업분류코드
+           , 내부신용평가등급구분
+           , 신용평가년월일
+           , 신용평가유효년월일
+           , 고객관리부점코드
+           ,  "TE기업규모구분"
+           ,  "TEPEER구분"
+           , 대분류업종코드
+           , 산업평가등급구분
+           , 채무자명
+           , 계열기업군코드
+           , 계열기업군명
+           , 대표사업자번호
+           ,  SUBSTR(CHAR(매출액),2,15)
+           ,  SUBSTR(CHAR(총자산),2,15)
+           , 한도고객구분
+           , 모기업법인등록번호
+           ,  "모기업ISO국가코드"
+           , 연합회차주번호
+           ,  "고객ID구분"
+           , 한도그룹번호
+           , 그룹사신용등급구분
+           , 차주대표자명
+           , 시스템최종처리일시
+           , 시스템최종사용자번호
+        FROM  DB2DBA.THKJL0015
+       WHERE 그룹회사코드= 'KB0'
+     OUTDDN (UNLDDN1)
+      FORMAT USER()
+/*

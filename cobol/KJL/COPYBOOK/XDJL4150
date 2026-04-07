@@ -1,0 +1,61 @@
+      *================================================================*
+      *@ NAME : XDJL4150                                               *
+      *@ DESC : DC국별수기국적조회 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2025-05-07 10:00:36                          *
+      *  생성일시     : 2025-05-07 10:00:36                          *
+      *  전체길이     : 00000002 BYTES                               *
+      *================================================================*
+           03  XDJL4150-RETURN.
+             05  XDJL4150-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4150-OK            VALUE  '00'.
+                 88  COND-XDJL4150-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4150-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4150-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4150-ERROR         VALUE  '09'.
+                 88  COND-XDJL4150-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4150-SYSERROR      VALUE  '99'.
+             05  XDJL4150-R-LINE                 PIC  9(006).
+             05  XDJL4150-R-ERRCD                PIC  X(008).
+             05  XDJL4150-R-TREAT-CD             PIC  X(008).
+             05  XDJL4150-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4150-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4150-I-PRCSS-DSTIC          PIC  X(002).
+      *----------------------------------------------------------------*
+           03  XDJL4150-OUT.
+      *----------------------------------------------------------------*
+      *--       현재건수1
+             05  XDJL4150-O-PRSNT-NOITM1         PIC  9(005).
+      *--       그리드1
+             05  XDJL4150-O-GRID1                OCCURS 000100 TIMES.
+      *--         계좌번호
+               07  XDJL4150-O-ACNO               PIC  X(020).
+      *--         ISO국가코드
+               07  XDJL4150-O-ISO-NATNL-CD       PIC  X(002).
+      *--         USD한도
+               07  XDJL4150-O-USD-CLAM           PIC  9(015)V9(03).
+      *--         ISO국가코드2
+               07  XDJL4150-O-ISO-NATNL-CD2      PIC  X(002).
+      *--         등록년월일
+               07  XDJL4150-O-REGI-YMD           PIC  X(008).
+      *--         등록직원번호
+               07  XDJL4150-O-REGI-EMPID         PIC  X(007).
+      *--         등록직원명
+               07  XDJL4150-O-REGI-EMNM          PIC  X(052).
+      *================================================================*
+      *        X  D  J  L  4  1  5  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4150-I-PRCSS-DSTIC        ;처리구분
+      *N  XDJL4150-O-PRSNT-NOITM1       ;현재건수1
+      *A  XDJL4150-O-GRID1              ;그리드1
+      *X  XDJL4150-O-ACNO               ;계좌번호
+      *X  XDJL4150-O-ISO-NATNL-CD       ;ISO국가코드
+      *N  XDJL4150-O-USD-CLAM           ;USD한도
+      *X  XDJL4150-O-ISO-NATNL-CD2      ;ISO국가코드2
+      *X  XDJL4150-O-REGI-YMD           ;등록년월일
+      *X  XDJL4150-O-REGI-EMPID         ;등록직원번호
+      *X  XDJL4150-O-REGI-EMNM          ;등록직원명

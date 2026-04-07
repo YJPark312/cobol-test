@@ -1,0 +1,50 @@
+//TKJLT009 JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*   토탈익스포져 인스턴스코드값 정비
+//* %%GLOBAL  PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//* %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*********************************************************************
+//DELETE1  EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLT009.KJL0119.INPUT'
+
+  SET MAXCC=0
+/*
+//UNLOAD1  EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLT009.KJL0119.INPUT,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT *
+  FROM DB2DBA.THKJL0119
+ WHERE 그룹회사코드 = 'KB0'
+   AND 신용공여대상구분 = '0'
+  WITH UR;
+/*
+//STEP02   EXEC JZBDEXEC,MBR=BJLT009,OPT=&SYSUID,COND=(4,LT)
+//INFILE1  DD DUMMY
+//INFILE2  DD DUMMY
+//INFILE3  DD DUMMY
+//INFILE4  DD DSN=KJL.SY.BJLT009.KJL0119.INPUT,DISP=SHR
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.TKJLT009.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(500,300),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-TKJLT009-001-NORBAT-%%$ODATE
+//*작업일                     자료기준년월일
+/*
+//

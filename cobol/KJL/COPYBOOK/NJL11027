@@ -1,0 +1,103 @@
+      *================================================================*
+      *@ NAME : NJL11027                                               *
+      *@ DESC : 포괄신용공여한도신청및승인                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-03 17:12:25                          *
+      *  생성일시     : 2009-03-03 17:12:37                          *
+      *================================================================*
+      *--     처리구분
+           07  NJL11027-PRCSS-DSTIC              PIC  X(002).
+      *--     차주번호
+           07  NJL11027-BRWR-NO                  PIC  X(013).
+      *--     한도신청번호
+           07  NJL11027-LIMT-APLCN-NO            PIC  X(010).
+      *--     수정총자산
+           07  NJL11027-AMND-TOTAL-ASST          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정매출액
+           07  NJL11027-AMND-SALEPR              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정기준년자기자본금
+           07  NJL11027-AMND-B-YR-ONCP-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정금융비용차입금
+           07  NJL11027-AMND-FNCS-AMBR           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정당행차입금
+           07  NJL11027-AMND-OWBNK-AMBR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정영업현금흐름액
+           07  NJL11027-AMND-BZOPR-ACF           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정업체평균이자율
+           07  NJL11027-AMND-ENTP-AVG-IRT        PIC  9(003)V9(02).
+      *--     수정여신성자산한도금액
+           07  NJL11027-AMND-LI-ASST-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정자기자본기준금액
+           07  NJL11027-AMND-O-CAPTL-BSAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정영업활동기준한도금액
+           07  NJL11027-AMND-BA-BASE-CLAM        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     수정포괄설정가능금액
+           07  NJL11027-AMND-I-STUP-ABLAMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신용등급지원비율
+           07  NJL11027-CRDRAT-SPORT-RATO        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도신청종류구분코드
+           07  NJL11027-LIMT-A-KND-DSTCD         PIC  X(001).
+      *--     신청년월일
+           07  NJL11027-APLCN-YMD                PIC  X(008).
+      *--     신청부점코드
+           07  NJL11027-APLCN-BRNCD              PIC  X(004).
+      *--     신청직원번호
+           07  NJL11027-APLCN-EMPID              PIC  X(007).
+      *--     한도설정가능금액
+           07  NJL11027-LIMT-STUP-ABLAMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도신청금액
+           07  NJL11027-LIMT-APLCN-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     신청사유내용
+           07  NJL11027-APLCN-RESN-CTNT          PIC  X(252).
+      *--     한도승인금액
+           07  NJL11027-LIMT-ATHOR-AMT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     한도설정유효년월일
+           07  NJL11027-LIMT-STUP-VALD-YMD       PIC  X(008).
+      *--     한도승인구분코드
+           07  NJL11027-LIMT-ATHOR-DSTCD         PIC  X(001).
+      *--     승인사유내용
+           07  NJL11027-ATHOR-RESN-CTNT          PIC  X(252).
+      *================================================================*
+      *        N  J  L  1  1  0  2  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  NJL11027-PRCSS-DSTIC          ;처리구분
+      *X  NJL11027-BRWR-NO              ;차주번호
+      *X  NJL11027-LIMT-APLCN-NO        ;한도신청번호
+      *S  NJL11027-AMND-TOTAL-ASST      ;수정총자산
+      *S  NJL11027-AMND-SALEPR          ;수정매출액
+      *S  NJL11027-AMND-B-YR-ONCP-AMT   ;수정기준년자기자본금
+      *S  NJL11027-AMND-FNCS-AMBR       ;수정금융비용차입금
+      *S  NJL11027-AMND-OWBNK-AMBR      ;수정당행차입금
+      *S  NJL11027-AMND-BZOPR-ACF       ;수정영업현금흐름액
+      *N  NJL11027-AMND-ENTP-AVG-IRT    ;수정업체평균이자율
+      *S  NJL11027-AMND-LI-ASST-CLAM    ;수정여신성자산한도금액
+      *S  NJL11027-AMND-O-CAPTL-BSAMT   ;수정자기자본기준금액
+      *S  NJL11027-AMND-BA-BASE-CLAM
+      * 수정영업활동기준한도금액
+      *S  NJL11027-AMND-I-STUP-ABLAMT   ;수정포괄설정가능금액
+      *S  NJL11027-CRDRAT-SPORT-RATO    ;신용등급지원비율
+      *X  NJL11027-LIMT-A-KND-DSTCD     ;한도신청종류구분코드
+      *X  NJL11027-APLCN-YMD            ;신청년월일
+      *X  NJL11027-APLCN-BRNCD          ;신청부점코드
+      *X  NJL11027-APLCN-EMPID          ;신청직원번호
+      *S  NJL11027-LIMT-STUP-ABLAMT     ;한도설정가능금액
+      *S  NJL11027-LIMT-APLCN-AMT       ;한도신청금액
+      *X  NJL11027-APLCN-RESN-CTNT      ;신청사유내용
+      *S  NJL11027-LIMT-ATHOR-AMT       ;한도승인금액
+      *X  NJL11027-LIMT-STUP-VALD-YMD   ;한도설정유효년월일
+      *X  NJL11027-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *X  NJL11027-ATHOR-RESN-CTNT      ;승인사유내용

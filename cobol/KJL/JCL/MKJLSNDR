@@ -1,0 +1,60 @@
+//MKJLSNDR JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLSND1
+//*********************************************************************
+//*   심사미기표여신현황수보UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJLR003.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(1000,0500),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT 그룹회사코드
+          ,기준년월일
+          ,심사고객식별자
+          ,여신승인신청번호
+          ,여신승인신청일련번호
+          ,표준산업분류코드
+          ,기업규모구분
+          ,담보연결여신계좌번호
+          ,소호기업신용등급
+          ,대출금액
+          ,배분담보비율
+          ,차감후위험조정이익률
+          ,금리가이드라인준수율
+          ,여신승인년월일
+          ,적용차주신용등급구분
+          ,상품대분류코드
+          ,상품중분류코드
+          ,상품템플릿코드
+          ,상품번호
+          ,신청부점코드
+          ,전결권자구분
+          ,시스템최종처리일시
+          ,시스템최종사용자번호
+      FROM  DB2DBA.THKJLR003
+     WHERE 그룹회사코드= 'KB0'
+    WITH  UR;
+//*
+//

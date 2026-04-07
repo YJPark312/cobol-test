@@ -1,0 +1,59 @@
+      *================================================================*
+      *@ NAME : YPJL4073                                               *
+      *@ DESC : AS국외영업점편중모니터링COPYBOOK                     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-23 14:58:48                          *
+      *  생성일시     : 2020-03-23 14:58:56                          *
+      *  전체길이     : 00039605 BYTES                               *
+      *================================================================*
+      *--     출력라인수1
+           07  YPJL4073-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  YPJL4073-GRID1                    OCCURS 000300 TIMES.
+      *--       기준년월일
+             09  YPJL4073-BASE-YMD               PIC  X(008).
+      *--       관리부점코드
+             09  YPJL4073-MGT-BRNCD              PIC  X(004).
+      *--       부점명
+             09  YPJL4073-BRN-NAME               PIC  X(022).
+      *--       대분류업종코드
+             09  YPJL4073-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  YPJL4073-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       산업별TE
+             09  YPJL4073-IDSTRY-PER-TE-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       비중
+             09  YPJL4073-WGHTZ                  PIC  9(003)V9(01).
+      *--       편중관리익스포져금액
+             09  YPJL4073-LNUP-MGT-EXPSR-AMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       투자비중
+             09  YPJL4073-INVST-WGHT             PIC  9(003)V9(01).
+      *--       편중관리대상여부
+             09  YPJL4073-LNUP-MGT-TAGET-YN      PIC  X(001).
+      *--       편중관리비율
+             09  YPJL4073-LNUP-MGT-CST-RT        PIC  9(003)V9(02).
+      *--       관리비중초과여부
+             09  YPJL4073-MGT-WGHT-EXCS-YN       PIC  X(001).
+      *--       여유액
+             09  YPJL4073-SEXTR-AMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  P  J  L  4  0  7  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *N  YPJL4073-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4073-GRID1                ;그리드1
+      *X  YPJL4073-BASE-YMD             ;기준년월일
+      *X  YPJL4073-MGT-BRNCD            ;관리부점코드
+      *X  YPJL4073-BRN-NAME             ;부점명
+      *X  YPJL4073-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  YPJL4073-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *S  YPJL4073-IDSTRY-PER-TE-AMT    ;산업별TE
+      *N  YPJL4073-WGHTZ                ;비중
+      *S  YPJL4073-LNUP-MGT-EXPSR-AMT   ;편중관리익스포져금액
+      *N  YPJL4073-INVST-WGHT           ;투자비중
+      *X  YPJL4073-LNUP-MGT-TAGET-YN    ;편중관리대상여부
+      *N  YPJL4073-LNUP-MGT-CST-RT      ;편중관리비율
+      *X  YPJL4073-MGT-WGHT-EXCS-YN     ;관리비중초과여부
+      *S  YPJL4073-SEXTR-AMT            ;여유액

@@ -1,0 +1,67 @@
+//MKJLSNDK JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :매월　마지막영업일
+//*선행작업명     : MKJLSNDJ
+//*********************************************************************
+//*   SAM FILE DELETE
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+  DELETE   KJL.SD.SHRTAA.SKJL0030.P00002
+  SET MAXCC=00
+/*
+//*********************************************************************
+//*   차주익스포져월집계UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0030.P00002,
+//            UNIT=SYSPA,DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(1000,0500),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT 그룹회사코드
+       , 기준년월
+       , 차주고객식별자
+       , 상품대분류코드
+       , 상품중분류코드
+       , 상품템플릿코드
+       , 상품번호
+       , 차주번호
+       , 명목액기준한도
+       , 명목액기준잔액
+       ,  "TE한도환산금액"
+       ,  "TE잔액환산금액"
+       ,  "CP한도환산금액"
+       ,  "CP잔액환산금액"
+       , 외화한도환산금액
+       , 외화잔액환산금액
+       , 시스템최종처리일시
+       , 시스템최종사용자번호
+    FROM  DB2DBA.THKJL0030
+   WHERE 그룹회사코드= 'KB0'
+     AND 기준년월  = '%%$OYEAR.%%OMONTH'
+    WITH  UR;
+//*
+//

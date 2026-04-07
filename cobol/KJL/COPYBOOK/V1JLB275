@@ -1,0 +1,143 @@
+      *================================================================*
+      *@ NAME : V1JLB275                                               *
+      *@ DESC : 포괄신용공여한도적정성점검대상등록                   *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-05-02 13:08:26                          *
+      *  생성일시     : 2024-05-02 13:08:30                          *
+      *  전체길이     : 00005708 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB275-PRCSS-RSULT              PIC  X(002).
+      *--     조회결과
+           07  V1JLB275-INQURY-RSULT             PIC  X(050).
+      *--     한도신청번호
+           07  V1JLB275-LIMT-APLCN-NO            PIC  X(010).
+      *--     한도점검진행상태구분
+           07  V1JLB275-LIMT-CP-STUS-DSTIC       PIC  X(001).
+      *--     최종한도승인구분
+           07  V1JLB275-LAST-L-ATHOR-DSTIC       PIC  X(001).
+      *--     기준년월일
+           07  V1JLB275-BASE-YMD                 PIC  X(008).
+      *--     신청신용등급
+           07  V1JLB275-APLCN-CRDRAT             PIC  X(004).
+      *--     신용등급
+           07  V1JLB275-CRDRAT                   PIC  X(004).
+      *--     관리한도설정년월일
+           07  V1JLB275-MGT-LIMT-STUP-YMD        PIC  X(008).
+      *--     유효기일
+           07  V1JLB275-VALD-FXDT                PIC  X(008).
+      *--     여신성한도
+           07  V1JLB275-LNBZ-INCLIN-LIMT         PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     포괄한도
+           07  V1JLB275-INLS-LIMT                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     사용액
+           07  V1JLB275-USE-AMT                  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     적정성여부
+           07  V1JLB275-PRTY-YN                  PIC  X(001).
+      *--     보고서첨부
+           07  V1JLB275-RPTDOC-APNDX             PIC  X(001).
+      *--     적정성점검구분
+           07  V1JLB275-PRTY-CHKUP-DSTCD         PIC  X(001).
+      *--     영업점코드
+           07  V1JLB275-BBRN-CD                  PIC  X(004).
+      *--     부점명
+           07  V1JLB275-BRN-NAME                 PIC  X(062).
+      *--     고객식별자
+           07  V1JLB275-CUST-IDNFR               PIC  X(010).
+      *--     차주명
+           07  V1JLB275-BRWR-NAME                PIC  X(052).
+      *--     그룹명
+           07  V1JLB275-GROUP-NAME               PIC  X(052).
+      *--     신청그룹등급
+           07  V1JLB275-APLCN-GROUP-GRD          PIC  X(003).
+      *--     그룹등급
+           07  V1JLB275-GROUP-GRD                PIC  X(003).
+      *--     설정상태
+           07  V1JLB275-STUP-STUS                PIC  X(010).
+      *--     간접익스포져
+           07  V1JLB275-INDR-EXPSR               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--     소진율
+           07  V1JLB275-EXHS-RT                  PIC  9(003)V9(02).
+      *--     조기경보사후관리구분
+           07  V1JLB275-ELY-AA-MGT-DSTIC         PIC  X(001).
+      *--     부실회계기업등급
+           07  V1JLB275-INSL-ACCTG-CORP-GRD      PIC  X(001).
+      *--     기업여신정책내용
+           07  V1JLB275-CORP-L-PLICY-CTNT        PIC  X(202).
+      *--     출력라인수1
+ROWCNT     07  V1JLB275-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+ROWCNT     07  V1JLB275-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     그리드1
+           07  V1JLB275-GRID1                    OCCURS 0 TO 000010
+               DEPENDING ON V1JLB275-OUTPT-LINE-CNT1.
+      *--       직원번호
+             09  V1JLB275-EMPID                  PIC  X(007).
+      *--       직원명
+             09  V1JLB275-EMNM                   PIC  X(052).
+      *--     그리드2
+           07  V1JLB275-GRID2                    OCCURS 0 TO 000010
+               DEPENDING ON V1JLB275-OUTPT-LINE-CNT2.
+      *--       첨부파일일련번호
+             09  V1JLB275-APNDX-FILE-SERNO       PIC  9(003).
+      *--       첨부파일식별자
+             09  V1JLB275-APNDX-FILE-IDNFR       PIC  X(040).
+      *--       첨부파일내용
+             09  V1JLB275-APNDX-FILE-CTNT        PIC  X(172).
+      *--       첨부파일명
+             09  V1JLB275-APNDX-FILE-NAME        PIC  X(172).
+      *--       등록년월일
+             09  V1JLB275-REGI-YMD               PIC  X(008).
+      *--       등록직원번호
+             09  V1JLB275-REGI-EMPID             PIC  X(007).
+      *--       등록직원명
+             09  V1JLB275-REGI-EMNM              PIC  X(052).
+      *================================================================*
+      *        V  1  J  L  B  2  7  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB275-PRCSS-RSULT          ;처리결과
+      *X  V1JLB275-INQURY-RSULT         ;조회결과
+      *X  V1JLB275-LIMT-APLCN-NO        ;한도신청번호
+      *X  V1JLB275-LIMT-CP-STUS-DSTIC   ;한도점검진행상태구분
+      *X  V1JLB275-LAST-L-ATHOR-DSTIC   ;최종한도승인구분
+      *X  V1JLB275-BASE-YMD             ;기준년월일
+      *X  V1JLB275-APLCN-CRDRAT         ;신청신용등급
+      *X  V1JLB275-CRDRAT               ;신용등급
+      *X  V1JLB275-MGT-LIMT-STUP-YMD    ;관리한도설정년월일
+      *X  V1JLB275-VALD-FXDT            ;유효기일
+      *S  V1JLB275-LNBZ-INCLIN-LIMT     ;여신성한도
+      *S  V1JLB275-INLS-LIMT            ;포괄한도
+      *S  V1JLB275-USE-AMT              ;사용액
+      *X  V1JLB275-PRTY-YN              ;적정성여부
+      *X  V1JLB275-RPTDOC-APNDX         ;보고서첨부
+      *X  V1JLB275-PRTY-CHKUP-DSTCD     ;적정성점검구분
+      *X  V1JLB275-BBRN-CD              ;영업점코드
+      *X  V1JLB275-BRN-NAME             ;부점명
+      *X  V1JLB275-CUST-IDNFR           ;고객식별자
+      *X  V1JLB275-BRWR-NAME            ;차주명
+      *X  V1JLB275-GROUP-NAME           ;그룹명
+      *X  V1JLB275-APLCN-GROUP-GRD      ;신청그룹등급
+      *X  V1JLB275-GROUP-GRD            ;그룹등급
+      *X  V1JLB275-STUP-STUS            ;설정상태
+      *S  V1JLB275-INDR-EXPSR           ;간접익스포져
+      *N  V1JLB275-EXHS-RT              ;소진율
+      *X  V1JLB275-ELY-AA-MGT-DSTIC     ;조기경보사후관리구분
+      *X  V1JLB275-INSL-ACCTG-CORP-GRD  ;부실회계기업등급
+      *X  V1JLB275-CORP-L-PLICY-CTNT    ;기업여신정책내용
+      *L  V1JLB275-OUTPT-LINE-CNT1      ;출력라인수1
+      *L  V1JLB275-OUTPT-LINE-CNT2      ;출력라인수2
+      *A  V1JLB275-GRID1                ;그리드1
+      *X  V1JLB275-EMPID                ;직원번호
+      *X  V1JLB275-EMNM                 ;직원명
+      *A  V1JLB275-GRID2                ;그리드2
+      *N  V1JLB275-APNDX-FILE-SERNO     ;첨부파일일련번호
+      *X  V1JLB275-APNDX-FILE-IDNFR     ;첨부파일식별자
+      *X  V1JLB275-APNDX-FILE-CTNT      ;첨부파일내용
+      *X  V1JLB275-APNDX-FILE-NAME      ;첨부파일명
+      *X  V1JLB275-REGI-YMD             ;등록년월일
+      *X  V1JLB275-REGI-EMPID           ;등록직원번호
+      *X  V1JLB275-REGI-EMNM            ;등록직원명

@@ -1,0 +1,47 @@
+      *================================================================*
+      *@ NAME : YNJLB087                                               *
+      *@ DESC : AS외화타점예치Depo별대주주등록COPYBOOK             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-08-19 15:38:10                          *
+      *  생성일시     : 2024-08-19 15:38:12                          *
+      *  전체길이     : 00010207 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB087-PRCSS-DSTIC              PIC  X(002).
+      *--     현재건수1
+           07  YNJLB087-PRSNT-NOITM1             PIC  9(005).
+      *--     그리드1
+           07  YNJLB087-GRID1                    OCCURS 000100 TIMES.
+      *--       기준년월일
+             09  YNJLB087-BASE-YMD               PIC  X(008).
+      *--       통화코드
+             09  YNJLB087-CNCYCD                 PIC  X(003).
+      *--       거래은행BIC코드
+             09  YNJLB087-TRAN-BNK-BIC           PIC  X(011).
+      *--       통합계정과목코드
+             09  YNJLB087-INTGRA-TIACC-CD        PIC  X(013).
+      *--       외화잔액
+             09  YNJLB087-FC-BAL                 PIC  9(015)V9(03).
+      *--       원화환산금액
+             09  YNJLB087-WONC-AUC               PIC  9(015)V9(03).
+      *--       고객식별자
+             09  YNJLB087-CUST-IDNFR             PIC  X(010).
+      *--       등록직원번호
+             09  YNJLB087-REGI-EMPID             PIC  X(007).
+      *--       등록일시
+             09  YNJLB087-REGI-YMS               PIC  X(014).
+      *================================================================*
+      *        Y  N  J  L  B  0  8  7    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB087-PRCSS-DSTIC          ;처리구분
+      *N  YNJLB087-PRSNT-NOITM1         ;현재건수1
+      *A  YNJLB087-GRID1                ;그리드1
+      *X  YNJLB087-BASE-YMD             ;기준년월일
+      *X  YNJLB087-CNCYCD               ;통화코드
+      *X  YNJLB087-TRAN-BNK-BIC         ;거래은행BIC코드
+      *X  YNJLB087-INTGRA-TIACC-CD      ;통합계정과목코드
+      *N  YNJLB087-FC-BAL               ;외화잔액
+      *N  YNJLB087-WONC-AUC             ;원화환산금액
+      *X  YNJLB087-CUST-IDNFR           ;고객식별자
+      *X  YNJLB087-REGI-EMPID           ;등록직원번호
+      *X  YNJLB087-REGI-YMS             ;등록일시

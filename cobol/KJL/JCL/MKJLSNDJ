@@ -1,0 +1,51 @@
+//MKJLSNDJ JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLDP35
+//*********************************************************************
+//*  EAD 그룹익스포져월집계UNLOAD - DW제공자료
+//*********************************************************************
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0136.P00001,
+//            UNIT=SYSPA,
+//            DISP=(OLD,CATLG,CATLG),
+//            SPACE=(CYL,(0500,0100),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT 그룹회사코드
+         , 기준년월
+         , 계열기업군코드
+         , 상품대분류코드
+         , 상품중분류코드
+         , 상품템플릿코드
+         , 상품번호
+         , "TE직접간접구분"
+         , 명목액기준한도
+         , 명목액기준잔액
+         , "한도기준TE금액"
+         , "잔액기준TE금액"
+         , 시스템최종처리일시
+         , 시스템최종사용자번호
+      FROM  DB2DBA.THKJL0136
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준년월    = '%%$OYEAR.%%OMONTH'
+    WITH  UR;
+//*

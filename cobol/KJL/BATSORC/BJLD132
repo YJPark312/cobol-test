@@ -1,0 +1,628 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD132 (BT한신평기준그룹사정보생성)
+      *@처리유형  : BATCH
+      *@처리개요  : 한신평기준그룹사정보생성한다.
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090410: 신규작성
+      *백현정:20111130:  DBIO개선내용적용（변경전／후로그적재）
+      * HYH    :20120227:  1,000건 단위 COMMIT 주기 변경
+      * HYH    :20150226:  10건 단위 COMMIT 주기 변경
+      * YBH    :20241121: 그룹순위에 관계없이 등급 갱신처리
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **  그룹사기본     : THKJL0013                     : CRU
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD132.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/04/10.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       CONFIGURATION                   SECTION.
+      *-----------------------------------------------------------------
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *-----------------------------------------------------------------
+       INPUT-OUTPUT                    SECTION.
+      *-----------------------------------------------------------------
+       FILE-CONTROL.
+           SELECT IN-FILE              ASSIGN       TO  INFILE
+                                       ORGANIZATION IS  SEQUENTIAL
+                                       FILE STATUS  IS  WK-IN-F-ST.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       FILE                            SECTION.
+      *-----------------------------------------------------------------
+       FD  IN-FILE LABEL RECORD IS     STANDARD RECORDING MODE F.
+       01  IN-REC.
+      *       그룹회사코드
+           03 IN-GROUP-CO-CD                PIC  X(00003).
+      *       기준년월
+           03 IN-BASE-YM                    PIC  X(00006).
+      *       계열적용구분
+           03 IN-AFFLT-APLY-DSTCD           PIC  X(00001).
+      *       계열기업군코드
+           03 IN-AFFLT-CORP-GROUP-CD        PIC  X(00006).
+      *       계열기업순위
+           03 IN-AFFLT-CORP-RANKG           PIC  9(00003).
+      *       주채권은행코드
+           03 IN-MAIN-BND-BNK-CD            PIC  X(00003).
+      *       계열기업군명
+           03 IN-AFFLT-C-GROUP-NAME         PIC  X(00042).
+      *       그룹사신용등급구분
+           03 IN-CMGR-CRTDSCD               PIC  X(00003).
+      *       등록직원번호
+           03 IN-REGI-EMPID                 PIC  X(00007).
+      *       등록년월일
+           03 IN-REGI-YMD                   PIC  X(00008).
+      *       시스템최종처리일시
+           03 IN-SYS-LAST-PRCSS-YMS         PIC  X(00020).
+      *       시스템최종사용자번호
+           03 IN-SYS-LAST-UNO               PIC  X(00007).
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      * CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD132'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-SQL-OK               PIC  9(003) VALUE  000.
+           03  CO-SQL-NTFND            PIC  9(003) VALUE  100.
+
+           03  CO-CHA-0                PIC  X(001) VALUE '0'.
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+
+           03  CO-NUM-0                PIC  9(001) VALUE  0.
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+           03  CO-NUM-100              PIC  9(003) VALUE  100.
+      *-----------------------------------------------------------------
+      * FILE STATUS
+      *-----------------------------------------------------------------
+       01  WK-FILE-STATUS.
+           03  WK-IN-F-ST              PIC  X(002) VALUE  SPACE.
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-READ-CNT          PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-UPDATE-CNT        PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-INSERT-CNT        PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF               PIC  X(001) VALUE  SPACE.
+               88  IN-EOF-Y                        VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TKJL0013-KEY.
+           COPY    TKJL0013.
+       01  TRJL0013-REC.
+           COPY    TRJL0013.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM  S3000-PROCESS-RTN
+              THRU  S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@WK-AREA,DBIO,PARAMETER 초기화
+           INITIALIZE    WK-AREA
+                         WK-SYSIN
+                         YCDBIOCA-CA
+                         XZUGEROR-CA
+
+      * JCL SYSIN ACCEPT  처리기준
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD132 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *    그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *    구분코드
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *    공통 UTILITY CALL
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+      *    RETURN 정보 확인
+           IF  XBJISTDT-R-STAT = ZEROS
+      *        정상처리
+               CONTINUE
+           ELSE
+      *        에러처리
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+
+           PERFORM  S1100-FILE-OPEN-RTN
+              THRU  S1100-FILE-OPEN-EXT
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *    사용하는 File을 OPEN 함
+      *-----------------------------------------------------------------
+       S1100-FILE-OPEN-RTN.
+
+           OPEN  INPUT  IN-FILE
+
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S1100-FILE-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *   그룹회사구분코드 미입력시 오류
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업실행일 미입력시 오류
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업명 미입력시 오류
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   처리회차 미입력시 오류
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   배치작업구분 미입력시 오류
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   작업자ID 미입력시 오류
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *   자료기준년월일 미입력시 오류
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일 미입력 오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@   INPUT FILE READ
+           PERFORM  S4000-READ-FILE-RTN
+              THRU  S4000-READ-FILE-EXT
+
+      *@1  END OF FILE일때까지 처리
+           PERFORM  UNTIL IN-EOF-Y
+
+      *@2     그룹사기본정보(THKJL0013) 등록 변경
+               PERFORM  S3300-PROCESS-SUB-RTN
+                  THRU  S3300-PROCESS-SUB-EXT
+
+      *@   INPUT FILE READ
+               PERFORM  S4000-READ-FILE-RTN
+                  THRU  S4000-READ-FILE-EXT
+           END-PERFORM
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   업무처리SUB
+      *-----------------------------------------------------------------
+       S3300-PROCESS-SUB-RTN.
+
+           INITIALIZE    TKJL0013-KEY
+                         TRJL0013-REC
+
+      *          그룹회사코드
+           MOVE  IN-GROUP-CO-CD
+             TO  KJL0013-PK-GROUP-CO-CD
+
+      *          기준년월
+           MOVE  IN-BASE-YM
+             TO  KJL0013-PK-BASE-YM
+
+      *          계열적용구분
+           MOVE  IN-AFFLT-APLY-DSTCD
+             TO  KJL0013-PK-AFFLT-APLY-DSTCD
+
+      *          계열기업군코드
+           MOVE  IN-AFFLT-CORP-GROUP-CD
+             TO  KJL0013-PK-AFFLT-CORP-GROUP-CD
+
+           #DYDBIO  SELECT-CMD-Y TKJL0013-PK TRJL0013-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     PERFORM  S3310-KJL0013-UPDATE-RTN
+                        THRU  S3310-KJL0013-UPDATE-EXT
+               WHEN  COND-DBIO-MRNF
+                     PERFORM  S3320-KJL0013-INSERT-RTN
+                        THRU  S3320-KJL0013-INSERT-EXT
+               WHEN  OTHER
+                     MOVE 'KJL0013'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT  '   TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'DB작업시　오류가　발생'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3300-PROCESS-SUB-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   그룹사기본(THKJL0013)수정
+      *-----------------------------------------------------------------
+       S3310-KJL0013-UPDATE-RTN.
+
+      *    그룹순위가 있는 대상은 순위,그룹명 변경안함
+241121     IF RJL0013-AFFLT-CORP-RANKG = 999
+      *       계열기업순위
+               MOVE  IN-AFFLT-CORP-RANKG
+                 TO  RJL0013-AFFLT-CORP-RANKG
+
+      *       주채권은행코드
+               MOVE  IN-MAIN-BND-BNK-CD
+                 TO  RJL0013-MAIN-BND-BNK-CD
+
+      *       계열기업군명
+               MOVE  IN-AFFLT-C-GROUP-NAME
+                 TO  RJL0013-AFFLT-C-GROUP-NAME
+           END-IF
+
+      *    그룹사신용등급구분
+           MOVE  IN-CMGR-CRTDSCD
+             TO  RJL0013-CMGR-CRTDSCD
+
+      *    등록직원번호
+           MOVE  IN-REGI-EMPID
+             TO  RJL0013-REGI-EMPID
+
+      *    등록년월일
+           MOVE  IN-REGI-YMD
+             TO  RJL0013-REGI-YMD
+
+      *@   DBIO LOG축적여부SETTING - 2011.11.30
+           SET  COND-DBIO-CHGLOG-YES  TO TRUE
+
+           #DYDBIO  UPDATE-CMD-Y TKJL0013-PK TRJL0013-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-UPDATE-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0013'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'UPDATE'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'UPDATE시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S3310-KJL0013-UPDATE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   그룹사기본(THKJL0013)등록
+      *-----------------------------------------------------------------
+       S3320-KJL0013-INSERT-RTN.
+
+      *    그룹회사코드
+           MOVE  IN-GROUP-CO-CD
+             TO  RJL0013-GROUP-CO-CD
+
+      *    기준년월
+           MOVE  IN-BASE-YM
+             TO  RJL0013-BASE-YM
+
+      *    계열적용구분
+           MOVE  IN-AFFLT-APLY-DSTCD
+             TO  RJL0013-AFFLT-APLY-DSTCD
+
+      *    계열기업군코드
+           MOVE  IN-AFFLT-CORP-GROUP-CD
+             TO  RJL0013-AFFLT-CORP-GROUP-CD
+
+      *    계열기업순위
+           MOVE  IN-AFFLT-CORP-RANKG
+             TO  RJL0013-AFFLT-CORP-RANKG
+
+      *    주채권은행코드
+           MOVE  IN-MAIN-BND-BNK-CD
+             TO  RJL0013-MAIN-BND-BNK-CD
+
+      *    계열기업군명
+           MOVE  IN-AFFLT-C-GROUP-NAME
+             TO  RJL0013-AFFLT-C-GROUP-NAME
+
+      *    그룹사신용등급구분
+           MOVE  IN-CMGR-CRTDSCD
+             TO  RJL0013-CMGR-CRTDSCD
+
+      *    등록직원번호
+           MOVE  IN-REGI-EMPID
+             TO  RJL0013-REGI-EMPID
+
+      *    등록년월일
+           MOVE  IN-REGI-YMD
+             TO  RJL0013-REGI-YMD
+
+      *@   DBIO LOG축적여부SETTING - 2024.11.21
+           SET  COND-DBIO-CHGLOG-YES  TO TRUE
+
+           #DYDBIO  INSERT-CMD-Y TKJL0013-PK TRJL0013-REC
+
+           EVALUATE  TRUE
+               WHEN  COND-DBIO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-INSERT-CNT
+               WHEN  OTHER
+                     MOVE 'KJL0013'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'INSERT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  DBIO-SQLCODE
+                                       TO  XZUGEROR-I-SQL-CD
+                     MOVE 'INSERT시 오류가 발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM02001 CO-UBM02001 DBIO-STAT
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+           .
+       S3320-KJL0013-INSERT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@    READ FILE
+      *-----------------------------------------------------------------
+       S4000-READ-FILE-RTN.
+
+           READ  IN-FILE     AT  END
+            SET  IN-EOF-Y    TO  TRUE
+           END-READ
+
+           EVALUATE  WK-IN-F-ST
+               WHEN  ZERO
+               WHEN  CO-CHA-04
+                     ADD   CO-NUM-1    TO  WK-AC-READ-CNT
+               WHEN  CO-CHA-10
+                     SET   IN-EOF-Y    TO  TRUE
+               WHEN  OTHER
+                     MOVE 'IN-FILE READ ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+                     MOVE  WK-IN-F-ST
+                                       TO  XZUGEROR-I-MSG(34:2)
+                     #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *@1  1000건마다 DISPLAY
+           IF  FUNCTION MOD(WK-AC-READ-CNT, 1000) = CO-NUM-0
+               #USRLOG 'WK-AC-READ-CNT : ' WK-AC-READ-CNT
+           END-IF
+
+150226*@1  10건마다 COMMIT처리
+           IF  FUNCTION MOD(WK-AC-READ-CNT, 10) = CO-NUM-0
+               EXEC SQL
+                    COMMIT
+               END-EXEC
+
+      *       리턴코드가 정상이 아니면 에러처리
+               EVALUATE  SQLCODE
+                   WHEN  CO-SQL-OK
+                         CONTINUE
+                   WHEN  OTHER
+                         MOVE 'KJL0013'    TO  XZUGEROR-I-TBL-ID
+                         MOVE 'COMMIT'     TO  XZUGEROR-I-FUNC-CD
+                         MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                         MOVE 'DBCommit시오류가발생했습니다 '
+                                           TO  XZUGEROR-I-MSG
+                         #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                         #OKEXIT CO-CHA-08
+               END-EVALUATE
+           END-IF
+
+                          .
+       S4000-READ-FILE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+           CLOSE  IN-FILE
+
+           IF  WK-IN-F-ST NOT = CO-STAT-OK
+               MOVE 'IN-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-IN-F-ST        TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 WK-IN-F-ST
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* FILE READ       COUNT  = ' WK-AC-READ-CNT
+           #USRLOG '* UPDATE          COUNT  = ' WK-AC-UPDATE-CNT
+           #USRLOG '* INSERT          COUNT  = ' WK-AC-INSERT-CNT
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLM132 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

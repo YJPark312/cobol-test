@@ -1,0 +1,268 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJL4072 (국외영업점TE현황조회)
+      *@처리유형  : AS
+      *@처리개요  :국외영업점TE현황조회조회
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *@YBH    :20200327: 신규작성
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJL4072.
+       AUTHOR.                         YBH.
+       DATE-WRITTEN.                   20/03/27.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJL4072 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-MESSAGE              PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE
+       01  XDJL4072-CA.
+           COPY  XDJL4072.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJL4072-CA.
+           COPY  YNJL4072.
+      *    AS COPYBOOK
+       01  YPJL4072-CA.
+           COPY  YPJL4072.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJL4072-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJL4072-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+           IF YNJL4072-PRCSS-DSTIC NOT = CO-CHA-01 AND
+                                         CO-CHA-02
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 DC호출
+           PERFORM S3100-DJL4072-CALL-RTN
+              THRU S3100-DJL4072-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJL4072-CALL-RTN.
+      *@1 포괄신용공여한도설정대상
+
+      *@3.1.1 입력파라미터 조립
+           INITIALIZE    XDJL4072-IN
+
+      *    처리구분
+           MOVE YNJL4072-PRCSS-DSTIC
+             TO XDJL4072-I-PRCSS-DSTIC
+      *    기준년월일
+           MOVE YNJL4072-BASE-YMD
+             TO XDJL4072-I-BASE-YMD
+191220*    관리부점코드
+           MOVE YNJL4072-MGT-BRNCD
+             TO XDJL4072-I-MGT-BRNCD
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJL4072 YCCOMMON-CA XDJL4072-CA
+
+      *@3.1.3 처리결과CHECK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           EVALUATE TRUE
+           WHEN COND-XDJL4072-OK
+      *@      출력처리
+               PERFORM S6000-OUTPUT-RTN
+                  THRU S6000-OUTPUT-EXT
+           WHEN COND-XDJL4072-NOTFOUND
+               MOVE 'N0000002'
+                 TO WK-MESSAGE
+           WHEN OTHER
+               #ERROR XDJL4072-R-ERRCD
+                      XDJL4072-R-TREAT-CD
+                      XDJL4072-R-STAT
+           END-EVALUATE
+           .
+
+       S3100-DJL4072-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력처리
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-RTN.
+      *@4 출력처리
+
+      *@4.1 출력라인수 조립
+           MOVE XDJL4072-O-OUTPT-LINE-CNT1
+             TO YPJL4072-OUTPT-LINE-CNT1
+
+      *@4.2 그리드1 조립
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL   WK-I > YPJL4072-OUTPT-LINE-CNT1
+      *       기준년월일
+               MOVE XDJL4072-O-BASE-YMD(WK-I)
+                 TO YPJL4072-BASE-YMD(WK-I)
+      *       관리부점코드
+               MOVE XDJL4072-O-MGT-BRNCD(WK-I)
+                 TO YPJL4072-MGT-BRNCD(WK-I)
+      *       부점명
+               MOVE XDJL4072-O-BRN-NAME(WK-I)
+                 TO YPJL4072-BRN-NAME(WK-I)
+      *       한도계좌번호
+               MOVE XDJL4072-O-LIMT-ACNO(WK-I)
+                 TO YPJL4072-LIMT-ACNO(WK-I)
+      *       차주고객식별자
+               MOVE XDJL4072-O-BRWR-CUST-IDNFR(WK-I)
+                 TO YPJL4072-BRWR-CUST-IDNFR(WK-I)
+      *       채무자명
+               MOVE XDJL4072-O-DBTRZ-NAME(WK-I)
+                 TO YPJL4072-DBTRZ-NAME(WK-I)
+      *       대분류업종코드
+               MOVE XDJL4072-O-LAG-CLSFI-BZTYP-CD(WK-I)
+                 TO YPJL4072-LAG-CLSFI-BZTYP-CD(WK-I)
+      *       대분류업종코드명
+               MOVE XDJL4072-O-LAG-C-BZTYP-CD-NAME(WK-I)
+                 TO YPJL4072-LAG-C-BZTYP-CD-NAME(WK-I)
+      *       상품코드
+               MOVE XDJL4072-O-PRDCT-CD(WK-I)
+                 TO YPJL4072-PRDCT-CD(WK-I)
+      *       상품명
+               MOVE XDJL4072-O-PRDCT-NAME(WK-I)
+                 TO YPJL4072-PRDCT-NAME(WK-I)
+      *       한도기준토탈익스포져금액
+               MOVE XDJL4072-O-LIMT-BASE-TE-AMT(WK-I)
+                 TO YPJL4072-LIMT-BASE-TE-AMT(WK-I)
+           END-PERFORM
+           .
+       S6000-OUTPUT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL04072000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK WK-MESSAGE
+           .
+       S9000-FINAL-EXT.
+           EXIT.

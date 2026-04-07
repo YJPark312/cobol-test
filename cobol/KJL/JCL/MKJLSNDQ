@@ -1,0 +1,25 @@
+//MKJLSNDQ JOB ,'M V S',CLASS=B,MSGCLASS=X,REGION=0M
+//*================================================================*/
+//* 계열기업 및 소속업체 정보 제공                       */
+//*----------------------------------------------------------------*/
+//NDMPROC1  EXEC PGM=DMBATCH
+//DMNETMAP  DD   DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD   DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD   DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD   SYSOUT=*
+//SYSIN     DD   *
+ SIGNON USERID=(C160491,) ESF=NO CASE=YES
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0               -
+  &SNODE=NDM.EEMBTO01                          -
+  &FTDSN=KJL.SD.UNLOAD.KJL0013.MBFD06          -
+  &TODSN1="/fsshare42/hostsam/rcv/MBF"         -
+  &TODSN2="/KJL_mbf_d06.dat"
+
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0               -
+  &SNODE=NDM.EEMBTO01                          -
+  &FTDSN=KJL.SD.UNLOAD.KJL0014.MBFD07          -
+  &TODSN1="/fsshare42/hostsam/rcv/MBF"         -
+  &TODSN2="/KJL_mbf_d07.dat"
+ SIGNOFF
+/*
+//

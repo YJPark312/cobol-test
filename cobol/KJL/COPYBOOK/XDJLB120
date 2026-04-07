@@ -1,0 +1,118 @@
+      *================================================================*
+      *@ NAME : XDJLB120                                               *
+      *@ DESC : DC(EAD)상품정보원장 COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2023-12-27 10:10:30                          *
+      *  생성일시     : 2023-12-27 10:10:31                          *
+      *  전체길이     : 00000245 BYTES                               *
+      *================================================================*
+           03  XDJLB120-RETURN.
+             05  XDJLB120-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB120-OK            VALUE  '00'.
+                 88  COND-XDJLB120-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB120-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB120-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB120-ERROR         VALUE  '09'.
+                 88  COND-XDJLB120-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB120-SYSERROR      VALUE  '99'.
+             05  XDJLB120-R-LINE                 PIC  9(006).
+             05  XDJLB120-R-ERRCD                PIC  X(008).
+             05  XDJLB120-R-TREAT-CD             PIC  X(008).
+             05  XDJLB120-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB120-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB120-I-PRCSS-DSTIC          PIC  X(002).
+      *--       조회기준년월
+             05  XDJLB120-I-BASE-YM              PIC  X(006).
+      *--       회계구분
+             05  XDJLB120-I-ACCTG-DSTIC          PIC  X(001).
+      *--       상품대분류코드
+             05  XDJLB120-I-PRDCT-LAG-CLSFI-CD   PIC  X(002).
+      *--       상품중분류코드
+             05  XDJLB120-I-PRDCT-MEDM-CLSFI-CD  PIC  X(002).
+      *--       상품템플릿코드
+             05  XDJLB120-I-PRDCT-TMPLT-CD       PIC  X(003).
+      *--       상품번호
+             05  XDJLB120-I-PRDCT-NO             PIC  X(005).
+      *--       상품명
+             05  XDJLB120-I-PRDCT-NAME           PIC  X(052).
+      *--       통합계정과목코드
+             05  XDJLB120-I-INTGRA-TIACC-CD      PIC  X(013).
+      *--       자산구분
+             05  XDJLB120-I-ASST-DSTIC           PIC  X(001).
+      *--       잔액NCCF환산율
+             05  XDJLB120-I-BAL-CCF-UTCRT        PIC  9(003).
+      *--       EAD한도CCF환산율
+             05  XDJLB120-I-EAD-LIMT-CCF-UTCRT   PIC  9(003).
+      *--       EAD한도NCCF환산율
+             05  XDJLB120-I-EAD-LIMT-NCCF-UTCRT  PIC  9(003).
+      *--       한도기준TE환산율
+             05  XDJLB120-I-LIMT-BASE-TE-UTCRT   PIC  9(003).
+      *--       포괄신용공여대상계정여부
+             05  XDJLB120-I-INLS-GT-ACITM-YN     PIC  X(001).
+      *--       CA대상계정여부
+             05  XDJLB120-I-CA-TAGET-ACITM-YN    PIC  X(001).
+      *--       신용공여한도환산율
+             05  XDJLB120-I-GRCR-LIMT-UTCRT      PIC  9(003).
+      *--       EAD중분류코드
+             05  XDJLB120-I-EAD-MEDM-CLSFI-CD    PIC  X(003).
+      *--       EAD중분류명
+             05  XDJLB120-I-EAD-MEDM-CLSFI-NAME  PIC  X(042).
+      *--       토탈익스포져중분류코드
+             05  XDJLB120-I-TE-MEDM-CLSFI-CD     PIC  X(003).
+      *--       토탈익스포져중분류명
+             05  XDJLB120-I-TE-MEDM-CLSFI-NAME   PIC  X(042).
+      *--       CA중분류코드
+             05  XDJLB120-I-CA-MEDM-CLSFI-CD     PIC  X(003).
+      *--       CA중분류명
+             05  XDJLB120-I-CA-MEDM-CLSFI-NAME   PIC  X(042).
+      *--       국외영업점편중관리대상여부
+             05  XDJLB120-I-ABRD-L-MGT-TAGET-YN  PIC  X(001).
+      *--       바젤기준신용환산률
+             05  XDJLB120-I-BSL-B-CRDT-UTCNG-RT  PIC  9(003).
+      *--       거액익스포져대상여부
+             05  XDJLB120-I-BSM-EXPSR-TAGET-YN   PIC  X(001).
+      *--       신용익스포져대상여부
+             05  XDJLB120-I-CRDT-EXPSR-TAGET-YN  PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJLB120-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB120-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  1  2  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB120-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB120-I-BASE-YM            ;조회기준년월
+      *X  XDJLB120-I-ACCTG-DSTIC        ;회계구분
+      *X  XDJLB120-I-PRDCT-LAG-CLSFI-CD ;상품대분류코드
+      *X  XDJLB120-I-PRDCT-MEDM-CLSFI-CD;상품중분류코드
+      *X  XDJLB120-I-PRDCT-TMPLT-CD     ;상품템플릿코드
+      *X  XDJLB120-I-PRDCT-NO           ;상품번호
+      *X  XDJLB120-I-PRDCT-NAME         ;상품명
+      *X  XDJLB120-I-INTGRA-TIACC-CD    ;통합계정과목코드
+      *X  XDJLB120-I-ASST-DSTIC         ;자산구분
+      *N  XDJLB120-I-BAL-CCF-UTCRT      ;잔액NCCF환산율
+      *N  XDJLB120-I-EAD-LIMT-CCF-UTCRT ;EAD한도CCF환산율
+      *N  XDJLB120-I-EAD-LIMT-NCCF-UTCRT;EAD한도NCCF환산율
+      *N  XDJLB120-I-LIMT-BASE-TE-UTCRT ;한도기준TE환산율
+      *X  XDJLB120-I-INLS-GT-ACITM-YN
+      * 포괄신용공여대상계정여부
+      *X  XDJLB120-I-CA-TAGET-ACITM-YN  ;CA대상계정여부
+      *N  XDJLB120-I-GRCR-LIMT-UTCRT    ;신용공여한도환산율
+      *X  XDJLB120-I-EAD-MEDM-CLSFI-CD  ;EAD중분류코드
+      *X  XDJLB120-I-EAD-MEDM-CLSFI-NAME;EAD중분류명
+      *X  XDJLB120-I-TE-MEDM-CLSFI-CD   ;토탈익스포져중분류코드
+      *X  XDJLB120-I-TE-MEDM-CLSFI-NAME ;토탈익스포져중분류명
+      *X  XDJLB120-I-CA-MEDM-CLSFI-CD   ;CA중분류코드
+      *X  XDJLB120-I-CA-MEDM-CLSFI-NAME ;CA중분류명
+      *X  XDJLB120-I-ABRD-L-MGT-TAGET-YN
+      * 국외영업점편중관리대상여부
+      *N  XDJLB120-I-BSL-B-CRDT-UTCNG-RT;바젤기준신용환산률
+      *X  XDJLB120-I-BSM-EXPSR-TAGET-YN ;거액익스포져대상여부
+      *X  XDJLB120-I-CRDT-EXPSR-TAGET-YN
+      * 신용익스포져대상여부
+      *X  XDJLB120-O-PRCSS-RSULT        ;처리결과

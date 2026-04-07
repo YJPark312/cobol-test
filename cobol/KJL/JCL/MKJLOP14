@@ -1,0 +1,23 @@
+//MKJLOP14 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     : MKJLDP06 / MKJLDB12
+//*********************************************************************
+//*   고객정보추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD25H,OPT=&SYSUID
+//INFILE   DD DISP=OLD,DSN=KJL.SD.BJLD251.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD253.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD254.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD255.V001
+//         DD DISP=OLD,DSN=KJL.SD.BJLD256.V001
+//OTFILE   DD DSN=KJL.SD.BJLD25H.V001,
+//            DISP=(OLD,CATLG,CATLG),
+//            UNIT=SYSPA,
+//            SPACE=(CYL,(0300,0100),RLSE),
+//            DCB=(RECFM=FB,LRECL=257)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLOP14-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일

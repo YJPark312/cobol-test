@@ -1,0 +1,16 @@
+//TKJLDP45 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일작업
+//*선행작업명     :  mkeedc18.sh
+//*********************************************************************
+//*   자금보충약정Capital Call 정보적재(THKJLR017)
+//*********************************************************************
+//STEP01  EXEC JZBDEXEC,MBR=BJLDR17,OPT=&SYSUID
+//INFILE    DD DISP=OLD,DSN=KEE.SD.SHRKJL.KEEDC18
+//INF       DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1     DD DISP=SHR,DSN=KJL.SD.MKJLDP45.DATA
+//SYSIN     DD *
+KB0-20210401-MKJLDP45-001-ONLBAT-KB STAR-20210402
+//*자료기준년월일

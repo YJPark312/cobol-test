@@ -1,0 +1,140 @@
+      *================================================================*
+      *@ NAME : XDJL4701                                               *
+      *@ DESC : DC지역본부별SUB한도조회COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-06-18 09:46:59                          *
+      *  생성일시     : 2018-06-18 09:47:00                          *
+      *  전체길이     : 00000017 BYTES                               *
+      *================================================================*
+           03  XDJL4701-RETURN.
+             05  XDJL4701-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4701-OK            VALUE  '00'.
+                 88  COND-XDJL4701-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4701-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4701-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4701-ERROR         VALUE  '09'.
+                 88  COND-XDJL4701-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4701-SYSERROR      VALUE  '99'.
+             05  XDJL4701-R-LINE                 PIC  9(006).
+             05  XDJL4701-R-ERRCD                PIC  X(008).
+             05  XDJL4701-R-TREAT-CD             PIC  X(008).
+             05  XDJL4701-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4701-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4701-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월일
+             05  XDJL4701-I-BASE-YMD             PIC  X(008).
+      *--       대분류업종코드
+             05  XDJL4701-I-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--       지역본부코드
+             05  XDJL4701-I-AREA-HQ-CD           PIC  X(004).
+      *----------------------------------------------------------------*
+           03  XDJL4701-OUT.
+      *----------------------------------------------------------------*
+      *--       그리드
+             05  XDJL4701-O-GRID.
+      *--         총라인수
+               07  XDJL4701-O-TOTAL-LINE-CNT     PIC  9(005).
+      *--         데이터부
+               07  XDJL4701-O-DATA-BOOK          OCCURS 000100 TIMES.
+      *--           대분류업종코드
+                 09  XDJL4701-O-LAG-CLSFI-BZTYP-CD
+                                                 PIC  X(003).
+      *--           지역본부코드
+                 09  XDJL4701-O-AREA-HQ-CD       PIC  X(004).
+      *--           지역본부명
+                 09  XDJL4701-O-AREA-HQ-NAME     PIC  X(022).
+      *--           전년도말익스포져금액
+                 09  XDJL4701-O-PYY-X-END-EXPSR-AMT
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부SUB한도금액
+                 09  XDJL4701-O-AREA-HQ-SUB-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부순증SUB한도금액
+                 09  XDJL4701-O-AREA-HN-SUB-CLAM PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부익스포져금액
+                 09  XDJL4701-O-AREA-HQ-EXPSR-AMT
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부한도여유금액
+                 09  XDJL4701-O-AREA-HQ-LIMT-EXAN
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부SUB소진율
+                 09  XDJL4701-O-AREA-HQ-SUB-EXHS-RT
+                                                 PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--           지역본부예외승인한도금액
+                 09  XDJL4701-O-AREA-HE-ATHOR-CLAM
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역본부예외승인금액
+                 09  XDJL4701-O-AREA-HE-ATHOR-AMT
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역예외승인여유금액
+                 09  XDJL4701-O-AREA-E-ATHOR-EXAN
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           지역예외승인소진율
+                 09  XDJL4701-O-AREA-EA-EXHS-RT  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--           지역본부기준소진율
+                 09  XDJL4701-O-AREA-HE-BASE     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--           월SUB한도금액
+                 09  XDJL4701-O-M-AREA-HQ-SUB-CLAM
+                                                 PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           월예외승인한도금액
+                 09  XDJL4701-O-M-AREA-HE-ATHOR  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           월기준소진율
+                 09  XDJL4701-O-M-AREA-HE-BASE   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--           대출금액
+                 09  XDJL4701-O-LN-AMT           PIC S9(018)
+                                                 LEADING  SEPARATE.
+      *--           실질여유액
+                 09  XDJL4701-O-ATUAL-SEXTR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--           실질소진율
+                 09  XDJL4701-O-ATUAL-EXHS-RT    PIC  9(003)V9(02).
+      *================================================================*
+      *        X  D  J  L  4  7  0  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4701-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4701-I-BASE-YMD           ;기준년월일
+      *X  XDJL4701-I-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4701-I-AREA-HQ-CD         ;지역본부코드
+      *G  XDJL4701-O-GRID               ;그리드
+      *N  XDJL4701-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4701-O-DATA-BOOK          ;데이터부
+      *X  XDJL4701-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4701-O-AREA-HQ-CD         ;지역본부코드
+      *X  XDJL4701-O-AREA-HQ-NAME       ;지역본부명
+      *S  XDJL4701-O-PYY-X-END-EXPSR-AMT
+      * 전년도말익스포져금액
+      *S  XDJL4701-O-AREA-HQ-SUB-CLAM   ;지역본부SUB한도금액
+      *S  XDJL4701-O-AREA-HN-SUB-CLAM
+      * 지역본부순증SUB한도금액
+      *S  XDJL4701-O-AREA-HQ-EXPSR-AMT  ;지역본부익스포져금액
+      *S  XDJL4701-O-AREA-HQ-LIMT-EXAN  ;지역본부한도여유금액
+      *S  XDJL4701-O-AREA-HQ-SUB-EXHS-RT;지역본부SUB소진율
+      *S  XDJL4701-O-AREA-HE-ATHOR-CLAM
+      * 지역본부예외승인한도금액
+      *S  XDJL4701-O-AREA-HE-ATHOR-AMT  ;지역본부예외승인금액
+      *S  XDJL4701-O-AREA-E-ATHOR-EXAN  ;지역예외승인여유금액
+      *S  XDJL4701-O-AREA-EA-EXHS-RT    ;지역예외승인소진율
+      *S  XDJL4701-O-AREA-HE-BASE       ;지역본부기준소진율
+      *S  XDJL4701-O-M-AREA-HQ-SUB-CLAM ;월SUB한도금액
+      *S  XDJL4701-O-M-AREA-HE-ATHOR    ;월예외승인한도금액
+      *S  XDJL4701-O-M-AREA-HE-BASE     ;월기준소진율
+      *S  XDJL4701-O-LN-AMT             ;대출금액
+      *S  XDJL4701-O-ATUAL-SEXTR-AMT    ;실질여유액
+      *N  XDJL4701-O-ATUAL-EXHS-RT      ;실질소진율

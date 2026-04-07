@@ -1,0 +1,312 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4087 (DC외화타점예치Depo별대주주조회)
+      *@처리유형  : DC
+      *@처리개요  : 외화타점예치Depo별대주주조회하는
+      *@              프로그램이다
+      *@구현방법  : SQL ARRAY
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240926: 신규작성
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  외화타점예치계좌기본수보: THKJLR019            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4087.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   24/09/XX.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *    환율이 등록되어있지 않습니다.
+           03  CO-B4400002             PIC  X(008) VALUE 'B4400002'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4087'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-06               PIC  X(002) VALUE '06'.
+           03  CO-CHA-07               PIC  X(002) VALUE '07'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+
+           03  WK-BF-KEY.
+               05 WK-BF-BASE-YMD       PIC  X(008).
+               05 WK-BF-CNCYCD         PIC  X(003).
+               05 WK-BF-TRAN-BNK-BIC   PIC  X(011).
+
+           03  WK-AF-KEY.
+               05 WK-AF-BASE-YMD       PIC  X(008).
+               05 WK-AF-CNCYCD         PIC  X(003).
+               05 WK-AF-TRAN-BNK-BIC   PIC  X(011).
+
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *외화타점예치Depo별대주주조회
+       01  XQJL4087-CA.
+           COPY  XQJL4087.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4087-CA.
+           COPY  XDJL4087.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4087-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4087-OUT
+                      XDJL4087-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   소관부서
+      *    IF XDJL4087-I-JRSDZ-BRNCD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+      *       #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+      *    END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@  외화타점예치Depo별대주주 조회
+           PERFORM S3200-QJL4087-CALL-RTN
+              THRU S3200-QJL4087-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  외화타점예치Depo별대주주 조회
+      *-----------------------------------------------------------------
+       S3200-QJL4087-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL4087-IN
+
+      *@2.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4087-I-GROUP-CO-CD
+
+      *@   기준년월일
+           IF XDJL4087-I-BASE-YMD = SPACE
+               MOVE ALL '%'
+                 TO XQJL4087-I-BASE-YMD
+           ELSE
+               MOVE XDJL4087-I-BASE-YMD
+                 TO XQJL4087-I-BASE-YMD
+
+           END-IF
+
+      *@   고객식별자
+           IF XDJL4087-I-CUST-IDNFR = SPACE
+               MOVE ALL '%'
+                 TO XQJL4087-I-CUST-IDNFR
+           ELSE
+               MOVE XDJL4087-I-CUST-IDNFR
+                 TO XQJL4087-I-CUST-IDNFR
+           END-IF
+
+
+      *    중단거래여부 확인
+           IF  BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+
+               MOVE BOCOM-BF-TDK-INFO-CTNT
+                 TO WK-BF-KEY
+
+      *        N기준년월일
+               MOVE WK-BF-BASE-YMD
+                 TO XQJL4087-I-N-BASE-YMD
+
+      *        N통화코드
+               MOVE WK-BF-CNCYCD
+                 TO XQJL4087-I-N-CNCYCD
+
+      *        N거래은행BIC코드
+               MOVE WK-BF-TRAN-BNK-BIC
+                 TO XQJL4087-I-N-TRAN-BNK-BIC
+
+           END-IF
+
+      *@2.3 프로그램 호출
+           #DYSQLA QJL4087 XQJL4087-CA
+      *@2.4 호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@2.5 출력변수 MOVE
+           MOVE  DBSQL-SELECT-CNT
+             TO  XDJL4087-O-PRSNT-NOITM1
+
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > XDJL4087-O-PRSNT-NOITM1
+
+      *        기준년월일
+               MOVE XQJL4087-O-BASE-YMD(WK-I)
+                 TO XDJL4087-O-BASE-YMD(WK-I)
+
+      *        통화코드
+               MOVE XQJL4087-O-CNCYCD(WK-I)
+                 TO XDJL4087-O-CNCYCD(WK-I)
+
+      *        구분
+               MOVE XQJL4087-O-DSTIC(WK-I)
+                 TO XDJL4087-O-DSTIC(WK-I)
+
+      *        거래은행BIC코드
+               MOVE XQJL4087-O-TRAN-BNK-BIC(WK-I)
+                 TO XDJL4087-O-TRAN-BNK-BIC(WK-I)
+
+      *        통합계정과목코드
+               MOVE XQJL4087-O-INTGRA-TIACC-CD(WK-I)
+                 TO XDJL4087-O-INTGRA-TIACC-CD(WK-I)
+
+      *        외화잔액
+               MOVE XQJL4087-O-FC-BAL(WK-I)
+                 TO XDJL4087-O-FC-BAL(WK-I)
+
+      *        원화환산금액
+               MOVE XQJL4087-O-WONC-AUC(WK-I)
+                 TO XDJL4087-O-WONC-AUC(WK-I)
+
+      *        고객식별자
+               MOVE XQJL4087-O-CUST-IDNFR(WK-I)
+                 TO XDJL4087-O-CUST-IDNFR(WK-I)
+
+      *        등록직원번호
+               MOVE XQJL4087-O-REGI-EMPID(WK-I)
+                 TO XDJL4087-O-REGI-EMPID(WK-I)
+
+      *        등록일시
+               MOVE XQJL4087-O-REGI-YMS(WK-I)
+                 TO XDJL4087-O-REGI-YMS(WK-I)
+
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT = 100
+
+      *        N기준년월일
+               MOVE XQJL4087-O-BASE-YMD(100)
+                 TO WK-AF-BASE-YMD
+
+      *        N통화코드
+               MOVE XQJL4087-O-CNCYCD(100)
+                 TO WK-AF-CNCYCD
+
+      *        N거래은행BIC코드
+               MOVE XQJL4087-O-TRAN-BNK-BIC(100)
+                 TO WK-AF-TRAN-BNK-BIC
+
+               #DSCNTR 2 WK-AF-KEY
+           END-IF
+           .
+       S3200-QJL4087-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@   정상종료
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

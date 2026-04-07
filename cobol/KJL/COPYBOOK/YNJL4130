@@ -1,0 +1,67 @@
+      *================================================================*
+      *@ NAME : YNJL4130                                               *
+      *@ DESC : AS국별수기계좌조회COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-09 15:10:42                          *
+      *  생성일시     : 2020-12-09 15:10:46                          *
+      *  전체길이     : 00093511 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJL4130-PRCSS-DSTIC              PIC  X(002).
+      *--     부점코드
+           07  YNJL4130-BRNCD                    PIC  X(004).
+      *--     총라인수
+           07  YNJL4130-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  YNJL4130-GRID1                    OCCURS 000500 TIMES.
+      *--       계좌번호
+             09  YNJL4130-ACNO                   PIC  X(020).
+      *--       고객식별자
+             09  YNJL4130-CUST-IDNFR             PIC  X(010).
+      *--       거래상대방
+             09  YNJL4130-TRAN-CNPRT             PIC  X(082).
+      *--       상품대분류코드
+             09  YNJL4130-PRDCT-LAG-CLSFI-CD     PIC  X(002).
+      *--       상품중분류코드
+             09  YNJL4130-PRDCT-MEDM-CLSFI-CD    PIC  X(002).
+      *--       상품템플릿코드
+             09  YNJL4130-PRDCT-TMPLT-CD         PIC  X(003).
+      *--       상품번호
+             09  YNJL4130-PRDCT-NO               PIC  X(005).
+      *--       ISO국가코드
+             09  YNJL4130-ISO-NATNL-CD           PIC  X(002).
+      *--       관리부점
+             09  YNJL4130-MGTBRN                 PIC  X(004).
+      *--       시작년월일
+             09  YNJL4130-START-YMD              PIC  X(008).
+      *--       만기년월일
+             09  YNJL4130-EXPIR-YMD              PIC  X(008).
+      *--       통화코드
+             09  YNJL4130-CNCYCD                 PIC  X(003).
+      *--       통화한도금액
+             09  YNJL4130-CRNCY-CLAM             PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *--       통화금일잔액
+             09  YNJL4130-CRNCY-TDD-BAL          PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        Y  N  J  L  4  1  3  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJL4130-PRCSS-DSTIC          ;처리구분
+      *X  YNJL4130-BRNCD                ;부점코드
+      *N  YNJL4130-TOTAL-LINE-CNT       ;총라인수
+      *A  YNJL4130-GRID1                ;그리드1
+      *X  YNJL4130-ACNO                 ;계좌번호
+      *X  YNJL4130-CUST-IDNFR           ;고객식별자
+      *X  YNJL4130-TRAN-CNPRT           ;거래상대방
+      *X  YNJL4130-PRDCT-LAG-CLSFI-CD   ;상품대분류코드
+      *X  YNJL4130-PRDCT-MEDM-CLSFI-CD  ;상품중분류코드
+      *X  YNJL4130-PRDCT-TMPLT-CD       ;상품템플릿코드
+      *X  YNJL4130-PRDCT-NO             ;상품번호
+      *X  YNJL4130-ISO-NATNL-CD         ;ISO국가코드
+      *X  YNJL4130-MGTBRN               ;관리부점
+      *X  YNJL4130-START-YMD            ;시작년월일
+      *X  YNJL4130-EXPIR-YMD            ;만기년월일
+      *X  YNJL4130-CNCYCD               ;통화코드
+      *S  YNJL4130-CRNCY-CLAM           ;통화한도금액
+      *S  YNJL4130-CRNCY-TDD-BAL        ;통화금일잔액

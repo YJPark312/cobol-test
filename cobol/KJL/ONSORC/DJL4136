@@ -1,0 +1,1155 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4136 (DC대주주(특수관계인포함)에
+      *                                    대한신용공여현황조회 )
+      *@처리유형  : DC
+      *@처리개요  : 당행 대주주(특수관계인 포함)에 대한
+      *               신용공여 현황조회하는 프로그램이다
+      *@구현방법  : SQL ARRAY
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *박정수:20240425: 신규작성
+      *박정수:20240926: 컬럼 추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  이사회승인내역 기본         : THKJL0081      : R
+      **  이사회승인관련계좌현황 기본 : THKJL0082      : R
+      **  이사회승인관련월별계좌현황 기본 : THKJL0083  : R
+      **  이사회승인내역월별현황 기본 : THKJL0084      : R
+      **  TE상품코드목록                : THKJL0118      : R
+      **  신용공여계정과목정보          : THKJL0119      : R
+      **  TE차주일계좌명세              : THKJL0125      : R
+      **  TE차주월계좌명세              : THKJL0126      : R
+      **  거액익스포져일계좌명세        : THKJL0076      : R
+      **  거액익스포져일계좌명세        : THKJL0077      : R
+      **  TE자기자본기본                : THKJL0049      : R
+      **  자회사대주주기본              : THKJL0042      : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4136.
+       AUTHOR.                         박정수.
+       DATE-WRITTEN.                   24/04/25.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *    환율이 등록되어있지 않습니다.
+           03  CO-B4400002             PIC  X(008) VALUE 'B4400002'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4136'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-06               PIC  X(002) VALUE '06'.
+           03  CO-CHA-07               PIC  X(002) VALUE '07'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-BASEYMD              PIC  X(008).
+           03  WK-BRDC-ATHOR-AMT       PIC  9(018) COMP-3.
+      *----
+      *   매매기준환율
+      *    N100단위통화여부
+      *   환율고시단위구분
+      *----
+           03  WK-DEAL-BASE-EXRT       PIC  9(005)V9(002).
+           03  WK-N100-UNIT-CRNCY-YN   PIC  X(0001).
+           03  WK-HWGSCD               PIC  S9(0003) COMP-3.
+      *----
+      *    매매기준율환산   －잔액  (BS기준잔액)
+           03  WK-BRDC-ATHOR-WONC-AUC  PIC S9(00018) COMP-3.
+
+           03  WK-JRSDZ-BRNCD          PIC  X(0004).
+           03  WK-H-I-BRNCD1           PIC  X(004).
+           03  WK-H-I-BRNCD2           PIC  X(004).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * 만기일/역만기일 산출 Parameter
+       01  XCJIIL03-CA.
+           COPY  XCJIIL03.
+      * 기준환율정보 조회 Parameter
+       01  XCJIEX01-CA.
+           COPY  XCJIEX01.
+      *전영업일추출매크로
+       01  XCJIDT16-CA.
+           COPY  XCJIDT16.
+
+      *대주주(특수관계인 포함)에 대한
+      *신용공여 현황조회 （헤더）   일 기준
+       01  XQJL4136-CA.
+           COPY  XQJL4136.
+
+      *대주주(특수관계인 포함)에 대한
+      *신용공여 현황조회 （그리드） 일 기준
+       01  XQJL4137-CA.
+           COPY  XQJL4137.
+
+      *대주주(특수관계인 포함)에 대한
+      *신용공여 현황조회 （헤더）   월 기준
+       01  XQJL4138-CA.
+           COPY  XQJL4138.
+
+      *대주주(특수관계인 포함)에 대한
+      *신용공여 현황조회 （그리드） 월 기준
+       01  XQJL4139-CA.
+           COPY  XQJL4139.
+
+240926* FC COPYBOOK
+       01  XFJL0001-CA.
+           COPY  XFJL0001.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4136-CA.
+           COPY  XDJL4136.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4136-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4136-OUT
+                      XDJL4136-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   처리구분
+           IF XDJL4136-I-PRCSS-DSTIC = CO-CHA-01
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   기준년월일
+           IF XDJL4136-I-BASE-YMD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  월말일　추출
+           PERFORM S3100-CJIIL03-CALL-RTN
+              THRU S3100-CJIIL03-CALL-EXT
+
+           #USRLOG 'HYH TEST WK-BASEYMD:           ' WK-BASEYMD
+           #USRLOG 'HYH TEST WXDJL4136-I-BASE-YMD: ' XDJL4136-I-BASE-YMD
+
+           IF WK-BASEYMD < XDJL4136-I-BASE-YMD
+
+           #USRLOG 'HYH TEST 일데이터'
+      *@2      대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (헤더)
+               PERFORM S3200-QJL4136-CALL-RTN
+                  THRU S3200-QJL4136-CALL-EXT
+
+      *@3      대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (그리드)
+               PERFORM S3300-QJL4137-CALL-RTN
+                  THRU S3300-QJL4137-CALL-EXT
+
+           ELSE
+
+           #USRLOG 'HYH TEST 월데이터'
+
+      *@2      대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (헤더) 월기준
+               PERFORM S3400-QJL4138-CALL-RTN
+                  THRU S3400-QJL4138-CALL-EXT
+
+      *@3      대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (그리드) 월기준
+               PERFORM S3500-QJL4139-CALL-RTN
+                  THRU S3500-QJL4139-CALL-EXT
+
+           END-IF
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  만기일/역만기일 산출(거래일 1개월전 날짜 산출)
+      *-----------------------------------------------------------------
+       S3100-CJIIL03-CALL-RTN.
+
+           INITIALIZE     XCJIIL03-IN
+
+      *    그룹회사코드
+           MOVE  BICOM-GROUP-CO-CD
+             TO  XCJIIL03-I-GROUP-CO-CD
+      *    구분코드
+           MOVE  '4'
+             TO  XCJIIL03-I-DSTCD
+      *    년월일
+           MOVE  JICOM-BF-BZOPR-YMD
+            TO   XCJIIL03-I-YMD
+      *    일수/월수
+           MOVE  1
+             TO  XCJIIL03-I-NODAY-NOMN
+
+      *@1 공통 UTILITY CALL
+           #DYCALL     CJIIL03  YCCOMMON-CA  XCJIIL03-CA
+
+      *@1 RETURN 정보 확인
+           IF  XCJIIL03-R-STAT    =  ZEROS
+
+               MOVE  XCJIIL03-O-YMD
+                 TO  WK-BASEYMD
+           ELSE
+               #ERROR XCJIIL03-R-ERRCD
+                      XCJIIL03-R-TREAT-CD
+                      XCJIIL03-R-STAT
+           END-IF
+           .
+
+       S3100-CJIIL03-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (헤더)
+      *-----------------------------------------------------------------
+       S3200-QJL4136-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL4136-IN
+
+      *@2.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4136-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XQJL4136-I-BASE-YM
+
+      *    기준일
+           MOVE XDJL4136-I-BASE-YMD(7:2)
+             TO XQJL4136-I-BASE-DD
+
+240926*    기준년월일
+           MOVE XDJL4136-I-BASE-YMD
+             TO XQJL4136-I-BASE-YMD
+
+      *@2.3 프로그램 호출
+           #DYSQLA QJL4136 XQJL4136-CA
+      *@2.4 호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   업무규제자기자본
+           COMPUTE XDJL4136-O-BZWK-REGUL-ONCP
+                 = XQJL4136-O-BZWK-REGUL-ONCP / 1000000
+
+      *@   자기자본기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XDJL4136-O-ONCP-BASE-YM
+
+      *    대주주 신용공여한도
+           COMPUTE XDJL4136-O-STKLN-M-GRCR-LIMT
+                 = XQJL4136-O-BZWK-REGUL-ONCP / 1000000 * 0.25
+
+
+      *    대주주 신용공여잔액
+           COMPUTE XDJL4136-O-STKLN-MAIN-GRCR-BAL
+                 = XQJL4136-O-STKLN-MAIN-GRCR-BAL / 1000000
+
+      *    대주주 한도여유액
+           COMPUTE XDJL4136-O-STKLN-ML-SEXTR-AMT
+                 = XDJL4136-O-STKLN-M-GRCR-LIMT
+                   - XDJL4136-O-STKLN-MAIN-GRCR-BAL
+
+      *    자회사 신용공여한도
+           COMPUTE XDJL4136-O-SBCO-GRCR-LIMT
+                 = XQJL4136-O-BZWK-REGUL-ONCP / 1000000 * 0.2
+
+      *    자회사 신용공여잔액
+           COMPUTE XDJL4136-O-SBCO-GRCR-BAL
+                 = XQJL4136-O-SBCO-GRCR-BAL / 1000000
+
+      *    자회사 한도여유액
+           COMPUTE XDJL4136-O-SBCO-LIMT-SEXTR-AMT
+                 = XDJL4136-O-SBCO-GRCR-LIMT
+                   - XDJL4136-O-SBCO-GRCR-BAL
+
+      *    전체 신용공여한도
+           COMPUTE XDJL4136-O-GRCR-LIMT
+                 = XQJL4136-O-BZWK-REGUL-ONCP / 1000000 * 0.2
+
+      *    전체 신용공여잔액
+           COMPUTE XDJL4136-O-GRCR-BAL
+                 = XDJL4136-O-SBCO-GRCR-BAL
+                 + XDJL4136-O-STKLN-MAIN-GRCR-BAL
+
+      *    전체 한도여유액
+           COMPUTE XDJL4136-O-LIMT-SEXTR-AMT
+                 = XDJL4136-O-GRCR-LIMT
+                   - XDJL4136-O-GRCR-BAL
+
+           .
+       S3200-QJL4136-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (그리드)
+      *-----------------------------------------------------------------
+       S3300-QJL4137-CALL-RTN.
+
+      *@3.1 변수초기화
+           INITIALIZE XQJL4137-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4137-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XQJL4137-I-BASE-YM
+
+      *    기준일
+           MOVE XDJL4136-I-BASE-YMD(7:2)
+             TO XQJL4137-I-BASE-DD
+
+240926*    기준년월일
+           MOVE XDJL4136-I-BASE-YMD
+             TO XQJL4137-I-BASE-YMD
+
+      *    소관부점코드
+           IF XDJL4136-I-JRSDZ-BRNCD = '9999'
+               MOVE '%%%%'
+                 TO XQJL4137-I-JRSDZ-BRNCD
+
+               MOVE '1'
+                 TO XQJL4137-I-BRN-DSTIC
+240926     ELSE
+               MOVE XDJL4136-I-JRSDZ-BRNCD
+                 TO WK-JRSDZ-BRNCD
+
+               PERFORM S6000-FJL0001-CALL-RTN
+                  THRU S6000-FJL0001-CALL-EXT
+
+               IF XFJL0001-O-BRNCD-VALDN-YN = CO-CHA-1
+                   MOVE '2'
+                     TO XQJL4137-I-BRN-DSTIC
+
+                   MOVE WK-H-I-BRNCD1
+                     TO XQJL4137-I-JRSDZ-BRNCD1
+
+                   MOVE WK-H-I-BRNCD2
+                     TO XQJL4137-I-JRSDZ-BRNCD2
+
+                   MOVE SPACE
+                     TO XQJL4137-I-JRSDZ-BRNCD
+
+               ELSE
+                   MOVE '1'
+                     TO XQJL4137-I-BRN-DSTIC
+
+                   MOVE WK-H-I-BRNCD1
+                     TO XQJL4137-I-JRSDZ-BRNCD
+
+                   MOVE SPACE
+                     TO XQJL4137-I-JRSDZ-BRNCD1
+
+                   MOVE SPACE
+                     TO XQJL4137-I-JRSDZ-BRNCD2
+
+               END-IF
+
+           END-IF
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL4137 XQJL4137-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4136-O-OUTPT-LINE-CNT1
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4136-O-OUTPT-LINE-CNT1
+
+               IF XQJL4137-O-JRSD-BRNZ-NAME(WK-I) = '소계' OR '합계'
+      *            고객식별자
+                   MOVE  SPACE
+                     TO  XDJL4136-O-CUST-IDNFR(WK-I)
+               ELSE
+      *            고객식별자
+                   MOVE  XQJL4137-O-CUST-IDNFR(WK-I)
+                     TO  XDJL4136-O-CUST-IDNFR(WK-I)
+               END-IF
+
+      *        고객명
+               MOVE  XQJL4137-O-CUSTNM(WK-I)
+                 TO  XDJL4136-O-CUSTNM(WK-I)
+
+      *        소관부점명
+               MOVE  XQJL4137-O-JRSD-BRNZ-NAME(WK-I)
+                 TO  XDJL4136-O-JRSD-BRNZ-NAME(WK-I)
+
+      *        신용공여중분류코드
+               MOVE  XQJL4137-O-GRCR-MIDL-CLSFI-CD(WK-I)
+                 TO  XDJL4136-O-GRCR-MIDL-CLSFI-CD(WK-I)
+
+      *        통화코드1
+               MOVE  XQJL4137-O-CNCYCD1(WK-I)
+                 TO  XDJL4136-O-CNCYCD1(WK-I)
+
+      *        이사회승인금액
+               MOVE  XQJL4137-O-BRDC-ATHOR-AMT(WK-I)
+                 TO  WK-BRDC-ATHOR-AMT
+
+      *         원화가 아닐 경우
+               IF XDJL4136-O-CNCYCD1(WK-I) NOT= 'KRW'
+                   IF XDJL4136-O-CNCYCD1(WK-I) NOT= SPACE
+
+      *                환율 조회
+                       PERFORM  S4000-CJIEX01-CALL-RTN
+                          THRU  S4000-CJIEX01-CALL-EXT
+
+      *                달러만 천단위 절사
+                       IF XDJL4136-O-CNCYCD1(WK-I) = 'USD'
+
+      *                    이사회승인금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                                 = WK-BRDC-ATHOR-AMT / 1000
+
+      *                    이사회승인원화환산금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                                 = WK-BRDC-ATHOR-WONC-AUC / 1000000
+                       ELSE
+      *                    이사회승인금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                                 = WK-BRDC-ATHOR-AMT / 1000000
+
+      *                    이사회승인원화환산금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                                 = WK-BRDC-ATHOR-WONC-AUC / 1000000
+
+                       END-IF
+                   END-IF
+
+               ELSE
+      *            이사회승인금액
+                   COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                         = WK-BRDC-ATHOR-AMT / 1000000
+
+      *            이사회승인원화환산금액
+                   COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                         = WK-BRDC-ATHOR-AMT / 1000000
+
+               END-IF
+
+      *        이사회승인년월일
+               MOVE  XQJL4137-O-BRDC-ATHOR-YMD(WK-I)
+                 TO  XDJL4136-O-BRDC-ATHOR-YMD(WK-I)
+
+      *        이사회승인유효년월일
+               MOVE  XQJL4137-O-BRDC-ATHOR-VALD-YMD(WK-I)
+                 TO  XDJL4136-O-BRDC-ATHOR-VALD-YMD(WK-I)
+
+      *        통합계정과목코드
+               MOVE  XQJL4137-O-INTGRA-TIACC-CD(WK-I)
+                 TO  XDJL4136-O-INTGRA-TIACC-CD(WK-I)
+
+      *        상품명
+               MOVE  XQJL4137-O-PRDCT-NAME(WK-I)
+                 TO  XDJL4136-O-PRDCT-NAME(WK-I)
+
+      *        계좌번호
+               MOVE  XQJL4137-O-ACNO(WK-I)
+                 TO  XDJL4136-O-ACNO(WK-I)
+
+      *        약정계좌번호
+               MOVE  XQJL4137-O-AGRE-ACNO(WK-I)
+                 TO  XDJL4136-O-AGRE-ACNO(WK-I)
+
+      *        시작년월일
+               MOVE  XQJL4137-O-START-YMD(WK-I)
+                 TO  XDJL4136-O-START-YMD(WK-I)
+
+      *        만기년월일
+               MOVE  XQJL4137-O-EXPIR-YMD(WK-I)
+                 TO  XDJL4136-O-EXPIR-YMD(WK-I)
+
+      *        통화코드2
+               MOVE  XQJL4137-O-CNCYCD2(WK-I)
+                 TO  XDJL4136-O-CNCYCD2(WK-I)
+
+      *        달러만 천단위 절사
+               IF XDJL4136-O-CNCYCD2(WK-I) = 'USD'
+      *            통화한도
+                   COMPUTE XDJL4136-O-CRNCY-CLAM(WK-I)
+                         = XQJL4137-O-CRNCY-CLAM(WK-I) / 1000
+
+      *            통화잔액
+                   COMPUTE XDJL4136-O-CRNCY-BAL(WK-I)
+                         = XQJL4137-O-CRNCY-BAL(WK-I) / 1000
+               ELSE
+      *            통화한도
+                   COMPUTE XDJL4136-O-CRNCY-CLAM(WK-I)
+                         = XQJL4137-O-CRNCY-CLAM(WK-I) / 1000000
+
+      *            통화잔액
+                   COMPUTE XDJL4136-O-CRNCY-BAL(WK-I)
+                         = XQJL4137-O-CRNCY-BAL(WK-I) / 1000000
+               END-IF
+
+      *        BS기준한도
+               COMPUTE XDJL4136-O-BS-BASE-CLAM(WK-I)
+                     = XQJL4137-O-BS-BASE-CLAM(WK-I) / 1000000
+
+      *        BS기준잔액
+               COMPUTE XDJL4136-O-BS-BASE-BAL(WK-I)
+                     = XQJL4137-O-BS-BASE-BAL(WK-I) / 1000000
+
+      *        신용공여익스포져금액
+               COMPUTE XDJL4136-O-GRCR-EXPSR-AMT(WK-I)
+                     = XQJL4137-O-GRCR-EXPSR-AMT(WK-I) / 1000000
+
+      *        금리내용
+               MOVE  XQJL4137-O-IRTZ-CTNT(WK-I)
+                 TO  XDJL4136-O-IRTZ-CTNT(WK-I)
+
+      *        담보형태구분
+               MOVE  XQJL4137-O-SCURTY-FORM-DSTCD(WK-I)
+                 TO  XDJL4136-O-SCURTY-FORM-DSTCD(WK-I)
+
+      *        담보설정금액
+               COMPUTE XDJL4136-O-SCURTY-SETAMT(WK-I)
+                    = XQJL4137-O-SCURTY-SETAMT(WK-I) / 1000000
+
+240926*        취급부점명
+               MOVE XQJL4137-O-HNDLN-BRN-NAME(WK-I)
+                 TO XDJL4136-O-HNDLN-BRN-NAME(WK-I)
+
+240926*        대출취급형태구분
+               MOVE XQJL4137-O-LN-HNDLN-FORM-DSTCD(WK-I)
+                 TO XDJL4136-O-LN-HNDLN-FORM-DSTCD(WK-I)
+
+      *        이사회승인번호
+               MOVE XQJL4137-O-BRDC-ATHOR-NO(WK-I)
+                 TO XDJL4136-O-BRDC-ATHOR-NO(WK-I)
+
+      *        관련여신일련번호
+               MOVE XQJL4137-O-RELATD-LNBZ-SERNO(WK-I)
+                 TO XDJL4136-O-RELATD-LNBZ-SERNO(WK-I)
+
+           END-PERFORM
+           .
+       S3300-QJL4137-CALL-EXT.
+           EXIT.
+
+
+      *-----------------------------------------------------------------
+      *@  대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (헤더) 월기준
+      *-----------------------------------------------------------------
+       S3400-QJL4138-CALL-RTN.
+
+      *@2.1 변수초기화
+           INITIALIZE XQJL4138-IN
+
+      *@2.2 호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4138-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XQJL4138-I-BASE-YM
+
+240926*    기준년월일
+           MOVE XDJL4136-I-BASE-YMD
+             TO XQJL4138-I-BASE-YMD
+
+      *@2.3 프로그램 호출
+           #DYSQLA QJL4138 XQJL4138-CA
+      *@2.4 호출결과확인
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+           ELSE
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   업무규제자기자본
+           COMPUTE XDJL4136-O-BZWK-REGUL-ONCP
+                 = XQJL4138-O-BZWK-REGUL-ONCP / 1000000
+
+      *@   자기자본기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XDJL4136-O-ONCP-BASE-YM
+
+      *    대주주 신용공여한도
+           COMPUTE XDJL4136-O-STKLN-M-GRCR-LIMT
+                 = XQJL4138-O-BZWK-REGUL-ONCP / 1000000 * 0.25
+
+
+      *    대주주 신용공여잔액
+           COMPUTE XDJL4136-O-STKLN-MAIN-GRCR-BAL
+                 = XQJL4138-O-STKLN-MAIN-GRCR-BAL / 1000000
+
+      *    대주주 한도여유액
+           COMPUTE XDJL4136-O-STKLN-ML-SEXTR-AMT
+                 = XDJL4136-O-STKLN-M-GRCR-LIMT
+                   - XDJL4136-O-STKLN-MAIN-GRCR-BAL
+
+      *    자회사 신용공여한도
+           COMPUTE XDJL4136-O-SBCO-GRCR-LIMT
+                 = XQJL4138-O-BZWK-REGUL-ONCP / 1000000 * 0.2
+
+      *    자회사 신용공여잔액
+           COMPUTE XDJL4136-O-SBCO-GRCR-BAL
+                 = XQJL4138-O-SBCO-GRCR-BAL / 1000000
+
+      *    자회사 한도여유액
+           COMPUTE XDJL4136-O-SBCO-LIMT-SEXTR-AMT
+                 = XDJL4136-O-SBCO-GRCR-LIMT
+                   - XDJL4136-O-SBCO-GRCR-BAL
+
+      *    전체 신용공여한도
+           COMPUTE XDJL4136-O-GRCR-LIMT
+                 = XQJL4138-O-BZWK-REGUL-ONCP / 1000000 * 0.2
+
+      *    전체 신용공여잔액
+           COMPUTE XDJL4136-O-GRCR-BAL
+                 = XDJL4136-O-SBCO-GRCR-BAL
+                 + XDJL4136-O-STKLN-MAIN-GRCR-BAL
+
+      *    전체 한도여유액
+           COMPUTE XDJL4136-O-LIMT-SEXTR-AMT
+                 = XDJL4136-O-GRCR-LIMT
+                   - XDJL4136-O-GRCR-BAL
+
+           .
+       S3400-QJL4138-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 대주주(특수관계인 포함)에
+      *        대한 신용공여 현황조회 (그리드) 월기준
+      *-----------------------------------------------------------------
+       S3500-QJL4139-CALL-RTN.
+
+      *@3.1 변수초기화
+           INITIALIZE XQJL4139-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL4139-I-GROUP-CO-CD
+
+      *@   기준년월
+           MOVE XDJL4136-I-BASE-YMD(1:6)
+             TO XQJL4139-I-BASE-YM
+
+240926*    기준년월일
+           MOVE XDJL4136-I-BASE-YMD
+             TO XQJL4139-I-BASE-YMD
+
+      *    소관부점코드
+           IF XDJL4136-I-JRSDZ-BRNCD = '9999'
+               MOVE '%%%%'
+                 TO XQJL4139-I-JRSDZ-BRNCD
+
+               MOVE '1'
+                 TO XQJL4139-I-BRN-DSTIC
+240926     ELSE
+               MOVE XDJL4136-I-JRSDZ-BRNCD
+                 TO WK-JRSDZ-BRNCD
+
+               PERFORM S6000-FJL0001-CALL-RTN
+                  THRU S6000-FJL0001-CALL-EXT
+
+               IF XFJL0001-O-BRNCD-VALDN-YN = CO-CHA-1
+                   MOVE '2'
+                     TO XQJL4139-I-BRN-DSTIC
+
+                   MOVE WK-H-I-BRNCD1
+                     TO XQJL4139-I-JRSDZ-BRNCD1
+
+                   MOVE WK-H-I-BRNCD2
+                     TO XQJL4139-I-JRSDZ-BRNCD2
+
+                   MOVE SPACE
+                     TO XQJL4139-I-JRSDZ-BRNCD
+
+               ELSE
+                   MOVE '1'
+                     TO XQJL4139-I-BRN-DSTIC
+
+                   MOVE WK-H-I-BRNCD1
+                     TO XQJL4139-I-JRSDZ-BRNCD
+
+                   MOVE SPACE
+                     TO XQJL4139-I-JRSDZ-BRNCD1
+
+                   MOVE SPACE
+                     TO XQJL4139-I-JRSDZ-BRNCD2
+
+               END-IF
+           END-IF
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL4139 XQJL4139-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4136-O-OUTPT-LINE-CNT1
+
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4136-O-OUTPT-LINE-CNT1
+
+               IF XQJL4139-O-JRSD-BRNZ-NAME(WK-I) = '소계' OR '합계'
+      *            고객식별자
+                   MOVE  SPACE
+                     TO  XDJL4136-O-CUST-IDNFR(WK-I)
+               ELSE
+      *            고객식별자
+                   MOVE  XQJL4139-O-CUST-IDNFR(WK-I)
+                     TO  XDJL4136-O-CUST-IDNFR(WK-I)
+               END-IF
+
+      *        고객명
+               MOVE  XQJL4139-O-CUSTNM(WK-I)
+                 TO  XDJL4136-O-CUSTNM(WK-I)
+
+      *        소관부점명
+               MOVE  XQJL4139-O-JRSD-BRNZ-NAME(WK-I)
+                 TO  XDJL4136-O-JRSD-BRNZ-NAME(WK-I)
+
+      *        신용공여중분류코드
+               MOVE  XQJL4139-O-GRCR-MIDL-CLSFI-CD(WK-I)
+                 TO  XDJL4136-O-GRCR-MIDL-CLSFI-CD(WK-I)
+
+      *        통화코드1
+               MOVE  XQJL4139-O-CNCYCD1(WK-I)
+                 TO  XDJL4136-O-CNCYCD1(WK-I)
+
+      *        이사회승인금액
+               MOVE  XQJL4139-O-BRDC-ATHOR-AMT(WK-I)
+                 TO  WK-BRDC-ATHOR-AMT
+
+      *         원화가 아닐 경우
+               IF XDJL4136-O-CNCYCD1(WK-I) NOT= 'KRW'
+                   IF XDJL4136-O-CNCYCD1(WK-I) NOT= SPACE
+
+      *                환율 조회
+                       PERFORM  S4000-CJIEX01-CALL-RTN
+                          THRU  S4000-CJIEX01-CALL-EXT
+
+      *                달러만 천단위 절사
+                       IF XDJL4136-O-CNCYCD1(WK-I) = 'USD'
+
+      *                    이사회승인금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                                 = WK-BRDC-ATHOR-AMT / 1000
+
+      *                    이사회승인원화환산금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                                 = WK-BRDC-ATHOR-WONC-AUC / 1000000
+                       ELSE
+      *                    이사회승인금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                                 = WK-BRDC-ATHOR-AMT / 1000000
+
+      *                    이사회승인원화환산금액
+                           COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                                 = WK-BRDC-ATHOR-WONC-AUC / 1000000
+                       END-IF
+                   END-IF
+
+               ELSE
+      *            이사회승인금액
+                   COMPUTE XDJL4136-O-BRDC-ATHOR-AMT(WK-I)
+                         = WK-BRDC-ATHOR-AMT / 1000000
+
+      *            이사회승인원화환산금액
+                   COMPUTE XDJL4136-O-BRDC-ATHOR-WONC-AUC(WK-I)
+                         = WK-BRDC-ATHOR-AMT / 1000000
+               END-IF
+
+      *        이사회승인년월일
+               MOVE  XQJL4139-O-BRDC-ATHOR-YMD(WK-I)
+                 TO  XDJL4136-O-BRDC-ATHOR-YMD(WK-I)
+
+      *        이사회승인유효년월일
+               MOVE  XQJL4139-O-BRDC-ATHOR-VALD-YMD(WK-I)
+                 TO  XDJL4136-O-BRDC-ATHOR-VALD-YMD(WK-I)
+
+      *        통합계정과목코드
+               MOVE  XQJL4139-O-INTGRA-TIACC-CD(WK-I)
+                 TO  XDJL4136-O-INTGRA-TIACC-CD(WK-I)
+
+      *        상품명
+               MOVE  XQJL4139-O-PRDCT-NAME(WK-I)
+                 TO  XDJL4136-O-PRDCT-NAME(WK-I)
+
+      *        계좌번호
+               MOVE  XQJL4139-O-ACNO(WK-I)
+                 TO  XDJL4136-O-ACNO(WK-I)
+
+      *        약정계좌번호
+               MOVE  XQJL4139-O-AGRE-ACNO(WK-I)
+                 TO  XDJL4136-O-AGRE-ACNO(WK-I)
+
+      *        시작년월일
+               MOVE  XQJL4139-O-START-YMD(WK-I)
+                 TO  XDJL4136-O-START-YMD(WK-I)
+
+      *        만기년월일
+               MOVE  XQJL4139-O-EXPIR-YMD(WK-I)
+                 TO  XDJL4136-O-EXPIR-YMD(WK-I)
+
+      *        통화코드2
+               MOVE  XQJL4139-O-CNCYCD2(WK-I)
+                 TO  XDJL4136-O-CNCYCD2(WK-I)
+
+      *        달러만 천단위 절사
+               IF XDJL4136-O-CNCYCD2(WK-I) = 'USD'
+      *            통화한도
+                   COMPUTE XDJL4136-O-CRNCY-CLAM(WK-I)
+                         = XQJL4139-O-CRNCY-CLAM(WK-I) / 1000
+
+      *            통화잔액
+                   COMPUTE XDJL4136-O-CRNCY-BAL(WK-I)
+                         = XQJL4139-O-CRNCY-BAL(WK-I) / 1000
+               ELSE
+      *            통화한도
+                   COMPUTE XDJL4136-O-CRNCY-CLAM(WK-I)
+                         = XQJL4139-O-CRNCY-CLAM(WK-I) / 1000000
+
+      *            통화잔액
+                   COMPUTE XDJL4136-O-CRNCY-BAL(WK-I)
+                         = XQJL4139-O-CRNCY-BAL(WK-I) / 1000000
+               END-IF
+
+      *        BS기준한도
+               COMPUTE XDJL4136-O-BS-BASE-CLAM(WK-I)
+                     = XQJL4139-O-BS-BASE-CLAM(WK-I) / 1000000
+
+      *        BS기준잔액
+               COMPUTE XDJL4136-O-BS-BASE-BAL(WK-I)
+                     = XQJL4139-O-BS-BASE-BAL(WK-I) / 1000000
+
+      *        신용공여익스포져금액
+               COMPUTE XDJL4136-O-GRCR-EXPSR-AMT(WK-I)
+                     = XQJL4139-O-GRCR-EXPSR-AMT(WK-I) / 1000000
+
+      *        금리내용
+               MOVE  XQJL4139-O-IRTZ-CTNT(WK-I)
+                 TO  XDJL4136-O-IRTZ-CTNT(WK-I)
+
+      *        담보형태구분
+               MOVE  XQJL4139-O-SCURTY-FORM-DSTCD(WK-I)
+                 TO  XDJL4136-O-SCURTY-FORM-DSTCD(WK-I)
+
+      *        담보설정금액
+               COMPUTE XDJL4136-O-SCURTY-SETAMT(WK-I)
+                    = XQJL4139-O-SCURTY-SETAMT(WK-I) / 1000000
+
+240926*        취급부점명
+               MOVE XQJL4139-O-HNDLN-BRN-NAME(WK-I)
+                 TO XDJL4136-O-HNDLN-BRN-NAME(WK-I)
+
+240926*        대출취급형태구분
+               MOVE XQJL4139-O-LN-HNDLN-FORM-DSTCD(WK-I)
+                 TO XDJL4136-O-LN-HNDLN-FORM-DSTCD(WK-I)
+
+      *        이사회승인번호
+               MOVE XQJL4139-O-BRDC-ATHOR-NO(WK-I)
+                 TO XDJL4136-O-BRDC-ATHOR-NO(WK-I)
+
+      *        관련여신일련번호
+               MOVE XQJL4139-O-RELATD-LNBZ-SERNO(WK-I)
+                 TO XDJL4136-O-RELATD-LNBZ-SERNO(WK-I)
+
+           END-PERFORM
+           .
+       S3500-QJL4139-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  환율 조회
+      *-----------------------------------------------------------------
+       S4000-CJIEX01-CALL-RTN.
+
+           INITIALIZE       XCJIEX01-IN
+
+      *---처리조건 데이터 MOVE
+      *   구분코드
+      *   그룹회사코드
+      *   출력구분코드
+      *   유효년월일－기준년월일
+      *   통화코드
+      *   환율적용회차
+      *----
+           MOVE  '1'                     TO  XCJIEX01-I-DSTCD
+           MOVE  BICOM-GROUP-CO-CD       TO  XCJIEX01-I-GROUP-CO-CD
+           MOVE  '1'                     TO  XCJIEX01-I-OUTPT-DSTCD
+           MOVE  XDJL4136-I-BASE-YMD     TO  XCJIEX01-I-BASE-YMD
+           MOVE  XDJL4136-O-CNCYCD1(WK-I)TO  XCJIEX01-I-CNCYCD
+           MOVE  1                       TO  XCJIEX01-I-EXRT-APLY-NTH
+
+      * 공통 UTILITY CALL
+          #DYCALL   CJIEX01  YCCOMMON-CA  XCJIEX01-CA
+
+      * RETURN 정보 확인
+           IF XCJIEX01-R-STAT    =  ZEROS
+      *----
+      *     매매기준환율
+      *      N100단위통화여부
+      *----
+             MOVE XCJIEX01-O-DEAL-BASE-EXRT(1)  TO WK-DEAL-BASE-EXRT
+             MOVE XCJIEX01-O-N100-UNIT-CRNCY-YN(1)
+                  TO  WK-N100-UNIT-CRNCY-YN
+           ELSE
+      *해당통화가　없으면 전영업일 1회차 환율 적용
+               IF  XCJIEX01-R-STAT  =  '07'
+                   INITIALIZE       XCJIEX01-IN
+
+                   MOVE  '1'
+                     TO  XCJIEX01-I-DSTCD
+                   MOVE  BICOM-GROUP-CO-CD
+                     TO  XCJIEX01-I-GROUP-CO-CD
+                   MOVE  '1'
+                     TO  XCJIEX01-I-OUTPT-DSTCD
+
+      *            전영업일 추출
+                   PERFORM S5000-CJIDT16-CALL-RTN
+                      THRU S5000-CJIDT16-CALL-EXT
+
+                   MOVE  XCJIDT16-O-BF-BZOPR-YMD
+                     TO  XCJIEX01-I-BASE-YMD
+                   MOVE  XDJL4136-O-CNCYCD1(WK-I)
+                     TO  XCJIEX01-I-CNCYCD
+                   MOVE  1
+                     TO  XCJIEX01-I-EXRT-APLY-NTH
+
+      * 공통 UTILITY CALL
+                   #DYCALL   CJIEX01  YCCOMMON-CA  XCJIEX01-CA
+
+      * RETURN 정보 확인
+                   IF XCJIEX01-R-STAT    =  ZEROS
+
+                       MOVE XCJIEX01-O-DEAL-BASE-EXRT(1)
+                         TO WK-DEAL-BASE-EXRT
+                       MOVE XCJIEX01-O-N100-UNIT-CRNCY-YN(1)
+                         TO WK-N100-UNIT-CRNCY-YN
+                   ELSE
+                       MOVE 0
+                         TO WK-DEAL-BASE-EXRT
+
+                       MOVE '0'
+                         TO WK-N100-UNIT-CRNCY-YN
+                   END-IF
+               ELSE
+                   #ERROR CO-B4400002 CO-UKJL0036 CO-STAT-ERROR
+               END-IF
+
+           END-IF
+
+      *환율고시단위구분
+           IF  WK-N100-UNIT-CRNCY-YN = '1'
+               MOVE 100       TO WK-HWGSCD
+           ELSE
+               MOVE 1         TO WK-HWGSCD
+           END-IF
+
+      * 매매기준율환산 ( 이사회승인원화환산금액)
+           COMPUTE   WK-BRDC-ATHOR-WONC-AUC
+                  =  WK-BRDC-ATHOR-AMT
+                  *  WK-DEAL-BASE-EXRT
+                  /  WK-HWGSCD
+
+           .
+       S4000-CJIEX01-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  전영업년월일을 구한다.
+      *-----------------------------------------------------------------
+       S5000-CJIDT16-CALL-RTN.
+
+      *@    초기화
+           INITIALIZE XCJIDT16-IN
+      *@    호출변수 MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD         TO XCJIDT16-I-GROUP-CO-CD
+      *@   기준년월일
+           MOVE XDJL4136-I-BASE-YMD       TO XCJIDT16-I-YMD
+      *@   구분코드
+           MOVE CO-CHA-1                  TO XCJIDT16-I-DSTCD
+      *@   공통 UTILITY CALL
+           #DYCALL CJIDT16 YCCOMMON-CA XCJIDT16-CA
+      *@    호출결과　확인
+           IF XCJIDT16-R-STAT = ZEROS
+              CONTINUE
+           ELSE
+              #ERROR XCJIDT16-R-ERRCD
+                     XCJIDT16-R-TREAT-CD
+                     XCJIDT16-R-STAT
+           END-IF
+           .
+       S5000-CJIDT16-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+240926*@  부점정보 추출
+      *-----------------------------------------------------------------
+       S6000-FJL0001-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE                      XFJL0001-IN
+
+      *@   조회구분
+           MOVE  CO-CHA-04             TO  XFJL0001-I-INQURY-DSTCD
+
+      *    소관부점코드
+           MOVE  WK-JRSDZ-BRNCD        TO  XFJL0001-I-BRNCD
+
+      *@   FC CALL
+           #DYCALL  FJL0001  YCCOMMON-CA  XFJL0001-CA
+
+      *@   처리결과확인
+           IF  XFJL0001-R-STAT  =  CO-STAT-OK
+               MOVE  XFJL0001-O-BRNCD(1)   TO   WK-H-I-BRNCD1
+               MOVE  XFJL0001-O-BRNCD(2)   TO   WK-H-I-BRNCD2
+           END-IF
+           .
+
+       S6000-FJL0001-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@   정상종료
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

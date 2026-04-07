@@ -1,0 +1,126 @@
+//TKJLP074 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0074 TABLE  LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0074',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(500,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0074,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0074
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준일"                             POSITION(       4         )
+   CHAR(                      2)                ,
+   "기준년월"                           POSITION(       6         )
+   CHAR(                      6)                ,
+   "차주고객식별자"                     POSITION(      12         )
+   CHAR(                     10)                ,
+   "한도계좌번호"                       POSITION(      22         )
+   CHAR(                     20)                ,
+   "한도상품대분류코드"                 POSITION(      42         )
+   CHAR(                      2)                ,
+   "한도상품중분류코드"                 POSITION(      44         )
+   CHAR(                      2)                ,
+   "한도상품템플릿코드"                 POSITION(      46         )
+   CHAR(                      3)                ,
+   "한도상품번호"                       POSITION(      49         )
+   CHAR(                      5)                ,
+   "차주번호"                           POSITION(      54         )
+   CHAR(                     13)                ,
+   "시작년월일"                         POSITION(      67         )
+   CHAR(                      8)                ,
+   "만기년월일"                         POSITION(      75         )
+   CHAR(                      8)                ,
+   "종료년월일"                         POSITION(      83         )
+   CHAR(                      8)                ,
+   "통화코드"                           POSITION(      91         )
+   CHAR(                      3)                ,
+   "통화한도"                           POSITION(      94:     103)
+   DECIMAL                                      ,
+   "통화잔액"                           POSITION(     104:     113)
+   DECIMAL                                      ,
+   "통합계정과목코드"                   POSITION(     114         )
+   CHAR(                     13)                ,
+   "신용공여대상구분"                   POSITION(     127         )
+   CHAR(                      1)                ,
+   "원만기구분"                         POSITION(     128         )
+   CHAR(                      1)                ,
+   "잔존만기구분"                       POSITION(     129         )
+   CHAR(                      1)                ,
+   "BS기준한도"                         POSITION(     130:     137)
+   DECIMAL                                      ,
+   "기준환율"                           POSITION(     138:     142)
+   DECIMAL                                      ,
+   "신용공여보증비율"                   POSITION(     143:     144)
+   DECIMAL                                      ,
+   "신용공여담보비율"                   POSITION(     145:     146)
+   DECIMAL                                      ,
+   "미사용한도"                         POSITION(     147:     154)
+   DECIMAL                                      ,
+   "미사용한도CCF환산율"              POSITION(     155:     156)
+   DECIMAL                                      ,
+   "미사용한도CA금액"                 POSITION(     157:     164)
+   DECIMAL                                      ,
+   "미사용한도CA제외금액"             POSITION(     165:     172)
+   DECIMAL                                      ,
+   "미사용보증담보합산액"               POSITION(     173:     180)
+   DECIMAL                                      ,
+   "미사용보증담보금액1"                POSITION(     181:     188)
+   DECIMAL                                     ,
+   "미사용보증담보금액2"                POSITION(     189:     196)
+   DECIMAL                                     ,
+   "미사용보증담보금액3"                POSITION(     197:     204)
+   DECIMAL                                     ,
+   "미사용보증담보금액4"                POSITION(     205:     212)
+   DECIMAL                                     ,
+   "미사용보증담보금액5"                POSITION(     213:     220)
+   DECIMAL                                     ,
+   "미사용보증담보금액6"                POSITION(     221:     228)
+   DECIMAL                                     ,
+   "미사용보증담보금액7"                POSITION(     229:     236)
+   DECIMAL                                     ,
+   "미사용보증담보금액8"                POSITION(     237:     244)
+   DECIMAL                                     ,
+   "미사용보증담보금액9"                POSITION(     245:     252)
+   DECIMAL                                     ,
+   "미사용보증담보환산1"                POSITION(     253:     260)
+   DECIMAL                                     ,
+   "미사용보증담보환산2"                POSITION(     261:     268)
+   DECIMAL                                     ,
+   "미사용보증담보환산3"                POSITION(     269:     276)
+   DECIMAL                                     ,
+   "미사용보증담보환산4"                POSITION(     277:     284)
+   DECIMAL                                     ,
+   "미사용보증담보환산5"                POSITION(     285:     292)
+   DECIMAL                                     ,
+   "미사용보증담보환산6"                POSITION(     293:     300)
+   DECIMAL                                     ,
+   "미사용보증담보환산7"                POSITION(     301:     308)
+   DECIMAL                                     ,
+   "미사용보증담보환산8"                POSITION(     309:     316)
+   DECIMAL                                     ,
+   "미사용보증담보환산9"                POSITION(     317:     324)
+   DECIMAL                                      ,
+   "신용공여기관구분"                   POSITION(     325         )
+   CHAR(                      1)                ,
+   "시스템최종처리일시"                 POSITION(     326         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(     346         )
+   CHAR(                      7)
+   )
+//

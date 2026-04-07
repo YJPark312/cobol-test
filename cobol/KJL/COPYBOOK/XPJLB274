@@ -1,0 +1,61 @@
+      *================================================================*
+      *@ NAME : XPJLB274                                               *
+      *@ DESC : PC포괄신용공여한도승인저장 COPYBOOK                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-08-26 10:38:28                          *
+      *  생성일시     : 2009-08-26 10:38:30                          *
+      *================================================================*
+           03  XPJLB274-RETURN.
+             05  XPJLB274-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB274-OK            VALUE  '00'.
+                 88  COND-XPJLB274-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB274-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB274-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB274-ERROR         VALUE  '09'.
+                 88  COND-XPJLB274-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB274-SYSERROR      VALUE  '99'.
+             05  XPJLB274-R-LINE                 PIC  9(006).
+             05  XPJLB274-R-ERRCD                PIC  X(008).
+             05  XPJLB274-R-TREAT-CD             PIC  X(008).
+             05  XPJLB274-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB274-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB274-I-PRCSS-DSTIC          PIC  X(002).
+      *--       차주번호
+             05  XPJLB274-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJLB274-I-APLCN-NO             PIC  X(010).
+      *--       신청직원번호
+             05  XPJLB274-I-APLCN-EMPID          PIC  X(007).
+      *--       승인년월일
+             05  XPJLB274-I-ATHOR-YMD            PIC  X(008).
+      *--       한도승인금액
+             05  XPJLB274-I-LIMT-ATHOR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도설정유효년월일
+             05  XPJLB274-I-LIMT-STUP-VALD-YMD   PIC  X(008).
+      *--       한도승인구분코드
+             05  XPJLB274-I-LIMT-ATHOR-DSTCD     PIC  X(001).
+      *--       승인사유내용
+             05  XPJLB274-I-ATHOR-RESN-CTNT      PIC  X(302).
+      *----------------------------------------------------------------*
+           03  XPJLB274-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB274-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  2  7  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB274-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB274-I-BRWR-NO            ;차주번호
+      *X  XPJLB274-I-APLCN-NO           ;신청번호
+      *X  XPJLB274-I-APLCN-EMPID        ;신청직원번호
+      *X  XPJLB274-I-ATHOR-YMD          ;승인년월일
+      *S  XPJLB274-I-LIMT-ATHOR-AMT     ;한도승인금액
+      *X  XPJLB274-I-LIMT-STUP-VALD-YMD ;한도설정유효년월일
+      *X  XPJLB274-I-LIMT-ATHOR-DSTCD   ;한도승인구분코드
+      *X  XPJLB274-I-ATHOR-RESN-CTNT    ;승인사유내용
+      *X  XPJLB274-O-PRCSS-RSULT        ;처리결과

@@ -1,0 +1,242 @@
+//MKJLZDL4 JOB 'KJL',REGION=0M,NOTIFY=$SYSUID,CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*   2단계보안조치 관련 정보삭제 대상UNLOAD
+//*********************************************************************
+//*   THKJL0026
+//*********************************************************************
+//DELETE29 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ026.KJL0026.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD29 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ026.KJL0026.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0026 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.기준년월          = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+   AND B.계좌번호          > ''
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0026 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.기준년월             = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+   AND B.계좌번호          > ''
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0072
+//*********************************************************************
+//DELETE29 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ072.KJL0072.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD29 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ072.KJL0072.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0072 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.기준년월          = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+   AND B.기준일           >= '01'
+   AND B.기준년월         >= '190001'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0072 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.기준년월             = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+   AND B.기준일              >= '01'
+   AND B.기준년월            >= '190001'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJL0073
+//*********************************************************************
+//DELETE30 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZ073.KJL0073.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD30 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZ073.KJL0073.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0073 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.기준년월          = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJL0073 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.기준년월             = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR013
+//*********************************************************************
+//DELETE53 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR13.KJLR013.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD53 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR13.KJLR013.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR013 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.계좌번호
+   AND A.기준년월          = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR013 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.계좌번호
+   AND A.기준년월             = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+  WITH UR;
+/*
+//*********************************************************************
+//*   THKJLR014
+//*********************************************************************
+//DELETE54 EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SY.BJLZR14.KJLR014.D%%ODATE'
+
+  SET MAXCC=0
+/*
+//UNLOAD54 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)
+//SYSTSIN  DD *
+  DSN SYSTEM(DAPG)
+  RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL') -
+      LIB('DB2APS.DSND10.RUNLIB.LOAD')
+  END
+//SYSREC00 DD DSN=KJL.SY.BJLZR14.KJLR014.D%%ODATE,
+//            DISP=(NEW,CATLG,DELETE),UNIT=SYSDA,
+//            SPACE=(CYL,(0500,0300),RLSE),
+//            DCB=(RECFM=FB)
+//SYSTSPRT DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=*
+//SYSPUNCH DD DUMMY
+//SYSIN    DD *
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR014 B
+ WHERE A.그룹회사코드      = B.그룹회사코드
+   AND A.계좌번호          = B.담보여신계좌번호
+   AND A.기준년월          = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분  = '1'
+   AND A.계좌삭제기준구분 IN ('1','2')
+   AND B.그룹회사코드      = 'KB0'
+   AND B.기준년월일       >= '19000101'
+UNION ALL
+SELECT B.*
+  FROM DB2DBA.THKHCBPEC A
+      ,DB2DBA.THKJLR014 B
+ WHERE A.그룹회사코드         = B.그룹회사코드
+   AND A.자동대출수신계좌번호 = B.담보여신계좌번호
+   AND A.기준년월             = '%%$OYEAR.%%OMONTH'
+   AND A.계좌삭제상태구분     = '1'
+   AND A.계좌삭제기준구분    IN ('1','2')
+   AND B.그룹회사코드         = 'KB0'
+   AND B.기준년월일          >= '19000101'
+  WITH UR;
+/*
+//

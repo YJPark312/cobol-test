@@ -1,0 +1,171 @@
+      *================================================================*
+      *@ NAME : XPJL409D                                               *
+      *@ DESC : PC기업및그룹한도신청및승인조회(승인서출력) COP     *
+      *@        YBOOK                                                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-13 19:57:11                          *
+      *  생성일시     : 2009-07-13 19:57:13                          *
+      *================================================================*
+           03  XPJL409D-RETURN.
+             05  XPJL409D-R-STAT                 PIC  X(002).
+                 88  COND-XPJL409D-OK            VALUE  '00'.
+                 88  COND-XPJL409D-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL409D-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL409D-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL409D-ERROR         VALUE  '09'.
+                 88  COND-XPJL409D-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL409D-SYSERROR      VALUE  '99'.
+             05  XPJL409D-R-LINE                 PIC  9(006).
+             05  XPJL409D-R-ERRCD                PIC  X(008).
+             05  XPJL409D-R-TREAT-CD             PIC  X(008).
+             05  XPJL409D-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL409D-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL409D-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJL409D-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJL409D-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJL409D-I-APLCN-NO             PIC  X(010).
+      *--       한도신청구분
+             05  XPJL409D-I-LIMT-APLCN-DSTIC     PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XPJL409D-OUT.
+      *----------------------------------------------------------------*
+      *--       승인년월일
+             05  XPJL409D-O-ATHOR-YMD            PIC  X(008).
+      *--       영업점명1
+             05  XPJL409D-O-BBRN-NAME1           PIC  X(022).
+      *--       영업점명2
+             05  XPJL409D-O-BBRN-NAME2           PIC  X(022).
+      *--       차주명
+             05  XPJL409D-O-BRWR-NAME            PIC  X(052).
+      *--       차주번호
+             05  XPJL409D-O-BRWR-NO              PIC  X(013).
+      *--       기업신용등급
+             05  XPJL409D-O-CORP-CRDRAT          PIC  X(004).
+      *--       그룹명
+             05  XPJL409D-O-GROUP-NAME           PIC  X(052).
+      *--       그룹등급
+             05  XPJL409D-O-GROUP-GRD            PIC  X(004).
+      *--       표준산업분류코드
+             05  XPJL409D-O-STND-I-CLSFI-CD      PIC  X(005).
+      *--       PEER코드
+             05  XPJL409D-O-PEER-CD              PIC  X(005).
+      *--       IR등급
+             05  XPJL409D-O-INRT-GRD             PIC  X(004).
+      *--       승인번호
+             05  XPJL409D-O-ATHOR-NO             PIC  X(010).
+      *--       직원번호
+             05  XPJL409D-O-EMPID                PIC  X(007).
+      *--       직원명
+             05  XPJL409D-O-EMNM                 PIC  X(042).
+      *--       신청구분
+             05  XPJL409D-O-APLCN-DSTIC          PIC  X(020).
+      *--       승인권자
+             05  XPJL409D-O-ATRZ                 PIC  X(020).
+      *--       승인구분
+             05  XPJL409D-O-ATHOR-DSTIC          PIC  X(020).
+      *--       조건부승인조건
+             05  XPJL409D-O-CNDT-ATHOR-CNDN      PIC  X(020).
+      *--       기준한도
+             05  XPJL409D-O-BASE-LIMT            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도설정유효일
+             05  XPJL409D-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       여신성관리한도
+             05  XPJL409D-O-LNBZ-I-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XPJL409D-O-MRKTY-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도
+             05  XPJL409D-O-MGT-LIMT             PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져
+             05  XPJL409D-O-EXPSR                PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성관리한도(그룹)
+             05  XPJL409D-O-LNBZ-I-MGT-LIMT1     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도(그룹)
+             05  XPJL409D-O-MRKTY-MGT-LIMT1      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도(그룹)
+             05  XPJL409D-O-MGT-LIMT1            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       익스포져(그룹)
+             05  XPJL409D-O-EXPSR1               PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업군명
+             05  XPJL409D-O-IDSTRY-GROUP-NAME    PIC  X(042).
+      *--       산업별관리한도
+             05  XPJL409D-O-IDSTRY-PER-MGT-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별익스포져
+             05  XPJL409D-O-IDSTRY-PER-EXPSR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       변경전여신성관리한도
+             05  XPJL409D-O-MODFI-BLI-MGT-LIMT   PIC  9(015).
+      *--       변경전시장성관리한도
+             05  XPJL409D-O-MODFI-BM-MGT-LIMT    PIC  9(015).
+      *--       합계1
+             05  XPJL409D-O-SUM1                 PIC  9(015).
+      *--       변경후여신성관리한도
+             05  XPJL409D-O-MODFI-ALI-MGT-LIMT   PIC  9(015).
+      *--       변경후시장성관리한도
+             05  XPJL409D-O-MODFI-AM-MGT-LIMT    PIC  9(015).
+      *--       합계2
+             05  XPJL409D-O-SUM2                 PIC  9(015).
+      *--       승인사유
+             05  XPJL409D-O-ATHOR-RESN           PIC  X(302).
+      *================================================================*
+      *        X  P  J  L  4  0  9  D    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL409D-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL409D-I-CUST-DSTIC         ;고객구분
+      *X  XPJL409D-I-BRWR-NO            ;차주번호
+      *X  XPJL409D-I-APLCN-NO           ;신청번호
+      *X  XPJL409D-I-LIMT-APLCN-DSTIC   ;한도신청구분
+      *X  XPJL409D-O-ATHOR-YMD          ;승인년월일
+      *X  XPJL409D-O-BBRN-NAME1         ;영업점명1
+      *X  XPJL409D-O-BBRN-NAME2         ;영업점명2
+      *X  XPJL409D-O-BRWR-NAME          ;차주명
+      *X  XPJL409D-O-BRWR-NO            ;차주번호
+      *X  XPJL409D-O-CORP-CRDRAT        ;기업신용등급
+      *X  XPJL409D-O-GROUP-NAME         ;그룹명
+      *X  XPJL409D-O-GROUP-GRD          ;그룹등급
+      *X  XPJL409D-O-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XPJL409D-O-PEER-CD            ;PEER코드
+      *X  XPJL409D-O-INRT-GRD           ;IR등급
+      *X  XPJL409D-O-ATHOR-NO           ;승인번호
+      *X  XPJL409D-O-EMPID              ;직원번호
+      *X  XPJL409D-O-EMNM               ;직원명
+      *X  XPJL409D-O-APLCN-DSTIC        ;신청구분
+      *X  XPJL409D-O-ATRZ               ;승인권자
+      *X  XPJL409D-O-ATHOR-DSTIC        ;승인구분
+      *X  XPJL409D-O-CNDT-ATHOR-CNDN    ;조건부승인조건
+      *S  XPJL409D-O-BASE-LIMT          ;기준한도
+      *X  XPJL409D-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *S  XPJL409D-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *S  XPJL409D-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *S  XPJL409D-O-MGT-LIMT           ;관리한도
+      *S  XPJL409D-O-EXPSR              ;익스포져
+      *S  XPJL409D-O-LNBZ-I-MGT-LIMT1   ;여신성관리한도(그룹)
+      *S  XPJL409D-O-MRKTY-MGT-LIMT1    ;시장성관리한도(그룹)
+      *S  XPJL409D-O-MGT-LIMT1          ;관리한도(그룹)
+      *S  XPJL409D-O-EXPSR1             ;익스포져(그룹)
+      *X  XPJL409D-O-IDSTRY-GROUP-NAME  ;산업군명
+      *S  XPJL409D-O-IDSTRY-PER-MGT-LIMT;산업별관리한도
+      *S  XPJL409D-O-IDSTRY-PER-EXPSR   ;산업별익스포져
+      *N  XPJL409D-O-MODFI-BLI-MGT-LIMT ;변경전여신성관리한도
+      *N  XPJL409D-O-MODFI-BM-MGT-LIMT  ;변경전시장성관리한도
+      *N  XPJL409D-O-SUM1               ;합계1
+      *N  XPJL409D-O-MODFI-ALI-MGT-LIMT ;변경후여신성관리한도
+      *N  XPJL409D-O-MODFI-AM-MGT-LIMT  ;변경후시장성관리한도
+      *N  XPJL409D-O-SUM2               ;합계2
+      *X  XPJL409D-O-ATHOR-RESN         ;승인사유

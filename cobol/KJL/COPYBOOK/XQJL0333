@@ -1,0 +1,41 @@
+      *===========================================================
+      *  프로그램명    : QJL0333
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0333
+      *  사용예        : 01  XQJL0333-CA.
+      *                      COPY  XQJL0333.
+      *  최종변경일시  : 2010년01월23일17시18분19초
+      *===========================================================
+           03  XQJL0333-IN.
+      *            전년말
+               05  XQJL0333-I-PYY-END
+                                          PIC  X(00006).
+      *            전월말
+               05  XQJL0333-I-LSMN-END
+                                          PIC  X(00006).
+      *            기준년월
+               05  XQJL0333-I-BASE-YM
+                                          PIC  X(00006).
+      *            그룹회사코드
+               05  XQJL0333-I-GROUP-CO-CD
+                                          PIC  X(00003).
+           03  XQJL0333-OUT.
+      *            계열기업군코드
+               05  XQJL0333-O-AFFLT-CORP-GROUP-CD
+                           OCCURS  00100  PIC  X(00006).
+      *            계열기업군명
+               05  XQJL0333-O-AFFLT-C-GROUP-NAME
+                           OCCURS  00100  PIC  X(00042).
+      *            전년말잔액
+               05  XQJL0333-O-PYY-END-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            전월잔액
+               05  XQJL0333-O-LSMN-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            당월잔액
+               05  XQJL0333-O-TTMN-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+
+      *===========================================================
+      *  XQJL0333   C O P Y B O O K   E N D
+      *===========================================================

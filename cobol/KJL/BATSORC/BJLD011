@@ -1,0 +1,1907 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: BJLD011 (BT토탈익스포져기준한도산출)
+      *@처리유형  : BATCH
+      *@처리개요  : 토탈익스포져기준한도산출한다（그룹제외）
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20090417: 신규작성
+      *백현정:20110107: 신용등급의　신용평가구분추가(20,22,99)
+      *백현정:20110304: 신용등급의　신용평가구분　변경
+      *  - １차　신용평가구분코드　２２제외
+      *  - ２차　신용평가구분코드　２２포함
+      *백현정:20111111: 할부금융　코드　추가
+      *  - 한신평재무업종구분코드: 할부금융('KK')
+      *  - 한신평보고서구분: 대차대조표('K1'),손익계산서('K2')
+      * YBH    :20120201: 한신평 재무정보조회
+      *                 : THABCB01 법인등록번호 기준 중복제거
+      * YBH    :20140721: 기업신용등급 세분화로 인한 필드변경
+      * HYH    :20170224:  KB-PIN 전환
+      * YBH    :20170706:  3개년 재무제표실적에 의한
+      *                   기준한도 산출
+      * YBH    :20170824: 암호화처리
+      * YBH    :20180416: 일반기업 및 금융기관 기준한도
+      *                 : 산출요건 변경
+      *                 : 등록된 재무업종으로 구분
+      * HYH    :20211007: 재무항목(금융총비용비율,매출채권회전비율
+      *                            현금성자산금액) 추가
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM             : 테이블명        : 접근유형
+      **  -------------------------   ----------------------------------
+      ** 한국신용평가업체개요     :  THKABCB01        : R
+      ** 한국신용평가재무제표     :  THKABCC26        : R
+      ** 기업신용등급승인명세     :  THKIIK616        : R
+180416** TE고객정보관리           :  THKJL0153        : R
+      ******************************************************************
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     BJLD011.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/04/10.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       CONFIGURATION                   SECTION.
+      *-----------------------------------------------------------------
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+      *-----------------------------------------------------------------
+       INPUT-OUTPUT                    SECTION.
+      *-----------------------------------------------------------------
+       FILE-CONTROL.
+           SELECT  OT-FILE             ASSIGN       TO  OTFILE
+                                       ORGANIZATION IS  SEQUENTIAL
+                                       FILE STATUS  IS  WK-OT-FILE-ST.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+       FILE                            SECTION.
+      *-----------------------------------------------------------------
+       FD  OT-FILE LABEL RECORD IS     STANDARD RECORDING MODE F.
+      *                                291 BYTE
+       01  OT-REC.
+      *       한신평업체코드
+           03 OT-ENTP-CD                    PIC  X(00006).
+      *       고객식별자
+           03 OT-CUST-IDNFR                 PIC  X(00010).
+      *       한신평산업코드（표준산업분류코드）
+           03 OT-IDSTRY-CD                  PIC  X(00005).
+      *       한신평재무업종구분
+           03 OT-F-BZTYP-DSTCD              PIC  X(00002).
+      *       결산년월일
+           03 OT-STLACC-YMD                 PIC  X(00008).
+      *       최종신용등급
+           03 OT-LAST-CRTDSCD               PIC  X(00004).
+      *       평가년월일
+           03 OT-VALUA-YMD                  PIC  X(00008).
+      *       유효년월일
+           03 OT-VALD-YMD                   PIC  X(00008).
+      *       법인세차감전계속사업이익（전전년）
+           03 OT-BBC-AMT-2                  PIC S9(00015) COMP-3.
+      *       법인세차감전계속사업이익（전년）
+           03 OT-BBC-AMT-1                  PIC S9(00015) COMP-3.
+      *       법인세차감전계속사업이익（기준년）
+           03 OT-BBC-AMT                    PIC S9(00015) COMP-3.
+      *       자기자본（전전년）
+           03 OT-JGJ-AMT-2                  PIC S9(00015) COMP-3.
+      *       자기자본（전년）
+           03 OT-JGJ-AMT-1                  PIC S9(00015) COMP-3.
+      *       자기자본（기준년）
+           03 OT-JGJ-AMT                    PIC S9(00015) COMP-3.
+      *       1. 영업이익
+170706     03 OT-YUI-AMT-2                  PIC S9(00015) COMP-3.
+170706     03 OT-YUI-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-YUI-AMT                    PIC S9(00015) COMP-3.
+      *       2. 이자수익
+           03 OT-IJS-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-IJS-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-IJS-AMT                    PIC S9(00015) COMP-3.
+      *       3. 감가상각비
+           03 OT-GGS-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-GGS-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-GGS-AMT                    PIC S9(00015) COMP-3.
+      *       8. 금융비용
+           03 OT-GYB-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-GYB-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-GYB-AMT                    PIC S9(00015) COMP-3.
+      *       10.단기차입금（기준년）
+           03 OT-DGC-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-DGC-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-DGC-AMT                    PIC S9(00015) COMP-3.
+      *       20.업체총차입금
+           03 OT-YCC-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-YCC-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-YCC-AMT                    PIC S9(00015) COMP-3.
+      *       21.자산총계
+           03 OT-JSC-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-JSC-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-JSC-AMT                    PIC S9(00015) COMP-3.
+      *       22.매출액
+           03 OT-MCA-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-MCA-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-MCA-AMT                    PIC S9(00015) COMP-3.
+211022*    금융총비용비율(금융비용/총비용비율)
+           03 OT-FNCS-RATO-2                PIC S9(00004)V9(5) COMP-3.
+           03 OT-FNCS-RATO-1                PIC S9(00004)V9(5) COMP-3.
+           03 OT-FNCS-RATO                  PIC S9(00004)V9(5) COMP-3.
+      *    매출채권회전비율
+           03 OT-ASALE-RATO-2               PIC S9(00004)V9(5) COMP-3.
+           03 OT-ASALE-RATO-1               PIC S9(00004)V9(5) COMP-3.
+           03 OT-ASALE-RATO                 PIC S9(00004)V9(5) COMP-3.
+      *    현금성자산금액(현금및현금성자산)
+           03 OT-CSH-AMT-2                  PIC S9(00015) COMP-3.
+           03 OT-CSH-AMT-1                  PIC S9(00015) COMP-3.
+           03 OT-CSH-AMT                    PIC S9(00015) COMP-3.
+
+      *-----------------------------------------------------------------
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      * CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *항목:코드구분(1)+오류 발생 PGM(2)+오류발생 루틴+
+      *식별번호
+
+      *01 : 초기화 처리(C/A 조립,Open 등)
+           03  CO-EBM01001             PIC  X(008) VALUE 'EBM01001'.
+           03  CO-UBM01001             PIC  X(008) VALUE 'UBM01001'.
+      *02 : INPUT File/DB 입력 처리
+           03  CO-EBM02001             PIC  X(008) VALUE 'EBM02001'.
+           03  CO-UBM02001             PIC  X(008) VALUE 'UBM02001'.
+      *03 : 내부 본 처리
+           03  CO-EBM03001             PIC  X(008) VALUE 'EBM03001'.
+           03  CO-UBM03001             PIC  X(008) VALUE 'UBM03001'.
+      *04 : OUTPUT File/DB 출력 처리
+           03  CO-EBM04001             PIC  X(008) VALUE 'EBM04001'.
+           03  CO-UBM04001             PIC  X(008) VALUE 'UBM04001'.
+      *05 : 종료 처리(Commit, Close 등)
+           03  CO-EBM05001             PIC  X(008) VALUE 'EBM05001'.
+           03  CO-UBM05001             PIC  X(008) VALUE 'UBM05001'.
+      *09 : 기타
+           03  CO-EBM09001             PIC  X(008) VALUE 'EBM09001'.
+           03  CO-UBM09001             PIC  X(008) VALUE 'UBM09001'.
+      *91 : Batch 초기화 유틸리티 호출
+           03  CO-EBM91001             PIC  X(008) VALUE 'EBM91001'.
+           03  CO-UBM91001             PIC  X(008) VALUE 'UBM91001'.
+      *92 : Batch 진행관리 유틸리티 호출
+           03  CO-EBM92001             PIC  X(008) VALUE 'EBM92001'.
+           03  CO-UBM92001             PIC  X(008) VALUE 'UBM92001'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'BJLD011'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-OK                   PIC  9(003) VALUE  000.
+           03  CO-NOT-FOUND            PIC  9(003) VALUE  100.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+           03  CO-CHA-00               PIC  X(002) VALUE '00'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-08               PIC  X(002) VALUE '08'.
+           03  CO-CHA-09               PIC  X(002) VALUE '09'.
+           03  CO-CHA-10               PIC  X(002) VALUE '10'.
+           03  CO-CHA-12               PIC  X(002) VALUE '12'.
+           03  CO-CHA-16               PIC  X(002) VALUE '16'.
+           03  CO-CHA-KB0              PIC  X(003) VALUE 'KB0'.
+           03  CO-CHA-KRW              PIC  X(003) VALUE 'KRW'.
+           03  CO-CHA-0000             PIC  X(004) VALUE '0000'.
+
+           03  CO-NUM-0                PIC  9(001) VALUE  0.
+           03  CO-NUM-1                PIC  9(001) VALUE  1.
+      *-----------------------------------------------------------------
+      * FILE STATUS
+      *-----------------------------------------------------------------
+       01  WK-FILE-STATUS.
+           03  WK-OT-FILE-ST           PIC  X(002) VALUE  SPACE.
+      *-----------------------------------------------------------------
+      * ACCUMULATORS
+      *-----------------------------------------------------------------
+       01  WK-ACCUMULATORS.
+           03  WK-AC-FETCH-CNT         PIC  9(013) VALUE  ZEROS.
+           03  WK-AC-WRITE-CNT         PIC  9(013) VALUE  ZEROS.
+      *-----------------------------------------------------------------
+      * SWITCHES
+      *-----------------------------------------------------------------
+       01  WK-SWITCHES.
+           03  WK-SW-EOF-YN            PIC  X(001) VALUE  SPACE.
+               88  EOF-Y                           VALUE 'Y'.
+           03  WK-SW-CHK-YN            PIC  X(001) VALUE  SPACE.
+               88  CHK-Y                           VALUE 'Y'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+      *신용등급별 지원비율
+           03  WK-GWBY                 PIC S9(005)V9(2) COMP-3.
+      *자금구분별　한신평보고서구분(BS/PL)
+           03  WK-TMP-BS               PIC X(002).
+           03  WK-TMP-PL               PIC X(002).
+      *결산년월일
+           03  WK-STLACC-YMD           PIC  X(008).
+      *결산년월일 - 1년
+           03  WK-STLACC-YMD-1         PIC  X(008).
+      *결산년월일 - 2년
+           03  WK-STLACC-YMD-2         PIC  X(008).
+
+      *법인세차감전게속사업이익（전전년）
+           03  WK-BBC-AMT-2            PIC S9(015) COMP-3.
+      *법인세차감전게속사업이익（전년）
+           03  WK-BBC-AMT-1            PIC S9(015) COMP-3.
+      *법인세차감전게속사업이익（기준년）
+           03  WK-BBC-AMT              PIC S9(015) COMP-3.
+
+      *자기자본（전전전）
+           03  WK-JGJ-AMT-2            PIC S9(015) COMP-3.
+      *자기자본（전년）
+           03  WK-JGJ-AMT-1            PIC S9(015) COMP-3.
+      *자기자본（기준년）
+           03  WK-JGJ-AMT              PIC S9(015) COMP-3.
+
+      *1. 영업이익
+170706     03  WK-YUI-AMT-2            PIC S9(018) COMP-3.
+170706     03  WK-YUI-AMT-1            PIC S9(018) COMP-3.
+           03  WK-YUI-AMT              PIC S9(018) COMP-3.
+      *2. 이자수익
+           03  WK-IJS-AMT-2            PIC S9(018) COMP-3.
+           03  WK-IJS-AMT-1            PIC S9(018) COMP-3.
+           03  WK-IJS-AMT              PIC S9(018) COMP-3.
+      *3. 감가상각비
+           03  WK-GGS-AMT-2            PIC S9(018) COMP-3.
+           03  WK-GGS-AMT-1            PIC S9(018) COMP-3.
+           03  WK-GGS-AMT              PIC S9(018) COMP-3.
+      *8. 금융비용
+           03  WK-GYB-AMT-2            PIC S9(018) COMP-3.
+           03  WK-GYB-AMT-1            PIC S9(018) COMP-3.
+           03  WK-GYB-AMT              PIC S9(018) COMP-3.
+      *10.단기차입금（기준년）
+           03  WK-DGC-AMT-2            PIC S9(018) COMP-3.
+           03  WK-DGC-AMT-1            PIC S9(018) COMP-3.
+           03  WK-DGC-AMT              PIC S9(018) COMP-3.
+      *20.업체총차입금
+           03  WK-YCC-AMT-2            PIC S9(018) COMP-3.
+           03  WK-YCC-AMT-1            PIC S9(018) COMP-3.
+           03  WK-YCC-AMT              PIC S9(018) COMP-3.
+      *21.자산총계
+           03  WK-JSC-AMT-2            PIC S9(018) COMP-3.
+           03  WK-JSC-AMT-1            PIC S9(018) COMP-3.
+           03  WK-JSC-AMT              PIC S9(018) COMP-3.
+      *22.매출액
+           03  WK-MCA-AMT-2            PIC S9(018) COMP-3.
+           03  WK-MCA-AMT-1            PIC S9(018) COMP-3.
+           03  WK-MCA-AMT              PIC S9(018) COMP-3.
+
+211022*    금융총비용비율(금융비용/총비용비율)
+           03  WK-FNCS-RATO-2          PIC S9(00015)V9(2) COMP-3.
+           03  WK-FNCS-RATO-1          PIC S9(00015)V9(2) COMP-3.
+           03  WK-FNCS-RATO            PIC S9(00015)V9(2) COMP-3.
+      *    매출채권회전비율
+           03  WK-ASALE-RATO-2         PIC S9(00015)V9(2) COMP-3.
+           03  WK-ASALE-RATO-1         PIC S9(00015)V9(2) COMP-3.
+           03  WK-ASALE-RATO           PIC S9(00015)V9(2) COMP-3.
+      *    현금성자산금액(현금및현금성자산)
+           03  WK-CSH-AMT-2            PIC S9(00015) COMP-3.
+           03  WK-CSH-AMT-1            PIC S9(00015) COMP-3.
+           03  WK-CSH-AMT              PIC S9(00015) COMP-3.
+
+      *-----------------------------------------------------------------
+      * ACCEPT AREA
+      *-----------------------------------------------------------------
+       01  WK-SYSIN.
+      *그룹회사코드
+           03  WK-SYSIN-GROUP-CD       PIC  X(003).
+           03  FILLER                  PIC  X(001).
+      *작업실행일
+           03  WK-SYSIN-JOB-YMD        PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *작업명
+           03  WK-SYSIN-JOB-NAME       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *처리회차
+           03  WK-SYSIN-JOB-SEQ        PIC  9(003).
+           03  FILLER                  PIC  X(001).
+      *배치작업구분
+           03  WK-SYSIN-BATCH-GB       PIC  X(006).
+           03  FILLER                  PIC  X(001).
+      *작업자ID
+           03  WK-SYSIN-WORK-ID        PIC  X(007).
+           03  FILLER                  PIC  X(001).
+      *자료기준년월일
+           03  WK-SYSIN-BASE-YMD       PIC  X(008).
+           03  FILLER                  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY    YCCOMMON.
+      *    공통영역 기준일자 Set Parameter
+       01  XBJISTDT-CA.
+           COPY    XBJISTDT.
+      *    만기일/역만기일 산출 COPYBOOK
+       01  XCJIIL03-CA.
+           COPY    XCJIIL03.
+      *-----------------------------------------------------------------
+      * DB2 SQL QUERY STATUS 관련 COPYBOOK
+      *-----------------------------------------------------------------
+       EXEC  SQL  INCLUDE  SQLCA            END-EXEC.
+       EXEC  SQL  BEGIN  DECLARE            SECTION  END-EXEC.
+      *    HOST INPUT
+        01  WK-HOST-IN.
+      *       그룹회사코드
+           03 WK-H-I-GROUP-CO-CD            PIC  X(00003).
+      *       기준일
+           03 WK-H-I-BASE-DD                PIC  X(00002).
+      *       기준년월
+           03 WK-H-I-BASE-YM                PIC  X(00006).
+
+      *    HOST OUTPUT
+       01  WK-HOST-OUT.
+      *       한신평업체코드
+           03 WK-H-O-ENTP-CD                PIC  X(00006).
+      *       고객식별자
+           03 WK-H-O-CUST-IDNFR             PIC  X(00010).
+      *       한신평산업코드（표준산업분류코드）
+           03 WK-H-O-IDSTRY-CD              PIC  X(00005).
+      *       한신평재무업종구분
+           03 WK-H-O-F-BZTYP-DSTCD          PIC  X(00002).
+      *       영업신용등급구분
+           03 WK-H-O-LAST-CRTDSCD           PIC  X(00004).
+      *       평가년월일
+           03 WK-H-O-VALUA-YMD              PIC  X(00008).
+      *       유효년월일
+           03 WK-H-O-VALD-YMD               PIC  X(00008).
+       EXEC  SQL  END    DECLARE            SECTION  END-EXEC.
+      *-----------------------------------------------------------------
+      * SQL CURSOR DECLARE
+      *-----------------------------------------------------------------
+      *한신평에서정의한기업규모구분
+      *(0:해당무,1:대기업,2:중소기업,9:기타)이다.
+           EXEC SQL
+           DECLARE  THKABCB01_CUR     CURSOR FOR
+           SELECT SUBSTR(MAX(A.최종변경년월일||
+                             A.한신평업체코드||
+                             A.한신평산업코드||
+                             A.한신평재무업종구분),9,6)
+                  AS 한신평업체코드
+                 ,C.고객식별자
+                 ,SUBSTR(MAX(A.최종변경년월일||
+                             A.한신평업체코드||
+                             A.한신평산업코드||
+                             A.한신평재무업종구분),15,5)
+                  AS 한신평산업코드
+180416           ,VALUE((SELECT 한신평재무업종구분
+                           FROM DB2DBA.THKJL0153
+                          WHERE 그룹회사코드 = C.그룹회사코드
+                            AND 고객식별자   = C.고객식별자
+                            AND 한신평재무업종구분 != ''
+                         )
+                 ,SUBSTR(MAX(A.최종변경년월일||
+                             A.한신평업체코드||
+                             A.한신평산업코드||
+                             A.한신평재무업종구분),20,2))
+                  AS 한신평재무업종구분
+                 ,VALUE(MAX(B.영업신용등급구분),'0000')
+                  AS 영업신용등급구분
+                 ,VALUE(MAX(B.평가년월일)      ,'') AS 평가년월일
+                 ,VALUE(MAX(B.유효년월일)      ,'') AS 유효년월일
+             FROM DB2DBA.THKABCB01 A
+                 ,DB2DBA.THKAAADET D
+                 ,DB2DBA.THKAABPCB C LEFT OUTER JOIN
+17224            (SELECT 심사고객식별자
+                        ,SUBSTR(MAX(CASE WHEN 신용평가구분 IN
+                                              ('02','13','15','22')
+                                         THEN '1'
+                                         ELSE '2'
+                                    END                 ||
+                                    평가년월일        ||
+                                    신용평가보고서번호||
+140721                              CASE WHEN 영업신용등급구분 IN
+                                              ('    ','0000')
+                                         THEN 최종신용등급구분
+                                         ELSE 영업신용등급구분
+                                    END                 ||
+                                    유효년월일),23,4)
+                         AS 영업신용등급구분
+                        ,SUBSTR(MAX(CASE WHEN 신용평가구분 IN
+                                              ('02','13','15','22')
+                                         THEN '1'
+                                         ELSE '2'
+                                    END                 ||
+                                    평가년월일        ||
+                                    신용평가보고서번호||
+140721                              CASE WHEN 영업신용등급구분 IN
+                                              ('    ','0000')
+                                         THEN 최종신용등급구분
+                                         ELSE 영업신용등급구분
+                                    END                 ||
+                                    유효년월일), 2,8)
+                         AS 평가년월일
+                        ,SUBSTR(MAX(CASE WHEN 신용평가구분 IN
+                                              ('02','13','15','22')
+                                         THEN '1'
+                                         ELSE '2'
+                                    END                 ||
+                                    평가년월일        ||
+                                    신용평가보고서번호||
+140721                              CASE WHEN 영업신용등급구분 IN
+                                              ('    ','0000')
+                                         THEN 최종신용등급구분
+                                         ELSE 영업신용등급구분
+                                    END                 ||
+                                    유효년월일),27,8)
+                         AS 유효년월일
+                    FROM DB2DBA.THKIIK616
+                   WHERE 그룹회사코드       = :WK-H-I-GROUP-CO-CD
+                     AND 기업신용등급원천지 = '3'
+                     AND 신용평가구분IN ('01','03','04','05',
+                                           '06','07','08','09',
+                                           '10','11','14','16',
+                                           '17','18','19','20','99',
+                                           '02','13','15','22')
+17224              GROUP BY 심사고객식별자
+                  ) B
+               ON C.고객식별자    = B.심사고객식별자
+            WHERE A.그룹회사코드  = D.그룹회사코드
+              AND A.고객식별자    = D.대체번호
+              AND D.그룹회사코드  = C.그룹회사코드
+170824        AND D.양방향고객암호화번호 = C.양방향고객암호화번호
+              AND A.그룹회사코드  = :WK-H-I-GROUP-CO-CD
+              AND A.고객식별자   <> ''
+
+120201      GROUP BY C.그룹회사코드,C.고객식별자
+             WITH UR
+           END-EXEC.
+
+      *=================================================================
+       PROCEDURE                       DIVISION.
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@1 초기화
+           PERFORM  S1000-INITIALIZE-RTN
+              THRU  S1000-INITIALIZE-EXT
+
+      *@1 입력값 CHECK(SYSIN)
+           PERFORM  S2000-VALIDATION-RTN
+              THRU  S2000-VALIDATION-EXT
+
+      *@1  SYSIN GET MOVE
+           PERFORM  S3000-SYSDATA-MOVE-RTN
+              THRU  S3000-SYSDATA-MOVE-EXT
+
+      *@1 업무처리
+           PERFORM  S3000-PROCESS-RTN
+              THRU  S3000-PROCESS-EXT
+
+      *@1 처리종료
+           PERFORM  S9000-FINAL-RTN
+              THRU  S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-AREA
+                         WK-SYSIN
+                         XBJISTDT-CA
+
+      *@1  JCL SYSIN ACCEPT
+           ACCEPT  WK-SYSIN            FROM  SYSIN
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD011 PGM START                    *'
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* WK-SYSIN = ' WK-SYSIN
+
+      *-----------------------------------------------------------------
+      *@1 공통영역기준일자 SET
+      *-----------------------------------------------------------------
+      *@2 입력파라미터 조립
+      *@ (그룹회사코드,작업실행일)
+
+      *   그룹회사코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  BICOM-GROUP-CO-CD
+
+      *   작업실행일
+           MOVE  WK-SYSIN-JOB-YMD
+             TO  BICOM-TRAN-BASE-YMD
+
+      *@2 프로그램호출:공통영역기준일자 SET
+           #DYCALL  BJISTDT  YCCOMMON-CA  XBJISTDT-CA
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  XBJISTDT-R-STAT = ZEROS
+           THEN
+               CONTINUE
+           ELSE
+               #ERROR   XBJISTDT-R-ERRCD
+                        XBJISTDT-R-TREAT-CD
+                        XBJISTDT-R-STAT
+               #OKEXIT  CO-CHA-08
+           END-IF
+
+      *@1  FILE OPEN
+           PERFORM  S1100-FILE-OPEN-RTN
+              THRU  S1100-FILE-OPEN-EXT
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   FILE OPEN
+      *-----------------------------------------------------------------
+       S1100-FILE-OPEN-RTN.
+
+      *@1  FILE OPEN
+           OPEN  OUTPUT  OT-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-FILE-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE OPEN ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-FILE-ST     TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S1100-FILE-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값 CHECK(SYSIN)
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@1 그룹회사구분코드 미입력시 에러
+           IF  WK-SYSIN-GROUP-CD NOT = CO-CHA-KB0
+               MOVE '그룹회사구분코드미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업실행일 미입력시 에러
+           IF  WK-SYSIN-JOB-YMD = SPACE
+               MOVE '작업실행일미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업명 미입력시 에러
+           IF  WK-SYSIN-JOB-NAME = SPACE
+               MOVE '작업명미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 처리회차 미입력시 에러
+           IF  WK-SYSIN-JOB-SEQ = SPACE
+               MOVE '처리회차미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 배치작업구분 미입력시 에러
+           IF  WK-SYSIN-BATCH-GB = SPACE
+               MOVE '배치작업구분미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 작업자ID 미입력시 에러
+           IF  WK-SYSIN-WORK-ID = SPACE
+               MOVE '작업자ID미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 자료기준년월일
+           IF  WK-SYSIN-BASE-YMD = SPACE
+               MOVE '자료기준년월일미입력오류입니다.'
+                                       TO  XZUGEROR-I-MSG
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   SYSIN GET MOVE
+      *-----------------------------------------------------------------
+       S3000-SYSDATA-MOVE-RTN.
+
+      *   초기화
+           INITIALIZE    WK-HOST-IN
+
+      *@1  HOST INPUT에 값 SET
+
+      *   그룹회사구분코드
+           MOVE  WK-SYSIN-GROUP-CD
+             TO  WK-H-I-GROUP-CO-CD
+
+      *   기준일
+           MOVE  WK-SYSIN-BASE-YMD(7:2)
+             TO  WK-H-I-BASE-DD
+
+      *   기준년월
+           MOVE  WK-SYSIN-BASE-YMD(1:6)
+             TO  WK-H-I-BASE-YM
+           .
+       S3000-SYSDATA-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  CURSOR OPEN
+           PERFORM  S3100-KABCB01-OPEN-RTN
+              THRU  S3100-KABCB01-OPEN-EXT
+
+      *@1  CURSOR FETCH
+           PERFORM  S3200-KABCB01-FETCH-RTN
+              THRU  S3200-KABCB01-FETCH-EXT
+
+      *@1  NOT FOUND일때까지 처리
+           PERFORM  UNTIL  EOF-Y
+
+      *@2          개별기업(은행/비은행/개별기업)제무재표조회
+                    PERFORM  S3400-KABCC26-SELECT-RTN
+                       THRU  S3400-KABCC26-SELECT-EXT
+
+      *@2           DATA MOVE
+                    PERFORM  S3400-DATA-MOVE-RTN
+                       THRU  S3400-DATA-MOVE-EXT
+
+      *@2           DATA WRITE
+                    PERFORM  S3500-DATA-WRITE-RTN
+                       THRU  S3500-DATA-WRITE-EXT
+
+      *@2           CURSOR FETCH
+                    PERFORM  S3200-KABCB01-FETCH-RTN
+                       THRU  S3200-KABCB01-FETCH-EXT
+           END-PERFORM
+
+      *@1  CURSOR CLOSE
+           PERFORM  S3600-KABCB01-CLOSE-RTN
+              THRU  S3600-KABCB01-CLOSE-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR OPEN
+      *-----------------------------------------------------------------
+       S3100-KABCB01-OPEN-RTN.
+
+      *   초기화
+           INITIALIZE    WK-SWITCHES
+
+      *@1  CURSOR OPEN
+           EXEC SQL
+               OPEN  THKABCB01_CUR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KABCB01'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'OPEN'       TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR OPEN시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3100-KABCB01-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR FETCH
+      *-----------------------------------------------------------------
+       S3200-KABCB01-FETCH-RTN.
+
+      *   초기화
+           INITIALIZE    WK-AREA
+                         WK-HOST-OUT
+
+      *@1  CURSOR FETCH
+           EXEC SQL
+              FETCH  THKABCB01_CUR
+               INTO  :WK-HOST-OUT
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     ADD   CO-NUM-1    TO  WK-AC-FETCH-CNT
+               WHEN  CO-NOT-FOUND
+                     SET   EOF-Y       TO  TRUE
+               WHEN  OTHER
+                     MOVE 'KABCB01'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'FETCH'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR FETCH시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *@1 십만건마다 DISPLAY
+           IF  FUNCTION MOD(WK-AC-FETCH-CNT,100000) = CO-NUM-0
+               #USRLOG 'WK-AC-FETCH-CNT : ' WK-AC-FETCH-CNT
+           END-IF
+           .
+       S3200-KABCB01-FETCH-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  개별기업(은행/비은행/개별기업)제무재표조회
+      *-----------------------------------------------------------------
+       S3400-KABCC26-SELECT-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 결산년월일 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,
+      *@한신평결산자료구분(K:결산)
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목:결산년월일
+           EXEC SQL
+             SELECT  VALUE(MAX(결산년월일),'00010101')
+               INTO  :WK-STLACC-YMD
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+      *#1           결산년월일이 '00010101' 아닌 경우
+                     IF  WK-STLACC-YMD NOT = '00010101'
+      *@2               결산년월일기준으로 전년월일및전전년월일산출
+                         PERFORM  S3410-CJIIL03-CALL-RTN
+                            THRU  S3410-CJIIL03-CALL-EXT
+
+      *@2               한신평재무업종구분별으로 재무재표정보조회
+                         PERFORM  S3420-KABCC26-SELECT-RTN
+                            THRU  S3420-KABCC26-SELECT-EXT
+                     END-IF
+               WHEN  CO-NOT-FOUND
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'SELECT-DATA-01시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3400-KABCC26-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  결산년월일기준으로 전년월일및전전년월일산출
+      *-----------------------------------------------------------------
+       S3410-CJIIL03-CALL-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 전년월일산출
+      *-----------------------------------------------------------------
+      *   초기화
+           INITIALIZE    WK-STLACC-YMD-1
+                         XCJIIL03-IN
+
+      *@2 입력파라미터 조립
+      *@ (그룹회사코드,구분코드:4,기준년월일,월수:12)
+
+      *   그룹회사코드
+           MOVE  WK-H-I-GROUP-CO-CD    TO  XCJIIL03-I-GROUP-CO-CD
+      *   구분코드
+           MOVE  '4'                   TO  XCJIIL03-I-DSTCD
+      *   기준년월일
+           MOVE  WK-STLACC-YMD         TO  XCJIIL03-I-YMD
+      *   월수
+           MOVE  12                    TO  XCJIIL03-I-NODAY-NOMN
+
+      *@2 프로그램호출:전년월일 추출
+           #DYCALL   CJIIL03   YCCOMMON-CA   XCJIIL03-CA
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  XCJIIL03-R-STAT  =  ZEROS
+               MOVE  XCJIIL03-O-YMD    TO  WK-STLACC-YMD-1
+
+           ELSE
+               #ERROR  XCJIIL03-R-ERRCD
+                       XCJIIL03-R-TREAT-CD
+                       XCJIIL03-R-STAT
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *-----------------------------------------------------------------
+      *@1 전전년월일산출
+      *-----------------------------------------------------------------
+      *   초기화
+           INITIALIZE    WK-STLACC-YMD-2
+                         XCJIIL03-IN
+
+      *@2 입력파라미터 조립
+      *@ (그룹회사코드,구분코드:4,기준년월일,월수:24)
+
+      *   그룹회사코드
+           MOVE  WK-H-I-GROUP-CO-CD    TO  XCJIIL03-I-GROUP-CO-CD
+      *   구분코드
+           MOVE  '4'                   TO  XCJIIL03-I-DSTCD
+      *   기준년월일
+           MOVE  WK-STLACC-YMD         TO  XCJIIL03-I-YMD
+      *   월수
+           MOVE  24                    TO  XCJIIL03-I-NODAY-NOMN
+
+      *@2 프로그램호출:전전년월일 추출
+           #DYCALL   CJIIL03   YCCOMMON-CA   XCJIIL03-CA
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  XCJIIL03-R-STAT  =  ZEROS
+               MOVE  XCJIIL03-O-YMD    TO  WK-STLACC-YMD-2
+
+           ELSE
+               #ERROR  XCJIIL03-R-ERRCD
+                       XCJIIL03-R-TREAT-CD
+                       XCJIIL03-R-STAT
+               #OKEXIT CO-CHA-08
+           END-IF
+           .
+       S3410-CJIIL03-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한신평재무업종구분별 재무재표정보조회
+      *-----------------------------------------------------------------
+       S3420-KABCC26-SELECT-RTN.
+
+           EVALUATE  WK-H-O-F-BZTYP-DSTCD
+      *#1 은행인경우
+           WHEN 'AA'
+      *@2     은행 제무재표조회
+               PERFORM  S3421-KABCC26-BANK-SEL-RTN
+                  THRU  S3421-KABCC26-BANK-SEL-EXT
+      *#2 금융기관일경우
+           WHEN 'BB'
+           WHEN 'CC'
+           WHEN 'DD'
+           WHEN 'EE'
+           WHEN 'FF'
+           WHEN 'GG'
+           WHEN 'HH'
+           WHEN 'II'
+           WHEN 'JJ'
+           WHEN 'KK'
+           WHEN 'ZZ'
+      *@3     금융기관 제무재표조회
+               PERFORM  S3422-KABCC26-NON-SEL-RTN
+                  THRU  S3422-KABCC26-NON-SEL-EXT
+           WHEN OTHER
+
+      *#2     금융기관외기업
+      *@2     기업 제무재표조회
+               PERFORM  S3423-KABCC26-GIUP-SEL-RTN
+                  THRU  S3423-KABCC26-GIUP-SEL-EXT
+
+               PERFORM  S3424-KABCC23-GIUP-SEL-RTN
+                  THRU  S3424-KABCC23-GIUP-SEL-EXT
+
+           END-EVALUATE
+           .
+       S3420-KABCC26-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  한국신용평가재무업종구분 = AA:은행 제무재표조회
+      *-----------------------------------------------------------------
+       S3421-KABCC26-BANK-SEL-RTN.
+
+      *-----------------------------------------------------------------
+      *@1  전전년법인세비용차감전계속사업이익,
+      *@     전년법인세비용차감전계속사업이익,
+      *@   기준년법인세비용차감전계속사업이익 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,결산년월일
+      *@(전전년/전년/기준년),한신평결산자료구분(K:결산),
+      *@한신평보고서구분(A2:은행손익계산서),
+      *@한신평재무항목코드(8000)
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목:재무제표항목금액(전전년/전년/기준년)
+
+      *@2  법인세차감전계속이익 = THKABCC26_재무제표항목금액
+      *@                    AND 한신평결자료구분 = K:결산
+      *@                    AND 한신평보고서구분 = A2:은행손익계산서
+      *@                    AND 한신평재무항목코드 = 8000
+
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+               INTO  :WK-BBC-AMT
+                  ,  :WK-BBC-AMT-1
+                  ,  :WK-BBC-AMT-2
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                          :WK-STLACC-YMD-1,
+                                          :WK-STLACC-YMD-2)
+                AND  한신평보고서구분   = 'A2'
+                AND  한신평재무항목코드 = '8000'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE  0           TO  WK-BBC-AMT
+                     MOVE  0           TO  WK-BBC-AMT-1
+                     MOVE  0           TO  WK-BBC-AMT-2
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'BANK-DATA-01시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *-----------------------------------------------------------------
+      *@1 전전년자기자본,전년자기자본,기준년자기자본 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,결산년월일
+      *@(전전년/전년/기준년),한신평결산자료구분(K:결산),
+      *@한신평보고서구분(A1:은행대차대조표),
+      *@한신평재무항목코드(7800)
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목:재무제표항목금액(전전년/전년/기준년)
+      *
+      *@2 자기자본  = THKABCC26_재무제표항목금액
+      *@              AND 한신평결자료구분 = K:결산
+      *@              AND 한신평보고서구분 = A1:은행대차대조표
+      *@              AND 한신평재무항목코드 = 7800
+
+
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+               INTO  :WK-JGJ-AMT
+                  ,  :WK-JGJ-AMT-1
+                  ,  :WK-JGJ-AMT-2
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                          :WK-STLACC-YMD-1,
+                                          :WK-STLACC-YMD-2)
+                AND  한신평보고서구분    = 'A1'
+                AND  한신평재무항목코드  = '7800'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE  0           TO  WK-JGJ-AMT
+                     MOVE  0           TO  WK-JGJ-AMT-1
+                     MOVE  0           TO  WK-JGJ-AMT-2
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'BANK-DATA-04시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3421-KABCC26-BANK-SEL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  금융기관 제무재표조회
+      *-----------------------------------------------------------------
+       S3422-KABCC26-NON-SEL-RTN.
+
+      *@1 자금구분별 추출을 위한 한신평보고서구분설정
+      *@(B2:증권손익계산서,C2:생보손익계산서,
+      *@E2:신용금고손익계산서,F2:종금손익계산서,I2:카드손익계산서,
+      *@J2:창투손익계산서,Z2:기타손익계산서)
+
+      * 2011.11.11 -할부금융　추가('K1','K2')
+           EVALUATE  WK-H-O-F-BZTYP-DSTCD
+               WHEN  'BB'
+                     MOVE 'B1' TO WK-TMP-BS
+                     MOVE 'B2' TO WK-TMP-PL
+               WHEN  'CC'
+                     MOVE 'C1' TO WK-TMP-BS
+                     MOVE 'C2' TO WK-TMP-PL
+               WHEN  'DD'
+                     MOVE 'D1' TO WK-TMP-BS
+                     MOVE 'D2' TO WK-TMP-PL
+               WHEN  'EE'
+                     MOVE 'E1' TO WK-TMP-BS
+                     MOVE 'E2' TO WK-TMP-PL
+               WHEN  'FF'
+                     MOVE 'F1' TO WK-TMP-BS
+                     MOVE 'F2' TO WK-TMP-PL
+               WHEN  'GG'
+                     MOVE 'G1' TO WK-TMP-BS
+                     MOVE 'G2' TO WK-TMP-PL
+               WHEN  'HH'
+                     MOVE 'H1' TO WK-TMP-BS
+                     MOVE 'H2' TO WK-TMP-PL
+               WHEN  'II'
+                     MOVE 'I1' TO WK-TMP-BS
+                     MOVE 'I2' TO WK-TMP-PL
+               WHEN  'JJ'
+                     MOVE 'J1' TO WK-TMP-BS
+                     MOVE 'J2' TO WK-TMP-PL
+               WHEN  'KK'
+                     MOVE 'K1' TO WK-TMP-BS
+                     MOVE 'K2' TO WK-TMP-PL
+               WHEN  OTHER
+                     MOVE 'Z1' TO WK-TMP-BS
+                     MOVE 'Z2' TO WK-TMP-PL
+            END-EVALUATE
+
+      *-----------------------------------------------------------------
+      *@1  전전년법인세비용차감전게속사업이익,
+      *@전년법인세비용차감전게속사업이익,
+      *@기준년법인세비용차감전게속사업이익 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,결산년월일
+      *@(전전년/전년/기준년),한신평결산자료구분(K:결산),
+      *@한신평보고서구분,한신평재무항목코드(8000)
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목:재무제표항목금액(전전년/전년/기준년)
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+               INTO  :WK-BBC-AMT
+                  ,  :WK-BBC-AMT-1
+                  ,  :WK-BBC-AMT-2
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                          :WK-STLACC-YMD-1,
+                                          :WK-STLACC-YMD-2)
+                AND  한신평보고서구분    = :WK-TMP-PL
+                AND  한신평재무항목코드  = '8000'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE  0           TO  WK-BBC-AMT
+                     MOVE  0           TO  WK-BBC-AMT-1
+                     MOVE  0           TO  WK-BBC-AMT-2
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'NONBANK-DATA-01시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+
+      *-----------------------------------------------------------------
+      *@1 전전년자기자본,전년자기자본,기준년자기자본 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,결산년월일
+      *@(전전년/전년/기준년),한신평결산자료구분(K:결산),
+      *@한신평보고서구분,한신평재무항목코드(8900)
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목:재무제표항목금액(전전년/전년/기준년)
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                                END),0) * 1000
+               INTO  :WK-JGJ-AMT
+                  ,  :WK-JGJ-AMT-1
+                  ,  :WK-JGJ-AMT-2
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                          :WK-STLACC-YMD-1,
+                                          :WK-STLACC-YMD-2)
+                AND  한신평보고서구분   = :WK-TMP-BS
+                AND  한신평재무항목코드 = '8900'
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+                     MOVE  0           TO  WK-JGJ-AMT
+                     MOVE  0           TO  WK-JGJ-AMT-1
+                     MOVE  0           TO  WK-JGJ-AMT-2
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'NONBANK-DATA-04시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3422-KABCC26-NON-SEL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  기업 제무재표조회
+      *-----------------------------------------------------------------
+       S3423-KABCC26-GIUP-SEL-RTN.
+
+      *-----------------------------------------------------------------
+      *@1 영업이익.이자수익,감가상각비,금융비용,
+      *@단기차입금(기준년),업체총차입금,자산총계,매출액
+      *@자기자본(기준년) 조회
+      *-----------------------------------------------------------------
+      *@2 조건항목:그룹회사코드,한신평업체코드,
+      *@한신평결산자료구분(K:결산),결산년월일
+      *@2 한국신용평가재무제표(THKABCC26) SELECT
+      *@2 출력항목: 재무제표항목금액
+      *@ 1. 영업이익
+      *@         AND  한신평보고서구분   = '12'
+      *@         AND  한신평재무항목코드 = '5000'
+      *@ 2. 이자수익
+      *@         AND  한신평보고서구분   = '12'
+      *@         AND  한신평재무항목코드 = '5101'
+      *@ 3. 감가상각비
+      *@         AND  한신평보고서구분    = '16'
+      *@         AND  한신평재무항목코드 IN ('1211','1212')
+      *@ 8. 금융비용
+      *@         AND  한신평보고서구분   = '12'
+      *@         AND  한신평재무항목코드 IN ('6120','6110','6132')
+      *@ 10.단기차입금（기준년）
+      *@         AND  한신평보고서구분    = '11'
+      *@         AND  한신평재무항목코드 IN ('5130','5185','5191',
+      *@                                       '5192','5193','5195',
+      *@                                       '5400')
+      *@ 20.업체총차입금
+      *@         AND  한신평보고서구분    = '11'
+      *@         AND  한신평재무항목코드IN
+      *@                                 ('5130','5185','5191','5192',
+      *@                                  '5193','5195','6050','6200',
+      *@                                  '6260','6401','6515','6940',
+      *@                                  '5400')
+      *@ 21.자산총계
+      *@         AND  한신평보고서구분   = '11'
+      *@         AND  한신평재무항목코드 = '5000'
+      *@ 22.매출액
+      *@         AND  한신평보고서구분   = '12'
+      *@         AND  한신평재무항목코드 = '1000'
+      *@ 23. 자기자본（기준년）
+      *@         AND  한신평보고서구분   = '11'
+      *@         AND  한신평재무항목코드 = '8900'
+211022*@ 현금성자산금액(현금및현금성자산)
+      *@         AND  한신평보고서구분   = '11'
+      *@         AND  한신평재무항목코드 = '1100'
+      *-----------------------------------------------------------------
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+170706           ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+170706            ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5101'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5101'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '5101'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '16'
+                                     AND (한신평재무항목코드 = '1211'
+                                      OR  한신평재무항목코드 = '1212')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '16'
+                                     AND (한신평재무항목코드 = '1211'
+                                      OR  한신평재무항목코드 = '1212')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '16'
+                                     AND (한신평재무항목코드 = '1211'
+                                      OR  한신평재무항목코드 = '1212')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '12'
+                                     AND (한신평재무항목코드 = '6120'
+                                      OR  한신평재무항목코드 = '6110'
+                                      OR  한신평재무항목코드 = '6132')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '12'
+                                     AND (한신평재무항목코드 = '6120'
+                                      OR  한신평재무항목코드 = '6110'
+                                      OR  한신평재무항목코드 = '6132')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '12'
+                                     AND (한신평재무항목코드 = '6120'
+                                      OR  한신평재무항목코드 = '6110'
+                                      OR  한신평재무항목코드 = '6132')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '6050'
+                                      OR  한신평재무항목코드 = '6200'
+                                      OR  한신평재무항목코드 = '6260'
+                                      OR  한신평재무항목코드 = '6401'
+                                      OR  한신평재무항목코드 = '6515'
+                                      OR  한신평재무항목코드 = '6940'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '6050'
+                                      OR  한신평재무항목코드 = '6200'
+                                      OR  한신평재무항목코드 = '6260'
+                                      OR  한신평재무항목코드 = '6401'
+                                      OR  한신평재무항목코드 = '6515'
+                                      OR  한신평재무항목코드 = '6940'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '11'
+                                     AND (한신평재무항목코드 = '5130'
+                                      OR  한신평재무항목코드 = '5185'
+                                      OR  한신평재무항목코드 = '5191'
+                                      OR  한신평재무항목코드 = '5192'
+                                      OR  한신평재무항목코드 = '5193'
+                                      OR  한신평재무항목코드 = '5195'
+                                      OR  한신평재무항목코드 = '6050'
+                                      OR  한신평재무항목코드 = '6200'
+                                      OR  한신평재무항목코드 = '6260'
+                                      OR  한신평재무항목코드 = '6401'
+                                      OR  한신평재무항목코드 = '6515'
+                                      OR  한신평재무항목코드 = '6940'
+                                      OR  한신평재무항목코드 = '5400')
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '5000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '1000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '1000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '12'
+                                     AND 한신평재무항목코드 = '1000'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '8900'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '8900'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '8900'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '1100'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-1
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '1100'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+                  ,  VALUE(SUM(CASE WHEN 결산년월일= :WK-STLACC-YMD-2
+                                     AND 한신평보고서구분 = '11'
+                                     AND 한신평재무항목코드 = '1100'
+                                    THEN 재무제표항목금액
+                                    ELSE  0
+                     END),0) * 1000
+               INTO  :WK-YUI-AMT
+                  ,  :WK-YUI-AMT-1
+                  ,  :WK-YUI-AMT-2
+                  ,  :WK-IJS-AMT
+                  ,  :WK-IJS-AMT-1
+                  ,  :WK-IJS-AMT-2
+                  ,  :WK-GGS-AMT
+                  ,  :WK-GGS-AMT-1
+                  ,  :WK-GGS-AMT-2
+                  ,  :WK-GYB-AMT
+                  ,  :WK-GYB-AMT-1
+                  ,  :WK-GYB-AMT-2
+                  ,  :WK-DGC-AMT
+                  ,  :WK-DGC-AMT-1
+                  ,  :WK-DGC-AMT-2
+                  ,  :WK-YCC-AMT
+                  ,  :WK-YCC-AMT-1
+                  ,  :WK-YCC-AMT-2
+                  ,  :WK-JSC-AMT
+                  ,  :WK-JSC-AMT-1
+                  ,  :WK-JSC-AMT-2
+                  ,  :WK-MCA-AMT
+                  ,  :WK-MCA-AMT-1
+                  ,  :WK-MCA-AMT-2
+                  ,  :WK-JGJ-AMT
+                  ,  :WK-JGJ-AMT-1
+                  ,  :WK-JGJ-AMT-2
+                  ,  :WK-CSH-AMT
+                  ,  :WK-CSH-AMT-1
+                  ,  :WK-CSH-AMT-2
+               FROM  DB2DBA.THKABCC26
+              WHERE  그룹회사코드   = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드 = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                        :WK-STLACC-YMD-1,
+                                        :WK-STLACC-YMD-2)
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+      *              1. 영업이익
+                     MOVE  0           TO  WK-YUI-AMT
+                                           WK-YUI-AMT-1
+                                           WK-YUI-AMT-2
+      *              2. 이자수익
+                     MOVE  0           TO  WK-IJS-AMT
+                                           WK-IJS-AMT-1
+                                           WK-IJS-AMT-2
+      *              3. 감가상각비
+                     MOVE  0           TO  WK-GGS-AMT
+                                           WK-GGS-AMT-1
+                                           WK-GGS-AMT-2
+      *              8. 금융비용
+                     MOVE  0           TO  WK-GYB-AMT
+                                           WK-GYB-AMT-1
+                                           WK-GYB-AMT-2
+      *              10.단기차입금（기준년）
+                     MOVE  0           TO  WK-DGC-AMT
+                                           WK-DGC-AMT-1
+                                           WK-DGC-AMT-2
+      *              20.업체총차입금
+                     MOVE  0           TO  WK-YCC-AMT
+                                           WK-YCC-AMT-1
+                                           WK-YCC-AMT-2
+      *              21.자산총계
+                     MOVE  0           TO  WK-JSC-AMT
+                                           WK-JSC-AMT-1
+                                           WK-JSC-AMT-2
+      *              22.매출액
+                     MOVE  0           TO  WK-MCA-AMT
+                                           WK-MCA-AMT-1
+                                           WK-MCA-AMT-2
+      *              23. 자기자본（기준년）
+                     MOVE  0           TO  WK-JGJ-AMT
+                                           WK-JGJ-AMT-1
+                                           WK-JGJ-AMT-2
+      *              현금성자산금액
+                     MOVE  0           TO  WK-CSH-AMT
+                                           WK-CSH-AMT-1
+                                           WK-CSH-AMT-2
+
+
+               WHEN  OTHER
+                     MOVE 'KABCC26'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'GIUP-DATA-01시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+
+           .
+       S3423-KABCC26-GIUP-SEL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  한국신용평가재무비율(THKABCC23) 조회
+      *-----------------------------------------------------------------
+       S3424-KABCC23-GIUP-SEL-RTN.
+
+      *-----------------------------------------------------------------
+211022*@  금융총비용비율(금융비용/총비용비율)(192240)
+      *@         AND  한신평보고서구분   = '19'
+      *@         AND  한신평재무항목코드 = '2240'
+      *@
+211022*@  매출채권회전율(194120)
+      *@         AND  한신평보고서구분   = '19'
+      *@         AND  한신평재무항목코드 = '4120'
+      *-----------------------------------------------------------------
+           EXEC SQL
+             SELECT  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD
+                                     AND 한신평재무항목코드 = '2240'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+                  ,  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD-1
+                                     AND 한신평재무항목코드 = '2240'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+                  ,  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD-2
+                                     AND 한신평재무항목코드 = '2240'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+                  ,  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD
+                                     AND 한신평재무항목코드 = '4120'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+                  ,  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD-1
+                                     AND 한신평재무항목코드 = '4120'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+                  ,  VALUE(SUM(CASE WHEN 결산년월일 = :WK-STLACC-YMD-2
+                                     AND 한신평재무항목코드 = '4120'
+                                    THEN 한신평재무비율
+                                    ELSE  0
+                     END),0)
+
+               INTO  :WK-FNCS-RATO
+                  ,  :WK-FNCS-RATO-1
+                  ,  :WK-FNCS-RATO-2
+                  ,  :WK-ASALE-RATO
+                  ,  :WK-ASALE-RATO-1
+                  ,  :WK-ASALE-RATO-2
+               FROM  DB2DBA.THKABCC23
+              WHERE  그룹회사코드       = :WK-H-I-GROUP-CO-CD
+                AND  한신평업체코드     = :WK-H-O-ENTP-CD
+                AND  한신평결산자료구분 = 'K'
+                AND  한신평보고서구분   = '19'
+                AND  결산년월일     IN (:WK-STLACC-YMD,
+                                        :WK-STLACC-YMD-1,
+                                        :WK-STLACC-YMD-2)
+               WITH  UR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  CO-NOT-FOUND
+      *              금융총비용비율(금융비용/총비용비율)
+                     MOVE  0           TO  WK-FNCS-RATO
+                                           WK-FNCS-RATO-1
+                                           WK-FNCS-RATO-2
+      *              매출채권회전비율
+                     MOVE  0           TO  WK-ASALE-RATO
+                                           WK-ASALE-RATO-1
+                                           WK-ASALE-RATO-2
+
+               WHEN  OTHER
+                     MOVE 'KABCC23'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'SELECT'     TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'GIUP-DATA-02 시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM03001 CO-UBM03001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+            END-EVALUATE
+
+           .
+       S3424-KABCC23-GIUP-SEL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DATA MOVE
+      *-----------------------------------------------------------------
+       S3400-DATA-MOVE-RTN.
+
+      *   초기화
+           INITIALIZE    OT-REC
+
+      *@1 출력데이터조립:한신평업체코드,법인등록번호,
+      *@한신평산업코드,결산년월일,영업신용등급구분,
+      *@평가년월일,유효년월일,법인세차감전게속사업이익(전전년),
+      *@법인세차감전게속사업이익(전년),자기자본(기준년),
+      *@영업이익,이자수익,감가상각비,금융비용,
+      *@단기차입금(기준년),업체총차입금,자산총계,매출액
+      *-----------------------------------------------------------------
+      *   공통자료
+      *-----------------------------------------------------------------
+      *   한신평업체코드 = THKABCB01_한신평업체코드
+           MOVE  WK-H-O-ENTP-CD        TO  OT-ENTP-CD
+
+      *   고객식별자   = THKABCB01_고객식별자(대체번호)
+           MOVE  WK-H-O-CUST-IDNFR     TO  OT-CUST-IDNFR
+
+      *   한신평산업코드(표준산업분류코드)
+      *          = THKABCB01_한신평산업코드
+           MOVE  WK-H-O-IDSTRY-CD      TO  OT-IDSTRY-CD
+
+      *   한신평재무업종구분 = THKABCB01_한신평업체코드
+180416*   한신평재무업종구분 SPACE방지를 위해 제조로 변경
+           IF  WK-H-O-F-BZTYP-DSTCD = SPACE
+               MOVE  CO-CHA-00
+                 TO  OT-F-BZTYP-DSTCD
+           ELSE
+               MOVE  WK-H-O-F-BZTYP-DSTCD
+                 TO  OT-F-BZTYP-DSTCD
+           END-IF
+
+      *   결산년월일  = THKABCC26_MAX(결산년월일)
+           MOVE  WK-STLACC-YMD         TO  OT-STLACC-YMD
+
+      *   영업신용등급구분  = THKIIK616_영업신용등급구분
+           MOVE  WK-H-O-LAST-CRTDSCD   TO  OT-LAST-CRTDSCD
+
+      *   평가년월일        = THKIIK616_평가년월일
+           MOVE  WK-H-O-VALUA-YMD      TO  OT-VALUA-YMD
+
+      *   유효년월일        = THKIIK616_유효년월일
+           MOVE  WK-H-O-VALD-YMD       TO  OT-VALD-YMD
+      *-----------------------------------------------------------------
+      *   금융기관(은행)
+      *-----------------------------------------------------------------
+      *   법인세차감전게속사업이익(전전년)
+           MOVE  WK-BBC-AMT-2          TO  OT-BBC-AMT-2
+
+      *   법인세차감전게속사업이익(전년)
+           MOVE  WK-BBC-AMT-1          TO  OT-BBC-AMT-1
+
+      *   법인세차감전게속사업이익(기준년)
+           MOVE  WK-BBC-AMT            TO  OT-BBC-AMT
+
+      *   자기자본(전전년)
+           MOVE  WK-JGJ-AMT-2          TO  OT-JGJ-AMT-2
+
+      *   자기자본(전년)
+           MOVE  WK-JGJ-AMT-1          TO  OT-JGJ-AMT-1
+
+      *   자기자본(기준년)
+           MOVE  WK-JGJ-AMT            TO  OT-JGJ-AMT
+      *-----------------------------------------------------------------
+      *   금융기관 외 기업
+      *-----------------------------------------------------------------
+      *    1.영업이익
+170706     MOVE WK-YUI-AMT-2           TO  OT-YUI-AMT-2
+170706     MOVE WK-YUI-AMT-1           TO  OT-YUI-AMT-1
+           MOVE WK-YUI-AMT             TO  OT-YUI-AMT
+
+      *    2.이자수익
+           MOVE  WK-IJS-AMT-2          TO  OT-IJS-AMT-2
+           MOVE  WK-IJS-AMT-1          TO  OT-IJS-AMT-1
+           MOVE  WK-IJS-AMT            TO  OT-IJS-AMT
+
+      *    3.감가상각비
+           MOVE  WK-GGS-AMT-2          TO  OT-GGS-AMT-2
+           MOVE  WK-GGS-AMT-1          TO  OT-GGS-AMT-1
+           MOVE  WK-GGS-AMT            TO  OT-GGS-AMT
+
+      *    8.금융비용
+           MOVE  WK-GYB-AMT-2          TO  OT-GYB-AMT-2
+           MOVE  WK-GYB-AMT-1          TO  OT-GYB-AMT-1
+           MOVE  WK-GYB-AMT            TO  OT-GYB-AMT
+
+      *    10.단기차입금(기준년)
+           MOVE  WK-DGC-AMT-2          TO  OT-DGC-AMT-2
+           MOVE  WK-DGC-AMT-1          TO  OT-DGC-AMT-1
+           MOVE  WK-DGC-AMT            TO  OT-DGC-AMT
+
+      *    20.업체총차입금
+           MOVE  WK-YCC-AMT-2          TO  OT-YCC-AMT-2
+           MOVE  WK-YCC-AMT-1          TO  OT-YCC-AMT-1
+           MOVE  WK-YCC-AMT            TO  OT-YCC-AMT
+
+      *    21.자산총계
+           MOVE  WK-JSC-AMT-2          TO  OT-JSC-AMT-2
+           MOVE  WK-JSC-AMT-1          TO  OT-JSC-AMT-1
+           MOVE  WK-JSC-AMT            TO  OT-JSC-AMT
+
+      *    22.매출액
+           MOVE  WK-MCA-AMT-2          TO  OT-MCA-AMT-2
+           MOVE  WK-MCA-AMT-1          TO  OT-MCA-AMT-1
+           MOVE  WK-MCA-AMT            TO  OT-MCA-AMT
+
+211022*    금융총비용비율(금융비용/총비용비율)
+           MOVE  WK-FNCS-RATO-2        TO  OT-FNCS-RATO-2
+           MOVE  WK-FNCS-RATO-1        TO  OT-FNCS-RATO-1
+           MOVE  WK-FNCS-RATO          TO  OT-FNCS-RATO
+
+      *    매출채권회전비율
+           MOVE  WK-ASALE-RATO-2       TO  OT-ASALE-RATO-2
+           MOVE  WK-ASALE-RATO-1       TO  OT-ASALE-RATO-1
+           MOVE  WK-ASALE-RATO         TO  OT-ASALE-RATO
+
+      *    현금성자산금액(현금및현금성자산)
+           MOVE  WK-CSH-AMT-2          TO  OT-CSH-AMT-2
+           MOVE  WK-CSH-AMT-1          TO  OT-CSH-AMT-1
+           MOVE  WK-CSH-AMT            TO  OT-CSH-AMT
+
+           .
+       S3400-DATA-MOVE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   DATA WRITE
+      *-----------------------------------------------------------------
+       S3500-DATA-WRITE-RTN.
+
+      *@1  DATA WRITE
+           WRITE OT-REC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-FILE-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE WRITE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-FILE-ST     TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+           ADD   CO-NUM-1              TO  WK-AC-WRITE-CNT
+           .
+       S3500-DATA-WRITE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   CURSOR CLOSE
+      *-----------------------------------------------------------------
+       S3600-KABCB01-CLOSE-RTN.
+
+      *@1  CURSOR CLOSE
+           EXEC SQL
+              CLOSE  THKABCB01_CUR
+           END-EXEC
+
+      *   리턴코드가 정상이 아니면 에러처리
+           EVALUATE  SQLCODE
+               WHEN  CO-OK
+                     CONTINUE
+               WHEN  OTHER
+                     MOVE 'KABCB01'    TO  XZUGEROR-I-TBL-ID
+                     MOVE 'CLOSE'      TO  XZUGEROR-I-FUNC-CD
+                     MOVE  SQLCODE     TO  XZUGEROR-I-SQL-CD
+                     MOVE 'CURSOR CLOSE시오류가발생했습니다'
+                                       TO  XZUGEROR-I-MSG
+                     #ERROR  CO-EBM05001 CO-UBM05001 CO-STAT-ERROR
+                     #OKEXIT CO-CHA-08
+           END-EVALUATE
+           .
+       S3600-KABCB01-CLOSE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+
+      *@1  FILE CLOSE
+           CLOSE     OT-FILE
+
+      *   리턴코드가 정상이 아니면 에러처리
+           IF  WK-OT-FILE-ST NOT = CO-STAT-OK
+               MOVE 'OT-FILE CLOSE ERROR : FILE-ST IS '
+                                       TO  XZUGEROR-I-MSG
+               MOVE  WK-OT-FILE-ST     TO  XZUGEROR-I-MSG(34:2)
+               #ERROR  CO-EBM02001 CO-UBM02001 CO-STAT-ERROR
+               #OKEXIT CO-CHA-08
+           END-IF
+
+      *@1 처리결과DISPLAY
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* THKABCB01_CUR   COUNT  = ' WK-AC-FETCH-CNT
+           #USRLOG '* WRITE           COUNT  = ' WK-AC-WRITE-CNT
+           #USRLOG '*--------------------------------------*'
+           #USRLOG '* BJLD011 PGM END                      *'
+           #USRLOG '*--------------------------------------*'
+      *@1 정상종료
+           #OKEXIT  CO-CHA-00
+           .
+       S9000-FINAL-EXT.
+           EXIT.

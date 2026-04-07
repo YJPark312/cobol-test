@@ -1,0 +1,36 @@
+      *================================================================*
+      *@ NAME : YNJLB071                                               *
+      *@ DESC : AS국외영업점편중관리기준 COPYBOOK                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-03-18 17:38:56                          *
+      *  생성일시     : 2020-03-18 17:39:06                          *
+      *  전체길이     : 00020017 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB071-PRCSS-DSTIC              PIC  X(002).
+      *--     기준년월
+           07  YNJLB071-BASE-YM                  PIC  X(006).
+      *--     관리부점코드
+           07  YNJLB071-MGT-BRNCD                PIC  X(004).
+      *--     총라인수
+           07  YNJLB071-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  YNJLB071-GRID1                    OCCURS 002000 TIMES.
+      *--       대분류업종코드
+             09  YNJLB071-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       편중관리비율
+             09  YNJLB071-LNUP-MGT-CST-RT        PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       합산관리여부
+             09  YNJLB071-SUM-MGT-YN             PIC  X(001).
+      *================================================================*
+      *        Y  N  J  L  B  0  7  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB071-PRCSS-DSTIC          ;처리구분
+      *X  YNJLB071-BASE-YM              ;기준년월
+      *X  YNJLB071-MGT-BRNCD            ;관리부점코드
+      *N  YNJLB071-TOTAL-LINE-CNT       ;총라인수
+      *A  YNJLB071-GRID1                ;그리드1
+      *X  YNJLB071-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *S  YNJLB071-LNUP-MGT-CST-RT      ;편중관리비율
+      *X  YNJLB071-SUM-MGT-YN           ;합산관리여부

@@ -1,0 +1,29 @@
+//MKJLDP29 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//* %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*********************************************************************
+//*이사회승인관련계좌월기본 (THKJL0083) 생성
+//*********************************************************************
+//STEP01   EXEC JZBDEXEC,MBR=BJLD831,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD831.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP29-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+/*
+//*********************************************************************
+//*이사회승인내역월별현황기본 (THKJL0084) 생성
+//*********************************************************************
+//STEP02   EXEC JZBDEXEC,MBR=BJLD841,OPT=&SYSUID
+//CHGLOG   DD DSN=KJL.SY.CHGLOG.BJLD841.D%%B.T%%TIME,
+//            DISP=(NEW,CATLG,DELETE),
+//            DCB=(RECFM=VB,BLKSIZE=32760,LRECL=32756),
+//            UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSIN    DD *
+KB0-%%$ODATE-MKJLDP29-001-ONLBAT-KB STAR-%%$ODATE
+/*
+//

@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : XDJL0B19                                               *
+      *@ DESC : 포괄신용공여한도적정성점검승인                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-08-31 15:59:18                          *
+      *  생성일시     : 2021-08-31 15:59:19                          *
+      *  전체길이     : 00000333 BYTES                               *
+      *================================================================*
+           03  XDJL0B19-RETURN.
+             05  XDJL0B19-R-STAT                 PIC  X(002).
+                 88  COND-XDJL0B19-OK            VALUE  '00'.
+                 88  COND-XDJL0B19-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL0B19-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL0B19-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL0B19-ERROR         VALUE  '09'.
+                 88  COND-XDJL0B19-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL0B19-SYSERROR      VALUE  '99'.
+             05  XDJL0B19-R-LINE                 PIC  9(006).
+             05  XDJL0B19-R-ERRCD                PIC  X(008).
+             05  XDJL0B19-R-TREAT-CD             PIC  X(008).
+             05  XDJL0B19-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL0B19-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL0B19-I-PRCSS-DSTIC          PIC  X(002).
+      *--       승인위원직원번호
+             05  XDJL0B19-I-ATHOR-CMMB-EMPID     PIC  X(007).
+      *--       고객식별자
+             05  XDJL0B19-I-CUST-IDNFR           PIC  X(010).
+      *--       한도신청번호
+             05  XDJL0B19-I-LIMT-APLCN-NO        PIC  X(010).
+      *--       한도승인구분
+             05  XDJL0B19-I-LIMT-ATHOR-DSTIC     PIC  X(001).
+      *--       승인의견내용
+             05  XDJL0B19-I-ATHOR-OPIN-CTNT      PIC  X(302).
+      *--       최종한도승인구분
+             05  XDJL0B19-I-LAST-L-ATHOR-DSTIC   PIC  X(001).
+      *----------------------------------------------------------------*
+           03  XDJL0B19-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJL0B19-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  0  B  1  9    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL0B19-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL0B19-I-ATHOR-CMMB-EMPID   ;승인위원직원번호
+      *X  XDJL0B19-I-CUST-IDNFR         ;고객식별자
+      *X  XDJL0B19-I-LIMT-APLCN-NO      ;한도신청번호
+      *X  XDJL0B19-I-LIMT-ATHOR-DSTIC   ;한도승인구분
+      *X  XDJL0B19-I-ATHOR-OPIN-CTNT    ;승인의견내용
+      *X  XDJL0B19-I-LAST-L-ATHOR-DSTIC ;최종한도승인구분
+      *X  XDJL0B19-O-PRCSS-RSULT        ;처리결과

@@ -1,0 +1,855 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4043 (보고서조회)
+      *@처리유형  : DC
+      *@처리개요  : 보고서조회
+      *@구현방법  : SQL ARRAY
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081203: 신규작성
+      *김진태:20090413: 프로그램수정
+      *김진태:20091209: 에러메세지정비
+      *김진태:20100115: 테이블컬럼변경
+      *김진태:20100409: TABLE/COPYBOOK 변경
+      *정윤섭:20200213: 경보발령 국가군 탭 삭제 및
+      *                   탭 출력 내용 변경
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      **  국별익스포져계좌명세    : THKJL0055            : R
+      **  국가별한도기본          : THKJL0056            : R
+      **   국별부점별신용공여집계 : THKJL0057            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4043.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/03.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4043'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.
+           03  CO-CHA-05               PIC  X(002) VALUE '05'.
+           03  CO-CHA-06               PIC  X(002) VALUE '06'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-EXHS-RT              PIC  9(005)V9999.
+           03  WK-ENMN-BZOPR-YMD       PIC  X(008).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *전월말영업말일구하는공통
+       01  XCJIIL09-CA.
+           COPY    XCJIIL09.
+      *신용공여보고서조회（그리드１）
+       01  XQJL0431-CA.
+           COPY    XQJL0431.
+      *신용공여보고서조회（그리드２）
+       01  XQJL0432-CA.
+           COPY    XQJL0432.
+200213*경보발령 국가군 탭 삭제
+      *신용공여보고서조회（그리드３）
+      *01  XQJL0433-CA.
+      *    COPY    XQJL0433.
+      *신용공여보고서조회（그리드４）
+       01  XQJL0434-CA.
+           COPY    XQJL0434.
+      *신용공여보고서조회（그리드５）
+       01  XQJL0435-CA.
+           COPY    XQJL0435.
+200221*전월말／금일　익스포져합계추출- QJL0437 로 합침
+      *01  XQJL0436-CA.
+      *    COPY    XQJL0436.
+      *신용공여보고서조회（그리드６）
+       01  XQJL0437-CA.
+           COPY    XQJL0437.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      * DC COPYBOOK
+       01  XDJL4043-CA.
+           COPY  XDJL4043.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4043-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4043-OUT
+                      XDJL4043-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@처리구분
+           IF XDJL4043-I-PRCSS-DSTIC NOT = CO-CHA-01 AND
+                                           CO-CHA-02 AND
+200213* 경보발령 국가군 탭(C0-CHA-03) 삭제
+      *                                    CO-CHA-03 AND
+                                           CO-CHA-04 AND
+                                           CO-CHA-05 AND
+                                           CO-CHA-06
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@기준년월일
+           IF XDJL4043-I-BASE-YMD = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+               #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@   처리구분에따른　프로그램　분기
+           EVALUATE XDJL4043-I-PRCSS-DSTIC
+               WHEN CO-CHA-01
+      *@1      지역별신용공여운용현황(2.국가지역별)
+                    PERFORM S3100-QJL0431-CALL-RTN
+                       THRU S3100-QJL0431-CALL-EXT
+               WHEN CO-CHA-02
+      *@2      신용등급별신용공여한도운용현황(3.신용등급별)
+                    PERFORM S3200-QJL0432-CALL-RTN
+                       THRU S3200-QJL0432-CALL-EXT
+200213*경보발령 국가군 탭 삭제
+      *        WHEN CO-CHA-03
+      *@3      경보발령국가군신용공여한도운용현황
+      *             PERFORM S3300-QJL0433-CALL-RTN
+      *                THRU S3300-QJL0433-CALL-EXT
+               WHEN CO-CHA-04
+      *@3      모니터링국가군신용공여한도운용현황(4.관심이하국가)
+                    PERFORM S3400-QJL0434-CALL-RTN
+                       THRU S3400-QJL0434-CALL-EXT
+               WHEN CO-CHA-05
+      *@3      국가별신용공여한도운용현황(1.국가별)
+                    PERFORM S3400-QJL0435-CALL-RTN
+                       THRU S3400-QJL0435-CALL-EXT
+               WHEN CO-CHA-06
+      *@3      상품별운용잔액비율현황(5.상품별)
+      *             PERFORM S3400-QJL0436-CALL-RTN
+      *                THRU S3400-QJL0436-CALL-EXT
+                    PERFORM S3400-QJL0437-CALL-RTN
+                       THRU S3400-QJL0437-CALL-EXT
+               WHEN OTHER
+                    CONTINUE
+           END-EVALUATE
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------01810024
+      *@ 국가지역별(2번탭)                                          01820024
+      *-----------------------------------------------------------------01830024
+       S3100-QJL0431-CALL-RTN.                                          01840024
+                                                                        01850024
+      *@1.1 변수초기화
+           INITIALIZE XQJL0431-IN
+
+      *@1.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0431-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+           MOVE XDJL4043-I-BASE-YMD                                     01910024
+             TO XQJL0431-I-BASE-YMD                                     01920024
+
+      *@1.3 프로그램　호출
+           #DYSQLA QJL0431 XQJL0431-CA
+
+      *@1.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@1.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4043-O-OUTPT-LINE-CNT1
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT1                    02740024
+                                                                        02780024
+      *@           한도관리지역구분코드(지역코드)
+                   MOVE XQJL0431-O-LIMT-MGT-AREA-DSTCD(WK-I)
+                     TO XDJL4043-O-LIMT-MGT-ARA-DSTCD1(WK-I)
+
+      *@           국가수
+                   MOVE XQJL0431-O-NATNL-CNT(WK-I)
+                     TO XDJL4043-O-NATNL-CNT1(WK-I)
+
+      *@           전체관리한도금액(한도, 지역관리한도금액)
+                   MOVE XQJL0431-O-AREA-MGT-CLAM(WK-I)
+                     TO XDJL4043-O-WHOL-MGT-CLAM1(WK-I)
+
+      *@           USD한도금액(익스포져)
+                   MOVE XQJL0431-O-USD-CLAM(WK-I)
+                     TO XDJL4043-O-USD-CLAM1(WK-I)
+
+      *@           금일운용비율(한도소진율)
+                   MOVE XQJL0431-O-LIMT-EXHS-RT(WK-I)
+                     TO XDJL4043-O-LIMT-EXHS-RT1(WK-I)
+
+      *@           한도여유액
+                   MOVE XQJL0431-O-LIMT-SEXTR-AMT(WK-I)
+                     TO XDJL4043-O-LIMT-SEXTR-AMT1(WK-I)
+
+           END-PERFORM
+           .                                                            01980024
+       S3100-QJL0431-CALL-EXT.                                          01990024
+           EXIT.                                                        02000024
+      *-----------------------------------------------------------------01810024
+      *@ 신용등급별(3번탭)                                          01820024
+      *-----------------------------------------------------------------01830024
+       S3200-QJL0432-CALL-RTN.                                          01840024
+                                                                        01850024
+      *@2.1 변수초기화
+           INITIALIZE XQJL0432-IN
+
+      *@2.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0432-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+           MOVE XDJL4043-I-BASE-YMD                                     01910024
+             TO XQJL0432-I-BASE-YMD                                     01920024
+
+      *@2.3 프로그램　호출
+           #DYSQLA QJL0432 XQJL0432-CA
+
+      *@2.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@2.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4043-O-OUTPT-LINE-CNT2
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT2                    02740024
+
+200211*@           공통한도대상여부
+                   MOVE XQJL0432-O-NATNL-W-CM-LIMT-YN(WK-I)
+                     TO XDJL4043-O-NATNL-W-CM-LIMT-YN2(WK-I)
+                                                                        02780024
+200211*@           당행국가신용등급구분
+                   MOVE XQJL0432-O-OWBNK-NC-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-OWBNK-NC-GRD-DSTCD2(WK-I)
+
+      *@           국가수
+                   MOVE XQJL0432-O-NATNL-CNT(WK-I)
+                     TO XDJL4043-O-NATNL-CNT2(WK-I)
+
+      *@           한도(전체관리한도금액, 국가별관리한도)
+                   MOVE XQJL0432-O-NATNL-PER-MGT-CLAM(WK-I)
+                     TO XDJL4043-O-WHOL-MGT-CLAM2(WK-I)
+
+200211*@           공통한도(국가전체공통한도금액)
+                   MOVE XQJL0432-O-NATNL-WHOL-CM-CLAM(WK-I)
+                     TO XDJL4043-O-NATNL-WHOL-CM-CLAM2(WK-I)
+
+      *@           USD한도금액(익스포져)
+                   MOVE XQJL0432-O-USD-CLAM(WK-I)
+                     TO XDJL4043-O-LIMT-USE-AMT2(WK-I)
+
+      *@           금일운용비율(한도소진율)
+                   MOVE XQJL0432-O-LIMT-EXHS-RT(WK-I)
+                     TO XDJL4043-O-LIMT-EXHS-RT2(WK-I)
+
+      *@           한도여유액
+                   MOVE XQJL0432-O-LIMT-SEXTR-AMT(WK-I)
+                     TO XDJL4043-O-LIMT-SEXTR-AMT2(WK-I)
+
+           END-PERFORM
+           .                                                            01980024
+       S3200-QJL0432-CALL-EXT.                                          01990024
+           EXIT.                                                        02000024
+      *-----------------------------------------------------------------01810024
+200213*@ 경보발령국가군신용공여한도운용현황  -> 삭제 (20200213)
+      *-----------------------------------------------------------------01830024
+      *S3300-QJL0433-CALL-RTN.
+      *
+      *@3.1 변수초기화
+      *    INITIALIZE XQJL0433-IN
+      *
+      *@3.2 변수 MOVE
+      *@   그룹회사코드
+      *    MOVE BICOM-GROUP-CO-CD
+      *      TO XQJL0433-I-GROUP-CO-CD
+      *@   기준년월일
+      *    MOVE XDJL4043-I-BASE-YMD
+      *      TO XQJL0433-I-BASE-YMD
+      *@   전월말영업일구하기
+      *    PERFORM S3400-CJIIL09-CALL-RTN
+      *       THRU S3400-CJIIL09-CALL-EXT
+      *    MOVE WK-ENMN-BZOPR-YMD
+      *      TO XQJL0433-I-ENMN-BZOPR-YMD
+      *
+      *@3.3 프로그램　호출
+      *    #DYSQLA QJL0433 XQJL0433-CA
+      *
+      *@3.4 호출결과　확인
+      *    EVALUATE TRUE
+      *        WHEN COND-DBSQL-OK
+      *        WHEN COND-DBSQL-MRNF
+      *             CONTINUE
+      *        WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+      *             #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+      *    END-EVALUATE
+      *
+      *@3.5 출력변수 MOVE
+      *
+      *@   출력건수
+      *    MOVE DBSQL-SELECT-CNT
+      *      TO XDJL4043-O-OUTPT-LINE-CNT3
+      *
+      *@   OUTPUT LOOP
+      *    PERFORM VARYING WK-I FROM 1 BY 1
+      *      UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT3
+      *
+      *@           영문국가명
+      *            MOVE XQJL0433-O-ENG-NATNL-NAME(WK-I)
+      *              TO XDJL4043-O-ENG-NATNL-NAME3(WK-I)
+      *
+      *@           SNP등급구분코드
+      *            MOVE XQJL0433-O-SNP-GRD-DSTCD(WK-I)
+      *              TO XDJL4043-O-SNP-GRD-DSTCD3(WK-I)
+      *
+      *@           무디스등급구분코드
+      *            MOVE XQJL0433-O-MODYS-GRD-DSTCD(WK-I)
+      *              TO XDJL4043-O-MODYS-GRD-DSTCD3(WK-I)
+      *
+      *@           피치등급구분코드
+      *            MOVE XQJL0433-O-FITCH-GRD-DSTCD(WK-I)
+      *              TO XDJL4043-O-FITCH-GRD-DSTCD3(WK-I)
+      *
+      *@           전체관리한도금액
+      *            MOVE XQJL0433-O-WHOL-MGT-CLAM(WK-I)
+      *              TO XDJL4043-O-WHOL-MGT-CLAM3(WK-I)
+      *
+      *@           전월잔액
+      *            MOVE XQJL0433-O-LSMN-BAL(WK-I)
+      *              TO XDJL4043-O-LSMN-BAL3(WK-I)
+      *
+      *@           USD한도금액
+      *            MOVE XQJL0433-O-USD-CLAM(WK-I)
+      *              TO XDJL4043-O-USD-CLAM3(WK-I)
+      *
+      *@           변동금액
+      *            COMPUTE XDJL4043-O-FLXBL-AMT3(WK-I)
+      *                  = XDJL4043-O-USD-CLAM3(WK-I)
+      *                  - XDJL4043-O-LSMN-BAL3(WK-I)
+      *
+      *@           한도소진율
+      *            IF XDJL4043-O-WHOL-MGT-CLAM3(WK-I) = ZERO OR
+      *               XDJL4043-O-USD-CLAM3(WK-I)      = ZERO
+      *               MOVE ZERO
+      *                 TO XDJL4043-O-LIMT-EXHS-RT3(WK-I)
+      *            ELSE
+      *               COMPUTE WK-EXHS-RT
+      *                     = (XDJL4043-O-USD-CLAM3(WK-I)
+      *                     /  XDJL4043-O-WHOL-MGT-CLAM3(WK-I))
+      *
+      *               COMPUTE XDJL4043-O-LIMT-EXHS-RT3(WK-I)
+      *                     = WK-EXHS-RT * 100
+      *            END-IF
+      *
+      *@           한도여유액
+      *            COMPUTE XDJL4043-O-LIMT-SEXTR-AMT3(WK-I)
+      *                  = XDJL4043-O-WHOL-MGT-CLAM3(WK-I)
+      *                  - XDJL4043-O-USD-CLAM3(WK-I)
+      *
+      *@           등록년월일
+      *            MOVE XQJL0433-O-REGI-YMD(WK-I)
+      *              TO XDJL4043-O-REGI-YMD3(WK-I)
+      *
+      *    END-PERFORM
+      *    .                                                            01980024
+      *S3300-QJL0433-CALL-EXT.                                          01990024
+      *    EXIT.
+      *-----------------------------------------------------------------01810024
+      *@ 관심이하국가(4번탭)
+      *-----------------------------------------------------------------01830024
+       S3400-QJL0434-CALL-RTN.                                          01840024
+                                                                        01850024
+      *@3.1 변수초기화
+           INITIALIZE XQJL0434-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0434-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+           MOVE XDJL4043-I-BASE-YMD                                     01910024
+             TO XQJL0434-I-BASE-YMD                                     01920024
+      *@   전월말영업일구하기                                         01900024
+           PERFORM S3400-CJIIL09-CALL-RTN
+              THRU S3400-CJIIL09-CALL-EXT
+           MOVE WK-ENMN-BZOPR-YMD
+             TO XQJL0434-I-ENMN-BZOPR-YMD
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL0434 XQJL0434-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4043-O-OUTPT-LINE-CNT4
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT4                    02740024
+
+200225*@           ISO국가코드
+                   MOVE XQJL0434-O-ISO-NATNL-CD(WK-I)
+                     TO XDJL4043-O-ISO-NATNL-CD4(WK-I)
+
+      *@           영문국가명
+                   MOVE XQJL0434-O-ENG-NATNL-NAME(WK-I)
+                     TO XDJL4043-O-ENG-NATNL-NAME4(WK-I)
+
+      *@           SNP등급구분코드
+                   MOVE XQJL0434-O-SNP-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-SNP-GRD-DSTCD4(WK-I)
+
+      *@           무디스등급구분코드
+                   MOVE XQJL0434-O-MODYS-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-MODYS-GRD-DSTCD4(WK-I)
+
+      *@           피치등급구분코드
+                   MOVE XQJL0434-O-FITCH-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-FITCH-GRD-DSTCD4(WK-I)
+
+200211*@           당행국가신용등급구분
+                   MOVE XQJL0434-O-OWBNK-NC-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-OWBNK-NC-GRD-DSTCD4(WK-I)
+
+200211*@           국가위험수준구분코드
+                   MOVE XQJL0434-O-NATNL-R-LVEL-DSTCD(WK-I)
+                     TO XDJL4043-O-NATNL-R-LVEL-DSTCD4(WK-I)
+
+      *@           전체관리한도금액(한도)
+                   MOVE XQJL0434-O-WHOL-MGT-CLAM(WK-I)
+                     TO XDJL4043-O-WHOL-MGT-CLAM4(WK-I)
+
+      *@           USD한도금액(익스포져)
+                   MOVE XQJL0434-O-USD-CLAM(WK-I)
+                     TO XDJL4043-O-USD-CLAM4(WK-I)
+
+      *@           한도소진율
+                   MOVE XQJL0434-O-LIMT-EXHS-RT(WK-I)
+                     TO XDJL4043-O-LIMT-EXHS-RT4(WK-I)
+
+      *@           한도여유액
+                   MOVE XQJL0434-O-LIMT-SEXTR-AMT(WK-I)
+                     TO XDJL4043-O-LIMT-SEXTR-AMT4(WK-I)
+
+      *@           전월잔액(전월말익스포져)
+                   MOVE XQJL0434-O-LSMN-BAL(WK-I)
+                     TO XDJL4043-O-LSMN-BAL4(WK-I)
+
+      *@           변동금액(전월말대비)
+                   MOVE XQJL0434-O-LSMN-END-CNTST(WK-I)
+                     TO XDJL4043-O-FLXBL-AMT4(WK-I)
+
+           END-PERFORM
+           .                                                            01980024
+       S3400-QJL0434-CALL-EXT.                                          01990024
+           EXIT.                                                        02000024
+      *-----------------------------------------------------------------01810024
+      *@ 국가별(1번탭)
+      *-----------------------------------------------------------------01830024
+       S3400-QJL0435-CALL-RTN.                                          01840024
+                                                                        01850024
+      *@3.1 변수초기화
+           INITIALIZE XQJL0435-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0435-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+           MOVE XDJL4043-I-BASE-YMD                                     01910024
+             TO XQJL0435-I-BASE-YMD                                     01920024
+      *@   전월말영업일구하기                                         01900024
+           PERFORM S3400-CJIIL09-CALL-RTN
+              THRU S3400-CJIIL09-CALL-EXT
+           MOVE WK-ENMN-BZOPR-YMD
+             TO XQJL0435-I-ENMN-BZOPR-YMD
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL0435 XQJL0435-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4043-O-OUTPT-LINE-CNT5
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT5                    02740024
+
+200225*@           ISO국가코드
+                   MOVE XQJL0435-O-ISO-NATNL-CD(WK-I)
+                     TO XDJL4043-O-ISO-NATNL-CD5(WK-I)
+
+      *@           영문국가명
+                   MOVE XQJL0435-O-ENG-NATNL-NAME(WK-I)
+                     TO XDJL4043-O-ENG-NATNL-NAME5(WK-I)
+
+      *@           SNP등급구분코드
+                   MOVE XQJL0435-O-SNP-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-SNP-GRD-DSTCD5(WK-I)
+
+      *@           무디스등급구분코드
+                   MOVE XQJL0435-O-MODYS-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-MODYS-GRD-DSTCD5(WK-I)
+
+      *@           피치등급구분코드
+                   MOVE XQJL0435-O-FITCH-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-FITCH-GRD-DSTCD5(WK-I)
+
+200211*@           당행국가신용등급구분
+                   MOVE XQJL0435-O-OWBNK-NC-GRD-DSTCD(WK-I)
+                     TO XDJL4043-O-OWBNK-NC-GRD-DSTCD5(WK-I)
+
+200211*@           국가위험수준구분코드
+                   MOVE XQJL0435-O-NATNL-R-LVEL-DSTCD(WK-I)
+                     TO XDJL4043-O-NATNL-R-LVEL-DSTCD5(WK-I)
+
+      *@           전체관리한도금액(한도)
+                   MOVE XQJL0435-O-WHOL-MGT-CLAM(WK-I)
+                     TO XDJL4043-O-WHOL-MGT-CLAM5(WK-I)
+
+      *@           USD한도금액(익스포져)
+                   MOVE XQJL0435-O-USD-CLAM(WK-I)
+                     TO XDJL4043-O-USD-CLAM5(WK-I)
+
+      *@           한도소진율
+                   MOVE XQJL0435-O-LIMT-EXHS-RT(WK-I)
+                     TO XDJL4043-O-LIMT-EXHS-RT5(WK-I)
+
+      *@           한도여유액
+                   MOVE XQJL0435-O-LIMT-SEXTR-AMT(WK-I)
+                     TO XDJL4043-O-LIMT-SEXTR-AMT5(WK-I)
+
+      *@           전월잔액(전월말익스포져)
+                   MOVE XQJL0435-O-LSMN-BAL(WK-I)
+                     TO XDJL4043-O-LSMN-BAL5(WK-I)
+
+      *@           변동금액(전월말대비)
+                   MOVE XQJL0435-O-LSMN-END-CNTST(WK-I)
+                     TO XDJL4043-O-FLXBL-AMT5(WK-I)
+
+           END-PERFORM
+           .                                                            01980024
+       S3400-QJL0435-CALL-EXT.                                          01990024
+           EXIT.                                                        02000024
+      *-----------------------------------------------------------------01810024
+      *@ 전월말／금일　익스포져　합계액　추출                         01820024
+      *-----------------------------------------------------------------01830024
+      *S3400-QJL0436-CALL-RTN.                                          01840024
+      *                                                                 01850024
+      *@3.1 변수초기화
+      *    INITIALIZE XQJL0436-IN
+      *
+      *@3.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+      *    MOVE BICOM-GROUP-CO-CD                                       01870024
+      *      TO XQJL0436-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+      *    MOVE XDJL4043-I-BASE-YMD                                     01910024
+      *      TO XQJL0436-I-BASE-YMD                                     01920024
+      *@   전월말영업일구하기                                         01900024
+      *    PERFORM S3400-CJIIL09-CALL-RTN
+      *       THRU S3400-CJIIL09-CALL-EXT
+      *    MOVE WK-ENMN-BZOPR-YMD
+      *      TO XQJL0436-I-ENMN-BZOPR-YMD
+      *
+      *@3.3 프로그램　호출
+      *    #DYSQLA QJL0436 XQJL0436-CA
+      *
+      *@3.4 호출결과　확인
+      *    EVALUATE TRUE
+      *        WHEN COND-DBSQL-OK
+      *        WHEN COND-DBSQL-MRNF
+      *             CONTINUE
+      *        WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+      *             #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+      *    END-EVALUATE
+      *    .                                                            01980024
+      *S3400-QJL0436-CALL-EXT.                                          01990024
+      *    EXIT.                                                        02000024
+      *-----------------------------------------------------------------01810024
+      *@ 상품별(5번탭)
+      *-----------------------------------------------------------------01830024
+       S3400-QJL0437-CALL-RTN.                                          01840024
+                                                                        01850024
+      *@3.1 변수초기화
+           INITIALIZE XQJL0437-IN
+
+      *@3.2 변수 MOVE
+      *@   그룹회사코드                                               01860024
+           MOVE BICOM-GROUP-CO-CD                                       01870024
+             TO XQJL0437-I-GROUP-CO-CD                                  01880024
+      *@   기준년월일                                                 01900024
+           MOVE XDJL4043-I-BASE-YMD                                     01910024
+             TO XQJL0437-I-BASE-YMD                                     01920024
+      *@   전월말영업일구하기                                         01900024
+           PERFORM S3400-CJIIL09-CALL-RTN
+              THRU S3400-CJIIL09-CALL-EXT
+           MOVE WK-ENMN-BZOPR-YMD
+             TO XQJL0437-I-ENMN-BZOPR-YMD
+
+      *@3.3 프로그램　호출
+           #DYSQLA QJL0437 XQJL0437-CA
+
+      *@3.4 호출결과　확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+               WHEN COND-DBSQL-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+
+      *@3.5 출력변수 MOVE
+
+      *@   출력건수
+           MOVE DBSQL-SELECT-CNT
+             TO XDJL4043-O-OUTPT-LINE-CNT6
+
+      *@   OUTPUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1                             02730024
+             UNTIL WK-I > XDJL4043-O-OUTPT-LINE-CNT6                    02740024
+                                                                        02780024
+      *@           상품명
+                   MOVE XQJL0437-O-PRDCT-NAME(WK-I)
+                     TO XDJL4043-O-PRDCT-NAME6(WK-I)
+
+      *@           전월잔액(전월말익스포져)
+                   MOVE XQJL0437-O-LSMN-BAL(WK-I)
+                     TO XDJL4043-O-LSMN-BAL6(WK-I)
+
+      *@           전월운용비율(전월말비중)
+                   MOVE XQJL0437-O-LSMN-WGHT(WK-I)
+                     TO XDJL4043-O-LSMN-MGIVST-RATO6(WK-I)
+
+      *@           금일잔액(익스포져)
+                   MOVE XQJL0437-O-TDD-BAL(WK-I)
+                     TO XDJL4043-O-TDD-BAL6(WK-I)
+
+      *@           금일운용비율(비중)
+                   MOVE XQJL0437-O-WGHTZ(WK-I)
+                     TO XDJL4043-O-TDD-MGIVST-RATO6(WK-I)
+
+      *@           증감(전월말 대비 비중 증감)
+                   MOVE XQJL0437-O-INCRDC(WK-I)
+                     TO XDJL4043-O-INCRDC6(WK-I)
+
+
+           END-PERFORM
+           .                                                            01980024
+       S3400-QJL0437-CALL-EXT.                                          01990024
+           EXIT.                                                        02000024
+      *-----------------------------------------------------------------
+      *@ 전월영업말일구하기
+      *-----------------------------------------------------------------
+       S3400-CJIIL09-CALL-RTN.
+
+      *@    초기화
+           INITIALIZE XCJIIL09-IN
+
+      *@    산출조건 DATA MOVE
+      *@   그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XCJIIL09-I-GROUP-CO-CD
+      *@   구분코드 - 1 : 증월, 2 : 감월
+           MOVE CO-CHA-2
+             TO XCJIIL09-I-DSTCD
+      *@   기준년월일
+           MOVE XDJL4043-I-BASE-YMD(1:6)
+             TO XCJIIL09-I-YMD(1:6)
+           MOVE CO-CHA-01
+             TO XCJIIL09-I-YMD(7:2)
+      *@   가산월／감산월
+           MOVE 1
+             TO XCJIIL09-I-PLS-SBTR-MN
+
+      *@    공통UTILITY CALL
+           #DYCALL CJIIL09 YCCOMMON-CA XCJIIL09-CA
+
+      *@    호출결과확인
+           IF XCJIIL09-R-STAT = ZERO
+              MOVE XCJIIL09-O-ENMN-BZOPR-YMD
+                TO WK-ENMN-BZOPR-YMD
+           ELSE
+              #ERROR XCJIIL09-R-ERRCD
+                     XCJIIL09-R-TREAT-CD
+                     XCJIIL09-R-STAT
+           END-IF
+           .
+       S3400-CJIIL09-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

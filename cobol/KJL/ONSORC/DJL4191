@@ -1,0 +1,377 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4191 (DC신용공여계정과목정보조회)
+      *@처리유형  : DC
+      *@처리개요  : 신용공여관련 계정과목정보를 조회하는
+      *@            : 프로그램이다
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *하윤희:20120905: 신규작성
+      *박정수:20240425: 신용공여중분류 추가
+      *박정수:20240926:통합계정과목코드 일부 입력시
+      *                  조회되도록 수정
+      *=================================================================
+      ******************************************************************
+      **
+      **  TABLE-SYNONYM    : 테이블명                    : 접근유형
+      **  ----------------   -------------------------------------------
+      **                   : THKJL0119                     : R
+      **
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4191.
+       AUTHOR.                        하윤희.
+       DATE-WRITTEN.                   12/09/05.
+
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-Z10.
+       OBJECT-COMPUTER.                IBM-Z10.
+
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4191'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-DUPM            PIC  X(002) VALUE '01'.
+           03  CO-STAT-NOTFND          PIC  X(002) VALUE '02'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.
+
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-TIACC-NAME           PIC  X(042).
+           03  WK-TIACC-NAME-RE        PIC  X(042).
+           03  WK-SPACE-CNT            PIC S9(004) COMP.
+           03  WK-INTGRA-TIACC-CD2     PIC  X(013).
+           03  WK-INTGRA-TIACC-CD-RE   PIC  X(013).
+
+           03  WK-NEXT-KEY.
+               05 WK-INTGRA-TIACC-CD   PIC  X(013).
+               05 WK-IDSTRY-TCS-DSTCD  PIC  X(001).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  XQJL1191-CA.
+           COPY  XQJL1191.
+
+       01  XQJL1192-CA.
+           COPY  XQJL1192.
+      *-----------------------------------------------------------------
+      * TABLE INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+       01  TRJL0119-REC.
+           COPY  TRJL0119.
+
+       01  TKJL0119-KEY.
+           COPY  TKJL0119.
+
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+           COPY    YCDBIOCA.
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+       01  XDJL4191-CA.
+           COPY  XDJL4191.
+
+
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4191-CA
+                                                   .
+      *=================================================================
+
+      *------------------------------------------------------------------
+      *@  처리메인
+      *------------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  초기화
+      *------------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+           INITIALIZE       WK-AREA
+                            XDJL4191-OUT
+                            XDJL4191-RETURN
+      *@DBIO, SQLIO PARAMETER 초기화
+                            YCDBIOCA-CA
+                            YCDBSQLA-CA
+                            .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  입력값검증
+      *------------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+
+      *------------------------------------------------------------------
+      *@  업무처리
+      *------------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@  신용공여계정과목정보(THKJL0119)원장 조회
+
+           EVALUATE XDJL4191-I-PRCSS-DSTIC
+
+           WHEN CO-CHA-01
+
+               INITIALIZE       XQJL1191-IN
+
+      *       그룹회사코드
+               MOVE  BICOM-GROUP-CO-CD
+                 TO  XQJL1191-I-GROUP-CO-CD
+
+      *       기준년월
+               MOVE  XDJL4191-I-BASE-YM
+                 TO  XQJL1191-I-BASE-YM
+
+240926*       통합계정과목코드가 빈칸일 경우
+              IF XDJL4191-I-INTGRA-TIACC-CD = SPACE
+
+                   MOVE  ALL '%'
+                     TO  XQJL1191-I-INTGRA-TIACC-CD
+              ELSE
+
+      *            통합계정과목코드
+                   MOVE  XDJL4191-I-INTGRA-TIACC-CD
+                     TO  WK-INTGRA-TIACC-CD2
+
+                   INSPECT  WK-INTGRA-TIACC-CD2
+                          REPLACING  ALL SPACE  BY '%'
+
+                   MOVE  WK-INTGRA-TIACC-CD2
+                     TO  XQJL1191-I-INTGRA-TIACC-CD
+               END-IF
+
+      *        계정과목명이 빈칸일 경우
+               IF XDJL4191-I-INQURY-TIACC-NAME = SPACE
+
+                   MOVE  ALL '%'
+                     TO  XQJL1191-I-INQURY-TIACC-NAME
+
+               ELSE
+
+      *            계정과목명
+                   MOVE  XDJL4191-I-INQURY-TIACC-NAME
+                     TO  WK-TIACC-NAME
+
+                   INSPECT  WK-TIACC-NAME
+                          TALLYING WK-SPACE-CNT FOR ALL SPACE
+                          REPLACING  ALL SPACE  BY '%'
+
+                   EVALUATE  WK-SPACE-CNT
+                       WHEN  0
+                       WHEN  1
+                           MOVE  WK-TIACC-NAME
+                             TO  WK-TIACC-NAME-RE
+                       WHEN  OTHER
+                           MOVE '%'
+                             TO  WK-TIACC-NAME-RE(1:1)
+                           MOVE  WK-TIACC-NAME
+                             TO  WK-TIACC-NAME-RE(2:)
+                           MOVE '%'
+                             TO  WK-TIACC-NAME-RE(42:)
+                   END-EVALUATE
+
+                   MOVE  WK-TIACC-NAME-RE
+                     TO  XQJL1191-I-INQURY-TIACC-NAME
+               END-IF
+
+      *       중단거래여부 확인
+               IF  BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-NEXT-KEY
+
+      *           통합계정과목코드
+                   MOVE WK-INTGRA-TIACC-CD
+                     TO XQJL1191-I-N-INTGRA-TIACC-CD
+
+               END-IF
+
+               #DYSQLA QJL1191 SELECT XQJL1191-CA
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3100-ARRAY-DATA-MOVE-RTN
+                      THRU S3100-ARRAY-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+           WHEN CO-CHA-03
+
+               INITIALIZE       XQJL1192-IN
+
+      *       그룹회사코드
+               MOVE  BICOM-GROUP-CO-CD
+                 TO  XQJL1192-I-GROUP-CO-CD
+      *       기준년월
+               MOVE  XDJL4191-I-BASE-YM
+                 TO  XQJL1192-I-BASE-YM
+
+               #DYSQLA QJL1192 SELECT XQJL1192-CA
+
+      *@1.1 조회결과확인
+      *@처리내용 : IF 조회 error 이면 에러처리
+               EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@          조회자료MOVE
+                   PERFORM S3200-DATA-MOVE-RTN
+                      THRU S3200-DATA-MOVE-EXT
+               WHEN COND-DBSQL-MRNF
+                   #OKEXIT  CO-STAT-NOTFND
+               WHEN OTHER
+      *           원장에러일경우　에러처리
+                   #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+               END-EVALUATE
+
+           END-EVALUATE
+
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  다건조회 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3100-ARRAY-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *        총라인수
+               MOVE  WK-I
+                 TO  XDJL4191-O-TOTAL-LINE-CNT
+
+      *        통합계정과목코드
+               MOVE  XQJL1191-O-INTGRA-TIACC-CD(WK-I)
+                 TO  XDJL4191-O-INTGRA-TIACC-CD(WK-I)
+
+      *        계정과목명
+               MOVE  XQJL1191-O-TIACC-NAME(WK-I)
+                 TO  XDJL4191-O-TIACC-NAME(WK-I)
+
+      *        계정과목CCF환산율
+               MOVE  XQJL1191-O-TIACC-CCF-UTCRT(WK-I)
+                 TO  XDJL4191-O-TIACC-CCF-UTCRT(WK-I)
+
+      *        신용공여계정구분
+               MOVE  XQJL1191-O-GRCR-ACITM-DSTCD(WK-I)
+                 TO  XDJL4191-O-GRCR-ACITM-DSTCD(WK-I)
+
+      *        신용공여대상구분
+               MOVE  XQJL1191-O-GRCR-TAGET-DSTCD(WK-I)
+                 TO  XDJL4191-O-GRCR-TAGET-DSTCD(WK-I)
+
+240425*        신용공여중분류코드
+               MOVE  XQJL1191-O-GRCR-MIDL-CLSFI-CD(WK-I)
+                 TO  XDJL4191-O-GRCR-MIDL-CLSFI-CD(WK-I)
+
+240425*        신용공여중분류코드명
+               MOVE  XQJL1191-O-GRCR-MC-CD-NAME(WK-I)
+                 TO  XDJL4191-O-GRCR-MC-CD-NAME(WK-I)
+
+           END-PERFORM
+
+           IF  DBSQL-SELECT-CNT > 100
+      *        N통합계정과목코드
+               MOVE  XQJL1191-O-INTGRA-TIACC-CD(WK-I)
+                 TO  WK-INTGRA-TIACC-CD
+
+               #DSCNTR 2 WK-NEXT-KEY
+           END-IF
+
+           .
+       S3100-ARRAY-DATA-MOVE-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+240425*@  신용공여중분류코드 출력데이터 조립
+      *-----------------------------------------------------------------
+       S3200-DATA-MOVE-RTN.
+
+      *@  출력파라미터 조립
+           PERFORM VARYING WK-I FROM 1 BY 1 UNTIL WK-I > 100
+                        OR WK-I > DBSQL-SELECT-CNT
+      *        총라인수
+               MOVE  WK-I
+                 TO  XDJL4191-O-TOTAL-LINE-CNT
+
+      *        신용공여중분류코드
+               MOVE  XQJL1192-O-GRCR-MIDL-CLSFI-CD(WK-I)
+                 TO  XDJL4191-O-GRCR-MIDL-CLSFI-CD(WK-I)
+
+      *        신용공여중분류코드명
+               MOVE  XQJL1192-O-GRCR-MC-CD-NAME(WK-I)
+                 TO  XDJL4191-O-GRCR-MC-CD-NAME(WK-I)
+
+           END-PERFORM
+
+           .
+       S3200-DATA-MOVE-EXT.
+           EXIT.
+      *------------------------------------------------------------------
+      *@  처리종료
+      *------------------------------------------------------------------
+       S9000-FINAL-RTN.
+           #OKEXIT  CO-STAT-OK.
+       S9000-FINAL-EXT.
+           EXIT.

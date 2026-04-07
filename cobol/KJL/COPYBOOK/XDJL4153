@@ -1,0 +1,75 @@
+      *================================================================*
+      *@ NAME : XDJL4153                                               *
+      *@ DESC : DCTE변경고객정보조회COPYBOOK                         *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-04-10 14:12:32                          *
+      *  생성일시     : 2018-04-10 14:12:36                          *
+      *  전체길이     : 00000012 BYTES                               *
+      *================================================================*
+           03  XDJL4153-RETURN.
+             05  XDJL4153-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4153-OK            VALUE  '00'.
+                 88  COND-XDJL4153-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4153-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4153-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4153-ERROR         VALUE  '09'.
+                 88  COND-XDJL4153-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4153-SYSERROR      VALUE  '99'.
+             05  XDJL4153-R-LINE                 PIC  9(006).
+             05  XDJL4153-R-ERRCD                PIC  X(008).
+             05  XDJL4153-R-TREAT-CD             PIC  X(008).
+             05  XDJL4153-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4153-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4153-I-PRCSS-DSTIC          PIC  X(002).
+      *--       KB-PIN
+             05  XDJL4153-I-KB-PIN               PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL4153-OUT.
+      *----------------------------------------------------------------*
+      *--       총라인수
+             05  XDJL4153-O-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드
+             05  XDJL4153-O-GRID                 OCCURS 000100 TIMES.
+      *--         KB-PIN
+               07  XDJL4153-O-KB-PIN             PIC  X(010).
+      *--         채무자명
+               07  XDJL4153-O-DBTRZ-NAME         PIC  X(052).
+      *--         신표준산업분류코드
+               07  XDJL4153-O-NEW-SI-CLSFI-CD    PIC  X(005).
+      *--         표준산업코드명
+               07  XDJL4153-O-STND-IDSTRY-CD-NAME
+                                                 PIC  X(042).
+      *--         TEPEER구분코드
+               07  XDJL4153-O-TE-PEER-DSTCD      PIC  X(005).
+      *--         PEER코드명
+               07  XDJL4153-O-PEER-CD-NAME       PIC  X(102).
+      *--         대분류업종코드
+               07  XDJL4153-O-LAG-CLSFI-BZTYP-CD PIC  X(003).
+      *--         대분류업종코드명
+               07  XDJL4153-O-LAG-C-BZTYP-CD-NAME
+                                                 PIC  X(032).
+      *--         한신평재무업종구분
+               07  XDJL4153-O-KIS-F-BZTYP-DSTCD  PIC  X(002).
+      *--         등록년월일
+               07  XDJL4153-O-REGI-YMD           PIC  X(008).
+      *================================================================*
+      *        X  D  J  L  4  1  5  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4153-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4153-I-KB-PIN             ;KB-PIN
+      *N  XDJL4153-O-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJL4153-O-GRID               ;그리드
+      *X  XDJL4153-O-KB-PIN             ;KB-PIN
+      *X  XDJL4153-O-DBTRZ-NAME         ;채무자명
+      *X  XDJL4153-O-NEW-SI-CLSFI-CD    ;신표준산업분류코드
+      *X  XDJL4153-O-STND-IDSTRY-CD-NAME;표준산업코드명
+      *X  XDJL4153-O-TE-PEER-DSTCD      ;TEPEER구분코드
+      *X  XDJL4153-O-PEER-CD-NAME       ;PEER코드명
+      *X  XDJL4153-O-LAG-CLSFI-BZTYP-CD ;대분류업종코드
+      *X  XDJL4153-O-LAG-C-BZTYP-CD-NAME;대분류업종코드명
+      *X  XDJL4153-O-KIS-F-BZTYP-DSTCD  ;한신평재무업종구분
+      *X  XDJL4153-O-REGI-YMD           ;등록년월일

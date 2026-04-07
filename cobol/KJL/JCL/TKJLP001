@@ -1,0 +1,112 @@
+//TKJLP001 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0001 계열사기본 TABLE LOAD
+//*********************************************************************
+//LOAD01   EXEC DSNUPROC,PARM='DAPG,KJL0001',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK05 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK06 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK07 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK08 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK09 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SORTWK10 DD  UNIT=SYSDA,SPACE=(CYL,(3000,10),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(3000,100),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(3000,100),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.PT.PIN.LOAD.KJL0001,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJL0001
+   (
+   "그룹회사코드"                  POSITION(       1         )
+   CHAR(                      3)           ,
+   "고객식별자"                    POSITION(       4         )
+   CHAR(                     10)           ,
+   "기준년월"                      POSITION(      14         )
+   CHAR(                      6)           ,
+   "차주번호"                      POSITION(      20         )
+   CHAR(                     13)           ,
+   "신표준산업분류코드"            POSITION(      33         )
+   CHAR(                      5)           ,
+   "한신평재무업종구분"            POSITION(      38         )
+   CHAR(                      2)           ,
+   "결산년월"                      POSITION(      40         )
+   CHAR(                      6)           ,
+   "업종평균적용년"                POSITION(      46         )
+   CHAR(                      4)           ,
+   "내부신용평가등급구분"          POSITION(      50         )
+   CHAR(                      4)           ,
+   "신용평가년월일"                POSITION(      54         )
+   CHAR(                      8)           ,
+   "신용평가유효년월일"            POSITION(      62         )
+   CHAR(                      8)           ,
+   "신용등급지원비율"              POSITION(      70:      72)
+   DECIMAL                                 ,
+   "전전년사업이익"                POSITION(      73:      80)
+   DECIMAL                                 ,
+   "전년사업이익"                  POSITION(      81:      88)
+   DECIMAL                                 ,
+   "기준년사업이익"                POSITION(      89:      96)
+   DECIMAL                                 ,
+   "영업이익"                      POSITION(      97:     104)
+   DECIMAL                                 ,
+   "이자수익"                      POSITION(     105:     112)
+   DECIMAL                                 ,
+   "감가상각비"                    POSITION(     113:     120)
+   DECIMAL                                 ,
+   "금융비용"                      POSITION(     121:     128)
+   DECIMAL                                 ,
+   "단기차입금"                    POSITION(     129:     136)
+   DECIMAL                                 ,
+   "단기차입금상환금액"            POSITION(     137:     144)
+   DECIMAL                                 ,
+   "업종가중평균율"                POSITION(     145:     147)
+   DECIMAL                                 ,
+   "업체총차입금"                  POSITION(     148:     155)
+   DECIMAL                                 ,
+   "총자산"                        POSITION(     156:     163)
+   DECIMAL                                 ,
+   "매출액"                        POSITION(     164:     171)
+   DECIMAL                                 ,
+   "현금흐름기준금액"              POSITION(     172:     179)
+   DECIMAL                                 ,
+   "전전년자기자본금"              POSITION(     180:     187)
+   DECIMAL                                 ,
+   "전년자기자본금"                POSITION(     188:     195)
+   DECIMAL                                 ,
+   "기준년자기자본금"              POSITION(     196:     203)
+   DECIMAL                                 ,
+   "금융자기자본비율"              POSITION(     204:     206)
+   DECIMAL                                 ,
+   "차입금자기자본율"              POSITION(     207:     209)
+   DECIMAL                                 ,
+   "자기자본기준금액"              POSITION(     210:     217)
+   DECIMAL                                 ,
+   "상환능력기준한도"              POSITION(     218:     225)
+   DECIMAL                                 ,
+   "차입금매출액비율"              POSITION(     226:     228)
+   DECIMAL                                 ,
+   "차입금총자산비율"              POSITION(     229:     231)
+   DECIMAL                                 ,
+   "규모기준한도"                  POSITION(     232:     239)
+   DECIMAL                                 ,
+   "기준한도"                      POSITION(     240:     247)
+   DECIMAL                                 ,
+   "외화기준한도"                  POSITION(     248:     255)
+   DECIMAL                                 ,
+   "시스템최종처리일시"            POSITION(     256         )
+   CHAR(                     20)           ,
+   "시스템최종사용자번호"          POSITION(     276         )
+   CHAR(                      7)
+   )
+//

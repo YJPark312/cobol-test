@@ -1,0 +1,89 @@
+//MKJLSNDN JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//* %%GLOBAL PARMGLB1
+//* %%SET %%A = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 :영업일
+//*선행작업명     : MKJLSNDG
+//*********************************************************************
+//*   EAD차주익스포져일집계THKJL0125 UNLOAD - DW제공자료
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.SHRTAA.SKJL0125.P00001'
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SD.SHRTAA.SKJL0125.P00001,
+//            UNIT=SYSPA,DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(1000,0500),RLSE)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+    SELECT
+        그룹회사코드
+       ,계좌번호
+       ,계좌중복일련번호
+       ,기준일
+       ,기준년월
+       ,고객식별자
+       ,고객관리번호
+       ,해외현지법인여부
+       ,차주번호
+       ,관리부점코드
+       ,"TE계좌고객구분"
+       ,한도계좌여부
+       ,"TE계좌구분"
+       ,상품대분류코드
+       ,상품중분류코드
+       ,상품템플릿코드
+       ,상품번호
+       ,대출자격구분
+       ,시작년월일
+       ,만기년월일
+       ,종료년월일
+       ,상품계약상태구분
+       ,통화코드
+       ,통화한도
+       ,통화잔액
+       ,"BS기준잔액"
+       ,명목액기준한도
+       ,명목액기준잔액
+       ,"CCF명목잔액환산금액"
+       ,배분내부회복가치
+       ,"CA담보제외금액"
+       ,"CA담보환산금액"
+       ,한도계좌번호
+       ,한도상품대분류코드
+       ,한도상품중분류코드
+       ,한도상품템플릿코드
+       ,한도상품번호
+       ,관련테이블명
+       ,과목코드
+       ,시스템최종처리일시
+       ,시스템최종사용자번호
+       ,"BS기준한도"
+       ,차주고객식별자
+       ,지급보증신용장번호
+      FROM  DB2DBA.THKJL0125
+     WHERE 그룹회사코드= 'KB0'
+       AND 기준일    = '%%A'
+       AND 기준년월  = '%%$OYEAR.%%OMONTH'
+    WITH  UR;
+//

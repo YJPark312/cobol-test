@@ -1,0 +1,53 @@
+//MKJLGD03 JOB (Z-KESA),CLASS=B,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*배치작업기준일 : 영업일
+//*선행작업명     :  MKJLGD03
+//*  %%GLOBAL PARMGLB1
+//*  %%SET %%A = 0101
+//*  %%SET %%B = %%$OYEAR.%%A
+//*********************************************************************
+//*   그룹사고객정보제공통지 대상 추출
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SD.BJLG003.V001'
+
+  SET MAXCC=0
+/*
+//STEP01  EXEC JZBDEXEC,MBR=BJLG003,OPT=&SYSUID
+//OTFILE  DD   DSN=KJL.SD.BJLG003.V001,
+//             DISP=(NEW,CATLG,CATLG),UNIT=SYSDA,
+//             SPACE=(CYL,(0100,0050),RLSE),DCB=(RECFM=FB,LRECL=174)
+//SYSIN     DD *
+KB0-%%$ODATE-MKJLGD03-001-ONLBAT-KB STAR-%%$ODATE-%%B-%%$ODATE
+//*그룹회사코드(3)-작업실행일(8)-작업명(8)-처리회차(3)
+//*-배치작업구분(6)-작업자ID(7)
+//*-자료기준년월일(8)-통지년월일(8)-정보제공년월일(8)
+/*
+//*********************************************************************
+//*       THKJLG001 RUN LOAD
+//*********************************************************************
+//LOAD     EXEC DSNUPROC,PARM='DAPG,KJLG001',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(1000,1000))
+//SYSPRINT DD  SYSOUT=*
+//SYSREC01 DD  DSN=KJL.SD.BJLG003.V001,DISP=SHR
+//         DD  DSN=KFC.SY.SHRKJL.KJLG001.V001,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME YES
+  INDDN SYSREC01 INTO TABLE
+      DB2DBA.THKJLG001
+/*
+//

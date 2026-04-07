@@ -1,0 +1,357 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: AJLB094 (AS기업및그룹한도신청및승인)
+      *@처리유형  : AS
+      *@처리개요  : 설정승인저장및승인
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20090529: 신규작성
+      *김진태:20091102: 타팀　조치메세지　정비
+      *김진태:20091211: PC 삭제
+      *김진태:20101101: 승인신청과승인분리
+      *                   TE심사자     - 저장및승인신청
+      *                   TE심사책임자 - 최종승인
+      * YBH    :20161019: 신용평가유효년월일 추가
+      * YBH    :20161216: 기준한도초과여부,한도승인사유구분 추가
+      * YBH    :20201231: 첨부파일 관리 추가
+      *=================================================================
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     AJLB094.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   09/05/29.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'AJLB094 '.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-CHA-02               PIC  X(002) VALUE '02'.
+           03  CO-CHA-03               PIC  X(002) VALUE '03'.          00570001
+           03  CO-CHA-04               PIC  X(002) VALUE '04'.          00570001
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  FILLER                  PIC  9(005) COMP.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    XIJICOMM INTERFACE
+       01  XIJICOMM-CA.
+           COPY  XIJICOMM.
+      *   처리DC  INTERFACE
+       01  XDJLB094-CA.
+           COPY  XDJLB094.
+      *   첨부파일관리DC  INTERFACE
+       01  XDJLB002-CA.
+           COPY  XDJLB002.
+      *   출력영역확보　및　초기화INTERFACE
+       01  XZUGOTMY-CA.
+           COPY  XZUGOTMY.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    AS COPYBOOK
+       01  YNJLB094-CA.
+           COPY  YNJLB094.
+      *    AS COPYBOOK
+       01  YPJLB094-CA.
+           COPY  YPJLB094.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   YNJLB094-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 출력영역확보 파라미터 및 결과코드 초기화
+           INITIALIZE    WK-AREA
+                         XIJICOMM-IN
+                         XZUGOTMY-IN
+
+      *@1.2 출력영역 확보
+           #GETOUT       YPJLB094-CA
+
+      *@1.3 COMMON AREA SETTING 공통IC프로그램 호출
+170706*    KB-PIN
+           MOVE YNJLB094-KB-PIN       TO AACOM-CUST-IDNFR
+
+           #DYCALL IJICOMM YCCOMMON-CA XIJICOMM-CA
+
+      *@1.4 호출결과 확인
+           IF COND-XIJICOMM-OK
+              CONTINUE
+           ELSE
+              #ERROR XIJICOMM-R-ERRCD
+                     XIJICOMM-R-TREAT-CD
+                     XIJICOMM-R-STAT
+           END-IF
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@3 업무처리(01:승인신청/02:승인/03:파일등록/04:파일삭제
+           EVALUATE YNJLB094-PRCSS-DSTIC
+           WHEN CO-CHA-01
+           WHEN CO-CHA-02
+      *@3.1 DC호출
+               PERFORM S3100-DJLB094-CALL-RTN
+                  THRU S3100-DJLB094-CALL-EXT
+201231     WHEN CO-CHA-03
+201231     WHEN CO-CHA-04
+               PERFORM S3200-DJLB002-CALL-RTN
+                  THRU S3200-DJLB002-CALL-EXT
+           WHEN OTHER
+               #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+
+       S3000-PROCESS-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   DC호출
+      *-----------------------------------------------------------------
+       S3100-DJLB094-CALL-RTN.
+
+           INITIALIZE    XDJLB094-IN
+
+      *@3.1.1 입력파라미터 조립
+      *    처리구분
+           MOVE YNJLB094-PRCSS-DSTIC
+             TO XDJLB094-I-PRCSS-DSTIC
+
+      *    고객구분
+           MOVE YNJLB094-CUST-DSTIC
+             TO XDJLB094-I-CUST-DSTIC
+
+      *    KB-PIN
+           MOVE YNJLB094-KB-PIN
+             TO XDJLB094-I-KB-PIN
+
+      *    신청번호
+           MOVE YNJLB094-APLCN-NO
+             TO XDJLB094-I-APLCN-NO
+
+      *    신청직원번호
+           MOVE YNJLB094-APLCN-EMPID
+             TO XDJLB094-I-APLCN-EMPID
+
+      *    신청구분
+           MOVE YNJLB094-APLCN-DSTIC
+             TO XDJLB094-I-APLCN-DSTIC
+
+      *    승인일자
+           MOVE YNJLB094-ATHOR-DTE
+             TO XDJLB094-I-ATHOR-DTE
+
+      *    기준한도산출액
+           MOVE YNJLB094-BASE-LIMT-CMPTN-AMT
+             TO XDJLB094-I-BASE-LIMT-CMPTN-AMT
+
+      *    관리한도설정액
+           MOVE YNJLB094-MGT-LIMT-STUP-AMT
+             TO XDJLB094-I-MGT-LIMT-STUP-AMT
+
+      *    여신성관리한도
+           MOVE YNJLB094-LNBZ-I-MGT-LIMT
+             TO XDJLB094-I-LNBZ-I-MGT-LIMT
+
+      *    시장성관리한도
+           MOVE YNJLB094-MRKTY-MGT-LIMT
+             TO XDJLB094-I-MRKTY-MGT-LIMT
+
+      *    한도설정유효일
+           MOVE YNJLB094-LIMT-STUP-VALD-DD
+             TO XDJLB094-I-LIMT-STUP-VALD-DD
+
+      *    승인권자
+           MOVE YNJLB094-ATRZ
+             TO XDJLB094-I-ATRZ
+
+      *    조건부승인조건
+           MOVE YNJLB094-CNDT-ATHOR-CNDN
+             TO XDJLB094-I-CNDT-ATHOR-CNDN
+
+      *    승인구분
+           MOVE YNJLB094-ATHOR-DSTIC
+             TO XDJLB094-I-ATHOR-DSTIC
+
+      *    승인사유
+           MOVE YNJLB094-ATHOR-RESN
+             TO XDJLB094-I-ATHOR-RESN
+
+161019*   전신용평가유효년월일
+           MOVE YNJLB094-BF-C-VALUA-VALD-YMD
+             TO XDJLB094-I-BF-C-VALUA-VALD-YMD
+
+161019*   후신용평가유효년월일
+           MOVE YNJLB094-AF-C-VALUA-VALD-YMD
+             TO XDJLB094-I-AF-C-VALUA-VALD-YMD
+
+161216*@   기준한도초과여부
+           MOVE YNJLB094-BASE-LIMT-EXCS-YN
+             TO XDJLB094-I-BASE-LIMT-EXCS-YN
+
+161216*@   한도승인사유구분
+           MOVE YNJLB094-LIMT-A-RESN-DSTCD
+             TO XDJLB094-I-LIMT-A-RESN-DSTCD
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJLB094 YCCOMMON-CA XDJLB094-CA
+
+      *@3.1.3 처리결과CHECK
+      *@실행조건:COND-XDJLB094-OK
+      *@처리내용:리턴코드가 정상(00) 아닐경우 오류처리한다
+           IF  COND-XDJLB094-OK
+      *        처리결과
+               MOVE XDJLB094-O-PRCSS-RSULT
+                 TO YPJLB094-PRCSS-RSULT
+           ELSE
+               #ERROR XDJLB094-R-ERRCD
+                      XDJLB094-R-TREAT-CD
+                      XDJLB094-R-STAT
+           END-IF
+           .
+       S3100-DJLB094-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+201231*@   첨부파일관리
+      *-----------------------------------------------------------------
+       S3200-DJLB002-CALL-RTN.
+
+           INITIALIZE    XDJLB002-IN
+
+      *@3.1.1 입력파라미터 조립
+      *    처리구분
+           MOVE YNJLB094-PRCSS-DSTIC
+             TO XDJLB002-I-PRCSS-DSTIC
+
+      *    한도신청번호
+           MOVE YNJLB094-APLCN-NO
+             TO XDJLB002-I-LIMT-APLCN-NO
+
+      *    첨부파일일련번호
+           MOVE YNJLB094-APNDX-FILE-SERNO
+             TO XDJLB002-I-APNDX-FILE-SERNO
+
+      *    첨부파일식별자
+           MOVE YNJLB094-APNDX-FILE-IDNFR
+             TO XDJLB002-I-APNDX-FILE-IDNFR
+
+      *    첨부파일내용
+           MOVE YNJLB094-APNDX-FILE-CTNT
+             TO XDJLB002-I-APNDX-FILE-CTNT
+
+      *    첨부파일명
+           MOVE YNJLB094-APNDX-FILE-NAME
+             TO XDJLB002-I-APNDX-FILE-NAME
+
+      *    KB-PIN
+           MOVE YNJLB094-KB-PIN
+             TO XDJLB002-I-KB-PIN
+
+      *@3.1.2 프로그램 호출
+      *@처리내용:DC프로그램호출
+           #DYCALL DJLB002 YCCOMMON-CA XDJLB002-CA
+
+      *@3.1.3 처리결과CHECK
+           IF  COND-XDJLB002-OK
+      *        처리결과
+               MOVE XDJLB002-O-PRCSS-RESULT
+                 TO YPJLB094-PRCSS-RSULT
+           ELSE
+               #ERROR XDJLB002-R-ERRCD
+                      XDJLB002-R-TREAT-CD
+                      XDJLB002-R-STAT
+           END-IF
+           .
+
+       S3200-DJLB002-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 폼ID SET
+      *@처리내용:화면폼ID SET
+           #BOFMID 'V1KJL11009000'
+
+      *@5.2 프로그램 종료
+      *@처리내용:프로그램 정상종료
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

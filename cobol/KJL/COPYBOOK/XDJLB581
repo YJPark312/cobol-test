@@ -1,0 +1,91 @@
+      *================================================================*
+      *@ NAME : XDJLB581                                               *
+      *@ DESC : DC국별수기계좌등록COPYBOOK                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-09 15:08:36                          *
+      *  생성일시     : 2020-12-09 15:08:36                          *
+      *  전체길이     : 00093511 BYTES                               *
+      *================================================================*
+           03  XDJLB581-RETURN.
+             05  XDJLB581-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB581-OK            VALUE  '00'.
+                 88  COND-XDJLB581-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB581-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB581-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB581-ERROR         VALUE  '09'.
+                 88  COND-XDJLB581-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB581-SYSERROR      VALUE  '99'.
+             05  XDJLB581-R-LINE                 PIC  9(006).
+             05  XDJLB581-R-ERRCD                PIC  X(008).
+             05  XDJLB581-R-TREAT-CD             PIC  X(008).
+             05  XDJLB581-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB581-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB581-I-PRCSS-DSTIC          PIC  X(002).
+      *--       부점코드
+             05  XDJLB581-I-BRNCD                PIC  X(004).
+      *--       총라인수
+             05  XDJLB581-I-TOTAL-LINE-CNT       PIC  9(005).
+      *--       그리드1
+             05  XDJLB581-I-GRID1                OCCURS 000500 TIMES.
+      *--         계좌번호
+               07  XDJLB581-I-ACNO               PIC  X(020).
+      *--         고객식별자
+               07  XDJLB581-I-CUST-IDNFR         PIC  X(010).
+      *--         거래상대방
+               07  XDJLB581-I-TRAN-CNPRT         PIC  X(082).
+      *--         상품대분류코드
+               07  XDJLB581-I-PRDCT-LAG-CLSFI-CD PIC  X(002).
+      *--         상품중분류코드
+               07  XDJLB581-I-PRDCT-MEDM-CLSFI-CD
+                                                 PIC  X(002).
+      *--         상품템플릿코드
+               07  XDJLB581-I-PRDCT-TMPLT-CD     PIC  X(003).
+      *--         상품번호
+               07  XDJLB581-I-PRDCT-NO           PIC  X(005).
+      *--         ISO국가코드
+               07  XDJLB581-I-ISO-NATNL-CD       PIC  X(002).
+      *--         관리부점
+               07  XDJLB581-I-MGTBRN             PIC  X(004).
+      *--         시작년월일
+               07  XDJLB581-I-START-YMD          PIC  X(008).
+      *--         만기년월일
+               07  XDJLB581-I-EXPIR-YMD          PIC  X(008).
+      *--         통화코드
+               07  XDJLB581-I-CNCYCD             PIC  X(003).
+      *--         통화한도금액
+               07  XDJLB581-I-CRNCY-CLAM         PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *--         통화금일잔액
+               07  XDJLB581-I-CRNCY-TDD-BAL      PIC S9(015)V9(03)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB581-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB581-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  5  8  1    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB581-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB581-I-BRNCD              ;부점코드
+      *N  XDJLB581-I-TOTAL-LINE-CNT     ;총라인수
+      *A  XDJLB581-I-GRID1              ;그리드1
+      *X  XDJLB581-I-ACNO               ;계좌번호
+      *X  XDJLB581-I-CUST-IDNFR         ;고객식별자
+      *X  XDJLB581-I-TRAN-CNPRT         ;거래상대방
+      *X  XDJLB581-I-PRDCT-LAG-CLSFI-CD ;상품대분류코드
+      *X  XDJLB581-I-PRDCT-MEDM-CLSFI-CD;상품중분류코드
+      *X  XDJLB581-I-PRDCT-TMPLT-CD     ;상품템플릿코드
+      *X  XDJLB581-I-PRDCT-NO           ;상품번호
+      *X  XDJLB581-I-ISO-NATNL-CD       ;ISO국가코드
+      *X  XDJLB581-I-MGTBRN             ;관리부점
+      *X  XDJLB581-I-START-YMD          ;시작년월일
+      *X  XDJLB581-I-EXPIR-YMD          ;만기년월일
+      *X  XDJLB581-I-CNCYCD             ;통화코드
+      *S  XDJLB581-I-CRNCY-CLAM         ;통화한도금액
+      *S  XDJLB581-I-CRNCY-TDD-BAL      ;통화금일잔액
+      *X  XDJLB581-O-PRCSS-RSULT        ;처리결과

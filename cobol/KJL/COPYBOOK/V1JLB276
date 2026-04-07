@@ -1,0 +1,158 @@
+      *================================================================*
+      *@ NAME : V1JLB276                                               *
+      *@ DESC : 포괄신용공여한도적정성점검승인                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2024-05-02 15:17:00                          *
+      *  생성일시     : 2024-05-02 15:17:03                          *
+      *  전체길이     : 00032330 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB276-PRCSS-RSULT              PIC  X(002).
+      *--     출력라인수1
+ROWCNT     07  V1JLB276-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     출력라인수2
+ROWCNT     07  V1JLB276-OUTPT-LINE-CNT2          PIC  9(005).
+      *--     출력라인수3
+ROWCNT     07  V1JLB276-OUTPT-LINE-CNT3          PIC  9(005).
+      *--     그리드1
+           07  V1JLB276-GRID1                    OCCURS 0 TO 000100
+               DEPENDING ON V1JLB276-OUTPT-LINE-CNT1.
+      *--       한도신청번호
+             09  V1JLB276-LIMT-APLCN-NO          PIC  X(010).
+      *--       한도점검진행상태구분
+             09  V1JLB276-LIMT-CP-STUS-DSTIC     PIC  X(001).
+      *--       기준년월일
+             09  V1JLB276-BASE-YMD               PIC  X(008).
+      *--       고객식별자
+             09  V1JLB276-CUST-IDNFR             PIC  X(010).
+      *--       차주명
+             09  V1JLB276-BRWR-NAME              PIC  X(052).
+      *--       관리한도설정년월일
+             09  V1JLB276-MGT-LIMT-STUP-YMD      PIC  X(008).
+      *--       유효기일
+             09  V1JLB276-VALD-FXDT              PIC  X(008).
+      *--       여신성한도
+             09  V1JLB276-LNBZ-INCLIN-LIMT       PIC  9(016).
+      *--       포괄한도
+             09  V1JLB276-INLS-LIMT              PIC  9(016).
+      *--       소진율
+             09  V1JLB276-EXHS-RT                PIC  9(003)V9(02).
+      *--       신청신용등급
+             09  V1JLB276-APLCN-CRDRAT           PIC  X(004).
+      *--       신용등급
+             09  V1JLB276-CRDRAT                 PIC  X(004).
+      *--       신청년월일
+             09  V1JLB276-APLCN-YMD              PIC  X(008).
+      *--       신청부점코드
+             09  V1JLB276-APLCN-BRNCD            PIC  X(004).
+      *--       신청직원번호
+             09  V1JLB276-APLCN-EMPID            PIC  X(007).
+      *--       신청직원명
+             09  V1JLB276-APLCN-EMNM             PIC  X(052).
+      *--       최종승인년월일
+             09  V1JLB276-LAST-ATHOR-YMD         PIC  X(008).
+      *--       최종승인직원번호
+             09  V1JLB276-LAST-ATHOR-EMPID       PIC  X(007).
+      *--       최종한도승인구분
+             09  V1JLB276-LAST-L-ATHOR-DSTIC     PIC  X(001).
+      *--       적정성점검구분
+             09  V1JLB276-PRTY-CHKUP-DSTCD       PIC  X(001).
+      *--       적정구분
+             09  V1JLB276-PROPR-DSTIC            PIC  X(001).
+      *--       진행구분
+             09  V1JLB276-PRGRS-DSTIC            PIC  X(001).
+      *--       의견등록여부
+             09  V1JLB276-OPIN-REGI-YN           PIC  X(001).
+      *--       승인위원직원번호
+             09  V1JLB276-ATHOR-CMMB-EMPID       PIC  X(007).
+      *--     그리드2
+           07  V1JLB276-GRID2                    OCCURS 0 TO 000010
+               DEPENDING ON V1JLB276-OUTPT-LINE-CNT2.
+      *--       직원번호
+             09  V1JLB276-EMPID                  PIC  X(007).
+      *--       직원명
+             09  V1JLB276-EMNM                   PIC  X(052).
+      *--       한도승인구분
+             09  V1JLB276-LIMT-ATHOR-DSTIC       PIC  X(001).
+      *--       승인의견내용
+             09  V1JLB276-ATHOR-OPIN-CTNT        PIC  X(302).
+      *--       최종처리일시
+             09  V1JLB276-LAST-PRCSS-YMS         PIC  X(014).
+      *--     재적위원수
+           07  V1JLB276-ENRL-CMMB-CNT            PIC  9(003).
+      *--     출석위원수
+           07  V1JLB276-ATTND-CMMB-CNT           PIC  9(003).
+      *--     승인위원수
+           07  V1JLB276-ATHOR-CMMB-CNT           PIC  9(003).
+      *--     블승인위원수
+           07  V1JLB276-NOT-ATHOR-CMMB-CNT       PIC  9(003).
+      *--     종합승인의견
+           07  V1JLB276-CMPRE-ATHOR-OPIN         PIC  X(001).
+      *--     그리드3
+           07  V1JLB276-GRID3                    OCCURS 0 TO 000010
+               DEPENDING ON V1JLB276-OUTPT-LINE-CNT3.
+      *--       첨부파일일련번호
+             09  V1JLB276-APNDX-FILE-SERNO       PIC  9(003).
+      *--       첨부파일식별자
+             09  V1JLB276-APNDX-FILE-IDNFR       PIC  X(040).
+      *--       첨부파일내용
+             09  V1JLB276-APNDX-FILE-CTNT        PIC  X(172).
+      *--       첨부파일명
+             09  V1JLB276-APNDX-FILE-NAME        PIC  X(172).
+      *--       등록년월일
+             09  V1JLB276-REGI-YMD               PIC  X(008).
+      *--       등록직원번호
+             09  V1JLB276-REGI-EMPID             PIC  X(007).
+      *--       등록직원명
+             09  V1JLB276-REGI-EMNM              PIC  X(052).
+      *================================================================*
+      *        V  1  J  L  B  2  7  6    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB276-PRCSS-RSULT          ;처리결과
+      *L  V1JLB276-OUTPT-LINE-CNT1      ;출력라인수1
+      *L  V1JLB276-OUTPT-LINE-CNT2      ;출력라인수2
+      *L  V1JLB276-OUTPT-LINE-CNT3      ;출력라인수3
+      *A  V1JLB276-GRID1                ;그리드1
+      *X  V1JLB276-LIMT-APLCN-NO        ;한도신청번호
+      *X  V1JLB276-LIMT-CP-STUS-DSTIC   ;한도점검진행상태구분
+      *X  V1JLB276-BASE-YMD             ;기준년월일
+      *X  V1JLB276-CUST-IDNFR           ;고객식별자
+      *X  V1JLB276-BRWR-NAME            ;차주명
+      *X  V1JLB276-MGT-LIMT-STUP-YMD    ;관리한도설정년월일
+      *X  V1JLB276-VALD-FXDT            ;유효기일
+      *N  V1JLB276-LNBZ-INCLIN-LIMT     ;여신성한도
+      *N  V1JLB276-INLS-LIMT            ;포괄한도
+      *N  V1JLB276-EXHS-RT              ;소진율
+      *X  V1JLB276-APLCN-CRDRAT         ;신청신용등급
+      *X  V1JLB276-CRDRAT               ;신용등급
+      *X  V1JLB276-APLCN-YMD            ;신청년월일
+      *X  V1JLB276-APLCN-BRNCD          ;신청부점코드
+      *X  V1JLB276-APLCN-EMPID          ;신청직원번호
+      *X  V1JLB276-APLCN-EMNM           ;신청직원명
+      *X  V1JLB276-LAST-ATHOR-YMD       ;최종승인년월일
+      *X  V1JLB276-LAST-ATHOR-EMPID     ;최종승인직원번호
+      *X  V1JLB276-LAST-L-ATHOR-DSTIC   ;최종한도승인구분
+      *X  V1JLB276-PRTY-CHKUP-DSTCD     ;적정성점검구분
+      *X  V1JLB276-PROPR-DSTIC          ;적정구분
+      *X  V1JLB276-PRGRS-DSTIC          ;진행구분
+      *X  V1JLB276-OPIN-REGI-YN         ;의견등록여부
+      *X  V1JLB276-ATHOR-CMMB-EMPID     ;승인위원직원번호
+      *A  V1JLB276-GRID2                ;그리드2
+      *X  V1JLB276-EMPID                ;직원번호
+      *X  V1JLB276-EMNM                 ;직원명
+      *X  V1JLB276-LIMT-ATHOR-DSTIC     ;한도승인구분
+      *X  V1JLB276-ATHOR-OPIN-CTNT      ;승인의견내용
+      *X  V1JLB276-LAST-PRCSS-YMS       ;최종처리일시
+      *N  V1JLB276-ENRL-CMMB-CNT        ;재적위원수
+      *N  V1JLB276-ATTND-CMMB-CNT       ;출석위원수
+      *N  V1JLB276-ATHOR-CMMB-CNT       ;승인위원수
+      *N  V1JLB276-NOT-ATHOR-CMMB-CNT   ;블승인위원수
+      *X  V1JLB276-CMPRE-ATHOR-OPIN     ;종합승인의견
+      *A  V1JLB276-GRID3                ;그리드3
+      *N  V1JLB276-APNDX-FILE-SERNO     ;첨부파일일련번호
+      *X  V1JLB276-APNDX-FILE-IDNFR     ;첨부파일식별자
+      *X  V1JLB276-APNDX-FILE-CTNT      ;첨부파일내용
+      *X  V1JLB276-APNDX-FILE-NAME      ;첨부파일명
+      *X  V1JLB276-REGI-YMD             ;등록년월일
+      *X  V1JLB276-REGI-EMPID           ;등록직원번호
+      *X  V1JLB276-REGI-EMNM            ;등록직원명

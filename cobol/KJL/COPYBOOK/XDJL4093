@@ -1,0 +1,391 @@
+      *================================================================*
+      *@ NAME : XDJL4093                                               *
+      *@ DESC : DC기업및그룹한도신청및승인(개별그룹기준한도산출    *
+      *@        ) COPYBOOK                                           *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-26 16:43:20                          *
+      *  생성일시     : 2021-11-26 16:43:20                          *
+      *  전체길이     : 00000578 BYTES                               *
+      *================================================================*
+           03  XDJL4093-RETURN.
+             05  XDJL4093-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4093-OK            VALUE  '00'.
+                 88  COND-XDJL4093-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4093-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4093-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4093-ERROR         VALUE  '09'.
+                 88  COND-XDJL4093-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4093-SYSERROR      VALUE  '99'.
+             05  XDJL4093-R-LINE                 PIC  9(006).
+             05  XDJL4093-R-ERRCD                PIC  X(008).
+             05  XDJL4093-R-TREAT-CD             PIC  X(008).
+             05  XDJL4093-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4093-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4093-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJL4093-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJL4093-I-KB-PIN               PIC  X(010).
+      *--       수정신용등급
+             05  XDJL4093-I-AMND-CRDRAT          PIC  X(004).
+      *--       수정TE산업분류코드
+             05  XDJL4093-I-AMND-TI-CLSFI-CD     PIC  X(003).
+      *--       수정신용등급별지원비율
+             05  XDJL4093-I-AMND-CP-SPORT-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년영업이익
+             05  XDJL4093-I-AMND-BF-PYY-OPRFT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년영업이익
+             05  XDJL4093-I-AMND-PYY-OPRFT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정영업이익
+             05  XDJL4093-I-AMND-OPRFT           PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년수입이자
+             05  XDJL4093-I-AMND-BP-IMPRT-INT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년수입이자
+             05  XDJL4093-I-AMND-PYY-IMPRT-INT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정수입이자
+             05  XDJL4093-I-AMND-IMPRT-INT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년감가상각비
+             05  XDJL4093-I-AMND-B-PYY-DPRC-CST  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년감가상각비
+             05  XDJL4093-I-AMND-PYY-DPRC-CST    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정감가상각비
+             05  XDJL4093-I-AMND-DPRC-CST        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년금융비용
+             05  XDJL4093-I-AMND-BF-PYY-FNCS     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년금융비용
+             05  XDJL4093-I-AMND-PYY-FNCS        PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정금융비용
+             05  XDJL4093-I-AMND-FNCS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년단기차입금
+             05  XDJL4093-I-AMND-BP-SHTRM-AMBR   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년단기차입금
+             05  XDJL4093-I-AMND-PYY-SHTRM-AMBR  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정단기차입금
+             05  XDJL4093-I-AMND-SHTRM-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정가중평균이자율
+             05  XDJL4093-I-AMND-WGHTG-AVG-IRT   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년금융총비용비율
+             05  XDJL4093-I-AMND-BPFT-CST-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전년금융총비용비율
+             05  XDJL4093-I-AMND-PFT-CST-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정금융총비용비율
+             05  XDJL4093-I-AMND-FTZ-CST-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년자기자본금
+             05  XDJL4093-I-AMND-B-PYY-ONCP-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년자기자본금
+             05  XDJL4093-I-AMND-PYY-ONCP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본
+             05  XDJL4093-I-AMND-ONCP            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본산업적용비율
+             05  XDJL4093-I-AMND-OI-APLY-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정차입금자기자본율
+             05  XDJL4093-I-AMND-AMBR-ONCP-RT    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년업체총차입금
+             05  XDJL4093-I-AMND-BPE-TOTAL-AMBR  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년업체총차입금
+             05  XDJL4093-I-AMND-PE-TOTAL-AMBR   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총차입금
+             05  XDJL4093-I-AMND-TOTAL-AMBR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년매출액
+             05  XDJL4093-I-AMND-BF-PYY-SALEPR   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년매출액
+             05  XDJL4093-I-AMND-PYY-SALEPR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정매출액
+             05  XDJL4093-I-AMND-SALEPR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정매출액산업적용비율
+             05  XDJL4093-I-AMND-SI-APLY-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년매출채권회전률
+             05  XDJL4093-I-AMND-BPAB-ROTAT-RT   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전년매출채권회전비율
+             05  XDJL4093-I-AMND-PAB-ROTAT-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정매출채권회전비율
+             05  XDJL4093-I-AMND-AB-ROTAT-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정기준전전년총자산
+             05  XDJL4093-I-AMND-BBP-TOTAL-ASST  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정기준전년총자산
+             05  XDJL4093-I-AMND-BP-TOTAL-ASST   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총자산
+             05  XDJL4093-I-AMND-TOTAL-ASST      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총자산산업적용비율
+             05  XDJL4093-I-AMND-TAI-APLY-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정차입금총자산비율
+             05  XDJL4093-I-AMND-AT-ASST-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전년현금성자산금액
+             05  XDJL4093-I-AMND-BPCI-ASAM       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전년현금성자산금액
+             05  XDJL4093-I-AMND-PC-INCLIN-ASAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정현금성자산금액
+             05  XDJL4093-I-AMND-C-INCLIN-ASAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4093-OUT.
+      *----------------------------------------------------------------*
+      *--       수정차입금상환예상액
+             05  XDJL4093-O-AMND-AR-ANTICI-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3차입금상환예상액
+             05  XDJL4093-O-AMND-Y3ARA-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정금융비용가중치값
+             05  XDJL4093-O-AMND-FNCS-WGHT-VAL   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3금융비용가중치값
+             05  XDJL4093-O-AMND-Y3F-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정현금흐름기준액
+             05  XDJL4093-O-AMND-CSFW-BASE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3현금흐름기준액
+             05  XDJL4093-O-AMND-Y3C-BASE-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총차입금자기자본비율
+             05  XDJL4093-O-AMND-TA-ONCP-RATO    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3총차입금자기자본비율
+             05  XDJL4093-O-AMND-Y3TA-ONCP-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정차입금자본가중치값
+             05  XDJL4093-O-AMND-AC-WGHT-VAL     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3차입자본가중치값
+             05  XDJL4093-O-AMND-Y3BC-WGHT-VAL   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정자기자본기준액
+             05  XDJL4093-O-AMND-ONCP-BASE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3자기자본기준금액
+             05  XDJL4093-O-AMND-Y-3-ONCP-BSAMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정상환능력기준한도
+             05  XDJL4093-O-AMND-S-BASE-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3상환능력기준한도
+             05  XDJL4093-O-AMND-Y3S-BASE-LIMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3평균매출금액
+             05  XDJL4093-O-AMND-Y3A-ASALE-AMT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3평균매출액비율
+             05  XDJL4093-O-AMND-Y3AS-RATO       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정매출가중치값
+             05  XDJL4093-O-AMND-ASALE-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정매출채권회전가중치값
+             05  XDJL4093-O-AMND-ABR-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3매출채권회전가중치값
+             05  XDJL4093-O-AMND-Y3ABR-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정매출기준금액
+             05  XDJL4093-O-AMND-ASALE-BSAMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3매출기준금액
+             05  XDJL4093-O-AMND-Y3-ASALE-BSAMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정총차입금총자산비율
+             05  XDJL4093-O-AMND-TAT-ASST-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3총차입금총자산비율
+             05  XDJL4093-O-AMND-Y3TATA-RATO     PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정평균현금성자산금액
+             05  XDJL4093-O-AMND-AC-INCLIN-ASAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정평균총자산금액
+             05  XDJL4093-O-AMND-AVG-TOTAL-ASAM  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정평균현금성자산비율
+             05  XDJL4093-O-AMND-ACI-ASST-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정차입자산비율가중치값
+             05  XDJL4093-O-AMND-BAR-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3차입자산비율가중값
+             05  XDJL4093-O-AMND-Y3BARW-VAL      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정현금성자산가중치값
+             05  XDJL4093-O-AMND-CIA-WGHT-VAL    PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정자산기준금액
+             05  XDJL4093-O-AMND-ASST-BSAMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3자산기준금액
+             05  XDJL4093-O-AMND-Y-3-ASST-BSAMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정규모기준한도
+             05  XDJL4093-O-AMND-SCAL-BASE-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3규모기준한도금액
+             05  XDJL4093-O-AMND-Y3S-BASE-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정기준한도
+             05  XDJL4093-O-AMND-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3기준한도금액
+             05  XDJL4093-O-AMND-Y-3-BASE-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  9  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4093-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4093-I-CUST-DSTIC         ;고객구분
+      *X  XDJL4093-I-KB-PIN             ;KB-PIN
+      *X  XDJL4093-I-AMND-CRDRAT        ;수정신용등급
+      *X  XDJL4093-I-AMND-TI-CLSFI-CD   ;수정TE산업분류코드
+      *S  XDJL4093-I-AMND-CP-SPORT-RATO
+      * 수정신용등급별지원비율
+      *S  XDJL4093-I-AMND-BF-PYY-OPRFT  ;수정전전년영업이익
+      *S  XDJL4093-I-AMND-PYY-OPRFT     ;수정전년영업이익
+      *S  XDJL4093-I-AMND-OPRFT         ;수정영업이익
+      *S  XDJL4093-I-AMND-BP-IMPRT-INT  ;수정전전년수입이자
+      *S  XDJL4093-I-AMND-PYY-IMPRT-INT ;수정전년수입이자
+      *S  XDJL4093-I-AMND-IMPRT-INT     ;수정수입이자
+      *S  XDJL4093-I-AMND-B-PYY-DPRC-CST
+      * 수정전전년감가상각비
+      *S  XDJL4093-I-AMND-PYY-DPRC-CST  ;수정전년감가상각비
+      *S  XDJL4093-I-AMND-DPRC-CST      ;수정감가상각비
+      *S  XDJL4093-I-AMND-BF-PYY-FNCS   ;수정전전년금융비용
+      *S  XDJL4093-I-AMND-PYY-FNCS      ;수정전년금융비용
+      *S  XDJL4093-I-AMND-FNCS          ;수정금융비용
+      *S  XDJL4093-I-AMND-BP-SHTRM-AMBR ;수정전전년단기차입금
+      *S  XDJL4093-I-AMND-PYY-SHTRM-AMBR;수정전년단기차입금
+      *S  XDJL4093-I-AMND-SHTRM-AMBR    ;수정단기차입금
+      *S  XDJL4093-I-AMND-WGHTG-AVG-IRT ;수정가중평균이자율
+      *S  XDJL4093-I-AMND-BPFT-CST-RATO
+      * 수정전전년금융총비용비율
+      *S  XDJL4093-I-AMND-PFT-CST-RATO
+      * 수정전년금융총비용비율
+      *S  XDJL4093-I-AMND-FTZ-CST-RATO  ;수정금융총비용비율
+      *S  XDJL4093-I-AMND-B-PYY-ONCP-AMT
+      * 수정전전년자기자본금
+      *S  XDJL4093-I-AMND-PYY-ONCP-AMT  ;수정전년자기자본금
+      *S  XDJL4093-I-AMND-ONCP          ;수정자기자본
+      *S  XDJL4093-I-AMND-OI-APLY-RATO
+      * 수정자기자본산업적용비율
+      *S  XDJL4093-I-AMND-AMBR-ONCP-RT  ;수정차입금자기자본율
+      *S  XDJL4093-I-AMND-BPE-TOTAL-AMBR
+      * 수정전전년업체총차입금
+      *S  XDJL4093-I-AMND-PE-TOTAL-AMBR ;수정전년업체총차입금
+      *S  XDJL4093-I-AMND-TOTAL-AMBR    ;수정총차입금
+      *S  XDJL4093-I-AMND-BF-PYY-SALEPR ;수정전전년매출액
+      *S  XDJL4093-I-AMND-PYY-SALEPR    ;수정전년매출액
+      *S  XDJL4093-I-AMND-SALEPR        ;수정매출액
+      *S  XDJL4093-I-AMND-SI-APLY-RATO
+      * 수정매출액산업적용비율
+      *S  XDJL4093-I-AMND-BPAB-ROTAT-RT
+      * 수정전전년매출채권회전률
+      *S  XDJL4093-I-AMND-PAB-ROTAT-RATO
+      * 수정전년매출채권회전비율
+      *S  XDJL4093-I-AMND-AB-ROTAT-RATO ;수정매출채권회전비율
+      *S  XDJL4093-I-AMND-BBP-TOTAL-ASST
+      * 수정기준전전년총자산
+      *S  XDJL4093-I-AMND-BP-TOTAL-ASST ;수정기준전년총자산
+      *S  XDJL4093-I-AMND-TOTAL-ASST    ;수정총자산
+      *S  XDJL4093-I-AMND-TAI-APLY-RATO
+      * 수정총자산산업적용비율
+      *S  XDJL4093-I-AMND-AT-ASST-RATO  ;수정차입금총자산비율
+      *S  XDJL4093-I-AMND-BPCI-ASAM     ;수정전전년현금성자산금액
+      *S  XDJL4093-I-AMND-PC-INCLIN-ASAM
+      * 수정전년현금성자산금액
+      *S  XDJL4093-I-AMND-C-INCLIN-ASAM ;수정현금성자산금액
+      *S  XDJL4093-O-AMND-AR-ANTICI-AMT ;수정차입금상환예상액
+      *S  XDJL4093-O-AMND-Y3ARA-AMT     ;수정Y3차입금상환예상액
+      *S  XDJL4093-O-AMND-FNCS-WGHT-VAL ;수정금융비용가중치값
+      *S  XDJL4093-O-AMND-Y3F-WGHT-VAL
+      * 수정Y3금융비용가중치값
+      *S  XDJL4093-O-AMND-CSFW-BASE-AMT ;수정현금흐름기준액
+      *S  XDJL4093-O-AMND-Y3C-BASE-AMT
+      * 수정Y3현금흐름기준액
+      *S  XDJL4093-O-AMND-TA-ONCP-RATO
+      * 수정총차입금자기자본비율
+      *S  XDJL4093-O-AMND-Y3TA-ONCP-RATO
+      * 수정Y3총차입금자기자본비율
+      *S  XDJL4093-O-AMND-AC-WGHT-VAL   ;수정차입금자본가중치값
+      *S  XDJL4093-O-AMND-Y3BC-WGHT-VAL
+      * 수정Y3차입자본가중치값
+      *S  XDJL4093-O-AMND-ONCP-BASE-AMT ;수정자기자본기준액
+      *S  XDJL4093-O-AMND-Y-3-ONCP-BSAMT
+      * 수정Y3자기자본기준금액
+      *S  XDJL4093-O-AMND-S-BASE-LIMT   ;수정상환능력기준한도
+      *S  XDJL4093-O-AMND-Y3S-BASE-LIMT
+      * 수정Y3상환능력기준한도
+      *S  XDJL4093-O-AMND-Y3A-ASALE-AMT ;수정Y3평균매출금액
+      *S  XDJL4093-O-AMND-Y3AS-RATO     ;수정Y3평균매출액비율
+      *S  XDJL4093-O-AMND-ASALE-WGHT-VAL;수정매출가중치값
+      *S  XDJL4093-O-AMND-ABR-WGHT-VAL
+      * 수정매출채권회전가중치값
+      *S  XDJL4093-O-AMND-Y3ABR-WGHT-VAL
+      * 수정Y3매출채권회전가중치값
+      *S  XDJL4093-O-AMND-ASALE-BSAMT   ;수정매출기준금액
+      *S  XDJL4093-O-AMND-Y3-ASALE-BSAMT
+      * 수정Y3매출기준금액
+      *S  XDJL4093-O-AMND-TAT-ASST-RATO
+      * 수정총차입금총자산비율
+      *S  XDJL4093-O-AMND-Y3TATA-RATO
+      * 수정Y3총차입금총자산비율
+      *S  XDJL4093-O-AMND-AC-INCLIN-ASAM
+      * 수정평균현금성자산금액
+      *S  XDJL4093-O-AMND-AVG-TOTAL-ASAM;수정평균총자산금액
+      *S  XDJL4093-O-AMND-ACI-ASST-RATO
+      * 수정평균현금성자산비율
+      *S  XDJL4093-O-AMND-BAR-WGHT-VAL
+      * 수정차입자산비율가중치값
+      *S  XDJL4093-O-AMND-Y3BARW-VAL
+      * 수정Y3차입자산비율가중값
+      *S  XDJL4093-O-AMND-CIA-WGHT-VAL
+      * 수정현금성자산가중치값
+      *S  XDJL4093-O-AMND-ASST-BSAMT    ;수정자산기준금액
+      *S  XDJL4093-O-AMND-Y-3-ASST-BSAMT
+      * 수정Y3자산기준금액
+      *S  XDJL4093-O-AMND-SCAL-BASE-LIMT;수정규모기준한도
+      *S  XDJL4093-O-AMND-Y3S-BASE-CLAM
+      * 수정Y3규모기준한도금액
+      *S  XDJL4093-O-AMND-BASE-LIMT     ;수정기준한도
+      *S  XDJL4093-O-AMND-Y-3-BASE-CLAM ;수정Y3기준한도금액

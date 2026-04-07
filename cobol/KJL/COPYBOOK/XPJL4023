@@ -1,0 +1,153 @@
+      *================================================================*
+      *@ NAME : XPJL4023                                               *
+      *@ DESC : PC본부부서기준값조회 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-06 16:58:38                          *
+      *  생성일시     : 2009-07-06 16:58:40                          *
+      *================================================================*
+           03  XPJL4023-RETURN.
+             05  XPJL4023-R-STAT                 PIC  X(002).
+                 88  COND-XPJL4023-OK            VALUE  '00'.
+                 88  COND-XPJL4023-KEYDUP        VALUE  '01'.
+                 88  COND-XPJL4023-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJL4023-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJL4023-ERROR         VALUE  '09'.
+                 88  COND-XPJL4023-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJL4023-SYSERROR      VALUE  '99'.
+             05  XPJL4023-R-LINE                 PIC  9(006).
+             05  XPJL4023-R-ERRCD                PIC  X(008).
+             05  XPJL4023-R-TREAT-CD             PIC  X(008).
+             05  XPJL4023-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJL4023-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJL4023-I-PRCSS-DSTIC          PIC  X(002).
+      *--       기준년월1
+             05  XPJL4023-I-BASE-YM1             PIC  X(006).
+      *--       기준년월2
+             05  XPJL4023-I-BASE-YM2             PIC  X(006).
+      *----------------------------------------------------------------*
+           03  XPJL4023-OUT.
+      *----------------------------------------------------------------*
+      *--       출력라인수1
+             05  XPJL4023-O-OUTPT-LINE-CNT1      PIC  9(005).
+      *--       출력라인수2
+             05  XPJL4023-O-OUTPT-LINE-CNT2      PIC  9(005).
+      *--       출력라인수3
+             05  XPJL4023-O-OUTPT-LINE-CNT3      PIC  9(005).
+      *--       출력라인수4
+             05  XPJL4023-O-OUTPT-LINE-CNT4      PIC  9(005).
+      *--       출력라인수5
+             05  XPJL4023-O-OUTPT-LINE-CNT5      PIC  9(005).
+      *--       BIS기준자기자본
+             05  XPJL4023-O-BIS-BASE-ONCP        PIC  9(012).
+      *--       기준년월1
+             05  XPJL4023-O-BASE-YM1             PIC  X(006).
+      *--       동일인외화자기자본
+             05  XPJL4023-O-SMPSN-FC-ONCP        PIC  9(012).
+      *--       기준년월2
+             05  XPJL4023-O-BASE-YM2             PIC  X(006).
+      *--       그리드1
+             05  XPJL4023-O-GRID1                OCCURS 000030 TIMES.
+      *--         기타
+               07  XPJL4023-O-INTNL-CV-GRD-DSTCD1
+                                                 PIC  X(004).
+      *--         기타
+               07  XPJL4023-O-SPORT-RATO1        PIC  9(003).
+      *--         기타
+               07  XPJL4023-O-RPAY-ANTICI-RATO1  PIC  9(003).
+      *--       그리드2
+             05  XPJL4023-O-GRID2                OCCURS 000030 TIMES.
+      *--         그룹
+               07  XPJL4023-O-INTNL-CV-GRD-DSTCD2
+                                                 PIC  X(004).
+      *--         그룹
+               07  XPJL4023-O-SPORT-RATO2        PIC  9(003).
+      *--         그룹
+               07  XPJL4023-O-RPAY-ANTICI-RATO2  PIC  9(003).
+      *--       그리드3
+             05  XPJL4023-O-GRID3                OCCURS 000030 TIMES.
+      *--         건설
+               07  XPJL4023-O-INTNL-CV-GRD-DSTCD3
+                                                 PIC  X(004).
+      *--         건설
+               07  XPJL4023-O-SPORT-RATO3        PIC  9(003).
+      *--         건설
+               07  XPJL4023-O-RPAY-ANTICI-RATO3  PIC  9(003).
+      *--       그리드4
+             05  XPJL4023-O-GRID4                OCCURS 000030 TIMES.
+      *--         조선
+               07  XPJL4023-O-INTNL-CV-GRD-DSTCD4
+                                                 PIC  X(004).
+      *--         조선
+               07  XPJL4023-O-SPORT-RATO4        PIC  9(003).
+      *--         조선
+               07  XPJL4023-O-RPAY-ANTICI-RATO4  PIC  9(003).
+      *--       그리드5
+             05  XPJL4023-O-GRID5                OCCURS 000150 TIMES.
+      *--         기준년월
+               07  XPJL4023-O-BASE-YM5           PIC  X(006).
+      *--         한국은행MC코드
+               07  XPJL4023-O-BOK-MTCN-CD5       PIC  X(006).
+      *--         업종명
+               07  XPJL4023-O-BOK-MTCN-NAME5     PIC  X(032).
+      *--         가중평균이자율
+               07  XPJL4023-O-BZTYP-WGHTG-AVG-RT5
+                                                 PIC  9(003)V9(02).
+      *--         차입금/매출액
+               07  XPJL4023-O-AMBR-SALEPR-RATO5  PIC  9(003)V9(02).
+      *--         차입금/자기자본
+               07  XPJL4023-O-AMBR-ONCP-RT5      PIC  9(003)V9(02).
+      *--         차입금/총자산
+               07  XPJL4023-O-AMBR-T-ASST-RATO5  PIC  9(003)V9(02).
+      *--       건설업
+             05  XPJL4023-O-CNST-A-USAG-MLPL     PIC  9(003).
+      *--       조선업
+             05  XPJL4023-O-CREW-AA-USAG-MLPL    PIC  9(003).
+      *================================================================*
+      *        X  P  J  L  4  0  2  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJL4023-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJL4023-I-BASE-YM1           ;기준년월1
+      *X  XPJL4023-I-BASE-YM2           ;기준년월2
+      *N  XPJL4023-O-OUTPT-LINE-CNT1    ;출력라인수1
+      *N  XPJL4023-O-OUTPT-LINE-CNT2    ;출력라인수2
+      *N  XPJL4023-O-OUTPT-LINE-CNT3    ;출력라인수3
+      *N  XPJL4023-O-OUTPT-LINE-CNT4    ;출력라인수4
+      *N  XPJL4023-O-OUTPT-LINE-CNT5    ;출력라인수5
+      *N  XPJL4023-O-BIS-BASE-ONCP      ;BIS기준자기자본
+      *X  XPJL4023-O-BASE-YM1           ;기준년월1
+      *N  XPJL4023-O-SMPSN-FC-ONCP      ;동일인외화자기자본
+      *X  XPJL4023-O-BASE-YM2           ;기준년월2
+      *A  XPJL4023-O-GRID1              ;그리드1
+      *X  XPJL4023-O-INTNL-CV-GRD-DSTCD1;기타 신용등급
+      *N  XPJL4023-O-SPORT-RATO1
+      * 기타 신용등급별지원비율(%)
+      *N  XPJL4023-O-RPAY-ANTICI-RATO1
+      * 기타 상환예상비율(%)
+      *A  XPJL4023-O-GRID2              ;그리드2
+      *X  XPJL4023-O-INTNL-CV-GRD-DSTCD2;그룹 신용등급별
+      *N  XPJL4023-O-SPORT-RATO2
+      * 그룹 신용등급별지원비율(%)
+      *N  XPJL4023-O-RPAY-ANTICI-RATO2
+      * 그룹 상환예상비율(%)
+      *A  XPJL4023-O-GRID3              ;그리드3
+      *X  XPJL4023-O-INTNL-CV-GRD-DSTCD3;건설 신용등급
+      *N  XPJL4023-O-SPORT-RATO3        ;건설 지원비율
+      *N  XPJL4023-O-RPAY-ANTICI-RATO3  ;건설 상환예상비율
+      *A  XPJL4023-O-GRID4              ;그리드4
+      *X  XPJL4023-O-INTNL-CV-GRD-DSTCD4;조선 신용등급
+      *N  XPJL4023-O-SPORT-RATO4        ;조선 지원비율
+      *N  XPJL4023-O-RPAY-ANTICI-RATO4  ;조선 상환예상비율
+      *A  XPJL4023-O-GRID5              ;그리드5
+      *X  XPJL4023-O-BASE-YM5           ;기준년월
+      *X  XPJL4023-O-BOK-MTCN-CD5       ;한국은행MC코드
+      *X  XPJL4023-O-BOK-MTCN-NAME5     ;업종명
+      *N  XPJL4023-O-BZTYP-WGHTG-AVG-RT5;가중평균이자율
+      *N  XPJL4023-O-AMBR-SALEPR-RATO5  ;차입금/매출액
+      *N  XPJL4023-O-AMBR-ONCP-RT5      ;차입금/자기자본
+      *N  XPJL4023-O-AMBR-T-ASST-RATO5  ;차입금/총자산
+      *N  XPJL4023-O-CNST-A-USAG-MLPL   ;건설업
+      *N  XPJL4023-O-CREW-AA-USAG-MLPL  ;조선업

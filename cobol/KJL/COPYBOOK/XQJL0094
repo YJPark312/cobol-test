@@ -1,0 +1,292 @@
+      *===========================================================
+      *  프로그램명    : QJL0094
+      *  파일 디렉토리 : KJL.DDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0094
+      *  사용예        : 01  XQJL0094-CA.
+      *                      COPY  XQJL0094.
+      *  최종변경일시  : 2021년12월13일15시38분44초
+      *===========================================================
+           03  XQJL0094-IN.
+      *            그룹회사코드
+               05  XQJL0094-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            한도신청번호
+               05  XQJL0094-I-LIMT-APLCN-NO
+                                          PIC  X(00010).
+           03  XQJL0094-OUT.
+      *            내부신용평가등급구분
+               05  XQJL0094-O-INTNL-CV-GRD-DSTCD
+                                          PIC  X(00004).
+      *            전전년결산년월
+               05  XQJL0094-O-BF-PYY-STLACC-YM
+                                          PIC  X(00006).
+      *            전년결산년월
+               05  XQJL0094-O-PYY-STLACC-YM
+                                          PIC  X(00006).
+      *            결산년월
+               05  XQJL0094-O-STLACC-YM
+                                          PIC  X(00006).
+      *            신표준산업분류코드
+               05  XQJL0094-O-NEW-SI-CLSFI-CD
+                                          PIC  X(00005).
+      *            표준산업코드명
+               05  XQJL0094-O-STND-IDSTRY-CD-NAME
+                                          PIC  X(00042).
+      *            TE산업분류코드
+               05  XQJL0094-O-TE-IDSTRY-CLSFI-CD
+                                          PIC  X(00003).
+      *            TE산업분류코드명
+               05  XQJL0094-O-TE-I-CLSFI-CD-NAME
+                                          PIC  X(00052).
+      *            업종평균적용년
+               05  XQJL0094-O-BZTYP-AVG-APLY-YR
+                                          PIC  X(00004).
+      *            신용등급지원비율
+               05  XQJL0094-O-CRDRAT-SPORT-RATO
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            전전년영업이익
+               05  XQJL0094-O-BF-PYY-OPRFT
+                                          PIC S9(00015) COMP-3.
+      *            전년영업이익
+               05  XQJL0094-O-PYY-OPRFT
+                                          PIC S9(00015) COMP-3.
+      *            영업이익
+               05  XQJL0094-O-OPRFT
+                                          PIC S9(00015) COMP-3.
+      *            전전년이자수익
+               05  XQJL0094-O-BF-PYY-INT-ERN
+                                          PIC S9(00015) COMP-3.
+      *            전년이자수익
+               05  XQJL0094-O-PYY-INT-ERN
+                                          PIC S9(00015) COMP-3.
+      *            이자수익
+               05  XQJL0094-O-INT-ERN
+                                          PIC S9(00015) COMP-3.
+      *            전전년감가상각비
+               05  XQJL0094-O-BF-PYY-DPRC-CST
+                                          PIC S9(00015) COMP-3.
+      *            전년감가상각비
+               05  XQJL0094-O-PYY-DPRC-CST
+                                          PIC S9(00015) COMP-3.
+      *            감가상각비
+               05  XQJL0094-O-DPRC-CST
+                                          PIC S9(00015) COMP-3.
+      *            전전년금융비용
+               05  XQJL0094-O-BF-PYY-FNCS
+                                          PIC S9(00015) COMP-3.
+      *            전년금융비용
+               05  XQJL0094-O-PYY-FNCS
+                                          PIC S9(00015) COMP-3.
+      *            금융비용
+               05  XQJL0094-O-FNCS
+                                          PIC S9(00015) COMP-3.
+      *            전전년단기차입금
+               05  XQJL0094-O-BF-PYY-SHTRM-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            전년단기차입금
+               05  XQJL0094-O-PYY-SHTRM-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            단기차입금
+               05  XQJL0094-O-SHTRM-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            단기차입금상환금액
+               05  XQJL0094-O-SHTRM-AMBR-RPAYAMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3단기차입금상환금액
+               05  XQJL0094-O-Y-3S-AMBR-RPAYAMT
+                                          PIC S9(00015) COMP-3.
+      *            업종가중평균율
+               05  XQJL0094-O-BZTYP-WGHTG-AVG-RT
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            전전년금융총비용비율
+               05  XQJL0094-O-BF-PDFT-CST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            전년금융총비용비율
+               05  XQJL0094-O-PYY-FT-CST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            금융총비용비율
+               05  XQJL0094-O-FINAC-T-CST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            금융비용가중치값
+               05  XQJL0094-O-FNCS-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            Y3금융비용가중치값
+               05  XQJL0094-O-Y-3-FNCS-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            현금흐름기준금액
+               05  XQJL0094-O-CSFW-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3현금흐름기준금액
+               05  XQJL0094-O-Y-3-CSFW-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            전전년자기자본금
+               05  XQJL0094-O-BF-PYY-ONCP-AMT
+                                          PIC S9(00015) COMP-3.
+      *            전년자기자본금
+               05  XQJL0094-O-PYY-ONCP-AMT
+                                          PIC S9(00015) COMP-3.
+      *            기준년자기자본금
+               05  XQJL0094-O-BASE-YR-ONCP-AMT
+                                          PIC S9(00015) COMP-3.
+      *            자기자본산업적용비율
+               05  XQJL0094-O-ONCP-I-APLY-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            차입금자기자본율
+               05  XQJL0094-O-AMBR-ONCP-RT
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            전전년업체총차입금
+               05  XQJL0094-O-BF-PE-TOTAL-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            전년업체총차입금
+               05  XQJL0094-O-PYY-ENTP-TOTAL-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            업체총차입금
+               05  XQJL0094-O-ENTP-TOTAL-AMBR
+                                          PIC S9(00015) COMP-3.
+      *            신차입금자기자본비율
+               05  XQJL0094-O-NEW-AMBR-ONCP-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            Y3신차입금자기자본율
+               05  XQJL0094-O-Y-3N-AMBR-ONCP-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            차입금자본가중치값
+               05  XQJL0094-O-AMBR-CAPTL-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            Y3차입자본가중치값
+               05  XQJL0094-O-Y-3M-CAPTL-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            자기자본기준금액
+               05  XQJL0094-O-ONCP-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3자기자본기준금액
+               05  XQJL0094-O-Y-3-ONCP-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            상환능력기준한도
+               05  XQJL0094-O-SOLVN-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            Y3상환능력기준한도
+               05  XQJL0094-O-Y-3-SOLVN-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            전전년매출액
+               05  XQJL0094-O-BF-PYY-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            전년매출액
+               05  XQJL0094-O-PYY-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            매출액
+               05  XQJL0094-O-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            매출액산업적용비율
+               05  XQJL0094-O-SALEPR-I-APLY-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            Y3평균매출금액
+               05  XQJL0094-O-Y-3-AVG-ASALE-AMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3평균매출액비율
+               05  XQJL0094-O-Y-3-AVG-SALEPR-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            매출가중치값
+               05  XQJL0094-O-ASALE-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            전전년매출채권회전률
+               05  XQJL0094-O-BF-PAB-ROTAT-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            전년매출채권회전비율
+               05  XQJL0094-O-PYY-AB-ROTAT-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            매출채권회전비율
+               05  XQJL0094-O-ASALE-B-ROTAT-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            매출채권회전가중치값
+               05  XQJL0094-O-ASALE-BRR-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            Y3매출채권회전가중값
+               05  XQJL0094-O-Y-3ABRR-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            매출기준금액
+               05  XQJL0094-O-ASALE-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3매출기준금액
+               05  XQJL0094-O-Y-3-ASALE-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            기준전전년총자산
+               05  XQJL0094-O-BASE-BP-TOTAL-ASST
+                                          PIC S9(00015) COMP-3.
+      *            기준전년총자산
+               05  XQJL0094-O-BASE-PYY-TOTAL-ASST
+                                          PIC S9(00015) COMP-3.
+      *            전년총자산
+               05  XQJL0094-O-PYY-TOTAL-ASST
+                                          PIC S9(00015) COMP-3.
+      *            총자산산업적용비율
+               05  XQJL0094-O-TOTAL-AI-APLY-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            차입금총자산비율
+               05  XQJL0094-O-AMBR-T-ASST-RATO
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            신차입금총자산비율
+               05  XQJL0094-O-NEW-AT-ASST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            Y3신차입금총자산비율
+               05  XQJL0094-O-Y-3NAT-ASST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            전전년현금성자산금액
+               05  XQJL0094-O-BF-PC-INCLIN-ASAM
+                                          PIC S9(00015) COMP-3.
+      *            전년현금성자산금액
+               05  XQJL0094-O-PYY-CSH-INCLIN-ASAM
+                                          PIC S9(00015) COMP-3.
+      *            현금성자산금액
+               05  XQJL0094-O-CSH-INCLIN-ASAM
+                                          PIC S9(00015) COMP-3.
+      *            평균현금성자산금액
+               05  XQJL0094-O-AVG-CSH-INCLIN-ASAM
+                                          PIC S9(00015) COMP-3.
+      *            평균총자산금액
+               05  XQJL0094-O-AVG-TOTAL-ASAM
+                                          PIC S9(00015) COMP-3.
+      *            평균현금성자산비율
+               05  XQJL0094-O-AVG-CI-ASST-RATO
+                                          PIC S9(00004)V9(5) COMP-3.
+      *            차입자산비율가중치값
+               05  XQJL0094-O-BRRW-AR-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            Y3차입자산비율가중값
+               05  XQJL0094-O-Y-3BA-RATO-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            현금성자산가중치값
+               05  XQJL0094-O-CSH-IAR-WGHT-VAL
+                                          PIC S9(00003)V9(2) COMP-3.
+      *            자산기준금액
+               05  XQJL0094-O-ASST-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            Y3자산기준금액
+               05  XQJL0094-O-Y-3-ASST-BSAMT
+                                          PIC S9(00015) COMP-3.
+      *            규모기준한도
+               05  XQJL0094-O-SCAL-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            Y3규모기준한도금액
+               05  XQJL0094-O-Y-3-SCAL-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            기준한도
+               05  XQJL0094-O-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            Y3기준한도금액
+               05  XQJL0094-O-Y-3-BASE-CLAM
+                                          PIC S9(00015) COMP-3.
+      *            기준전전전년매출액
+               05  XQJL0094-O-BASE-BB-PYY-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            기준전전년매출액
+               05  XQJL0094-O-BASE-BF-PYY-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            기준전년매출액
+               05  XQJL0094-O-BASE-PYY-SALEPR
+                                          PIC S9(00015) COMP-3.
+      *            차입금매출액비율
+               05  XQJL0094-O-AMBR-SALEPR-RATO
+                                          PIC S9(00003)V9(2) COMP-3.
+      *===========================================================
+      *  XQJL0094   C O P Y B O O K   E N D
+      *===========================================================

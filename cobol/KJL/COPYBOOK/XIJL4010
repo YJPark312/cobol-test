@@ -1,0 +1,110 @@
+      *================================================================*
+      *@ NAME : XIJL4010                                               *
+      *@ DESC : IC관계기업현황조회 COPYBOOK                          *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-02-17 10:15:39                          *
+      *  생성일시     : 2017-02-17 10:15:40                          *
+      *  전체길이     : 00000018 BYTES                               *
+      *================================================================*
+           03  XIJL4010-RETURN.
+             05  XIJL4010-R-STAT                 PIC  X(002).
+                 88  COND-XIJL4010-OK            VALUE  '00'.
+                 88  COND-XIJL4010-KEYDUP        VALUE  '01'.
+                 88  COND-XIJL4010-NOTFOUND      VALUE  '02'.
+                 88  COND-XIJL4010-SPVSTOP       VALUE  '05'.
+                 88  COND-XIJL4010-ERROR         VALUE  '09'.
+                 88  COND-XIJL4010-ABNORMAL      VALUE  '98'.
+                 88  COND-XIJL4010-SYSERROR      VALUE  '99'.
+             05  XIJL4010-R-LINE                 PIC  9(006).
+             05  XIJL4010-R-ERRCD                PIC  X(008).
+             05  XIJL4010-R-TREAT-CD             PIC  X(008).
+             05  XIJL4010-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XIJL4010-IN.
+      *----------------------------------------------------------------*
+      *--       기준년월일
+             05  XIJL4010-I-BASE-YMD             PIC  X(008).
+      *--       고객식별자
+             05  XIJL4010-I-CUST-IDNFR           PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XIJL4010-OUT.
+      *----------------------------------------------------------------*
+      *--       그룹1(자금별여신현황조회)
+             05  XIJL4010-O-GROUP1.
+      *--         고객관리부점코드
+               07  XIJL4010-O-CUST-MGT-BRNCD     PIC  X(004).
+      *--         명목액기준한도
+               07  XIJL4010-O-TTL-AMT-BASE-CLAM  PIC  9(015).
+      *--         명목액기준잔액
+               07  XIJL4010-O-TTL-AMT-BASE-BAL   PIC  9(015).
+      *--         시설자금명목액기준한도
+               07  XIJL4010-O-FCLT-BASE-CLAM     PIC  9(015).
+      *--         시설자금명목액기준잔액
+               07  XIJL4010-O-FCLT-BASE-BAL      PIC  9(015).
+      *--         운전자금명목액기준한도
+               07  XIJL4010-O-WRKN-BASE-CLAM     PIC  9(015).
+      *--         운전자금명목액기준잔액
+               07  XIJL4010-O-WRKN-BASE-BAL      PIC  9(015).
+      *--         투자금융명목액기준한도
+               07  XIJL4010-O-INFC-BASE-CLAM     PIC  9(015).
+      *--         투자금융명목액기준잔액
+               07  XIJL4010-O-INFC-BASE-BAL      PIC  9(015).
+      *--         기타명목액기준한도
+               07  XIJL4010-O-ETC-BASE-CLAM      PIC  9(015).
+      *--         기타자금명목액기준잔액
+               07  XIJL4010-O-ECT-BASE-BAL       PIC  9(015).
+      *--         예비1
+               07  XIJL4010-O-FILLER1            PIC  X(060).
+      *--       그룹2(파생상품현황조회)
+             05  XIJL4010-O-GROUP2.
+      *--         총거래한도
+               07  XIJL4010-O-TOTAL-TRAN-CLAM    PIC  9(015).
+      *--         신용한도소진율
+               07  XIJL4010-O-CDLN-EXHS-RT       PIC  9(007)V9(02).
+      *--         신용거래한도
+               07  XIJL4010-O-CRDT-TRAN-CLAM     PIC  9(015).
+      *--         담보거래한도
+               07  XIJL4010-O-SCURTY-TRAN-CLAM   PIC  9(015).
+      *--         외환총한도소진율
+               07  XIJL4010-O-FX-T-LIMT-EXHS-RT   PIC  9(007)V9(02).
+      *--         담보소진율
+               07  XIJL4010-O-SCURTY-EXHS-RT      PIC  9(007)V9(02).
+      *--         예비2
+               07  XIJL4010-O-FILLER2            PIC  X(060).
+      *--       그룹3(포괄신용공여조회)
+             05  XIJL4010-O-GROUP3.
+      *--         한도승인금액
+               07  XIJL4010-O-LIMT-ATHOR-AMT     PIC  9(015).
+      *--         한도설정유효년월일
+               07  XIJL4010-O-LIMT-STUP-VALD-YMD PIC  X(008).
+      *--         예비3
+               07  XIJL4010-O-FILLER3            PIC  X(060).
+      *================================================================*
+      *        X  I  J  L  4  0  1  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XIJL4010-I-BASE-YMD           ;기준년월일
+      *X  XIJL4010-I-CUST-IDNFR         ;고객식별자
+      *G  XIJL4010-O-GROUP1             ;그룹1(자금별여신현황조회)
+      *X  XIJL4010-O-CUST-MGT-BRNCD     ;고객관리부점코드
+      *N  XIJL4010-O-TTL-AMT-BASE-CLAM  ;명목액기준한도
+      *N  XIJL4010-O-TTL-AMT-BASE-BAL   ;명목액기준잔액
+      *N  XIJL4010-O-FCLT-BASE-CLAM     ;시설자금명목액기준한도
+      *N  XIJL4010-O-FCLT-BASE-BAL      ;시설자금명목액기준잔액
+      *N  XIJL4010-O-WRKN-BASE-CLAM     ;운전자금명목액기준한도
+      *N  XIJL4010-O-WRKN-BASE-BAL      ;운전자금명목액기준잔액
+      *N  XIJL4010-O-INFC-BASE-CLAM     ;투자금융명목액기준한도
+      *N  XIJL4010-O-INFC-BASE-BAL      ;투자금융명목액기준잔액
+      *N  XIJL4010-O-ETC-BASE-CLAM      ;기타명목액기준한도
+      *N  XIJL4010-O-ECT-BASE-BAL       ;기타자금명목액기준잔액
+      *X  XIJL4010-O-FILLER1            ;예비1
+      *G  XIJL4010-O-GROUP2             ;그룹2(파생상품현황조회)
+      *N  XIJL4010-O-TOTAL-TRAN-CLAM    ;총거래한도
+      *X  XIJL4010-O-CDLN-EXHS-RT       ;신용한도소진율
+      *N  XIJL4010-O-CRDT-TRAN-CLAM     ;신용거래한도
+      *N  XIJL4010-O-SCURTY-TRAN-CLAM   ;담보거래한도
+      *X  XIJL4010-O-FILLER2            ;예비2
+      *G  XIJL4010-O-GROUP3             ;그룹3(포괄신용공여조회)
+      *N  XIJL4010-O-LIMT-ATHOR-AMT     ;한도승인금액
+      *X  XIJL4010-O-LIMT-STUP-VALD-YMD ;한도설정유효년월일
+      *X  XIJL4010-O-FILLER3            ;예비3

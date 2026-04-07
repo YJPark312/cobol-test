@@ -1,0 +1,133 @@
+//TKJLDP23 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%$WCALC %%$ODATE -1 WORKDAYS
+//*  %%SET %%B = %%SUBSTR %%A 3 6
+//*  %%SET %%C = %%SUBSTR %%A 7 2
+//*********************************************************************
+//STEP23  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD551.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0055 ')
+        ,CHAR('THKJL0055DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,계좌번호
+        ,계좌중복일련번호
+        ,고객식별자
+        ,고객관리번호
+        ,차주번호
+        ,계약한도구분
+        ,상품대분류코드
+        ,상품중분류코드
+        ,상품템플릿코드
+        ,상품번호
+        ,대출자격구분
+        ,"ISO국가코드"
+        ,관리부점코드
+        ,시작년월일
+        ,만기년월일
+        ,종료년월일
+        ,과목코드
+        ,통화코드
+        ,통화한도
+        ,통화금일잔액
+        ,"USD한도"
+        ,"USD금일잔액"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+    FROM DB2DBA.THKJL0055
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+     AND 과목코드              IN ('R05')
+    WITH UR;
+/*
+//*********************************************************************
+//*   국별익스포져(국외점포)계좌추출
+//*********************************************************************
+//STEP01 EXEC JZBDEXEC,MBR=BJLD551,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-TKJLDP23-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+/*
+//STEP26  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M,COND=(4,LT)
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.BJLD571.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJL0057 ')
+        ,CHAR('THKJL0057DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,관리부점코드
+        ,"ISO국가코드"
+        ,영문국가명
+        ,국가별관리한도
+        ,대출잔액
+        ,지급보증잔액
+        ,회사채잔액
+        ,주식잔액
+        ,유가증권잔액
+        ,예치금잔액
+        ,파생상품잔액
+        ,기타잔액
+        ,합계잔액
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,지역관리한도금액
+        ,당행국가신용등급구분
+        ,국가전체공통한도여부
+        ,국가전체공통한도금액
+        ,국가위험수준구분
+        ,한도관리지역구분
+    FROM DB2DBA.THKJL0057
+   WHERE 그룹회사코드           = 'KB0'
+     AND 기준년월일             = '%%A'
+    WITH UR;
+/*
+//*********************************************************************
+//*   국별부점별익스포져생성
+//*********************************************************************
+//STEP07 EXEC JZBDEXEC,MBR=BJLD571,OPT=&SYSUID
+//SYSIN    DD *
+KB0-%%A-TKJLDP23-001-ONLBAT-KB STAR-%%A
+//*자료기준년월일
+//

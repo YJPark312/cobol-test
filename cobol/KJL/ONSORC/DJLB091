@@ -1,0 +1,666 @@
+      *=================================================================00010001
+      *@업무명    : KJL     (Total Exposure)                          00020030
+      *@프로그램명: DJLB091 (기업및그룹한도신청및승인)              00030030
+      *@처리유형  : DC                                                00040030
+      *@처리개요  : 개별그룹기준한도저장                            00050030
+      *-----------------------------------------------------------------00060001
+      *                 P R O G R A M   변　경　이　력                00070030
+      *-----------------------------------------------------------------00080001
+      *@성명 : 일자 : 변　경　내　용                              00090030
+      * ----------------------------------------------------------------00100001
+      *김진태:20090525: 신규작성                                    00110030
+      *김진태:20091020: 시스템처리일시／사용자번호　삭제            00110030
+      *김진태:20091020: 한신평재무업종구분　＇００＇으로　삽입      00110030
+      *김진태:20091211: 에러메세지정비                              00110030
+      *김진태:20091219: 기처리된신청건일경우비정상종료후단말처리    00110030
+      *김진태:20101110: 한도진행상태구분　인스턴스　추가로인한　
+      *                   변경내용적용－기준한도저장시미처리（승인신청
+      *                   ）단계일경우에도비정상종료후단말에서에러처리
+      *                   THKJL0003 COPYBOOK 변경
+      *박주희:20170201:  KB-PIN 전환（２차）
+      * YBH    :20170706:  3개년 재무제표실적에 의한
+      *                   기준한도 산출
+      * YBH    :20211029: 프로세스 개선
+      *=================================================================00120001
+      ******************************************************************00130001
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형 00150030
+      **  ------------------------- ------------------------------------00160001
+      **  관리한도신청이력        : THKJL0003            : R          00170030
+      **  기준한도수정이력        : THKJL0004            : CRUD       00170030
+      ******************************************************************00240001
+       IDENTIFICATION                  DIVISION.                        00250001
+      *=================================================================00260001
+       PROGRAM-ID.                     DJLB091.                         00270001
+       AUTHOR.                         김진태.                        00280030
+       DATE-WRITTEN.                   09/05/25.                        00290001
+      *=================================================================00300001
+       ENVIRONMENT                     DIVISION.                        00310001
+      *=================================================================00320001
+       CONFIGURATION                   SECTION.                         00330001
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================00340001
+       DATA                            DIVISION.                        00350001
+      *=================================================================00360001
+       WORKING-STORAGE                 SECTION.                         00370001
+      *-----------------------------------------------------------------00380001
+      *CONSTANT ERROR AREA                                              00390001
+      *-----------------------------------------------------------------00400001
+       01  CO-ERROR-AREA.
+      *에러메시지정의
+           03  CO-B3000068             PIC  X(008) VALUE 'B3000068'.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B4200219             PIC  X(008) VALUE 'B4200219'.
+           03  CO-B4200221             PIC  X(008) VALUE 'B4200221'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-B4200224             PIC  X(008) VALUE 'B4200224'.
+      *조치메시지정의
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------00460001
+      * CONSTANT AREA                                                   00470001
+      *-----------------------------------------------------------------00480001
+       01  CO-AREA.                                                     00490001
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJLB091'.     00500001
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.          00510001
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.          00520001
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.          00530001
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.          00540001
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.          00550001
+                                                                        00560001
+           03  CO-CHA-1                PIC  X(001) VALUE '1'.           00570001
+           03  CO-CHA-2                PIC  X(001) VALUE '2'.           00570001
+           03  CO-CHA-3                PIC  X(001) VALUE '3'.           00570001
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.          00650069
+      *-----------------------------------------------------------------00740001
+      * WORKING AREA                                                    00750001
+      *-----------------------------------------------------------------00760001
+       01  WK-AREA.                                                     00770001
+           03  WK-STAT                 PIC  X(002).                     00780001
+      *-----------------------------------------------------------------00850001
+      * PGM INTERFACE PARAMETER                                         00860001
+      *-----------------------------------------------------------------00870001
+
+      *-----------------------------------------------------------------01860001
+      * DBIO SQLIO INTERFACE PARAMETER                                  01870001
+      *-----------------------------------------------------------------01880001
+      * DBIO  INTERFACE COPYBOOK
+           COPY    YCDBIOCA.                                            01900001
+      *-----------------------------------------------------------------01910001
+      * TABLE ACCESS INTERFACE PARAMETER                                01920001
+      * LIBRARY : KJL.DDB2.DBCOPY                                       01930001
+      *-----------------------------------------------------------------01940001
+      * DBIO ACCESS KEY관리                                           01950030
+      *-----------------------------------------------------------------01960001
+      * DBIO KEY COPYBOOK
+       01  TKJL0003-KEY.                                                02050001
+           COPY    TKJL0003.                                            02060001
+      * DBIO RECORD COPYBOOK
+       01  TRJL0003-REC.                                                02070001
+           COPY    TRJL0003.                                            02080001
+      * DBIO KEY COPYBOOK
+       01  TKJL0004-KEY.                                                02050001
+           COPY    TKJL0004.                                            02060001
+      * DBIO RECORD COPYBOOK
+       01  TRJL0004-REC.                                                02070001
+           COPY    TRJL0004.                                            02080001
+      *-----------------------------------------------------------------02210001
+       LINKAGE                         SECTION.                         02220001
+      *-----------------------------------------------------------------02230001
+      * COMMON AREA COPYBOOK
+       01  YCCOMMON-CA.                                                 02240001
+           COPY    YCCOMMON.                                            02250001
+      * DC COPYBOOK
+       01  XDJLB091-CA.                                                 02260001
+           COPY    XDJLB091.                                            02270001
+      *=================================================================02280001
+       PROCEDURE                       DIVISION                         02290001
+                                       USING       YCCOMMON-CA          02300001
+                                                   XDJLB091-CA          02310001
+                                                   .                    02320001
+      *=================================================================02330001
+      *-----------------------------------------------------------------02340001
+      *@  처리메인                                                    02350030
+      *-----------------------------------------------------------------02360001
+       S0000-MAIN-RTN.                                                  02370001
+                                                                        02380001
+      *@  초기화                                                      02390030
+           PERFORM S1000-INITIALIZE-RTN                                 02400001
+              THRU S1000-INITIALIZE-EXT                                 02410001
+                                                                        02420001
+      *@  입력값　CHECK                                               02430030
+           PERFORM S2000-VALIDATION-RTN                                 02440001
+              THRU S2000-VALIDATION-EXT                                 02450001
+                                                                        02460001
+      *@  업무처리                                                    02470030
+           PERFORM S3000-PROCESS-RTN                                    02480001
+              THRU S3000-PROCESS-EXT                                    02490001
+                                                                        02500001
+      *@  처리종료                                                    02510030
+           PERFORM S9000-FINAL-RTN                                      02520001
+              THRU S9000-FINAL-EXT                                      02530001
+           .                                                            02540001
+       S0000-MAIN-EXT.                                                  02550001
+           EXIT.                                                        02560001
+      *-----------------------------------------------------------------02570001
+      *@  초기화                                                      02580030
+      *-----------------------------------------------------------------02590001
+       S1000-INITIALIZE-RTN.                                            02600001
+                                                                        02610001
+      *@   WK-AREA 및　프로그램파라미터　초기화                       02620030
+           INITIALIZE WK-AREA                                           02630001
+      *               DBIO
+                      YCDBIOCA-CA                                       02640001
+                                                                        02660001
+      *@  출력영역　및　결과코드　초기화                              02670030
+           INITIALIZE XDJLB091-OUT                                      02680001
+                      XDJLB091-RETURN                                   02690001
+           .                                                            02700001
+       S1000-INITIALIZE-EXT.                                            02710001
+           EXIT.                                                        02720001
+      *-----------------------------------------------------------------02730001
+      *@  입력값검증                                                  02740030
+      *-----------------------------------------------------------------02750001
+       S2000-VALIDATION-RTN.                                            02760001
+                                                                        02770001
+      *@처리구분체크
+           IF XDJLB091-I-PRCSS-DSTIC = CO-CHA-01
+              CONTINUE
+           ELSE
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@고객구분
+           IF XDJLB091-I-CUST-DSTIC = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@   KB-PIN
+           IF XDJLB091-I-KB-PIN = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+
+      *@신청번호
+           IF XDJLB091-I-APLCN-NO = SPACE
+      * 에러메세지 : 필수항목미입력오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .                                                            02880001
+       S2000-VALIDATION-EXT.                                            02890001
+           EXIT.                                                        02900001
+      *-----------------------------------------------------------------03120001
+      *@  업무처리                                                    03130030
+      *-----------------------------------------------------------------03140001
+       S3000-PROCESS-RTN.                                               03150001
+
+      *@1  진행상태가　처리／미처리（승인신청）인지를　확인한다
+           PERFORM S3100-THKJL0003-SELECT-RTN
+              THRU S3100-THKJL0003-SELECT-EXT
+
+      *@2  기준한도　수정이력　삭제
+           PERFORM S3200-THKJL0004-DELETE-RTN
+              THRU S3200-THKJL0004-DELETE-EXT
+
+      *@3  기준한도　수정이력　삽입
+           PERFORM S3300-THKJL0004-INSERT-RTN
+              THRU S3300-THKJL0004-INSERT-EXT
+
+      *@   처리결과MOVE
+           MOVE CO-STAT-OK
+             TO WK-STAT
+           .                                                            03380001
+       S3000-PROCESS-EXT.                                               03390001
+           EXIT.                                                        03400001
+      *-----------------------------------------------------------------
+      *@  해당신청건이　처리및미처리（승인신청）되었는지를　조회
+      *-----------------------------------------------------------------
+       S3100-THKJL0003-SELECT-RTN.
+
+      *@1.1변수초기화
+           INITIALIZE TKJL0003-KEY
+                      TRJL0003-REC
+      *@1.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD   TO KJL0003-PK-GROUP-CO-CD
+           MOVE XDJLB091-I-APLCN-NO TO KJL0003-PK-LIMT-APLCN-NO
+
+      *@1.3DBIO CALL
+           #DYDBIO SELECT-CMD-N TKJL0003-PK TRJL0003-REC
+      *@1.4처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+      *@진행상태가처리，미처리（승인신청）이면단말에서에러처리
+      *@2010.11.10
+                    IF RJL0003-LIMT-P-STUS-DSTCD = CO-CHA-1 OR
+                                                   CO-CHA-3
+                       MOVE CO-STAT-ABNORMAL
+                         TO WK-STAT
+      *@이미처리된신청건일경우비정상종료후단말에서안내메세지출력
+                       PERFORM S9000-FINAL-RTN
+                          THRU S9000-FINAL-EXT
+                    END-IF
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3100-THKJL0003-SELECT-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 기준한도　수정이력　삭제
+      *-----------------------------------------------------------------
+       S3200-THKJL0004-DELETE-RTN.
+
+      *@2.1변수초기화
+           INITIALIZE TKJL0004-KEY
+                      TRJL0004-REC
+      *@2.2변수 MOVE
+           MOVE BICOM-GROUP-CO-CD   TO KJL0004-PK-GROUP-CO-CD
+           MOVE XDJLB091-I-APLCN-NO TO KJL0004-PK-LIMT-APLCN-NO
+
+      *@프로그램　호출                                                02542309
+           #DYDBIO SELECT-CMD-Y TKJL0004-PK TRJL0004-REC                02542409
+
+      *@호출결과확인                                                  02542509
+           EVALUATE TRUE                                                02542609
+               WHEN COND-DBIO-OK                                        02542709
+               WHEN COND-DBIO-MRNF                                      02543009
+                    CONTINUE
+               WHEN OTHER                                               02543309
+      *@원장조회오류일경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．                   02543409
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다               02543509
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR        02543609
+           END-EVALUATE                                                 02543709
+
+      *@2.3DBIO CALL
+           #DYDBIO DELETE-CMD-Y TKJL0004-PK TRJL0004-REC
+      *@2.4처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+               WHEN COND-DBIO-MRNF
+                    CONTINUE
+               WHEN OTHER
+      *@원장삭제오류일경우
+      *@에러메세지 : 테이블 DELETE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200219 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3200-THKJL0004-DELETE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 기준한도　수정이력　삽입
+      *-----------------------------------------------------------------
+       S3300-THKJL0004-INSERT-RTN.
+
+      *@3.1  원장등록
+      *@관련테이블 : 기준한도수정이력  접근유형 : CREATE
+
+      *@그룹회사코드
+           MOVE BICOM-GROUP-CO-CD
+             TO RJL0004-GROUP-CO-CD
+
+      *@한도신청번호
+           MOVE XDJLB091-I-APLCN-NO
+             TO RJL0004-LIMT-APLCN-NO
+
+170201*@   KB-PIN
+           MOVE XDJLB091-I-KB-PIN
+             TO RJL0004-CUST-IDNFR
+
+      *@한신평재무업종구분
+           MOVE '00'
+             TO RJL0004-KIS-F-BZTYP-DSTCD
+
+      *@등록년월
+           MOVE BICOM-TRAN-BASE-YMD(1:6)
+             TO RJL0004-REGI-YM
+
+      *@등록일
+           MOVE BICOM-TRAN-BASE-YMD(7:2)
+             TO RJL0004-REGI-DD
+
+      *@내부신용평가등급구분
+           MOVE XDJLB091-I-CRDRAT
+             TO RJL0004-INTNL-CV-GRD-DSTCD
+
+      *@결산년월
+           MOVE XDJLB091-I-STLACC-YM
+             TO RJL0004-STLACC-YM
+
+      *@신표준산업분류코드
+           MOVE XDJLB091-I-STND-I-CLSFI-CD
+             TO RJL0004-NEW-SI-CLSFI-CD
+
+211029*    TE산업분류코드
+           MOVE XDJLB091-I-TE-IDSTRY-CLSFI-CD
+             TO RJL0004-TE-IDSTRY-CLSFI-CD
+
+      *@업종평균적용년
+           MOVE XDJLB091-I-BZTYP-AVG-BASE-YR
+             TO RJL0004-BZTYP-AVG-APLY-YR
+
+      *@신용등급지원비율
+           MOVE XDJLB091-I-CRDRAT-P-SPORT-RATO
+             TO RJL0004-CRDRAT-SPORT-RATO
+
+      *@전전년경상이익
+           MOVE ZERO
+             TO RJL0004-BF-PYY-ODNR-PRFT
+      *@전년경상이익
+           MOVE ZERO
+             TO RJL0004-PYY-ODNR-PRFT
+      *@기준년경상이익
+           MOVE ZERO
+             TO RJL0004-BASE-YR-ODNR-PRFT
+
+170706*@  전전년영업이익
+           COMPUTE RJL0004-BF-PYY-OPRFT
+                 = XDJLB091-I-BF-PYY-OPRFT * 1000000
+      *@  전년영업이익
+           COMPUTE RJL0004-PYY-OPRFT
+                 = XDJLB091-I-PYY-OPRFT * 1000000
+      *@영업이익
+           COMPUTE RJL0004-OPRFT
+                 = XDJLB091-I-OPRFT * 1000000
+
+      *@  전전년이자수익
+           COMPUTE RJL0004-BF-PYY-INT-ERN
+                 = XDJLB091-I-BF-PYY-IMPRT-INT * 1000000
+      *@  전년이자수익
+           COMPUTE RJL0004-PYY-INT-ERN
+                 = XDJLB091-I-PYY-IMPRT-INT * 1000000
+      *@이자수익
+           COMPUTE RJL0004-INT-ERN
+                 = XDJLB091-I-IMPRT-INT * 1000000
+
+      *@  전전년감가상각비
+           COMPUTE RJL0004-BF-PYY-DPRC-CST
+                 = XDJLB091-I-BF-PYY-DPRC-CST * 1000000
+      *@  전년감가상각비
+           COMPUTE RJL0004-PYY-DPRC-CST
+                 = XDJLB091-I-PYY-DPRC-CST * 1000000
+      *@감가상각비
+           COMPUTE RJL0004-DPRC-CST
+                 = XDJLB091-I-DPRC-CST * 1000000
+
+      *@  전전년금융비용
+           COMPUTE RJL0004-BF-PYY-FNCS
+                 = XDJLB091-I-BF-PYY-FNCS * 1000000
+      *@  전년금융비용
+           COMPUTE RJL0004-PYY-FNCS
+                 = XDJLB091-I-PYY-FNCS * 1000000
+      *@금융비용
+           COMPUTE RJL0004-FNCS
+                 = XDJLB091-I-FNCS * 1000000
+
+      *@  전전년단기차입금
+           COMPUTE RJL0004-BF-PYY-SHTRM-AMBR
+                 = XDJLB091-I-BF-PYY-SHTRM-AMBR * 1000000
+      *@  전년단기차입금
+           COMPUTE RJL0004-PYY-SHTRM-AMBR
+                 = XDJLB091-I-PYY-SHTRM-AMBR * 1000000
+      *@단기차입금
+           COMPUTE RJL0004-SHTRM-AMBR
+                 = XDJLB091-I-SHTRM-AMBR * 1000000
+
+      *@차입금상환예상액
+           COMPUTE RJL0004-SHTRM-AMBR-RPAYAMT
+                 = XDJLB091-I-AMBR-R-ANTICI-AMT * 1000000
+170706*@   Y3단기차입금상환금액
+           COMPUTE RJL0004-Y-3S-AMBR-RPAYAMT
+                 = XDJLB091-I-Y-3S-AMBR-RPAYAMT * 1000000
+
+      *@업종가중평균율
+           MOVE XDJLB091-I-WGHTG-AVGZ-IRT
+             TO RJL0004-BZTYP-WGHTG-AVG-RT
+
+211029*   전전년금융총비용비율
+           MOVE XDJLB091-I-BF-PFT-CST-RATO
+             TO RJL0004-BF-PFT-CST-RATO
+211029*   전년금융총비용비율
+           MOVE XDJLB091-I-PYY-FT-CST-RATO
+             TO RJL0004-PYY-FT-CST-RATO
+211029*   금융총비용비율
+           MOVE XDJLB091-I-FINAC-T-CST-RATO
+             TO RJL0004-FINAC-T-CST-RATO
+
+211029*   금융비용가중치값
+           MOVE XDJLB091-I-FNCS-WGHT-VAL
+             TO RJL0004-FNCS-WGHT-VAL
+211029*   Y3금융비용가중치값
+           MOVE XDJLB091-I-Y-3-FNCS-WGHT-VAL
+             TO RJL0004-Y-3-FNCS-WGHT-VAL
+
+      *@현금흐름기준금액
+           COMPUTE RJL0004-CSFW-BSAMT
+                 = XDJLB091-I-CSFW-BASE-AMT * 1000000
+170706*@   Y3현금흐름기준금액
+           COMPUTE RJL0004-Y-3-CSFW-BSAMT
+                 = XDJLB091-I-Y-3-CSFW-BSAMT * 1000000
+
+170706*@  전전년자기자본금
+           COMPUTE RJL0004-BF-PYY-ONCP-AMT
+                 = XDJLB091-I-BF-PYY-ONCP-AMT * 1000000
+170706*@  전년자기자본금
+           COMPUTE RJL0004-PYY-ONCP-AMT
+                 = XDJLB091-I-PYY-ONCP-AMT * 1000000
+      *@기준년자기자본금
+           COMPUTE RJL0004-BASE-YR-ONCP-AMT
+                 = XDJLB091-I-ONCP * 1000000
+
+211029*   자기자본산업적용비율
+           MOVE XDJLB091-I-ONCP-I-APLY-RATO
+             TO RJL0004-ONCP-I-APLY-RATO
+
+      *@금융자기자본비율
+           MOVE ZERO
+             TO RJL0004-FINAC-ONCP-RATO
+
+      *@차입금자기자본율(업종평균)
+           MOVE XDJLB091-I-AMBR-ONCP-RT
+             TO RJL0004-AMBR-ONCP-RT
+
+170706*@  전전년업체총차입금
+           COMPUTE RJL0004-BF-PE-TOTAL-AMBR
+                 = XDJLB091-I-BF-PE-TOTAL-AMBR * 1000000
+      *@  전년업체총차입금
+           COMPUTE RJL0004-PYY-ENTP-TOTAL-AMBR
+                 = XDJLB091-I-PYY-ENTP-TOTAL-AMBR * 1000000
+      *@업체총차입금
+           COMPUTE RJL0004-ENTP-TOTAL-AMBR
+                 = XDJLB091-I-TOTAL-AMBR * 1000000
+
+211029*   신차입금자기자본비율(총차입금자기자본비율)
+           MOVE XDJLB091-I-TOTAL-A-ONCP-RATO
+             TO RJL0004-NEW-AMBR-ONCP-RATO
+211029*    Y3신차입금자기자본율(Y3총차입금자기자본비율)
+           MOVE XDJLB091-I-Y-3T-AMBR-ONCP-RATO
+             TO RJL0004-Y-3N-AMBR-ONCP-RATO
+211029*   차입금자본가중치값
+           MOVE XDJLB091-I-AMBR-CAPTL-WGHT-VAL
+             TO RJL0004-AMBR-CAPTL-WGHT-VAL
+211029*   Y3차입자본가중치값
+           MOVE XDJLB091-I-Y-3A-CAPTL-WGHT-VAL
+             TO RJL0004-Y-3A-CAPTL-WGHT-VAL
+
+      *@자기자본기준금액
+           COMPUTE RJL0004-ONCP-BSAMT
+                 = XDJLB091-I-ONCP-BASE-AMT * 1000000
+170706*@   Y3자기자본기준금액
+           COMPUTE RJL0004-Y-3-ONCP-BSAMT
+                 = XDJLB091-I-Y-3-ONCP-BSAMT * 1000000
+
+      *@상환능력기준한도
+           COMPUTE RJL0004-SOLVN-BASE-CLAM
+                 = XDJLB091-I-SOLVN-BASE-LIMT * 1000000
+      *@   Y3상환능력기준한도
+           COMPUTE RJL0004-Y-3-SOLVN-BASE-CLAM
+                 = XDJLB091-I-Y-3-SOLVN-BASE-CLAM * 1000000
+
+      *@  전전년매출액
+           COMPUTE RJL0004-BF-PYY-SALEPR
+                 = XDJLB091-I-BF-PYY-SALEPR * 1000000
+      *@  전년매출액
+           COMPUTE RJL0004-PYY-SALEPR
+                 = XDJLB091-I-PYY-SALEPR * 1000000
+      *@매출액
+           COMPUTE RJL0004-SALEPR
+                 = XDJLB091-I-SALEPR * 1000000
+
+211029*   매출액산업적용비율
+           MOVE XDJLB091-I-SALEPR-I-APLY-RATO
+             TO RJL0004-SALEPR-I-APLY-RATO
+
+211029*    Y3평균매출금액
+           COMPUTE RJL0004-Y-3-AVG-ASALE-AMT
+                 = XDJLB091-I-Y-3-AVG-ASALE-AMT * 1000000
+211029*    Y3평균매출액비율
+           MOVE XDJLB091-I-Y-3-AVG-SALEPR-RATO
+             TO RJL0004-Y-3-AVG-SALEPR-RATO
+211029*   매출가중치값
+           MOVE XDJLB091-I-ASALE-WGHT-VAL
+             TO RJL0004-ASALE-WGHT-VAL
+
+211029*   전전년매출채권회전률
+           MOVE XDJLB091-I-BF-PAB-ROTAT-RATO
+             TO RJL0004-BF-PAB-ROTAT-RATO
+211029*   전년매출채권회전비율
+           MOVE XDJLB091-I-PYY-AB-ROTAT-RATO
+             TO RJL0004-PYY-AB-ROTAT-RATO
+211029*   매출채권회전비율
+           MOVE XDJLB091-I-ASALE-B-ROTAT-RATO
+             TO RJL0004-ASALE-B-ROTAT-RATO
+
+211029*   매출채권회전가중치값
+           MOVE XDJLB091-I-ASALE-BR-WGHT-VAL
+             TO RJL0004-ASALE-BRR-WGHT-VAL
+211029*    Y3매출채권회전가중값
+           MOVE XDJLB091-I-Y-3ABR-WGHTG-VAL
+             TO RJL0004-Y-3ABRR-WGHT-VAL
+
+211029*   매출기준금액
+           COMPUTE RJL0004-ASALE-BSAMT
+                 = XDJLB091-I-ASALE-BSAMT     * 1000000
+211029*   Y3매출기준금액
+           COMPUTE RJL0004-Y-3-ASALE-BSAMT
+                 = XDJLB091-I-Y-3-ASALE-BSAMT * 1000000
+
+      *@  기준전전년총자산
+           COMPUTE RJL0004-BASE-BP-TOTAL-ASST
+                 = XDJLB091-I-BASE-BP-TOTAL-ASST * 1000000
+      *@  기준전년총자산
+           COMPUTE RJL0004-BASE-PYY-TOTAL-ASST
+                 = XDJLB091-I-BASE-PYY-TOTAL-ASST * 1000000
+      *@전년총자산(전년이 붙어있지만 기준년총자산 임)
+           COMPUTE RJL0004-PYY-TOTAL-ASST
+                 = XDJLB091-I-TOTAL-ASST * 1000000
+
+211029*   총자산산업적용비율
+           MOVE XDJLB091-I-TOTAL-AI-APLY-RATO
+             TO RJL0004-TOTAL-AI-APLY-RATO
+      *@차입금총자산비율(업종평균)
+           MOVE XDJLB091-I-AMBR-T-ASST-RATO
+             TO RJL0004-AMBR-T-ASST-RATO
+211029*   신차입금총자산비율(총차입금총자산비율)
+           MOVE XDJLB091-I-TOTAL-AT-ASST-RATO
+             TO RJL0004-NEW-AT-ASST-RATO
+211029*    Y3신차입금총자산비율(Y3총차입금총자산비율)
+           MOVE XDJLB091-I-Y-3TAT-ASST-RATO
+             TO RJL0004-Y-3NAT-ASST-RATO
+
+211029*   전전년현금성자산금액
+           COMPUTE RJL0004-BF-PC-INCLIN-ASAM
+                 = XDJLB091-I-BF-PC-INCLIN-ASAM   * 1000000
+211029*   전년현금성자산금액
+           COMPUTE RJL0004-PYY-CSH-INCLIN-ASAM
+                 = XDJLB091-I-PYY-CSH-INCLIN-ASAM * 1000000
+211029*   현금성자산금액
+           COMPUTE RJL0004-CSH-INCLIN-ASAM
+                 = XDJLB091-I-CSH-INCLIN-ASAM     * 1000000
+
+211029*   평균현금성자산금액
+           COMPUTE RJL0004-AVG-CSH-INCLIN-ASAM
+                 = XDJLB091-I-AVG-CSH-INCLIN-ASAM * 1000000
+211029*   평균총자산금액
+           COMPUTE RJL0004-AVG-TOTAL-ASAM
+                 = XDJLB091-I-AVG-TOTAL-ASAM      * 1000000
+211029*   평균현금성자산비율
+           MOVE XDJLB091-I-AVG-CI-ASST-RATO
+             TO RJL0004-AVG-CI-ASST-RATO
+
+211029*   차입자산비율가중치값
+           MOVE XDJLB091-I-BRRW-AR-WGHT-VAL
+             TO RJL0004-BRRW-AR-WGHT-VAL
+211029*    Y3차입자산비율가중값
+           MOVE XDJLB091-I-Y-3BA-RATO-WGHT-VAL
+             TO RJL0004-Y-3BA-RATO-WGHT-VAL
+211029*   현금성자산가중치값
+           MOVE XDJLB091-I-CSH-I-ASST-WGHT-VAL
+             TO RJL0004-CSH-IAR-WGHT-VAL
+
+211029*   자산기준금액
+           COMPUTE RJL0004-ASST-BSAMT
+                 = XDJLB091-I-ASST-BSAMT     * 1000000
+211029*   Y3자산기준금액
+           COMPUTE RJL0004-Y-3-ASST-BSAMT
+                 = XDJLB091-I-Y-3-ASST-BSAMT * 1000000
+
+      *@규모기준한도
+           COMPUTE RJL0004-SCAL-BASE-CLAM
+                 = XDJLB091-I-SCAL-BASE-LIMT * 1000000
+170706*@   Y3규모기준한도금액
+           COMPUTE RJL0004-Y-3-SCAL-BASE-CLAM
+                 = XDJLB091-I-Y-3-SCAL-BASE-CLAM * 1000000
+
+      *@기준한도
+           COMPUTE RJL0004-BASE-CLAM
+                 = XDJLB091-I-BASE-LIMT * 1000000
+      *@   Y3기준한도금액
+           COMPUTE RJL0004-Y-3-BASE-CLAM
+                 = XDJLB091-I-Y-3-BASE-CLAM * 1000000
+
+      *@3.2DBIO CALL
+           #DYDBIO INSERT-CMD-Y TKJL0004-PK TRJL0004-REC
+      *@3.3처리결과확인
+           EVALUATE TRUE
+               WHEN COND-DBIO-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장등록오류일경우
+      *@에러메세지 : 테이블 INSERT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B4200221 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3300-THKJL0004-INSERT-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------32250001
+      *@  처리종료                                                    32260030
+      *-----------------------------------------------------------------32270001
+       S9000-FINAL-RTN.                                                 32280001
+      *@3 종료처리                                                    32290030
+                                                                        32300001
+      *@   처리결과
+           MOVE WK-STAT
+             TO XDJLB091-O-PRCSS-RSULT
+
+      *@3.1 프로그램 종료                                           32310030
+      *@처리내용 : 프로그램을 정상 종료 함                    32320030
+           #OKEXIT  CO-STAT-OK                                          32340001
+           .                                                            32350001
+       S9000-FINAL-EXT.                                                 32360001
+           EXIT.                                                        32370001

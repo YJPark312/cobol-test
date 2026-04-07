@@ -1,0 +1,54 @@
+      *================================================================*
+      *@ NAME : V1JL4060                                               *
+      *@ DESC : CRM섭외정보현황조회                                  *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2017-10-24 11:01:57                          *
+      *  생성일시     : 2017-10-24 11:02:02                          *
+      *  전체길이     : 00067505 BYTES                               *
+      *================================================================*
+      *--     총라인수
+ROWCNT     07  V1JL4060-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드
+           07  V1JL4060-GRID                     OCCURS 0 TO 000500
+               DEPENDING ON V1JL4060-TOTAL-LINE-CNT.
+      *--       대분류업종코드
+             09  V1JL4060-LAG-CLSFI-BZTYP-CD     PIC  X(003).
+      *--       대분류업종코드명
+             09  V1JL4060-LAG-C-BZTYP-CD-NAME    PIC  X(032).
+      *--       협상유치계획건수
+             09  V1JL4060-ATRC-PLAN-NOITM1       PIC  9(005).
+      *--       협상유치계획금액
+             09  V1JL4060-ATRC-PLAN-AMT1         PIC  9(015).
+      *--       상품제안유치계획건수
+             09  V1JL4060-ATRC-PLAN-NOITM2       PIC  9(005).
+      *--       상품제안유치계획금액
+             09  V1JL4060-ATRC-PLAN-AMT2         PIC  9(015).
+      *--       의사결정중유치계획건
+             09  V1JL4060-ATRC-PLAN-NOITM3       PIC  9(005).
+      *--       의사결정중유치계획금
+             09  V1JL4060-ATRC-PLAN-AMT3         PIC  9(015).
+      *--       계약체결중유치계획건
+             09  V1JL4060-ATRC-PLAN-NOITM4       PIC  9(005).
+      *--       계약체결중유치계획금
+             09  V1JL4060-ATRC-PLAN-AMT4         PIC  9(015).
+      *--       유치계획건수
+             09  V1JL4060-ATRC-PLAN-NOITM        PIC  9(005).
+      *--       유치계획금액
+             09  V1JL4060-ATRC-PLAN-AMT          PIC  9(015).
+      *================================================================*
+      *        V  1  J  L  4  0  6  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *L  V1JL4060-TOTAL-LINE-CNT       ;총라인수
+      *A  V1JL4060-GRID                 ;그리드
+      *X  V1JL4060-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JL4060-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *N  V1JL4060-ATRC-PLAN-NOITM1     ;협상유치계획건수
+      *N  V1JL4060-ATRC-PLAN-AMT1       ;협상유치계획금액
+      *N  V1JL4060-ATRC-PLAN-NOITM2     ;상품제안유치계획건수
+      *N  V1JL4060-ATRC-PLAN-AMT2       ;상품제안유치계획금액
+      *N  V1JL4060-ATRC-PLAN-NOITM3     ;의사결정중유치계획건
+      *N  V1JL4060-ATRC-PLAN-AMT3       ;의사결정중유치계획금
+      *N  V1JL4060-ATRC-PLAN-NOITM4     ;계약체결중유치계획건
+      *N  V1JL4060-ATRC-PLAN-AMT4       ;계약체결중유치계획금
+      *N  V1JL4060-ATRC-PLAN-NOITM      ;유치계획건수
+      *N  V1JL4060-ATRC-PLAN-AMT        ;유치계획금액

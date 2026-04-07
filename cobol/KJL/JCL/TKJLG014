@@ -1,0 +1,552 @@
+//TKJLG014 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* 지주사 리스크분석DATA 구축 UNLOAD
+//*  SUB한도월집계 (THKJL0064)
+//*  KJL.SM.KJL0064.EXPM21.G014 => KB0_FBJ_EXP_M21_YYYYMM.DAT
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%MEND%%$OYEAR.%%OMONTH
+//*********************************************************************
+//DELETE   EXEC PGM=IDCAMS
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHKTMP4'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHK4'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DATTMP4'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DAT4'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP4,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,HEX(CURRENT DATE)
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140430'
+   GROUP BY 기준년월일
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP4,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHK4,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP4,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,그룹회사코드
+        ,CHAR(',')
+        ,"SUB한도구분"
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB한도"))
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB잔액"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 그룹회사코드
+                                    ,기준년월일
+                                    ,"SUB한도구분") AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140430'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP4,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.DAT4,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0064 TE한도월집계
+//*-------------------------------------------------------------------*
+//JL0064C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.CHK4 -
+    &TODSN="KB0_FBJ_EXP_M21_201404.chk"
+  SIGNOFF
+/*
+//JL0064D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.DAT4 -
+    &TODSN="KB0_FBJ_EXP_M21_201404.dat"
+  SIGNOFF
+/*
+//DELETE   EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHKTMP5'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHK5'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DATTMP5'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DAT5'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP5,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,HEX(CURRENT DATE)
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140530'
+   GROUP BY 기준년월일
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP5,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHK5,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP5,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,그룹회사코드
+        ,CHAR(',')
+        ,"SUB한도구분"
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB한도"))
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB잔액"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 그룹회사코드
+                                    ,기준년월일
+                                    ,"SUB한도구분") AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140530'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP5,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.DAT5,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0064 TE한도월집계
+//*-------------------------------------------------------------------*
+//JL0064C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.CHK5 -
+    &TODSN="KB0_FBJ_EXP_M21_201405.chk"
+  SIGNOFF
+/*
+//JL0064D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.DAT5 -
+    &TODSN="KB0_FBJ_EXP_M21_201405.dat"
+  SIGNOFF
+/*
+//DELETE   EXEC PGM=IDCAMS,COND=(4,LT)
+//SYSPRINT DD   SYSOUT=*
+//SYSIN    DD   *
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHKTMP6'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.CHK6'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DATTMP6'
+  DELETE  'KJL.SM.KJL0064.EXPM21.G014.DAT6'
+
+  SET MAXCC=0
+/*
+//STEP01 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP6,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,HEX(CURRENT DATE)
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(COUNT(1))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140630'
+   GROUP BY 기준년월일
+    WITH UR;
+/*
+//STEP02 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHKTMP6,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.CHK6,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=26,BLKSIZE=27950)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//STEP03 EXEC PGM=IKJEFT01,
+//            DYNAMNBR=20,
+//            REGION=0M
+//STEPLIB  DD DSN=DB2APS.DSND10.SDSNLOAD,
+//            DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH DD DUMMY
+//SYSREC00 DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP6,
+//            UNIT=SYSPA,
+//            DISP=(NEW,CATLG,CATLG),
+//            SPACE=(CYL,(0050,0030),RLSE),
+//            DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT DD SYSOUT=*
+//SYSDBOUT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSUDUMP DD DUMMY
+//SYSIN    DD *
+  SELECT CHAR(SUBSTR(기준년월일,1,6))
+        ,CHAR(',')
+        ,그룹회사코드
+        ,CHAR(',')
+        ,"SUB한도구분"
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB한도"))
+        ,CHAR(',')
+        ,CHAR(DIGITS("SUB잔액"))
+        ,CHAR(',')
+        ,CHAR(REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE(
+              REPLACE('.'||DIGITS(CAST(
+         ROW_NUMBER() OVER (ORDER BY 그룹회사코드
+                                    ,기준년월일
+                                    ,"SUB한도구분") AS DEC(10)))
+                      ,'.000000000','         ')
+                      ,'.00000000' ,'        ' )
+                      ,'.0000000'  ,'       '  )
+                      ,'.000000'   ,'      '   )
+                      ,'.00000'    ,'     '    )
+                      ,'.0000'     ,'    '     )
+                      ,'.000'      ,'   '      )
+                      ,'.00'       ,'  '       )
+                      ,'.0'        ,' '        )
+                      ,'.'         ,''         ))
+    FROM DB2DBA.THKJL0064
+   WHERE 그룹회사코드 = 'KB0'
+     AND 기준년월일   = '20140630'
+    WITH  UR;
+/*
+//STEP04 EXEC PGM=SORT
+//SORTIN   DD DSN=KJL.SM.KJL0064.EXPM21.G014.DATTMP6,DISP=SHR
+//SORTOUT  DD DSN=KJL.SM.KJL0064.EXPM21.G014.DAT6,
+//            DISP=(NEW,CATLG,CATLG),SPACE=(CYL,(50,30),RLSE),
+//            UNIT=SYSPA,DCB=(RECFM=FB,LRECL=55,BLKSIZE=27940)
+//SORTWK01 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK02 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SORTWK03 DD SPACE=(CYL,(300,200),RLSE),UNIT=SYSPA
+//SYSPRINT DD SYSOUT=*
+//SYSOUT   DD SYSOUT=*
+//SYSIN    DD *
+  SORT    FIELDS=COPY
+/*
+//*-------------------------------------------------------------------*
+//*   THKJL0064 TE한도월집계
+//*-------------------------------------------------------------------*
+//JL0064C   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.CHK6 -
+    &TODSN="KB0_FBJ_EXP_M21_201406.chk"
+  SIGNOFF
+/*
+//JL0064D   EXEC PGM=DMBATCH,PARM=(YYSLYNN)
+//STEPLIB   DD DISP=SHR,DSN=MVS.NDMBA.LINKLIB
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA1.NETMAP
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA1.MSG
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BEAI.EGIP.PROC
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+  SIGNON USERID=(C160491) CASE=YES ESF=NO
+  SUBMIT PROC=MKIBJIJU MAXDELAY=UNLIMITED -
+    &FRDSN=KJL.SM.KJL0064.EXPM21.G014.DAT6 -
+    &TODSN="KB0_FBJ_EXP_M21_201406.dat"
+  SIGNOFF
+/*
+//

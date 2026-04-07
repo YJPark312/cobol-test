@@ -1,0 +1,54 @@
+      *================================================================*
+      *@ NAME : XPJLB030                                               *
+      *@ DESC : PC계열그룹관리 COPYBOOK                              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-06-30 10:25:50                          *
+      *  생성일시     : 2009-06-30 10:25:51                          *
+      *================================================================*
+           03  XPJLB030-RETURN.
+             05  XPJLB030-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB030-OK            VALUE  '00'.
+                 88  COND-XPJLB030-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB030-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB030-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB030-ERROR         VALUE  '09'.
+                 88  COND-XPJLB030-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB030-SYSERROR      VALUE  '99'.
+             05  XPJLB030-R-LINE                 PIC  9(006).
+             05  XPJLB030-R-ERRCD                PIC  X(008).
+             05  XPJLB030-R-TREAT-CD             PIC  X(008).
+             05  XPJLB030-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB030-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB030-I-PRCSS-DSTIC          PIC  X(002).
+      *--       구분
+             05  XPJLB030-I-AFFLT-APLY-DSTCD     PIC  X(001).
+      *--       그룹코드
+             05  XPJLB030-I-AFFLT-CORP-GROUP-CD  PIC  X(006).
+      *--       그룹순위
+             05  XPJLB030-I-AFFLT-CORP-RANKG     PIC  9(003).
+      *--       주채권은행
+             05  XPJLB030-I-MAIN-BND-BNK-CD      PIC  X(003).
+      *--       그룹명
+             05  XPJLB030-I-AFFLT-C-GROUP-NAME   PIC  X(042).
+      *--       그룹등급
+             05  XPJLB030-I-INTNL-CV-GRD-DSTCD   PIC  X(004).
+      *----------------------------------------------------------------*
+           03  XPJLB030-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XPJLB030-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  3  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB030-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB030-I-AFFLT-APLY-DSTCD   ;구분
+      *X  XPJLB030-I-AFFLT-CORP-GROUP-CD;그룹코드
+      *N  XPJLB030-I-AFFLT-CORP-RANKG   ;그룹순위
+      *X  XPJLB030-I-MAIN-BND-BNK-CD    ;주채권은행
+      *X  XPJLB030-I-AFFLT-C-GROUP-NAME ;그룹명
+      *X  XPJLB030-I-INTNL-CV-GRD-DSTCD ;그룹등급
+      *X  XPJLB030-O-PRCSS-RSULT        ;처리결과

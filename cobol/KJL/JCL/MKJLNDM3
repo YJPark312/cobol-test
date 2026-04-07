@@ -1,0 +1,43 @@
+//MKJLNDM3 JOB ,'M V S',CLASS=B,MSGCLASS=X,REGION=0M
+//*================================================================*/
+//* TE µ¥ÀÌÅÍ ±Û·Î¹úÇÃ·§Æû(Á¤º¸°è) Á¦°ø                    */
+//*----------------------------------------------------------------*/
+//NDMPROC1  EXEC PGM=DMBATCH
+//DMNETMAP  DD   DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD   DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD   DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD   SYSOUT=*
+//SYSIN     DD   *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0             -
+  &SNODE=NDM.begapo11                        -
+  &FTDSN=KJL.SD.SHRKEE.BJLD561.V001          -
+  &TODSN1="/nfsfile/tstream/DAT/REA/RCV_DAT" -
+  &TODSN2="/KJL_SD_BJLD561_V001_D%%ODATE.txt"
+
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0             -
+  &SNODE=NDM.begapo11                        -
+  &FTDSN=KJL.SD.BJLD112.V001                 -
+  &TODSN1="/nfsfile/tstream/DAT/REA/RCV_DAT" -
+  &TODSN2="/KJL_SD_BJLD112_V001_D%%ODATE.txt"
+
+ SIGNOFF
+/*
+//*================================================================*/
+//* TE µ¥ÀÌÅÍ ±Û·Î¹úÇÃ·§Æû(°èÁ¤°è) Á¦°ø                    */
+//*----------------------------------------------------------------*/
+//NDMPROC2  EXEC PGM=DMBATCH
+//DMNETMAP  DD   DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD   DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD   DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD   SYSOUT=*
+//SYSIN     DD   *
+ SIGNON USERID=(KJL000N,) ESF=NO CASE=YES
+ SUBMIT PROC=KIDNDMZZ MAXDELAY=0             -
+  &SNODE=NDM.bspapo01                        -
+  &FTDSN=KJL.SD.SHRKEE.BJLD114.V001          -
+  &TODSN1="/fsfile/rbb/creditrisk"           -
+  &TODSN2="/KJL_SD_BJLD114_V001_D%%ODATE.txt"
+ SIGNOFF
+/*
+//

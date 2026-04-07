@@ -1,0 +1,50 @@
+      *================================================================*
+      *@ NAME : YNJLB095                                               *
+      *@ DESC : AS기업및그룹한도신청및승인(결의록관리)COPYBOOK     *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-06-11 18:39:23                          *
+      *  생성일시     : 2020-06-11 18:39:30                          *
+      *  전체길이     : 00031182 BYTES                               *
+      *================================================================*
+      *--     처리구분
+           07  YNJLB095-PRCSS-DSTIC              PIC  X(002).
+      *--     고객구분
+           07  YNJLB095-CUST-DSTIC               PIC  X(001).
+      *--     KB-PIN
+           07  YNJLB095-KB-PIN                   PIC  X(010).
+      *--     고객명
+           07  YNJLB095-CUSTNM                   PIC  X(052).
+      *--     한도신청번호
+           07  YNJLB095-LIMT-APLCN-NO            PIC  X(010).
+      *--     한도승인권자구분
+           07  YNJLB095-LIMT-ATRZ-DSTCD          PIC  X(001).
+      *--     종합승인구분
+           07  YNJLB095-CMPRE-ATHOR-DSTIC        PIC  X(001).
+      *--     총라인수
+           07  YNJLB095-TOTAL-LINE-CNT           PIC  9(005).
+      *--     그리드1
+           07  YNJLB095-GRID1                    OCCURS 000100 TIMES.
+      *--       승인위원직원번호
+             09  YNJLB095-ATHOR-CMMB-EMPID       PIC  X(007).
+      *--       승인위원구분
+             09  YNJLB095-ATHOR-CMMB-DSTIC       PIC  X(001).
+      *--       한도승인구분코드
+             09  YNJLB095-LIMT-ATHOR-DSTCD       PIC  X(001).
+      *--       승인의견내용
+             09  YNJLB095-ATHOR-OPIN-CTNT        PIC  X(302).
+      *================================================================*
+      *        Y  N  J  L  B  0  9  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  YNJLB095-PRCSS-DSTIC          ;처리구분
+      *X  YNJLB095-CUST-DSTIC           ;고객구분
+      *X  YNJLB095-KB-PIN               ;KB-PIN
+      *X  YNJLB095-CUSTNM               ;고객명
+      *X  YNJLB095-LIMT-APLCN-NO        ;한도신청번호
+      *X  YNJLB095-LIMT-ATRZ-DSTCD      ;한도승인권자구분
+      *X  YNJLB095-CMPRE-ATHOR-DSTIC    ;종합승인구분
+      *N  YNJLB095-TOTAL-LINE-CNT       ;총라인수
+      *A  YNJLB095-GRID1                ;그리드1
+      *X  YNJLB095-ATHOR-CMMB-EMPID     ;승인위원직원번호
+      *X  YNJLB095-ATHOR-CMMB-DSTIC     ;승인위원구분
+      *X  YNJLB095-LIMT-ATHOR-DSTCD     ;한도승인구분코드
+      *X  YNJLB095-ATHOR-OPIN-CTNT      ;승인의견내용

@@ -1,0 +1,45 @@
+      *================================================================*
+      *@ NAME : XDJLB038                                               *
+      *@ DESC : DC자회사및대주주등록 COPYBOOK                        *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-07-17 20:26:47                          *
+      *  생성일시     : 2009-07-17 20:26:50                          *
+      *================================================================*
+           03  XDJLB038-RETURN.
+             05  XDJLB038-R-STAT                 PIC  X(002).
+                 88  COND-XDJLB038-OK            VALUE  '00'.
+                 88  COND-XDJLB038-KEYDUP        VALUE  '01'.
+                 88  COND-XDJLB038-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJLB038-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJLB038-ERROR         VALUE  '09'.
+                 88  COND-XDJLB038-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJLB038-SYSERROR      VALUE  '99'.
+             05  XDJLB038-R-LINE                 PIC  9(006).
+             05  XDJLB038-R-ERRCD                PIC  X(008).
+             05  XDJLB038-R-TREAT-CD             PIC  X(008).
+             05  XDJLB038-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJLB038-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJLB038-I-PRCSS-DSTIC          PIC  X(002).
+      *--       채무자번호
+             05  XDJLB038-I-BRWR-NO              PIC  X(013).
+      *--       자회사/대주주구분
+             05  XDJLB038-I-SBCO-L-SKHDR-DSTCD   PIC  X(001).
+      *--       출자금액
+             05  XDJLB038-I-LAG-SKHDR-AMFN       PIC  9(015).
+      *----------------------------------------------------------------*
+           03  XDJLB038-OUT.
+      *----------------------------------------------------------------*
+      *--       처리결과
+             05  XDJLB038-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  D  J  L  B  0  3  8    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJLB038-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJLB038-I-BRWR-NO            ;채무자번호
+      *X  XDJLB038-I-SBCO-L-SKHDR-DSTCD ;자회사/대주주구분
+      *N  XDJLB038-I-LAG-SKHDR-AMFN     ;출자금액
+      *X  XDJLB038-O-PRCSS-RSULT        ;처리결과

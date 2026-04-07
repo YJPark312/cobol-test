@@ -1,0 +1,43 @@
+      *===========================================================
+      *  프로그램명    : QJL0432
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0432
+      *  사용예        : 01  XQJL0432-CA.
+      *                      COPY  XQJL0432.
+      *  최종변경일시  : 2020년02월25일14시39분33초
+      *===========================================================
+           03  XQJL0432-IN.
+      *            그룹회사코드
+               05  XQJL0432-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0432-I-BASE-YMD
+                                          PIC  X(00008).
+           03  XQJL0432-OUT.
+      *            국가전체공통한도여부
+               05  XQJL0432-O-NATNL-W-CM-LIMT-YN
+                           OCCURS  00100  PIC  X(00001).
+      *            당행국가신용등급구분
+               05  XQJL0432-O-OWBNK-NC-GRD-DSTCD
+                           OCCURS  00100  PIC  X(00004).
+      *            국가수
+               05  XQJL0432-O-NATNL-CNT
+                           OCCURS  00100  PIC S9(00003) COMP-3.
+      *            국가별관리한도
+               05  XQJL0432-O-NATNL-PER-MGT-CLAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            국가전체공통한도금액
+               05  XQJL0432-O-NATNL-WHOL-CM-CLAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            USD한도금액
+               05  XQJL0432-O-USD-CLAM
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *            한도소진율
+               05  XQJL0432-O-LIMT-EXHS-RT
+                           OCCURS  00100  PIC S9(00003)V9(2) COMP-3.
+      *            한도여유액
+               05  XQJL0432-O-LIMT-SEXTR-AMT
+                           OCCURS  00100  PIC S9(00015) COMP-3.
+      *===========================================================
+      *  XQJL0432   C O P Y B O O K   E N D
+      *===========================================================

@@ -1,0 +1,108 @@
+      *================================================================*
+      *@ NAME : XDJL4095                                               *
+      *@ DESC : DC기업및그룹한도신청및승인조회(금융기관기준한도    *
+      *@        산출) COPYBOOK                                       *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2021-11-24 16:02:56                          *
+      *  생성일시     : 2021-11-24 16:02:56                          *
+      *  전체길이     : 00000121 BYTES                               *
+      *================================================================*
+           03  XDJL4095-RETURN.
+             05  XDJL4095-R-STAT                 PIC  X(002).
+                 88  COND-XDJL4095-OK            VALUE  '00'.
+                 88  COND-XDJL4095-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL4095-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL4095-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL4095-ERROR         VALUE  '09'.
+                 88  COND-XDJL4095-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL4095-SYSERROR      VALUE  '99'.
+             05  XDJL4095-R-LINE                 PIC  9(006).
+             05  XDJL4095-R-ERRCD                PIC  X(008).
+             05  XDJL4095-R-TREAT-CD             PIC  X(008).
+             05  XDJL4095-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4095-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL4095-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJL4095-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJL4095-I-KB-PIN               PIC  X(010).
+      *--       수정신용등급별지원비율
+             05  XDJL4095-I-AMND-CP-SPORT-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전기법인세비율차감전계속사업이익
+             05  XDJL4095-I-AMND-BPCRSBCB-PRFT   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전기법인세비율차감전계속사업이익
+             05  XDJL4095-I-AMND-PCRSBCB-PRFT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정당기법인세비율차감전계속사업이익
+             05  XDJL4095-I-AMND-CCRSBCB-PRFT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정최근업종평균자기자본비율
+             05  XDJL4095-I-AMND-LBA-ONCP-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정전전기자기자본
+             05  XDJL4095-I-AMND-BF-PRPRID-ONCP  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정전기자기자본
+             05  XDJL4095-I-AMND-PRPRID-ONCP     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정당기자기자본
+             05  XDJL4095-I-AMND-CRTM-ONCP       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL4095-OUT.
+      *----------------------------------------------------------------*
+      *--       수정Y3평균사업이익비율
+             05  XDJL4095-O-AMND-Y3AB-PRFT-RATO  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정이익가중치값
+             05  XDJL4095-O-AMND-PRFT-WGHT-VAL   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정상환능력기준한도
+             05  XDJL4095-O-AMND-S-BASE-LIMT     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정Y3평균자기자본비율
+             05  XDJL4095-O-AMND-Y3A-ONCP-RATO   PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정자본가중치값
+             05  XDJL4095-O-AMND-CAPTL-WGHT-VAL  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--       수정규모기준한도
+             05  XDJL4095-O-AMND-SCAL-BASE-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       수정기준한도
+             05  XDJL4095-O-AMND-BASE-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *================================================================*
+      *        X  D  J  L  4  0  9  5    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL4095-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL4095-I-CUST-DSTIC         ;고객구분
+      *X  XDJL4095-I-KB-PIN             ;KB-PIN
+      *S  XDJL4095-I-AMND-CP-SPORT-RATO
+      * 수정신용등급별지원비율
+      *S  XDJL4095-I-AMND-BPCRSBCB-PRFT
+      * 수정전전기법인세비율차감전계속사업이익
+      *S  XDJL4095-I-AMND-PCRSBCB-PRFT
+      * 수정전기법인세비율차감전계속사업이익
+      *S  XDJL4095-I-AMND-CCRSBCB-PRFT
+      * 수정당기법인세비율차감전계속사업이익
+      *S  XDJL4095-I-AMND-LBA-ONCP-RATO
+      * 수정최근업종평균자기자본비율
+      *S  XDJL4095-I-AMND-BF-PRPRID-ONCP;수정전전기자기자본
+      *S  XDJL4095-I-AMND-PRPRID-ONCP   ;수정전기자기자본
+      *S  XDJL4095-I-AMND-CRTM-ONCP     ;수정당기자기자본
+      *S  XDJL4095-O-AMND-Y3AB-PRFT-RATO
+      * 수정Y3평균사업이익비율
+      *S  XDJL4095-O-AMND-PRFT-WGHT-VAL ;수정이익가중치값
+      *S  XDJL4095-O-AMND-S-BASE-LIMT   ;수정상환능력기준한도
+      *S  XDJL4095-O-AMND-Y3A-ONCP-RATO
+      * 수정Y3평균자기자본비율
+      *S  XDJL4095-O-AMND-CAPTL-WGHT-VAL;수정자본가중치값
+      *S  XDJL4095-O-AMND-SCAL-BASE-LIMT;수정규모기준한도
+      *S  XDJL4095-O-AMND-BASE-LIMT     ;수정기준한도

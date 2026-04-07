@@ -1,0 +1,784 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4052 (등급및규모별TE현황조회)
+      *@처리유형  : DC
+      *@처리개요  :등급및규모별TE현황조회
+      *@구현방법  : OPEN-FETCH-CLOSE
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *백현정:20110711: 신규작성（공공행정C26제외）
+      *@PJH  :20191220: 국내외구분코드　추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM             : 테이블명           : 접근유형
+      **  ------------------------- ------------------------------------
+      ** 산업등급별익스포져일집계 : THKJL0066            : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4052.
+       AUTHOR.                         백현정.
+       DATE-WRITTEN.                   11/07/11.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+      *        전산업무담당자에게　문의하시기　바랍니다．
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4052'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+
+           03  CO-MAX-CNT              PIC  9(002) VALUE 30.
+           03  CO-NUM-100              PIC  9(003) VALUE 100.
+
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+
+           03  CO-CHA-Y                PIC  X(001) VALUE 'Y'.
+           03  CO-CHA-N                PIC  X(001) VALUE 'N'.
+
+           03  CO-CHA-999              PIC  X(003) VALUE '999'.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC  9(005) COMP.
+           03  WK-BIT                  PIC  X(001).
+           03  WK-CUR-CNT              PIC  9(005) COMP.
+           03  WK-EXHS-RT              PIC  9(005)V9999.
+           03  WK-SUM.
+               05 WK-CNGL-TE            PIC  9(015).
+               05 WK-SME-TE             PIC  9(015).
+               05 WK-CORP-TYP-SOHO-TE   PIC  9(015).
+               05 WK-RTLSAL-TYP-SOHO-TE PIC  9(015).
+               05 WK-ETC-TE             PIC  9(015).
+               05 WK-SUBT               PIC  9(015).
+               03 WK-WGHTZ              PIC  9(003)V99.
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *업종（대분류）별
+       01  XQJL0521-CA.
+           COPY    XQJL0521.
+      *전체
+       01  XQJL0522-CA.
+           COPY    XQJL0522.
+      *업종（대분류）별－TE합산
+       01  XQJL0523-CA.
+           COPY    XQJL0523.
+      *전체－TE합산
+       01  XQJL0524-CA.
+           COPY    XQJL0524.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO INTERFACE PARAMETER
+           COPY    YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      * COMMON COPYBOOK
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+
+      * DC COPYBOOK
+       01  XDJL4052-CA.
+           COPY  XDJL4052.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4052-CA
+                                                   .
+      *=================================================================
+
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+
+      *@   WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE WK-AREA
+      *               SQLIO
+                      YCDBSQLA-CA
+
+      *@  출력영역　및　결과코드　초기화
+           INITIALIZE XDJL4052-OUT
+                      XDJL4052-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+
+      *@   처리구분                                                   01871007
+           IF XDJL4052-I-PRCSS-DSTIC = CO-CHA-01                        01872007
+              CONTINUE                                                  01874007
+           ELSE                                                         01875007
+      * 에러메세지 : 처리구분오류입니다．                           01876007
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01877007
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR              01878007
+           END-IF                                                       01879007
+                                                                        01879807
+      *@   기준년월일                                                 01879207
+           IF XDJL4052-I-BASE-YMD = SPACE                               01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+
+      *@   대분류업종코드                                             01879207
+           IF XDJL4052-I-LAG-CLSFI-BZTYP-CD = SPACE                     01879307
+      * 에러메세지 : 필수항목미입력오류입니다．                     01879407
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.              01879507
+              #ERROR CO-B3800004 CO-UKJL0036 CO-STAT-ERROR              01879607
+           END-IF                                                       01879707
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+
+      *@1  프로세스처리
+           PERFORM S3200-PROCESS-RTN
+              THRU S3200-PROCESS-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 등급및규모별TE현황조회
+      *-----------------------------------------------------------------
+       S3200-PROCESS-RTN.
+
+      *@ 전체조회
+           IF XDJL4052-I-LAG-CLSFI-BZTYP-CD = CO-CHA-999
+      *@    비중을위한전체합계금액추출
+              PERFORM S3250-XQJL0524-CALL-RTN
+                 THRU S3250-XQJL0524-CALL-EXT
+
+      *@     SQLIO OPEN
+              PERFORM S3260-XQJL0522-OPEN-RTN
+                 THRU S3260-XQJL0522-OPEN-EXT
+
+              MOVE CO-CHA-Y
+                TO WK-BIT
+
+      *@     FETCH LOOP
+              PERFORM UNTIL WK-BIT     = CO-CHA-N OR
+                            WK-CUR-CNT = CO-MAX-CNT
+      *@    데이터를　읽음(FETCH)
+                  PERFORM S3270-XQJL0522-FETCH-RTN
+                     THRU S3270-XQJL0522-FETCH-EXT
+              END-PERFORM
+
+      *@     SQLIO CLOSE
+              PERFORM S3280-XQJL0522-CLOSE-RTN
+                 THRU S3280-XQJL0522-CLOSE-EXT
+
+           ELSE
+      *@ 대분류업종코드별조회(C01~C27)
+      *@    비중을위한전체합계금액추출
+              PERFORM S3210-XQJL0523-CALL-RTN
+                 THRU S3210-XQJL0523-CALL-EXT
+
+      *@     SQLIO OPEN
+              PERFORM S3220-XQJL0521-OPEN-RTN
+                 THRU S3220-XQJL0521-OPEN-EXT
+
+              MOVE CO-CHA-Y
+                TO WK-BIT
+
+      *@     FETCH LOOP
+              PERFORM UNTIL WK-BIT     = CO-CHA-N OR
+                            WK-CUR-CNT = CO-MAX-CNT
+      *@    데이터를　읽음(FETCH)
+              PERFORM S3230-XQJL0521-FETCH-RTN
+                 THRU S3230-XQJL0521-FETCH-EXT
+              END-PERFORM
+
+      *@     SQLIO CLOSE
+              PERFORM S3240-XQJL0521-CLOSE-RTN
+                 THRU S3240-XQJL0521-CLOSE-EXT
+           END-IF
+
+           MOVE WK-CUR-CNT
+             TO XDJL4052-O-OUTPT-LINE-CNT1
+           .
+       S3200-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  비중을위한전체합계금액추출（대분류업종코드별）
+      *-----------------------------------------------------------------
+       S3210-XQJL0523-CALL-RTN.
+
+      *@3.2.1 초기화
+           INITIALIZE    XQJL0523-IN
+
+      *@3.2.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0523)입력파라메타=
+      *@SET(그룹회사코드,기준년월일,대분류업종코드)
+
+      *@  그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0523-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE XDJL4052-I-BASE-YMD
+             TO XQJL0523-I-BASE-YMD
+
+      *@   대분류업종코드
+           MOVE XDJL4052-I-LAG-CLSFI-BZTYP-CD
+             TO XQJL0523-I-LAG-CLSFI-BZTYP-CD
+
+191220*@   국내외구분코드
+           MOVE XDJL4052-I-HMAB-DSTCD
+             TO XQJL0523-I-HMAB-DSTCD
+
+      *@3.2.3 SLQIO프로그램 호출
+      *@처리내용:QJL0523프로그램을 호출한다
+      *@관련테이블:THKJL0066 접근유형:READ
+           #DYSQLA QJL0523 XQJL0523-CA
+
+      *@3.2.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+      *비중을위한전체합계금액추출（대분류업종코드별）
+                    MOVE ZERO
+                      TO XQJL0523-O-SUM
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3210-XQJL0523-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   OPEN
+      *-----------------------------------------------------------------
+       S3220-XQJL0521-OPEN-RTN.
+
+      *@   초기화
+           INITIALIZE XQJL0521-IN
+
+      *@   변수 MOVE
+      *@  그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0521-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE XDJL4052-I-BASE-YMD
+             TO XQJL0521-I-BASE-YMD
+
+      *@   대분류업종코드
+           MOVE XDJL4052-I-LAG-CLSFI-BZTYP-CD
+             TO XQJL0521-I-LAG-CLSFI-BZTYP-CD
+
+191220*@   국내외구분코드
+           MOVE XDJL4052-I-HMAB-DSTCD
+             TO XQJL0521-I-HMAB-DSTCD
+
+      *@   SQLIO OPEN
+           #DYSQLA QJL0521 OPEN XQJL0521-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오픈에러인경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3220-XQJL0521-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  FETCH
+      *-----------------------------------------------------------------
+       S3230-XQJL0521-FETCH-RTN.
+
+      *@   SQLIO FETCH
+           #DYSQLA QJL0521 FETCH XQJL0521-CA
+
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@            출력파라미터 조립
+                    PERFORM S3231-OUTPUT-SET-RTN
+                       THRU S3231-OUTPUT-SET-EXT
+               WHEN COND-DBSQL-MRNF
+      *@            데이터존재여부표시
+                    MOVE CO-CHA-N TO WK-BIT
+               WHEN OTHER
+      *@원장패치에러인경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3230-XQJL0521-FETCH-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 출력파라미터 SET
+      *-----------------------------------------------------------------
+       S3231-OUTPUT-SET-RTN.
+
+      *@   OUTPUT DATA PUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > DBSQL-SELECT-CNT
+
+               ADD 1 TO WK-CUR-CNT
+
+      *@       내부신용평가등급구분코드
+               MOVE XQJL0521-O-INTNL-CV-GRD-DSTCD(WK-I)
+                 TO XDJL4052-O-INTNL-CV-GRD-DSTCD(WK-CUR-CNT)
+
+      *@       대기업토탈익스포져
+               COMPUTE XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+                     = XQJL0521-O-CNGL-TE(WK-I)
+
+      *@       중소기업토탈익스포져
+               COMPUTE XDJL4052-O-SME-TE(WK-CUR-CNT)
+                     = XQJL0521-O-SME-TE(WK-I)
+
+      *@       기업형소호토탈익스포져
+               COMPUTE XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+                     = XQJL0521-O-CORP-TYP-SOHO-TE(WK-I)
+
+      *@       소매형소호토탈익스포져
+               COMPUTE XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+                     = XQJL0521-O-RTLSAL-TYP-SOHO-TE(WK-I)
+
+      *@       기타토탈익스포져
+               COMPUTE XDJL4052-O-ETC-TE(WK-CUR-CNT)
+                     = XQJL0521-O-ETC-TE(WK-I)
+
+      *@       소계
+               COMPUTE XDJL4052-O-SUBT(WK-CUR-CNT)
+                     = XQJL0521-O-SUBT(WK-I)
+
+      *@       비중＝소계／전체합계＊１００
+               INITIALIZE WK-EXHS-RT
+               IF XQJL0523-O-SUM > 0
+                  COMPUTE WK-EXHS-RT
+                        = XQJL0521-O-SUBT(WK-I) /
+                          XQJL0523-O-SUM
+                  COMPUTE XDJL4052-O-WGHTZ(WK-CUR-CNT)
+                        = WK-EXHS-RT * 100
+      *@       그렇지않은경우　０으로　산출
+               ELSE
+                  MOVE ZERO
+                    TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+               END-IF
+
+      *@합계처리
+      *@       대기업토탈익스포져
+               ADD XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+                TO WK-CNGL-TE
+
+      *@       중소기업토탈익스포져
+               ADD XDJL4052-O-SME-TE(WK-CUR-CNT)
+                TO WK-SME-TE
+
+      *@       기업형소호토탈익스포져
+               ADD XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+                TO WK-CORP-TYP-SOHO-TE
+
+      *@       소매형소호토탈익스포져
+               ADD XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+                TO WK-RTLSAL-TYP-SOHO-TE
+
+      *@       기타토탈익스포져
+               ADD XDJL4052-O-ETC-TE(WK-CUR-CNT)
+                TO WK-ETC-TE
+
+      *@       소계
+               ADD XDJL4052-O-SUBT(WK-CUR-CNT)
+                TO WK-SUBT
+
+      *@       비중
+               ADD XDJL4052-O-WGHTZ(WK-CUR-CNT)
+                TO WK-WGHTZ
+
+           END-PERFORM
+
+      *@합계부출력
+           IF DBSQL-SELECT-CNT > ZEROS
+               ADD 1 TO WK-CUR-CNT
+      *@      총건수
+              MOVE WK-CUR-CNT
+                TO XDJL4052-O-OUTPT-LINE-CNT1
+      *@       '합계'
+               MOVE '합계'
+                 TO XDJL4052-O-INTNL-CV-GRD-DSTCD(WK-CUR-CNT)
+      *@       대기업토탈익스포져
+              MOVE WK-CNGL-TE
+                TO XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+      *@       중소기업토탈익스포져
+              MOVE WK-SME-TE
+                TO XDJL4052-O-SME-TE(WK-CUR-CNT)
+      *@       기업형소호토탈익스포져
+              MOVE WK-CORP-TYP-SOHO-TE
+                TO XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+      *@       소매형소호토탈익스포져
+              MOVE WK-RTLSAL-TYP-SOHO-TE
+                TO XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+      *@       기타토탈익스포져
+              MOVE WK-ETC-TE
+                TO XDJL4052-O-ETC-TE(WK-CUR-CNT)
+      *@       소계
+              MOVE WK-SUBT
+                TO XDJL4052-O-SUBT(WK-CUR-CNT)
+      *@       비중＝１００（신병기대리요청）
+      *       MOVE WK-WGHTZ
+      *         TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+              MOVE CO-NUM-100
+                TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+           ELSE
+      *@      총건수＝０
+              MOVE ZERO
+                TO XDJL4052-O-OUTPT-LINE-CNT1
+           END-IF
+           .
+       S3231-OUTPUT-SET-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  CLOSE
+      *-----------------------------------------------------------------
+       S3240-XQJL0521-CLOSE-RTN.
+
+      *@   SQLIO CLOSE
+           #DYSQLA QJL0521 CLOSE XQJL0521-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장클로즈에러인경우
+      *@에러메세지 : 테이블 CLOSE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3240-XQJL0521-CLOSE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  비중을위한전체합계금액추출（전체금액）
+      *-----------------------------------------------------------------
+       S3250-XQJL0524-CALL-RTN.
+
+      *@3.2.1 초기화
+           INITIALIZE    XQJL0524-IN
+
+      *@3.2.2 입력파라미터 조립
+      *@처리내용:SQLIO(QJL0524)입력파라메타=
+      *@SET(그룹회사코드,기준년월일)
+
+      *@  그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0524-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE XDJL4052-I-BASE-YMD
+             TO XQJL0524-I-BASE-YMD
+
+191220*@   국내외구분코드
+           MOVE XDJL4052-I-HMAB-DSTCD
+             TO XQJL0524-I-HMAB-DSTCD
+
+      *@3.2.3 SLQIO프로그램 호출
+      *@처리내용:QJL0524프로그램을 호출한다
+      *@관련테이블:THKJL0066 접근유형:READ
+           #DYSQLA QJL0524 XQJL0524-CA
+
+      *@3.2.4 호출결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN COND-DBSQL-MRNF
+      *비중을위한전체합계금액추출（전체）
+                    MOVE ZERO
+                      TO XQJL0524-O-SUM
+               WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3250-XQJL0524-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@   OPEN
+      *-----------------------------------------------------------------
+       S3260-XQJL0522-OPEN-RTN.
+
+      *@   초기화
+           INITIALIZE XQJL0522-IN
+
+      *@   변수 MOVE
+      *@  그룹회사구분코드
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJL0522-I-GROUP-CO-CD
+
+      *@   기준년월일
+           MOVE XDJL4052-I-BASE-YMD
+             TO XQJL0522-I-BASE-YMD
+
+191220*@   국내외구분코드
+           MOVE XDJL4052-I-HMAB-DSTCD
+             TO XQJL0522-I-HMAB-DSTCD
+
+      *@   SQLIO OPEN
+           #DYSQLA QJL0522 OPEN XQJL0522-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장오픈에러인경우
+      *@에러메세지 : 테이블 OPEN 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3260-XQJL0522-OPEN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *  FETCH
+      *-----------------------------------------------------------------
+       S3270-XQJL0522-FETCH-RTN.
+
+      *@   SQLIO FETCH
+           #DYSQLA QJL0522 FETCH XQJL0522-CA
+
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+      *@            출력파라미터 조립
+                    PERFORM S3271-OUTPUT-SET-RTN
+                       THRU S3271-OUTPUT-SET-EXT
+               WHEN COND-DBSQL-MRNF
+      *@            데이터존재여부표시
+                    MOVE CO-CHA-N TO WK-BIT
+               WHEN OTHER
+      *@원장패치에러인경우
+      *@에러메세지 : 테이블 FETCH 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3270-XQJL0522-FETCH-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@ 출력파라미터 SET
+      *-----------------------------------------------------------------
+       S3271-OUTPUT-SET-RTN.
+
+      *@   OUTPUT DATA PUT LOOP
+           PERFORM VARYING WK-I FROM 1 BY 1
+                   UNTIL WK-I > DBSQL-SELECT-CNT
+
+               ADD 1 TO WK-CUR-CNT
+
+      *@       내부신용평가등급구분코드
+               MOVE XQJL0522-O-INTNL-CV-GRD-DSTCD(WK-I)
+                 TO XDJL4052-O-INTNL-CV-GRD-DSTCD(WK-CUR-CNT)
+
+      *@       대기업토탈익스포져
+               COMPUTE XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+                     = XQJL0522-O-CNGL-TE(WK-I)
+
+      *@       중소기업토탈익스포져
+               COMPUTE XDJL4052-O-SME-TE(WK-CUR-CNT)
+                     = XQJL0522-O-SME-TE(WK-I)
+
+      *@       기업형소호토탈익스포져
+               COMPUTE XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+                     = XQJL0522-O-CORP-TYP-SOHO-TE(WK-I)
+
+      *@       소매형소호토탈익스포져
+               COMPUTE XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+                     = XQJL0522-O-RTLSAL-TYP-SOHO-TE(WK-I)
+
+      *@       기타토탈익스포져
+               COMPUTE XDJL4052-O-ETC-TE(WK-CUR-CNT)
+                     = XQJL0522-O-ETC-TE(WK-I)
+
+      *@       소계
+               COMPUTE XDJL4052-O-SUBT(WK-CUR-CNT)
+                     = XQJL0522-O-SUBT(WK-I)
+
+      *@       비중＝소계／전체합계＊１００
+               INITIALIZE WK-EXHS-RT
+               IF XQJL0524-O-SUM > 0
+                  COMPUTE WK-EXHS-RT
+                        = XQJL0522-O-SUBT(WK-I) /
+                          XQJL0524-O-SUM
+                  COMPUTE XDJL4052-O-WGHTZ(WK-CUR-CNT)
+                        = WK-EXHS-RT * 100
+      *@       그렇지않은경우　０으로　산출
+               ELSE
+                  MOVE ZERO
+                    TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+               END-IF
+
+      *@합계처리
+      *@       대기업토탈익스포져
+               ADD XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+                TO WK-CNGL-TE
+
+      *@       중소기업토탈익스포져
+               ADD XDJL4052-O-SME-TE(WK-CUR-CNT)
+                TO WK-SME-TE
+
+      *@       기업형소호토탈익스포져
+               ADD XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+                TO WK-CORP-TYP-SOHO-TE
+
+      *@       소매형소호토탈익스포져
+               ADD XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+                TO WK-RTLSAL-TYP-SOHO-TE
+
+      *@       기타토탈익스포져
+               ADD XDJL4052-O-ETC-TE(WK-CUR-CNT)
+                TO WK-ETC-TE
+
+      *@       소계
+               ADD XDJL4052-O-SUBT(WK-CUR-CNT)
+                TO WK-SUBT
+
+      *@       비중
+               ADD XDJL4052-O-WGHTZ(WK-CUR-CNT)
+                TO WK-WGHTZ
+
+           END-PERFORM
+
+      *@합계부출력
+           IF DBSQL-SELECT-CNT > ZEROS
+               ADD 1 TO WK-CUR-CNT
+      *@      총건수
+              MOVE WK-CUR-CNT
+                TO XDJL4052-O-OUTPT-LINE-CNT1
+      *@       '합계'
+               MOVE '합계'
+                 TO XDJL4052-O-INTNL-CV-GRD-DSTCD(WK-CUR-CNT)
+      *@       대기업토탈익스포져
+              MOVE WK-CNGL-TE
+                TO XDJL4052-O-CNGL-TE(WK-CUR-CNT)
+      *@       중소기업토탈익스포져
+              MOVE WK-SME-TE
+                TO XDJL4052-O-SME-TE(WK-CUR-CNT)
+      *@       기업형소호토탈익스포져
+              MOVE WK-CORP-TYP-SOHO-TE
+                TO XDJL4052-O-CORP-TYP-SOHO-TE(WK-CUR-CNT)
+      *@       소매형소호토탈익스포져
+              MOVE WK-RTLSAL-TYP-SOHO-TE
+                TO XDJL4052-O-RTLSAL-TYP-SOHO-TE(WK-CUR-CNT)
+      *@       기타토탈익스포져
+              MOVE WK-ETC-TE
+                TO XDJL4052-O-ETC-TE(WK-CUR-CNT)
+      *@       소계
+              MOVE WK-SUBT
+                TO XDJL4052-O-SUBT(WK-CUR-CNT)
+      *@       비중＝１００（신병기대리요청）
+      *       MOVE WK-WGHTZ
+      *         TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+              MOVE CO-NUM-100
+                TO XDJL4052-O-WGHTZ(WK-CUR-CNT)
+           ELSE
+      *@      총건수＝０
+              MOVE ZERO
+                TO XDJL4052-O-OUTPT-LINE-CNT1
+           END-IF
+           .
+       S3271-OUTPUT-SET-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  CLOSE
+      *-----------------------------------------------------------------
+       S3280-XQJL0522-CLOSE-RTN.
+
+      *@   SQLIO CLOSE
+           #DYSQLA QJL0522 CLOSE XQJL0522-CA
+
+      *@   결과확인
+           EVALUATE TRUE
+               WHEN COND-DBSQL-OK
+                    CONTINUE
+               WHEN OTHER
+      *@원장클로즈에러인경우
+      *@에러메세지 : 테이블 CLOSE 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다.
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3280-XQJL0522-CLOSE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@3 종료처리
+
+      *@3.1 프로그램 종료
+      *@처리내용 : 프로그램을 정상 종료 함
+
+           #OKEXIT  CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

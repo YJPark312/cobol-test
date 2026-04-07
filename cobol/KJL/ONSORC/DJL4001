@@ -1,0 +1,498 @@
+      *=================================================================
+      *@업무명    : KJL     (Total Exposure)
+      *@프로그램명: DJL4001 (DC채무자고객번호및고객명조회)
+      *@처리유형  : DC
+      *@처리개요  : 채무자고객번호 및 고객명 조회처
+      *@              프로그램이다
+      *@구현방법  : 자동거래（중단거래）
+      *-----------------------------------------------------------------
+      *                 P R O G R A M   변　경　이　력
+      *-----------------------------------------------------------------
+      *@성명 : 일자 : 변　경　내　용
+      * ----------------------------------------------------------------
+      *전우선:20081203: 신규작성
+      *김진태:20090608: 프로그램수정
+      *김진태:20091203: 에러메세지정비
+      *김진태:20091203: PC 삭제
+      * YBH    :20150521: KB-PIN 처리
+      * YBH    :20170224: KB-PIN 처리(2차)
+      * YBH    :20170803: 암호화 처리
+      *정윤섭:20191122: 모기업법인고객정보추가
+      *=================================================================
+      ******************************************************************
+      **  TABLE-SYNONYM      : 테이블명                  : 접근유형
+      **  ------------------   -----------------------------------------
+      ** 채무자고객기본    : THKJL0015                   : R
+      ******************************************************************
+       IDENTIFICATION                  DIVISION.
+      *=================================================================
+       PROGRAM-ID.                     DJL4001.
+       AUTHOR.                         전우선.
+       DATE-WRITTEN.                   08/12/03.
+      *=================================================================
+       ENVIRONMENT                     DIVISION.
+      *=================================================================
+       CONFIGURATION                   SECTION.
+       SOURCE-COMPUTER.                IBM-3090.
+       OBJECT-COMPUTER.                IBM-3090.
+      *=================================================================
+       DATA                            DIVISION.
+      *=================================================================
+       WORKING-STORAGE                 SECTION.
+      *-----------------------------------------------------------------
+      *CONSTANT ERROR AREA
+      *-----------------------------------------------------------------
+       01  CO-ERROR-AREA.
+           03  CO-B3000070             PIC  X(008) VALUE 'B3000070'.
+           03  CO-B3800004             PIC  X(008) VALUE 'B3800004'.
+           03  CO-B3900009             PIC  X(008) VALUE 'B3900009'.
+           03  CO-UKJL0036             PIC  X(008) VALUE 'UKJL0036'.
+      *-----------------------------------------------------------------
+      * CONSTANT AREA
+      *-----------------------------------------------------------------
+       01  CO-AREA.
+           03  CO-PGM-ID               PIC  X(008) VALUE 'DJL4001'.
+           03  CO-STAT-OK              PIC  X(002) VALUE '00'.
+           03  CO-STAT-ERROR           PIC  X(002) VALUE '09'.
+           03  CO-STAT-ABNORMAL        PIC  X(002) VALUE '98'.
+           03  CO-STAT-SYSERROR        PIC  X(002) VALUE '99'.
+           03  CO-STAT-NOTNORMAL       PIC  X(002) VALUE '08'.
+      *
+           03  CO-CHA-01               PIC  X(002) VALUE '01'.
+           03  CO-MAX-CNT              PIC  9(002) VALUE  30.
+           03  CO-NUM-13               PIC  9(002) VALUE  13.
+           03  CO-NUM-42               PIC  9(002) VALUE  42.
+      *-----------------------------------------------------------------
+      * WORKING AREA
+      *-----------------------------------------------------------------
+       01  WK-AREA.
+           03  WK-I                    PIC S9(004) COMP.
+           03  WK-LEN                  PIC  9(003).
+           03  WK-BRWR-NO              PIC  X(020).
+170803     03  WK-TWOWY-CUST-ECRYP-NO  PIC  X(044).
+170224     03  WK-CUST-IDNFR           PIC  X(010).
+           03  WK-BF-KEY.
+170224         05 WK-BF-CUST-IDNFR     PIC  X(010).
+           03  WK-NEXT-KEY.
+               05 WK-AF-CUST-IDNFR     PIC  X(010).
+      *-----------------------------------------------------------------
+      * PGM INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      * SQLIO COPYBOOK
+170224 01  XQJLZ004-CA.
+           COPY  XQJLZ004.
+      * SQLIO COPYBOOK
+       01  XQJL0012-CA.
+           COPY  XQJL0012.
+170803*   양방향 암호화 COPYBOOK
+       01  XFAVKENC-CA.
+           COPY  XFAVKENC.
+170803*   양방향 복호화 COPYBOOK
+       01  XFAVKDEC-CA.
+           COPY  XFAVKDEC.
+      *-----------------------------------------------------------------
+      * DBIO SQLIO INTERFACE PARAMETER
+      *-----------------------------------------------------------------
+      *    DBIO SQLIO INTERFACE PARAMETER
+           COPY  YCDBSQLA.
+      *-----------------------------------------------------------------
+       LINKAGE                         SECTION.
+      *-----------------------------------------------------------------
+      *    COMMON AREA
+       01  YCCOMMON-CA.
+           COPY  YCCOMMON.
+      *    DC COPYBOOK
+       01  XDJL4001-CA.
+           COPY  XDJL4001.
+      *=================================================================
+       PROCEDURE                       DIVISION
+                                       USING       YCCOMMON-CA
+                                                   XDJL4001-CA
+                                                   .
+      *=================================================================
+      *-----------------------------------------------------------------
+      *@  처리메인
+      *-----------------------------------------------------------------
+       S0000-MAIN-RTN.
+
+      *@  초기화
+           PERFORM S1000-INITIALIZE-RTN
+              THRU S1000-INITIALIZE-EXT
+
+      *@  입력값　CHECK
+           PERFORM S2000-VALIDATION-RTN
+              THRU S2000-VALIDATION-EXT
+
+      *@  업무처리
+           PERFORM S3000-PROCESS-RTN
+              THRU S3000-PROCESS-EXT
+
+      *@  출력처리
+           PERFORM S6000-OUTPUT-SET-RTN
+              THRU S6000-OUTPUT-SET-EXT
+
+      *@  처리종료
+           PERFORM S9000-FINAL-RTN
+              THRU S9000-FINAL-EXT
+           .
+       S0000-MAIN-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  초기화
+      *-----------------------------------------------------------------
+       S1000-INITIALIZE-RTN.
+      *@1 초기화
+
+      *@1.1 WK-AREA 및　프로그램파라미터　초기화
+           INITIALIZE    WK-AREA
+      *                  SQLIO 초기화
+                         XQJLZ004-IN
+      *                  SQLIO 초기화
+                         XQJL0012-IN
+
+      *@1.2 DBIO SQLIO INTERFACE PARAMETER　초기화
+           INITIALIZE    YCDBSQLA-CA
+
+      *@1.3 출력영역　및　결과코드　초기화
+           INITIALIZE    XDJL4001-OUT
+           INITIALIZE    XDJL4001-RETURN
+           .
+       S1000-INITIALIZE-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력값검증
+      *-----------------------------------------------------------------
+       S2000-VALIDATION-RTN.
+      *@2 입력값검증
+
+      *@2.1 처리구분CHECK
+      *@실행조건:XDJL4001-I-PRCSS-DSTIC NOT = CO-CHA-01
+      *@처리내용:처리구분 "01" 아닐경우 오류처리한다
+      *@에러메시지:처리구분 오류입니다
+      *@조치메시지:처리구분 오류입니다
+           IF XDJL4001-I-PRCSS-DSTIC NOT = CO-CHA-01
+      * 에러메세지 : 처리구분오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다.
+              #ERROR CO-B3000070 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S2000-VALIDATION-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  업무처리
+      *-----------------------------------------------------------------
+       S3000-PROCESS-RTN.
+      *@3 업무처리
+
+      *@3.1 입력파라미터 조립
+           PERFORM S3100-INPUT-SET-RTN
+              THRU S3100-INPUT-SET-EXT
+
+      *@3.2 SQLIO 호출
+           PERFORM S3200-SQLIO-CALL-RTN
+              THRU S3200-SQLIO-CALL-EXT
+           .
+       S3000-PROCESS-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  입력파라미터 SET
+      *-----------------------------------------------------------------
+       S3100-INPUT-SET-RTN.
+      *@3.1.1 채무자고객명미입력CHECK
+      *@실행조건:XDJL4001-I-DBTRZ-NAME NOT = SPACE
+      *@처리내용:SQLIO(QJL0012)입력파라메타=
+      *@SET(그룹회사구분코드,채무자고객명)
+           IF XDJL4001-I-DBTRZ-NAME NOT = SPACE
+      *@       유효문자뒤의　공백을　카운트한다
+               INSPECT FUNCTION REVERSE(XDJL4001-I-DBTRZ-NAME)
+               TALLYING WK-LEN FOR LEADING SPACE
+
+      *@       유효문자뒤의　모든　공백을　％로　채움
+               IF WK-LEN NOT = ZERO
+                  MOVE ALL '%'
+                    TO XDJL4001-I-DBTRZ-NAME(CO-NUM-42 - WK-LEN + 1 :
+                                             WK-LEN)
+               END-IF
+
+      *@입력파라미터조립
+      *@       그룹회사구분코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJL0012-I-GROUP-CO-CD
+150521*@       채무자고객명
+               MOVE '%'
+                 TO XQJL0012-I-DBTRZ-NAME(1:1)
+               MOVE XDJL4001-I-DBTRZ-NAME
+                 TO XQJL0012-I-DBTRZ-NAME(2:)
+
+               IF BICOM-DSCN-TRAN-DSTCD = '1' OR '2'
+      *            중단키
+                   MOVE BOCOM-BF-TDK-INFO-CTNT
+                     TO WK-BF-KEY
+170224*            고객식별자
+                   MOVE WK-BF-CUST-IDNFR
+                     TO XQJL0012-I-CUST-IDNFR
+               END-IF
+      *@3.1.2 채무자고객명미입력CHECK
+      *@실행조건:ELSE
+           ELSE
+      *@      입력파라미터조립
+170803         IF XDJL4001-I-BRWR-NO NOT = SPACE
+170803*           차주번호 암호화처리
+                   PERFORM S3110-FAVKENC-CALL-RTN
+                      THRU S3110-FAVKENC-CALL-EXT
+               END-IF
+
+      *@       그룹회사구분코드
+               MOVE BICOM-GROUP-CO-CD
+                 TO XQJLZ004-I-GROUP-CO-CD
+170803*@       양방향고객암호화번호
+               MOVE WK-TWOWY-CUST-ECRYP-NO
+                 TO XQJLZ004-I-TWOWY-CUST-ECRYP-NO
+170224*@       고객식별자
+               MOVE XDJL4001-I-KB-PIN
+                 TO XQJLZ004-I-CUST-IDNFR
+           END-IF
+           .
+
+       S3100-INPUT-SET-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+170803*@   양방향 암호화 프로그램 호출
+      *-----------------------------------------------------------------
+       S3110-FAVKENC-CALL-RTN.
+
+           INITIALIZE    XFAVKENC-IN
+
+      *   암호화구분코드(1:양방향)
+           MOVE 1
+             TO XFAVKENC-I-CODE
+      *   입력데이터
+           MOVE XDJL4001-I-BRWR-NO
+             TO XFAVKENC-I-DATA
+      *   입력데이터길이
+           MOVE 20
+             TO XFAVKENC-I-DATALENG
+
+           #DYCALL FAVKENC YCCOMMON-CA XFAVKENC-CA
+
+           IF XFAVKENC-O-RETCD = ZERO
+      *@       양방향고객암호화번호
+               MOVE XFAVKENC-O-DATA(1:XFAVKENC-O-DATALENG)
+                 TO WK-TWOWY-CUST-ECRYP-NO
+           END-IF
+           .
+
+       S3110-FAVKENC-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@   SLQIO 호출
+      *-----------------------------------------------------------------
+       S3200-SQLIO-CALL-RTN.
+      *@3.2.1 채무자고객명미입력CHECK
+      *@실행조건:XDJL4001-I-DBTRZ-NAME NOT = SPACE
+      *@처리내용:QJL0012프로그램을 호출한다
+      *@관련테이블:THKJL0015(채무자고객기본) 접근유형:READ
+           IF XDJL4001-I-DBTRZ-NAME NOT = SPACE
+              #DYSQLA QJL0012 XQJL0012-CA
+      *@3.2.2 채무자고객명미입력CHECK
+      *@실행조건:ELSE
+      *@처리내용:QJLZ004프로그램을 호출한다
+      *@관련테이블:THKJL0015(채무자고객기본) 접근유형:READ
+           ELSE
+              #DYSQLA QJLZ004 XQJLZ004-CA
+           END-IF
+
+      *@3.2.3 호출결과 확인
+      *@실행조건:COND-DBSQL-OK OR COND-DBSQL-MRNF
+      *@처리내용:CONTINUE
+           IF COND-DBSQL-OK OR COND-DBSQL-MRNF
+              CONTINUE
+
+      *@3.2.4 호출결과 확인
+      *@실행조건:ELSE
+      *@처리내용:오류처리한다.
+      *@에러메시지:SQLIO 오류입니다.
+      *@조치메시지:시스템에러입니다.SQLCODE를 확인바랍니다
+           ELSE
+
+      * 에러메세지 : 테이블 SELECT 오류입니다．
+      * 조치메세지 : 전산업무담당자에게　문의바랍니다
+              #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-IF
+           .
+       S3200-SQLIO-CALL-EXT.
+           EXIT.
+      *-----------------------------------------------------------------
+      *@  출력파라미터 SET
+      *-----------------------------------------------------------------
+       S6000-OUTPUT-SET-RTN.
+      *@4 출력처리
+
+      *@4.1 출력라인수 조립
+           IF DBSQL-SELECT-CNT > CO-MAX-CNT
+               MOVE CO-MAX-CNT
+                 TO XDJL4001-O-OUTPT-LINE-CNT1
+
+      *@       NEXT DATA KEY SET
+      *@      중단거래 대비한 마지막 KEY 항목 SET
+               IF XDJL4001-I-DBTRZ-NAME NOT = SPACE
+170224             MOVE XQJL0012-O-KB-PIN(31)
+                     TO WK-AF-CUST-IDNFR
+               ELSE
+                   MOVE XQJLZ004-O-KB-PIN
+                     TO WK-AF-CUST-IDNFR
+               END-IF
+
+               #DSCNTR 2 WK-NEXT-KEY
+           ELSE
+              MOVE DBSQL-SELECT-CNT
+                TO XDJL4001-O-OUTPT-LINE-CNT1
+           END-IF
+
+      *@4.2 그리드1 조립
+      *@실행조건:WK-I > YPJL4001-OUTPT-LINE-CNT1
+      *@처리내용:그리드1 조립 =
+      *@SET(채무자번호,채무자고객명)
+           PERFORM VARYING WK-I FROM 1 BY 1
+             UNTIL WK-I > XDJL4001-O-OUTPT-LINE-CNT1
+
+               IF XDJL4001-I-DBTRZ-NAME NOT = SPACE
+150522*@           KB-PIN으로 채무자번호 찾기
+                   MOVE XQJL0012-O-KB-PIN(WK-I)
+                     TO WK-CUST-IDNFR
+
+170224*@          차주 ROUTINE CALL
+                   PERFORM S3200-QJLZ004-CALL-RTN
+                      THRU S3200-QJLZ004-CALL-EXT
+170803*           차주번호 복호화처리
+                   PERFORM S6100-FAVKDEC-CALL-RTN
+                      THRU S6100-FAVKDEC-CALL-EXT
+
+      *           채무자번호
+                   MOVE WK-BRWR-NO
+                     TO XDJL4001-O-BRWR-NO(WK-I)
+
+150521*            KB-PIN
+                   MOVE XQJL0012-O-KB-PIN(WK-I)
+                     TO XDJL4001-O-KB-PIN(WK-I)
+
+      *           채무자명
+                   MOVE XQJL0012-O-DBTRZ-NAME(WK-I)
+                     TO XDJL4001-O-DBTRZ-NAME(WK-I)
+
+191122*            모기업법인고객식별자
+                   MOVE XQJL0012-O-MAMA-CC-CUST-IDNFR(WK-I)
+                     TO XDJL4001-O-MAMA-CC-CUST-IDNFR(WK-I)
+
+191122*            모기업법인고객명
+                   MOVE XQJL0012-O-MAMA-CC-CUST-NAME(WK-I)
+                     TO XDJL4001-O-MAMA-CC-CUST-NAME(WK-I)
+
+               ELSE
+170803*           차주번호 복호화처리
+                   PERFORM S6100-FAVKDEC-CALL-RTN
+                      THRU S6100-FAVKDEC-CALL-EXT
+
+      *           채무자번호
+                   MOVE WK-BRWR-NO
+                     TO XDJL4001-O-BRWR-NO(WK-I)
+
+150521*            KB-PIN
+                   MOVE XQJLZ004-O-KB-PIN
+                     TO XDJL4001-O-KB-PIN(WK-I)
+
+      *           채무자명
+                   MOVE XQJLZ004-O-DBTRZ-NAME
+                     TO XDJL4001-O-DBTRZ-NAME(WK-I)
+
+191122*           모기업법인고객식별자
+                   MOVE XQJLZ004-O-MAMA-CC-CUST-IDNFR
+                     TO XDJL4001-O-MAMA-CC-CUST-IDNFR(WK-I)
+
+191122*            모기업법인고객명
+                   MOVE XQJLZ004-O-MAMA-CC-CUST-NAME
+                     TO XDJL4001-O-MAMA-CC-CUST-NAME(WK-I)
+
+               END-IF
+           END-PERFORM
+           .
+
+       S6000-OUTPUT-SET-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  차주정보 조회
+      *-----------------------------------------------------------------
+170224 S3200-QJLZ004-CALL-RTN.
+
+      *@   변수초기화
+           INITIALIZE XQJLZ004-IN
+
+      *@   변수 MOVE
+           MOVE BICOM-GROUP-CO-CD
+             TO XQJLZ004-I-GROUP-CO-CD
+      *@  고객식별자
+           MOVE WK-CUST-IDNFR
+             TO XQJLZ004-I-CUST-IDNFR
+
+      *@   SQLIO CALL
+           #DYSQLA QJLZ004 XQJLZ004-CA
+
+      *@   처리결과확인
+           EVALUATE TRUE
+           WHEN COND-DBSQL-OK
+           WHEN COND-DBSQL-MRNF
+               CONTINUE
+           WHEN OTHER
+      *@원장조회에러인경우
+      *@에러메세지 : 테이블 SELECT 오류입니다．
+      *@조치메세지 : 전산업무담당자에게　문의바랍니다
+                    #ERROR CO-B3900009 CO-UKJL0036 CO-STAT-ERROR
+           END-EVALUATE
+           .
+       S3200-QJLZ004-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+170803*@   양방향 복호화 프로그램 호출
+      *-----------------------------------------------------------------
+       S6100-FAVKDEC-CALL-RTN.
+
+           INITIALIZE    XFAVKDEC-IN
+
+      *   암호화구분코드(2:양방향)
+           MOVE 2
+             TO XFAVKDEC-I-CODE
+      *   입력데이터
+           MOVE XQJLZ004-O-TWOWY-CUST-ECRYP-NO
+             TO XFAVKDEC-I-DATA
+      *   입력데이터길이
+           MOVE 20
+             TO XFAVKDEC-I-DATALENG
+
+           #DYCALL FAVKDEC YCCOMMON-CA XFAVKDEC-CA
+
+           IF XFAVKDEC-O-RETCD = ZERO
+      *@       양방향고객복호화번호
+               MOVE XFAVKDEC-O-DATA(1:XFAVKDEC-O-DATALENG)
+                 TO WK-BRWR-NO
+           END-IF
+           .
+
+       S6100-FAVKDEC-CALL-EXT.
+           EXIT.
+
+      *-----------------------------------------------------------------
+      *@  처리종료
+      *-----------------------------------------------------------------
+       S9000-FINAL-RTN.
+      *@5 종료처리
+
+      *@5.1 프로그램 종료
+      *@처리내용:프로그램을 정상 종료 함
+           #OKEXIT CO-STAT-OK
+           .
+       S9000-FINAL-EXT.
+           EXIT.

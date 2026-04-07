@@ -1,0 +1,65 @@
+      *================================================================*
+      *@ NAME : YPJL4053                                               *
+      *@ DESC : AS기업규모별Sub-Limit관리조회 COPYBOOK             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2013-03-07 07:28:10                          *
+      *  생성일시     : 2013-03-07 07:28:16                          *
+      *  전체길이     : 00015605 BYTES                               *
+      *================================================================*
+      *--     그리드1
+           07  YPJL4053-GRID1.
+      *--       출력라인수1
+             09  YPJL4053-OUTPT-LINE-CNT1        PIC  9(005).
+      *--       데이터부
+             09  YPJL4053-DATA-BOOK              OCCURS 000100 TIMES.
+      *--         대분류업종코드
+               11  YPJL4053-LAG-CLSFI-BZTYP-CD   PIC  X(006).
+      *--         대분류업종코드명
+               11  YPJL4053-LAG-C-BZTYP-CD-NAME  PIC  X(032).
+      *--         기업규모구분
+               11  YPJL4053-CORP-SCAL-DSTIC      PIC  X(012).
+      *--         산업별규모별SUB한도
+               11  YPJL4053-IDSTRY-PSP-SUB-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         토탈익스포져
+               11  YPJL4053-TE                   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         비중
+               11  YPJL4053-WGHTZ                PIC  9(003)V9(02).
+      *--         소진율
+               11  YPJL4053-EXHS-RT              PIC  9(003)V9(02).
+      *--         한도여유액
+               11  YPJL4053-LIMT-SEXTR-AMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         대상여부
+               11  YPJL4053-TAGET-YN             PIC  X(008).
+      *--         한도초과년월일
+               11  YPJL4053-LIMT-EXCS-YMD        PIC  X(008).
+      *--         예외적용년월일
+               11  YPJL4053-ECEPT-APLY-YMD       PIC  X(008).
+      *--         취급중단년월일
+               11  YPJL4053-HNDLN-DSCN-YMD       PIC  X(008).
+      *--         취급기준1적용년월일
+               11  YPJL4053-HNDLN-B-1-APLY-YMD   PIC  X(008).
+      *--         취급기준2적용년월일
+               11  YPJL4053-HNDLN-B-2-APLY-YMD   PIC  X(008).
+      *================================================================*
+      *        Y  P  J  L  4  0  5  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *G  YPJL4053-GRID1                ;그리드1
+      *N  YPJL4053-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  YPJL4053-DATA-BOOK            ;데이터부
+      *X  YPJL4053-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  YPJL4053-LAG-C-BZTYP-CD-NAME  ;대분류업종코드명
+      *X  YPJL4053-CORP-SCAL-DSTIC      ;기업규모구분
+      *S  YPJL4053-IDSTRY-PSP-SUB-LIMT  ;산업별규모별SUB한도
+      *S  YPJL4053-TE                   ;토탈익스포져
+      *N  YPJL4053-WGHTZ                ;비중
+      *N  YPJL4053-EXHS-RT              ;소진율
+      *S  YPJL4053-LIMT-SEXTR-AMT       ;한도여유액
+      *X  YPJL4053-TAGET-YN             ;대상여부
+      *X  YPJL4053-LIMT-EXCS-YMD        ;한도초과년월일
+      *X  YPJL4053-ECEPT-APLY-YMD       ;예외적용년월일
+      *X  YPJL4053-HNDLN-DSCN-YMD       ;취급중단년월일
+      *X  YPJL4053-HNDLN-B-1-APLY-YMD   ;취급기준1적용년월일
+      *X  YPJL4053-HNDLN-B-2-APLY-YMD   ;취급기준2적용년월일

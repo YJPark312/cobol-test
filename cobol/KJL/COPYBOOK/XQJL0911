@@ -1,0 +1,61 @@
+      *===========================================================
+      *  프로그램명    : QJL0911
+      *  파일 디렉토리 : KJL.TBDB2.DBCOPY
+      *  MEMBER NAME   : XQJL0911
+      *  사용예        : 01  XQJL0911-CA.
+      *                      COPY  XQJL0911.
+      *  최종변경일시  : 2020년03월23일17시05분07초
+      *===========================================================
+           03  XQJL0911-IN.
+      *            그룹회사코드
+               05  XQJL0911-I-GROUP-CO-CD
+                                          PIC  X(00003).
+      *            기준년월일
+               05  XQJL0911-I-BASE-YMD
+                                          PIC  X(00008).
+      *            관리부점코드
+               05  XQJL0911-I-MGT-BRNCD
+                                          PIC  X(00004).
+           03  XQJL0911-OUT.
+      *            기준년월일
+               05  XQJL0911-O-BASE-YMD
+                           OCCURS  00300  PIC  X(00008).
+      *            관리부점코드
+               05  XQJL0911-O-MGT-BRNCD
+                           OCCURS  00300  PIC  X(00004).
+      *            부점명
+               05  XQJL0911-O-BRN-NAME
+                           OCCURS  00300  PIC  X(00022).
+      *            대분류업종코드
+               05  XQJL0911-O-LAG-CLSFI-BZTYP-CD
+                           OCCURS  00300  PIC  X(00003).
+      *            대분류업종코드명
+               05  XQJL0911-O-LAG-C-BZTYP-CD-NAME
+                           OCCURS  00300  PIC  X(00032).
+      *            산업별TE
+               05  XQJL0911-O-IDSTRY-PER-TE-AMT
+                           OCCURS  00300  PIC S9(00015) COMP-3.
+      *            비중
+               05  XQJL0911-O-WGHTZ
+                           OCCURS  00300  PIC S9(00003)V9(1) COMP-3.
+      *            편중관리익스포져금액
+               05  XQJL0911-O-LNUP-MGT-EXPSR-AMT
+                           OCCURS  00300  PIC S9(00015) COMP-3.
+      *            투자비중
+               05  XQJL0911-O-INVST-WGHT
+                           OCCURS  00300  PIC S9(00003)V9(1) COMP-3.
+      *            편중관리대상여부
+               05  XQJL0911-O-LNUP-MGT-TAGET-YN
+                           OCCURS  00300  PIC  X(00001).
+      *            편중관리비율
+               05  XQJL0911-O-LNUP-MGT-CST-RT
+                           OCCURS  00300  PIC S9(00003)V9(2) COMP-3.
+      *            관리비중초과여부
+               05  XQJL0911-O-MGT-WGHT-EXCS-YN
+                           OCCURS  00300  PIC  X(00001).
+      *            여유액
+               05  XQJL0911-O-SEXTR-AMT
+                           OCCURS  00300  PIC S9(00015) COMP-3.
+      *===========================================================
+      *  XQJL0911   C O P Y B O O K   E N D
+      *===========================================================

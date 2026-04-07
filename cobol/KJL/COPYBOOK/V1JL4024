@@ -1,0 +1,55 @@
+      *================================================================*
+      *@ NAME : V1JL4024                                               *
+      *@ DESC : 포괄신용공여한도설정대상                             *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-11-28 15:37:37                          *
+      *  생성일시     : 2009-11-28 15:37:46                          *
+      *================================================================*
+      *--     부점명
+           07  V1JL4024-BRN-NAME                 PIC  X(062).
+      *--     출력라인수1
+ROWCNT     07  V1JL4024-OUTPT-LINE-CNT1          PIC  9(005).
+      *--     그리드1
+           07  V1JL4024-GRID1                    OCCURS 0 TO 001000
+               DEPENDING ON V1JL4024-OUTPT-LINE-CNT1.
+      *--       부점코드
+             09  V1JL4024-BRNCD                  PIC  X(004).
+      *--       부점명1
+             09  V1JL4024-BRN-NAME1              PIC  X(062).
+      *--       차주번호
+             09  V1JL4024-BRWR-NO                PIC  X(013).
+      *--       차주명
+             09  V1JL4024-BRWR-NAME              PIC  X(052).
+      *--       그룹명
+             09  V1JL4024-GROUP-NAME             PIC  X(052).
+      *--       신용등급
+             09  V1JL4024-CRDRAT                 PIC  X(004).
+      *--       그룹등급
+             09  V1JL4024-GROUP-GRD              PIC  X(004).
+      *--       설정상태
+             09  V1JL4024-STUP-STUS              PIC  X(010).
+      *--       포괄한도
+             09  V1JL4024-INLS-LIMT              PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       기사용금액
+             09  V1JL4024-PRVIUS-AMUS            PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도유효년월일
+             09  V1JL4024-MGT-LIMT-VALD-YMD      PIC  X(008).
+      *================================================================*
+      *        V  1  J  L  4  0  2  4    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JL4024-BRN-NAME             ;부점명
+      *L  V1JL4024-OUTPT-LINE-CNT1      ;출력라인수1
+      *A  V1JL4024-GRID1                ;그리드1
+      *X  V1JL4024-BRNCD                ;부점코드
+      *X  V1JL4024-BRN-NAME1            ;부점명1
+      *X  V1JL4024-BRWR-NO              ;차주번호
+      *X  V1JL4024-BRWR-NAME            ;차주명
+      *X  V1JL4024-GROUP-NAME           ;그룹명
+      *X  V1JL4024-CRDRAT               ;신용등급
+      *X  V1JL4024-GROUP-GRD            ;그룹등급
+      *X  V1JL4024-STUP-STUS            ;설정상태
+      *S  V1JL4024-INLS-LIMT            ;포괄한도
+      *S  V1JL4024-PRVIUS-AMUS          ;기사용금액
+      *X  V1JL4024-MGT-LIMT-VALD-YMD    ;관리한도유효년월일

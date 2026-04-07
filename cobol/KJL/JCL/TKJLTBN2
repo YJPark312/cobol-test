@@ -1,0 +1,42 @@
+//TKJLTBN2 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//* NDM JCL (EDW => ZABA)
+//*********************************************************************
+//NDMPROC  EXEC PGM=DMBATCH
+//DMNETMAP  DD DISP=SHR,DSN=MVS.NDMBA.NETMAP
+//DMPUBLIB  DD DISP=SHR,DSN=NDM.BBAT.PROC
+//DMMSGFIL  DD DISP=SHR,DSN=MVS.NDMBA.MSG
+//DMPRINT   DD  SYSOUT=*
+//SYSIN     DD  *
+ SIGNON USERID=(C309509,) ESF=NO CASE=YES
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare02/srvsam/TETAATR71.sam -
+         &TODSN=KJL.SM.BJLDR11.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare02/srvsam/TETAATR72.sam -
+         &TODSN=KJL.SM.BJLDR21.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare02/srvsam/TETAATR77.sam -
+         &TODSN=KJL.SM.BJLDR71.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABDP61.dat -
+         &TODSN=KJL.SM.BJLDR61.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABDP65.dat -
+         &TODSN=KJL.SM.BJLDR62.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABDP67.dat -
+         &TODSN=KJL.SM.BJLDR63.V001
+ SUBMIT PROC=MKJLNDM3 MAXDELAY=0 -
+         &SNODE=NDM.DDMDBO01 -
+         &FTDSN=/fsshare01/edwsam/TETABDP69.dat -
+         &TODSN=KJL.SM.BJLDR64.V001
+ SIGNOFF
+/*
+//

@@ -1,0 +1,60 @@
+      *================================================================*
+      *@ NAME : XBJLTGEX                                               *
+      *@ DESC : 통화별　환산
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-03-09 14:53:55                          *
+      *  생성일시     : 2009-03-09 14:53:57                          *
+      *================================================================*
+           03  XBJLTGEX-RETURN.
+             05  XBJLTGEX-R-STAT                 PIC  X(002).
+                 88  COND-XBJLTGEX-OK            VALUE  '00'.
+                 88  COND-XBJLTGEX-KEYDUP        VALUE  '01'.
+                 88  COND-XBJLTGEX-NOTFOUND      VALUE  '02'.
+                 88  COND-XBJLTGEX-ERROR         VALUE  '09'.
+                 88  COND-XBJLTGEX-ABNORMAL      VALUE  '98'.
+                 88  COND-XBJLTGEX-SYSERROR      VALUE  '99'.
+             05  XBJLTGEX-R-LINE                 PIC  9(006).
+             05  XBJLTGEX-R-ERRCD                PIC  X(008).
+             05  XBJLTGEX-R-TREAT-CD             PIC  X(008).
+             05  XBJLTGEX-R-SQL-CD               PIC S9(005) COMP-3.
+
+      *----------------------------------------------------------------*
+           03  XBJLTGEX-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분(1:통화별환산2:외환매매익　역환산)
+             05  XBJLTGEX-I-GBCD             PIC  X(001).
+      *--       유효년월일
+             05  XBJLTGEX-I-BASE-YMD         PIC  X(008).
+      *--       통화코드
+             05  XBJLTGEX-I-CNCYCD           PIC  X(003).
+      *--       통화한도금액
+             05  XBJLTGEX-I-CRNCY-CLAM       PIC S9(00015)V9(3) COMP-3.
+      *--       통화기준잔액
+             05  XBJLTGEX-I-CRNCY-BAL        PIC S9(00015)V9(3) COMP-3.
+      *--        BS잔액（파생상품BS잔액　게산용)
+             05  XBJLTGEX-I-BS-BAL           PIC S9(00015)V9(3) COMP-3.
+
+      *----------------------------------------------------------------*
+           03  XBJLTGEX-OUT.
+      *----------------------------------------------------------------*
+      *--       전신환매도율환산－한도액（명목액기준한도）
+             05  XBJLTGEX-O-TTL-AMT-BASE-CLAM  PIC S9(00015) COMP-3.
+      *--       전신환매도율환산－잔액　（명목액기준잔액）
+             05  XBJLTGEX-O-TTL-AMT-BASE-BAL   PIC S9(00015) COMP-3.
+      *--       매매기준율환산－잔액 ( BS기준잔액)
+             05  XBJLTGEX-O-BS-BASE-BAL        PIC S9(00015) COMP-3.
+      *--       매매기준율환산－잔액 ( BS기준잔액－파생상품BS )
+      *      　 ( BS기준잔액－파생상품BS ,외환매매익　역환산 )
+             05  XBJLTGEX-O-BS-BAL             PIC S9(00015) COMP-3.
+      *         매매기준환율
+             05  XBJLTGEX-O-DEAL-BASE-EXRT     PIC  9(005)V9(004).
+      *         전신환매도환율
+             05  XBJLTGEX-O-TELCHK-SEL-EXRT    PIC  9(005)V9(004).
+      *          N100단위통화여부
+             05  XBJLTGEX-O-N100-UNIT-CRNCY-YN PIC  X(0001).
+170224*          BS기준한도 = 통화한도 * 1회차매매기준환율
+             05  XBJLTGEX-O-BS-BASE-CLAM       PIC S9(00015) COMP-3.
+
+      *================================================================*
+      *        X  B  J  L  E  X  P  O    C  O  P  Y  B  O  O  K        *
+      *================================================================*

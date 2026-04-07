@@ -1,0 +1,142 @@
+      *================================================================*
+      *@ NAME : XDJL409B                                               *
+      *@ DESC : DC기업및그룹한도신청및승인조회(설정승인조회) C     *
+      *@        OPYBOOK                                                *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2020-12-17 14:23:06                          *
+      *  생성일시     : 2020-12-17 14:23:07                          *
+      *  전체길이     : 00000023 BYTES                               *
+      *================================================================*
+           03  XDJL409B-RETURN.
+             05  XDJL409B-R-STAT                 PIC  X(002).
+                 88  COND-XDJL409B-OK            VALUE  '00'.
+                 88  COND-XDJL409B-KEYDUP        VALUE  '01'.
+                 88  COND-XDJL409B-NOTFOUND      VALUE  '02'.
+                 88  COND-XDJL409B-SPVSTOP       VALUE  '05'.
+                 88  COND-XDJL409B-ERROR         VALUE  '09'.
+                 88  COND-XDJL409B-ABNORMAL      VALUE  '98'.
+                 88  COND-XDJL409B-SYSERROR      VALUE  '99'.
+             05  XDJL409B-R-LINE                 PIC  9(006).
+             05  XDJL409B-R-ERRCD                PIC  X(008).
+             05  XDJL409B-R-TREAT-CD             PIC  X(008).
+             05  XDJL409B-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XDJL409B-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XDJL409B-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XDJL409B-I-CUST-DSTIC           PIC  X(001).
+      *--       KB-PIN
+             05  XDJL409B-I-KB-PIN               PIC  X(010).
+      *--       신청번호
+             05  XDJL409B-I-APLCN-NO             PIC  X(010).
+      *----------------------------------------------------------------*
+           03  XDJL409B-OUT.
+      *----------------------------------------------------------------*
+      *--       신청일자
+             05  XDJL409B-O-APLCN-DTE            PIC  X(008).
+      *--       신청직원번호
+             05  XDJL409B-O-APLCN-EMPID          PIC  X(007).
+      *--       신청직원명
+             05  XDJL409B-O-APLCN-EMNM           PIC  X(042).
+      *--       신청영업점코드
+             05  XDJL409B-O-APLCNZ-BRNCD         PIC  X(004).
+      *--       신청영업점명
+             05  XDJL409B-O-APLCN-BBRN-NAME      PIC  X(042).
+      *--       신청구분
+             05  XDJL409B-O-APLCN-DSTIC          PIC  X(001).
+      *--       승인일자
+             05  XDJL409B-O-ATHOR-DTE            PIC  X(008).
+      *--       기준한도산출액
+             05  XDJL409B-O-BASE-LIMT-CMPTN-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       관리한도설정액
+             05  XDJL409B-O-MGT-LIMT-STUP-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       여신성관리한도
+             05  XDJL409B-O-LNBZ-I-MGT-LIMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       시장성관리한도
+             05  XDJL409B-O-MRKTY-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       한도설정유효일
+             05  XDJL409B-O-LIMT-STUP-VALD-DD    PIC  X(008).
+      *--       승인권자
+             05  XDJL409B-O-ATRZ                 PIC  X(001).
+      *--       조건부승인조건
+             05  XDJL409B-O-CNDT-ATHOR-CNDN      PIC  X(001).
+      *--       승인구분
+             05  XDJL409B-O-ATHOR-DSTIC          PIC  X(001).
+      *--       기준한도초과여부
+             05  XDJL409B-O-BASE-LIMT-EXCS-YN    PIC  X(001).
+      *--       한도승인사유구분
+             05  XDJL409B-O-LIMT-A-RESN-DSTCD    PIC  X(003).
+      *--       승인사유
+             05  XDJL409B-O-ATHOR-RESN           PIC  X(302).
+      *--       신용평가유효일
+             05  XDJL409B-O-CRDT-VALUA-VALD-YMD  PIC  X(008).
+      *--       후신용평가유효년월일
+             05  XDJL409B-O-AF-C-VALUA-VALD-YMD  PIC  X(008).
+      *--       재무적용연수
+             05  XDJL409B-O-FNAF-APLY-NOY        PIC  X(001).
+      *--       한도진행상태구분
+             05  XDJL409B-O-LIMT-P-STUS-DSTCD    PIC  X(001).
+      *--       현재건수1
+             05  XDJL409B-O-PRSNT-NOITM1         PIC  9(005).
+      *--       그리드1
+             05  XDJL409B-O-GRID1                OCCURS 000100 TIMES.
+      *--         첨부파일일련번호
+               07  XDJL409B-O-APNDX-FILE-SERNO   PIC  9(003).
+      *--         첨부파일식별자
+               07  XDJL409B-O-APNDX-FILE-IDNFR   PIC  X(040).
+      *--         등록년월일
+               07  XDJL409B-O-REGI-YMD           PIC  X(008).
+      *--         등록직원번호
+               07  XDJL409B-O-REGI-EMPID         PIC  X(007).
+      *--         등록직원명
+               07  XDJL409B-O-REGI-EMNM          PIC  X(042).
+      *--         첨부파일내용
+               07  XDJL409B-O-APNDX-FILE-CTNT    PIC  X(172).
+      *--         첨부파일명
+               07  XDJL409B-O-APNDX-FILE-NAME    PIC  X(172).
+      *================================================================*
+      *        X  D  J  L  4  0  9  B    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XDJL409B-I-PRCSS-DSTIC        ;처리구분
+      *X  XDJL409B-I-CUST-DSTIC         ;고객구분
+      *X  XDJL409B-I-KB-PIN             ;KB-PIN
+      *X  XDJL409B-I-APLCN-NO           ;신청번호
+      *X  XDJL409B-O-APLCN-DTE          ;신청일자
+      *X  XDJL409B-O-APLCN-EMPID        ;신청직원번호
+      *X  XDJL409B-O-APLCN-EMNM         ;신청직원명
+      *X  XDJL409B-O-APLCNZ-BRNCD       ;신청영업점코드
+      *X  XDJL409B-O-APLCN-BBRN-NAME    ;신청영업점명
+      *X  XDJL409B-O-APLCN-DSTIC        ;신청구분
+      *X  XDJL409B-O-ATHOR-DTE          ;승인일자
+      *S  XDJL409B-O-BASE-LIMT-CMPTN-AMT;기준한도산출액
+      *S  XDJL409B-O-MGT-LIMT-STUP-AMT  ;관리한도설정액
+      *S  XDJL409B-O-LNBZ-I-MGT-LIMT    ;여신성관리한도
+      *S  XDJL409B-O-MRKTY-MGT-LIMT     ;시장성관리한도
+      *X  XDJL409B-O-LIMT-STUP-VALD-DD  ;한도설정유효일
+      *X  XDJL409B-O-ATRZ               ;승인권자
+      *X  XDJL409B-O-CNDT-ATHOR-CNDN    ;조건부승인조건
+      *X  XDJL409B-O-ATHOR-DSTIC        ;승인구분
+      *X  XDJL409B-O-BASE-LIMT-EXCS-YN  ;기준한도초과여부
+      *X  XDJL409B-O-LIMT-A-RESN-DSTCD  ;한도승인사유구분
+      *X  XDJL409B-O-ATHOR-RESN         ;승인사유
+      *X  XDJL409B-O-CRDT-VALUA-VALD-YMD;신용평가유효일
+      *X  XDJL409B-O-AF-C-VALUA-VALD-YMD
+      * 후신용평가유효년월일
+      *X  XDJL409B-O-FNAF-APLY-NOY      ;재무적용연수
+      *X  XDJL409B-O-LIMT-P-STUS-DSTCD  ;한도진행상태구분
+      *N  XDJL409B-O-PRSNT-NOITM1       ;현재건수1
+      *A  XDJL409B-O-GRID1              ;그리드1
+      *N  XDJL409B-O-APNDX-FILE-SERNO   ;첨부파일일련번호
+      *X  XDJL409B-O-APNDX-FILE-IDNFR   ;첨부파일식별자
+      *X  XDJL409B-O-REGI-YMD           ;등록년월일
+      *X  XDJL409B-O-REGI-EMPID         ;등록직원번호
+      *X  XDJL409B-O-REGI-EMNM          ;등록직원명
+      *X  XDJL409B-O-APNDX-FILE-CTNT    ;첨부파일내용
+      *X  XDJL409B-O-APNDX-FILE-NAME    ;첨부파일명

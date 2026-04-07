@@ -1,0 +1,121 @@
+      *================================================================*
+      *@ NAME : XPJLB093                                               *
+      *@ DESC : PC기업및그룹한도신청및승인(설정신청저장) COPYB     *
+      *@        OOK                                                    *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2009-05-27 10:08:54                          *
+      *  생성일시     : 2009-05-27 10:08:57                          *
+      *================================================================*
+           03  XPJLB093-RETURN.
+             05  XPJLB093-R-STAT                 PIC  X(002).
+                 88  COND-XPJLB093-OK            VALUE  '00'.
+                 88  COND-XPJLB093-KEYDUP        VALUE  '01'.
+                 88  COND-XPJLB093-NOTFOUND      VALUE  '02'.
+                 88  COND-XPJLB093-SPVSTOP       VALUE  '05'.
+                 88  COND-XPJLB093-ERROR         VALUE  '09'.
+                 88  COND-XPJLB093-ABNORMAL      VALUE  '98'.
+                 88  COND-XPJLB093-SYSERROR      VALUE  '99'.
+             05  XPJLB093-R-LINE                 PIC  9(006).
+             05  XPJLB093-R-ERRCD                PIC  X(008).
+             05  XPJLB093-R-TREAT-CD             PIC  X(008).
+             05  XPJLB093-R-SQL-CD               PIC S9(005)
+                                                 LEADING  SEPARATE.
+      *----------------------------------------------------------------*
+           03  XPJLB093-IN.
+      *----------------------------------------------------------------*
+      *--       처리구분
+             05  XPJLB093-I-PRCSS-DSTIC          PIC  X(002).
+      *--       고객구분
+             05  XPJLB093-I-CUST-DSTIC           PIC  X(001).
+      *--       차주번호
+             05  XPJLB093-I-BRWR-NO              PIC  X(013).
+      *--       신청번호
+             05  XPJLB093-I-APLCN-NO             PIC  X(010).
+      *--       한도신청구분
+             05  XPJLB093-I-LIMT-APLCN-DSTIC     PIC  X(001).
+      *--       대표자명
+             05  XPJLB093-I-RPRS-NAME            PIC  X(052).
+      *--       기업신용등급
+             05  XPJLB093-I-CORP-CRDRAT          PIC  X(004).
+      *--       표준산업분류코드
+             05  XPJLB093-I-STND-I-CLSFI-CD      PIC  X(005).
+      *--       그룹명
+             05  XPJLB093-I-GROUP-NAME           PIC  X(042).
+      *--       그룹등급
+             05  XPJLB093-I-GROUP-GRD            PIC  X(004).
+      *--       영업점코드
+             05  XPJLB093-I-BBRN-CD              PIC  X(004).
+      *--       영업점명
+             05  XPJLB093-I-BBRN-NAME            PIC  X(022).
+      *--       직원번호
+             05  XPJLB093-I-EMPID                PIC  X(007).
+      *--       직원명
+             05  XPJLB093-I-EMNM                 PIC  X(042).
+      *--       개별기업관리한도
+             05  XPJLB093-I-IDIVI-CORP-MGT-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       개별기업익스포져
+             05  XPJLB093-I-IDIVI-CORP-EXPSR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹관리한도
+             05  XPJLB093-I-GROUP-MGT-LIMT       PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       그룹익스포져
+             05  XPJLB093-I-GROUP-EXPSR          PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업군명
+             05  XPJLB093-I-IDSTRY-GROUP-NAME    PIC  X(042).
+      *--       산업별관리한도
+             05  XPJLB093-I-IDSTRY-PER-MGT-LIMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       산업별익스포져
+             05  XPJLB093-I-IDSTRY-PER-EXPSR     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--       변경전여신성관리한도
+             05  XPJLB093-I-MODFI-BLI-MGT-LIMT   PIC  9(015).
+      *--       변경전시장성관리한도
+             05  XPJLB093-I-MODFI-BM-MGT-LIMT    PIC  9(015).
+      *--       변경후여신성관리한도
+             05  XPJLB093-I-MODFI-ALI-MGT-LIMT   PIC  9(015).
+      *--       변경후시장성관리한도
+             05  XPJLB093-I-MODFI-AM-MGT-LIMT    PIC  9(015).
+      *--       신청사유
+             05  XPJLB093-I-APLCN-RESN           PIC  X(302).
+      *----------------------------------------------------------------*
+           03  XPJLB093-OUT.
+      *----------------------------------------------------------------*
+      *--       신청번호
+             05  XPJLB093-O-APLCN-NO             PIC  X(010).
+      *--       처리결과
+             05  XPJLB093-O-PRCSS-RSULT          PIC  X(002).
+      *================================================================*
+      *        X  P  J  L  B  0  9  3    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  XPJLB093-I-PRCSS-DSTIC        ;처리구분
+      *X  XPJLB093-I-CUST-DSTIC         ;고객구분
+      *X  XPJLB093-I-BRWR-NO            ;차주번호
+      *X  XPJLB093-I-APLCN-NO           ;신청번호
+      *X  XPJLB093-I-LIMT-APLCN-DSTIC   ;한도신청구분
+      *X  XPJLB093-I-RPRS-NAME          ;대표자명
+      *X  XPJLB093-I-CORP-CRDRAT        ;기업신용등급
+      *X  XPJLB093-I-STND-I-CLSFI-CD    ;표준산업분류코드
+      *X  XPJLB093-I-GROUP-NAME         ;그룹명
+      *X  XPJLB093-I-GROUP-GRD          ;그룹등급
+      *X  XPJLB093-I-BBRN-CD            ;영업점코드
+      *X  XPJLB093-I-BBRN-NAME          ;영업점명
+      *X  XPJLB093-I-EMPID              ;직원번호
+      *X  XPJLB093-I-EMNM               ;직원명
+      *S  XPJLB093-I-IDIVI-CORP-MGT-LIMT;개별기업관리한도
+      *S  XPJLB093-I-IDIVI-CORP-EXPSR   ;개별기업익스포져
+      *S  XPJLB093-I-GROUP-MGT-LIMT     ;그룹관리한도
+      *S  XPJLB093-I-GROUP-EXPSR        ;그룹익스포져
+      *X  XPJLB093-I-IDSTRY-GROUP-NAME  ;산업군명
+      *S  XPJLB093-I-IDSTRY-PER-MGT-LIMT;산업별관리한도
+      *S  XPJLB093-I-IDSTRY-PER-EXPSR   ;산업별익스포져
+      *N  XPJLB093-I-MODFI-BLI-MGT-LIMT ;변경전여신성관리한도
+      *N  XPJLB093-I-MODFI-BM-MGT-LIMT  ;변경전시장성관리한도
+      *N  XPJLB093-I-MODFI-ALI-MGT-LIMT ;변경후여신성관리한도
+      *N  XPJLB093-I-MODFI-AM-MGT-LIMT  ;변경후시장성관리한도
+      *X  XPJLB093-I-APLCN-RESN         ;신청사유
+      *X  XPJLB093-O-APLCN-NO           ;신청번호
+      *X  XPJLB093-O-PRCSS-RSULT        ;처리결과

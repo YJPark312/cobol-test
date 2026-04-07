@@ -1,0 +1,81 @@
+//TKJLDP11 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*                   배치실행JCL
+//*********************************************************************
+//*  %%GLOBAL  PARMGLB1
+//*  %%SET %%A = %%$WCALC %%$ODATE -1 WORKDAYS
+//*  %%SET %%B = %%SUBSTR %%$ODATE 3 6
+//*  %%SET %%C = %%SUBSTR %%$ODATE 7 2
+//*********************************************************************
+//*   국외점포거래정보적재           (THKJLR005)
+//*********************************************************************
+//STEP02  EXEC PGM=IKJEFT01,DYNAMNBR=20,REGION=0M
+//STEPLIB   DD DSN=DB2APS.DSND10.SDSNLOAD,
+//             DISP=(SHR,KEEP,KEEP)
+//SYSPUNCH  DD DUMMY
+//SYSREC00  DD DSN=KJL.SY.CHGLOG.TKJLDP11.D%%B.T%%TIME,
+//             DISP=(NEW,CATLG,DELETE),
+//             UNIT=SYSDA,SPACE=(CYL,(100,100),RLSE)
+//SYSTSPRT  DD SYSOUT=*
+//SYSTSIN   DD *
+DSN SYSTEM(DAPG)
+RUN PROGRAM(DSNTIAUL) PLAN(DSNTIB13) PARMS('SQL,TOLWARN(YES)') -
+    LIB('DB2APS.DSND10.RUNLIB.LOAD')
+END
+/*
+//SYSABOUT  DD SYSOUT=*
+//SYSDBOUT  DD SYSOUT=*
+//SYSOUT    DD SYSOUT=*
+//SYSPRINT  DD SYSOUT=*
+//SYSUDUMP  DD DUMMY
+//SYSIN     DD *
+  SELECT CHAR(DIGITS(CAST(ROW_NUMBER() OVER() AS DEC(12))))
+        ,HEX(CURRENT TIMESTAMP)
+        ,CHAR('RJLR005 ')
+        ,CHAR('THKJLR005DB:')
+        ,그룹회사코드
+        ,기준년월일
+        ,관리부점코드
+        ,계좌번호
+        ,"통합CRM번호"
+        ,고객고유번호
+        ,법인등록번호
+        ,"ISO국가코드"
+        ,신규년월일
+        ,만기년월일
+        ,현지취급통화코드
+        ,현지한도약정금액
+        ,현지통화대출잔액
+        ,계정과목코드
+        ,계정세과목코드
+        ,통합계정과목코드
+        ,해외점포영업년월일
+        ,원화환산잔액
+        ,해외점포계좌구분
+        ,국제한도구분
+        ,"USD한도약정금액"
+        ,"USD대출잔액"
+        ,고객식별자
+        ,고객관리번호
+        ,"고객식별자1"
+        ,"고객관리번호1"
+        ,"고객식별자2"
+        ,"고객관리번호2"
+        ,시스템최종처리일시
+        ,시스템최종사용자번호
+        ,한도계좌번호
+        ,지급보증신용장번호
+    FROM DB2DBA.THKJLR005
+   WHERE 그룹회사코드           = 'KB0'
+     AND SUBSTR(기준년월일,7,2) = '%%C'
+    WITH UR;
+/*
+//STEP03   EXEC JZBDEXEC,MBR=BJLDR51,OPT=&SYSUID,COND=(4,LT)
+//INFILE     DD DISP=OLD,DSN=KJL.SD.SHRKFI.BJLDR51.V001
+//INF        DD DISP=SHR,DSN=KJL.SY.MKJLMSG1.INFO
+//OUTF1      DD DISP=SHR,DSN=KJL.SD.MKJLDP11.DATA
+//*                         현재 사용안함
+//SYSIN      DD *
+KB0-%%$ODATE-TKJLDP11-001-ONLBAT-KB STAR-%%$ODATE
+//*자료기준년월일
+//

@@ -1,0 +1,102 @@
+      *================================================================*
+      *@ NAME : V1JLB070                                               *
+      *@ DESC : 지역본부별SUB한도관리                              *
+      *----------------------------------------------------------------*
+      *  최종변경일시 : 2018-06-18 10:16:32                          *
+      *  생성일시     : 2018-06-18 10:16:39                          *
+      *  전체길이     : 00025307 BYTES                               *
+      *================================================================*
+      *--     처리결과
+           07  V1JLB070-PRCSS-RSULT              PIC  X(002).
+      *--     그리드
+           07  V1JLB070-GRID.
+      *--       총라인수
+ROWCNT       09  V1JLB070-TOTAL-LINE-CNT         PIC  9(005).
+      *--       데이터부
+             09  V1JLB070-DATA-BOOK              OCCURS 0 TO 000100
+                 DEPENDING ON V1JLB070-TOTAL-LINE-CNT.
+      *--         대분류업종코드
+               11  V1JLB070-LAG-CLSFI-BZTYP-CD   PIC  X(003).
+      *--         지역본부코드
+               11  V1JLB070-AREA-HQ-CD           PIC  X(004).
+      *--         지역본부명
+               11  V1JLB070-AREA-HQ-NAME         PIC  X(022).
+      *--         전년도말익스포져금액
+               11  V1JLB070-PYY-X-END-EXPSR-AMT  PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부SUB한도금액
+               11  V1JLB070-AREA-HQ-SUB-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부순증SUB한도금액
+               11  V1JLB070-AREA-HN-SUB-CLAM     PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부익스포져금액
+               11  V1JLB070-AREA-HQ-EXPSR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부한도여유금액
+               11  V1JLB070-AREA-HQ-LIMT-EXAN    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부SUB소진율
+               11  V1JLB070-AREA-HQ-SUB-EXHS-RT  PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         지역본부예외승인한도금액
+               11  V1JLB070-AREA-HE-ATHOR-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역본부예외승인금액
+               11  V1JLB070-AREA-HE-ATHOR-AMT    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역예외승인여유금액
+               11  V1JLB070-AREA-E-ATHOR-EXAN    PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         지역예외승인소진율
+               11  V1JLB070-AREA-EA-EXHS-RT      PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         지역본부기준소진율
+               11  V1JLB070-AREA-HE-BASE         PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         월SUB한도금액
+               11  V1JLB070-M-AREA-HQ-SUB-CLAM   PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         월예외승인한도금액
+               11  V1JLB070-M-AREA-HE-ATHOR      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         월기준소진율
+               11  V1JLB070-M-AREA-HE-BASE       PIC S9(003)V9(02)
+                                                 LEADING  SEPARATE.
+      *--         대출금액
+               11  V1JLB070-LN-AMT               PIC S9(018)
+                                                 LEADING  SEPARATE.
+      *--         실질여유액
+               11  V1JLB070-ATUAL-SEXTR-AMT      PIC S9(015)
+                                                 LEADING  SEPARATE.
+      *--         실질소진율
+               11  V1JLB070-ATUAL-EXHS-RT        PIC  9(003)V9(02).
+      *================================================================*
+      *        V  1  J  L  B  0  7  0    C  O  P  Y  B  O  O  K        *
+      *================================================================*
+      *X  V1JLB070-PRCSS-RSULT          ;처리결과
+      *G  V1JLB070-GRID                 ;그리드
+      *L  V1JLB070-TOTAL-LINE-CNT       ;총라인수
+      *A  V1JLB070-DATA-BOOK            ;데이터부
+      *X  V1JLB070-LAG-CLSFI-BZTYP-CD   ;대분류업종코드
+      *X  V1JLB070-AREA-HQ-CD           ;지역본부코드
+      *X  V1JLB070-AREA-HQ-NAME         ;지역본부명
+      *S  V1JLB070-PYY-X-END-EXPSR-AMT  ;전년도말익스포져금액
+      *S  V1JLB070-AREA-HQ-SUB-CLAM     ;지역본부SUB한도금액
+      *S  V1JLB070-AREA-HN-SUB-CLAM
+      * 지역본부순증SUB한도금액
+      *S  V1JLB070-AREA-HQ-EXPSR-AMT    ;지역본부익스포져금액
+      *S  V1JLB070-AREA-HQ-LIMT-EXAN    ;지역본부한도여유금액
+      *S  V1JLB070-AREA-HQ-SUB-EXHS-RT  ;지역본부SUB소진율
+      *S  V1JLB070-AREA-HE-ATHOR-CLAM
+      * 지역본부예외승인한도금액
+      *S  V1JLB070-AREA-HE-ATHOR-AMT    ;지역본부예외승인금액
+      *S  V1JLB070-AREA-E-ATHOR-EXAN    ;지역예외승인여유금액
+      *S  V1JLB070-AREA-EA-EXHS-RT      ;지역예외승인소진율
+      *S  V1JLB070-AREA-HE-BASE         ;지역본부기준소진율
+      *S  V1JLB070-M-AREA-HQ-SUB-CLAM   ;월SUB한도금액
+      *S  V1JLB070-M-AREA-HE-ATHOR      ;월예외승인한도금액
+      *S  V1JLB070-M-AREA-HE-BASE       ;월기준소진율
+      *S  V1JLB070-LN-AMT               ;대출금액
+      *S  V1JLB070-ATUAL-SEXTR-AMT      ;실질여유액
+      *N  V1JLB070-ATUAL-EXHS-RT        ;실질소진율

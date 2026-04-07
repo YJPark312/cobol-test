@@ -1,0 +1,15 @@
+//TKJLTBO1 JOB (LWY,BANCS),CLASS=T,MSGCLASS=X,NOTIFY=&SYSUID
+//*-----------------------------------------------------------
+//* 업무명    : KJL     (토탈익스포져)
+//* 처리유형  : BATCH 　
+//* 처리개요  : 토탈익스포져 원장 소산 처리
+//*               '23.06.27 오류데이터정비 작업
+//*-----------------------------------------------------------
+//STEPTB01  EXEC  PGM=ICEGENER,REGION=0M
+//SYSUT1    DD  DSN=KJL.SY.CHGLOG.TKJLT009.D%%ODATE,DISP=SHR
+//SYSUT2    DD  DSN=TAS.CTTBB.KJLCVY05.CHGLOG.BJLT009.D%%ODATE,
+//          DISP=(NEW,CATLG,DELETE),UNIT=VSM
+//SYSPRINT  DD  SYSOUT=*
+//SYSIN     DD  DUMMY
+/*
+//

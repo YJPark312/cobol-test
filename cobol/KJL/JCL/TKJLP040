@@ -1,0 +1,47 @@
+//TKJLP040 JOB (Z-KESA),CLASS=T,MSGCLASS=X
+//*********************************************************************
+//*  THKJL0040 CA한도초과명세 TABLE LOAD
+//*********************************************************************
+//LOAD01  EXEC DSNUPROC,PARM='DAPG,KJL0040',COND=(4,LT)
+//DSNTRACE DD  SYSOUT=*
+//SORTLIB  DD  DSN=SYS1.SORTLIB,DISP=SHR
+//DFSPARM  DD  DSN=SYS1.PARMLIB(DFSPARMH),DISP=SHR
+//SORTWK01 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK02 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK03 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SORTWK04 DD  UNIT=SYSDA,SPACE=(CYL,(200,200),RLSE)
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SORTOUT  DD  UNIT=SYSDA,SPACE=(CYL,(500,500),RLSE)
+//SYSPRINT DD  SYSOUT=*
+//SYSREC00 DD  DSN=KJL.PT.PIN.LOAD.KJL0040,DISP=SHR
+//SYSIN    DD *
+  LOAD DATA LOG NO
+  NOCOPYPEND
+  RESUME NO REPLACE
+  STATISTICS TABLE ALL INDEX ALL
+  INDDN SYSREC00 INTO TABLE
+      DB2DBA.THKJL0040
+   (
+   "그룹회사코드"                       POSITION(       1         )
+   CHAR(                      3)                ,
+   "기준년월일"                         POSITION(       4         )
+   CHAR(                      8)                ,
+   "한도구분"                           POSITION(      12         )
+   CHAR(                      1)                ,
+   "고객식별자"                         POSITION(      13         )
+   CHAR(                     10)                ,
+   "차주번호"                           POSITION(      23         )
+   CHAR(                     13)                ,
+   "KB신용공여금액"                     POSITION(      36:      43)
+   DECIMAL                                      ,
+   "FS신용공여금액"                     POSITION(      44:      51)
+   DECIMAL                                      ,
+   "제외대상금액"                       POSITION(      52:      59)
+   DECIMAL                                      ,
+   "시스템최종처리일시"                 POSITION(      60         )
+   CHAR(                     20)                ,
+   "시스템최종사용자번호"               POSITION(      80         )
+   CHAR(                      7)
+   )
+/*
+//
