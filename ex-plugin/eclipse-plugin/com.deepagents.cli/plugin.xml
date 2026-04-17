@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <!-- ── View ── -->
+  <extension point="org.eclipse.ui.views">
+    <category id="com.deepagents.cli.category" name="DeepAgents"/>
+    <view
+        id="com.deepagents.cli.views.DeepAgentsView"
+        name="DeepAgents CLI"
+        category="com.deepagents.cli.category"
+        class="com.deepagents.cli.views.DeepAgentsView"
+        icon="icons/deepagents.png"
+        allowMultiple="false"/>
+  </extension>
+
+  <!-- ── Commands ── -->
+  <extension point="org.eclipse.ui.commands">
+    <command
+        id="com.deepagents.cli.commands.openView"
+        name="Open DeepAgents View"
+        description="Open the DeepAgents CLI panel"/>
+    <command
+        id="com.deepagents.cli.commands.runSelection"
+        name="Run Selection with DeepAgents"
+        description="Send selected text to DeepAgents"/>
+  </extension>
+
+  <!-- ── Handlers ── -->
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+        commandId="com.deepagents.cli.commands.openView"
+        class="com.deepagents.cli.handlers.OpenViewHandler"/>
+    <handler
+        commandId="com.deepagents.cli.commands.runSelection"
+        class="com.deepagents.cli.handlers.RunSelectionHandler"/>
+  </extension>
+
+  <!-- ── Menus ── -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- 메인 메뉴: Window > DeepAgents -->
+    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
+      <menu id="com.deepagents.cli.menu" label="DeepAgents">
+        <command
+            commandId="com.deepagents.cli.commands.openView"
+            label="Open DeepAgents Panel"
+            style="push"/>
+      </menu>
+    </menuContribution>
+
+    <!-- 에디터 우클릭 컨텍스트 메뉴 -->
+    <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+      <menu id="com.deepagents.cli.contextmenu" label="DeepAgents">
+        <command
+            commandId="com.deepagents.cli.commands.runSelection"
+            label="Send to DeepAgents"
+            style="push"/>
+      </menu>
+    </menuContribution>
+
+    <!-- 툴바 버튼 -->
+    <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar">
+      <toolbar id="com.deepagents.cli.toolbar">
+        <command
+            commandId="com.deepagents.cli.commands.openView"
+            label="DeepAgents"
+            tooltip="Open DeepAgents CLI Panel"
+            style="push"/>
+      </toolbar>
+    </menuContribution>
+  </extension>
+
+  <!-- ── Preferences ── -->
+  <extension point="org.eclipse.ui.preferencePages">
+    <page
+        id="com.deepagents.cli.preferences"
+        name="DeepAgents CLI"
+        class="com.deepagents.cli.preferences.DeepAgentsPreferencePage"/>
+  </extension>
+
+  <extension point="org.eclipse.core.runtime.preferences">
+    <initializer class="com.deepagents.cli.preferences.PreferenceInitializer"/>
+  </extension>
+
+</plugin>

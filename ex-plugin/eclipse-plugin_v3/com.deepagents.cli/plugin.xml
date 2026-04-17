@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <!-- ── View ── -->
+  <extension point="org.eclipse.ui.views">
+    <category id="com.deepagents.cli.category" name="DeepAgents"/>
+    <view
+        id="com.deepagents.cli.views.DeepAgentsView"
+        name="DeepAgents CLI"
+        category="com.deepagents.cli.category"
+        class="com.deepagents.cli.views.DeepAgentsView"
+        allowMultiple="false"/>
+  </extension>
+
+  <!-- ── Commands ── -->
+  <extension point="org.eclipse.ui.commands">
+    <command
+        id="com.deepagents.cli.commands.openView"
+        name="Open C2J Panel"
+        description="C2J Pipeline 패널 열기"/>
+    <command
+        id="com.deepagents.cli.commands.convertCobol"
+        name="C2J 전환"
+        description="현재 COBOL 파일을 Java로 전환합니다"/>
+  </extension>
+
+  <!-- ── Handlers ── -->
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+        commandId="com.deepagents.cli.commands.openView"
+        class="com.deepagents.cli.handlers.OpenViewHandler"/>
+    <handler
+        commandId="com.deepagents.cli.commands.convertCobol"
+        class="com.deepagents.cli.handlers.RunSelectionHandler"/>
+  </extension>
+
+  <!-- ── Menus ── -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- 메인 메뉴: Window > C2J -->
+    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
+      <menu id="com.deepagents.cli.menu" label="C2J">
+        <command
+            commandId="com.deepagents.cli.commands.openView"
+            label="C2J Pipeline 패널 열기"
+            style="push"/>
+        <command
+            commandId="com.deepagents.cli.commands.convertCobol"
+            label="C2J 전환 (현재 파일)"
+            style="push"/>
+      </menu>
+    </menuContribution>
+
+    <!-- 에디터 우클릭 컨텍스트 메뉴 -->
+    <menuContribution locationURI="popup:org.eclipse.ui.popup.any">
+      <menu id="com.deepagents.cli.contextmenu" label="C2J">
+        <command
+            commandId="com.deepagents.cli.commands.convertCobol"
+            label="C2J 전환"
+            style="push"/>
+      </menu>
+    </menuContribution>
+
+    <!-- 툴바 버튼 -->
+    <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar">
+      <toolbar id="com.deepagents.cli.toolbar">
+        <command
+            commandId="com.deepagents.cli.commands.openView"
+            label="C2J"
+            tooltip="C2J Pipeline 패널 열기"
+            style="push"/>
+      </toolbar>
+    </menuContribution>
+  </extension>
+
+  <!-- ── Preferences ── -->
+  <extension point="org.eclipse.ui.preferencePages">
+    <page
+        id="com.deepagents.cli.preferences"
+        name="DeepAgents CLI"
+        class="com.deepagents.cli.preferences.DeepAgentsPreferencePage"/>
+  </extension>
+
+  <extension point="org.eclipse.core.runtime.preferences">
+    <initializer class="com.deepagents.cli.preferences.PreferenceInitializer"/>
+  </extension>
+
+</plugin>
