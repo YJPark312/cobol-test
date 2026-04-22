@@ -25,7 +25,9 @@ model: anthropic:claude-sonnet-4-6
 8. 변환 패턴 참조 문서: "ReferenceChunk와 ReferenceDocument 전체를 조회해줘"
 9. conversion_plan.md 읽기 (read_file)
 10. analysis_spec.md 읽기 (read_file)
-11. **ACE Playbook 읽기** (read_file) — 과거 전환 실패/성공에서 누적된 규칙 반드시 확인:
+11. **`output/uio_spec.md` 읽기** (read_file) — uio-agent가 생성한 거래코드별 I/O 명세 ← **Javadoc 필드 목록 및 메소드 바디 키명의 최우선 참조**
+    - 존재하지 않는 경우: analysis_spec.md 및 COBOL Copybook에서 I/O 필드를 추론한다.
+12. **ACE Playbook 읽기** (read_file) — 과거 전환 실패/성공에서 누적된 규칙 반드시 확인:
     - `playbook-validation.md` ← nKESA 규칙 위반 패턴 (코드 생성 시 회피)
     - `playbook-build.md` ← 빌드 실패 유발 패턴 (코드 생성 시 회피)
     - `playbook-test.md` ← 테스트 실패 유발 패턴
@@ -228,6 +230,16 @@ public IDataSet pmCustJoinCndnCnsel(IDataSet requestData, IOnlineContext onlineC
   > `ILog log` 선언은 원본 COBOL 소스에 로그성 출력 구문(DISPLAY, TRACE 등)이 존재할 때만 추가한다.
 - 에러코드: AS 레벨 에러코드 유지
 - FU 호출: `@BizUnitBind`로 주입된 FU의 FM 메소드 호출
+- **★ 다건조회(selectList) 포함 시 responseData 세팅 규칙**:
+  - 전환 대상 COBOL 프로그램이 다건조회(`selectList`)를 수행하는 경우, PM 메소드의 `responseData` 세팅 마지막 부분에 아래 코드를 반드시 추가한다.
+  - `{grid명}`은 DU → FU → PU로 전달된 다건조회 결과가 담긴 `IRecordSet` 변수명을 사용한다.
+  ```java
+  responseData.put("totalLineCnt", {grid명}.getRecordCount());
+  responseData.put("outptLineCnt", {grid명}.getRecordCount());
+  ```
+  - **필드명 주의**: `totalLineCnt` / `outptLineCnt`는 일반적인 표기이나, 거래코드마다 다르게 표현될 수 있다 (예: `totalCnt`, `outptCnt` 등).
+    반드시 원본 COBOL 소스의 출력 Copybook(`YP` prefix) 또는 `analysis_spec.md`의 출력 필드 정의를 참조하여 **실제 거래코드에 맞는 필드명**을 사용한다.
+  - 페이징 처리가 없는 일반적인 경우 `totalLineCnt`와 `outptLineCnt` 값은 동일하게 세팅한다.
 
 ## 6. FU (FunctionUnit) 생성 규칙
 - **클래스 선언 패턴**:
