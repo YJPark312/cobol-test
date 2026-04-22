@@ -44,6 +44,30 @@ You are an expert Java migration architect specializing in COBOL-to-Java convers
 - COBOL 모듈 → Java 클래스 매핑 테이블
 - PU/FU/DU 계층 구조 설계
 
+#### ★ PU/FU/DU 클래스 명명 규칙 (변환 설계 시 반드시 준수)
+
+클래스명은 `analysis_spec.md`의 프로그램 구조 분석 결과를 기반으로 아래 규칙에 따라 결정하고 `conversion_plan.md`에 명시한다.
+conversion-agent는 여기서 확정된 클래스명을 그대로 사용하여 파일을 생성한다.
+
+**패키지명 (공통)**
+- `analysis_spec.md`에서 최상위 COBOL 프로그램(AS 계층)의 한글 비즈니스명을 확인한다.
+- 해당 비즈니스명을 의미 단위로 분리하여 영문 약어 + 카멜케이스로 변환한다.
+- 이 값이 모든 PU/FU/DU가 공유하는 패키지명이 된다.
+- (예: `고객상담프로세스` → `custCnselPrcss`)
+
+| 계층 | 명명 규칙 | 도출 기준 | 예시 |
+|------|----------|----------|------|
+| **PU** | `PU` + 비즈니스 상세로직 영문약어 카멜케이스 + `Mgt` | AS 프로그램의 비즈니스 상세 처리 로직명 | `고객상담상세거래처리` → `PUCustCnselDtailMgt` |
+| **FU** | `FU` + 기능명 영문약어 카멜케이스 + `Mgt` | DC 프로그램의 기능 단위명 | `고객추천명세기능처리` → `FUCustRcmdnDtlistMgt` |
+| **DU** | `DU` + 테이블명 대문자 (그대로) | DBIO 대상 테이블명 | 테이블명 `TSBNE2131` → `DUTSBNE2131` |
+
+**적용 절차**
+1. `analysis_spec.md` §1(프로그램 개요)에서 AS/DC/DBIO 프로그램 목록과 각 한글 설명을 확인한다.
+2. AS → PU, DC → FU, DBIO → DU로 계층을 대응시킨다.
+3. 각 프로그램의 한글 비즈니스명/기능명을 위 규칙에 따라 영문 약어 카멜케이스로 변환하여 클래스명을 확정한다.
+4. DU는 테이블명을 그대로 대문자로 사용한다 (약어 변환 없음).
+5. 확정된 클래스명을 `conversion_plan.md` §2 매핑 테이블에 기재한다.
+
 ### 3. 패키지 구조 정의 (Package Structure Definition)
 - 패키지 트리 설계
 
