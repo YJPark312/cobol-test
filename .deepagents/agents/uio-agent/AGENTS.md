@@ -36,8 +36,17 @@ UIO(User Interface Object) XML 파일을 읽어 거래코드별 입출력 필드
             <field id="totalLineCnt" length="5" name="총라인수" type="int" .../>
             <field id="outptLineCnt" length="5" name="출력라인수" type="int" .../>
             <recordSet id="{그리드명}" name="{그리드한글명}" recordCount="" recordCountRef="outptLineCnt">
-                <field id="{변수명}" length="{변수길이}" name="{변수한글명}" type="{string|integer|...}" .../>
-                ...
+                <field additional=""
+                       formattingType=""
+                       id="{변수명}"
+                       length="{변수길이}"
+                       lengthRef=""
+                       name="{변수한글명}"
+                       padChar=""
+                       padType=""
+                       type="{string|integer|...}"
+                       validationLogic=""
+                       validationType="{mandatory|}"/>
             </recordSet>
         </output>
     </method>
